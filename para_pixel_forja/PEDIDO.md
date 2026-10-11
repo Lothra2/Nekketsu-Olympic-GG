@@ -192,7 +192,9 @@ Columnas: nombre, cuadros aproximados, fps, bucle, eventos que tiene que traer y
 | `air_kick` | 4 | 14 | no | `impacto` | Patada en el aire desde un salto normal |
 | `slip_wet` | 8 | 14 | no | `aterriza` | Resbalón en piso mojado |
 
-**Párate para aprobar:** primero solo `lift`, `carry_walk`, `throw_overhead`, `carried` y `thrown_spin`, con un GIF de Rick levantando a Kenji y lanzándolo, y otro de Alana levantando un pote. Con chibi los brazos no pasan la cabeza: lo levantado va apoyado en las manos, encima del pelo.
+**Campo nuevo `cuerpo`** (pedido después del lote A): igual que `cajas` pero solo con el cuerpo, sin implementos, pelotas ni efectos. Es el hurtbox del juego. Sale en el kit con `--datos` junto a los demás.
+
+**Párate para aprobar:** primero solo `lift`, `carry_walk`, `throw_overhead`, `carried` y `thrown_spin`, con un GIF de Rick levantando a Steph y lanzándola (Kenji todavía no existe, llega en C1), y otro de Alana levantando un pote. Con chibi los brazos no pasan la cabeza: lo levantado va apoyado en las manos, encima del pelo.
 
 ### B2. Recorridos (Cross Country y obstáculos)
 | Animación | Cuadros | fps | Bucle | Eventos | Notas |
@@ -678,6 +680,7 @@ Quedan en el catálogo general de efectos.
 ### G2. Para el envoltorio completo
 | Id | Detalle |
 |---|---|
+| Retrato grande dibujado | El lote A entregó el retrato de 96 como escalado x3 del sprite. Para la pantalla VS y la intro hace falta un dibujante de cabezas grandes de verdad: sellos de ojos y bocas a ese tamaño, las 7 expresiones |
 | Íconos de prueba | 16 más el bonus, 32x32 |
 | Banderas | Vietnam, Colombia, Venezuela, Japón, Bogotá y Zulia, en 16 y 32 px, quietas y ondeando |
 | Mapa de la gira | 640x360 con los 3 países y la ruta del avión |

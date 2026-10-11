@@ -15,7 +15,8 @@ Si eres una sesión de Claude Code trabajando en `Lothra2/pixel_forja`, este arc
 2. **Lee completo** [PEDIDO.md](PEDIDO.md). Es el contrato: qué se pide, las reglas y los criterios de aceptación de cada lote.
 3. **Lee** [ESTADO.md](ESTADO.md) para ver qué lotes están aprobados y qué insumos del juego ya existen.
 4. **Revisa en PixelForja** qué ya se entregó: cada lote entregado deja `docs/olimpico/<lote>/ENTREGA.md` en `main`. Si existe, ese lote ya se hizo aunque ESTADO.md no esté al día.
-5. **Elige el lote:**
+5. **Revisa que el lote anterior esté en `main`.** Si su PR sigue abierto, para y avísale a Rick: el lote nuevo tiene que salir de un `main` que ya lo traiga.
+6. **Elige el lote:**
    - El que te pidió Rick, si te nombró uno.
    - Si no, el primero de la tabla de orden (PEDIDO.md, sección 16) que no esté entregado y cuyas dependencias sí lo estén.
    - Antes de empezar, di en una línea qué lote vas a hacer y por qué.

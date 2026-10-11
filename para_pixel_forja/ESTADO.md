@@ -8,7 +8,7 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 
 | Orden | Lote | Qué | Depende de | Estado | PR |
 |---|---|---|---|---|---|
-| 1 | A | Datos por cuadro, filas, atlas, retratos, vestuario por pack | Nada | pendiente | |
+| 1 | A | Datos por cuadro, filas, atlas, retratos, vestuario por pack | Nada | entregado (falta merge a main) | [pixel_forja#7](https://github.com/Lothra2/pixel_forja/pull/7) |
 | 2 | B1 + D1 | Levantar y lanzar, agarres, armas del piso | A | pendiente | |
 | 3 | C1 | Familia GG e Instituto Nekketsu | A | pendiente | |
 | 4 | G1 fuentes | Acentos del vietnamita en las fuentes | Nada | pendiente | |
@@ -23,6 +23,15 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 | 13 | B5, E5 | Pruebas de pelota | E1 | pendiente | |
 | 14 | B6, B7, C3, E6 | Tradicionales, técnicas, secretos y Barrio Nekketsu | E1 | pendiente | |
 | 15 | J | Estudio | Todo | pendiente | |
+
+## Notas de lo entregado
+
+**Lote A**, revisado del lado del juego: compila y pasan 170 de 170 pruebas en la rama. Se aceptan:
+- Retrato de 96 escalado x3: sirve para los diálogos. El dibujado de verdad pasa al lote G2 (pantalla VS e intro).
+- Cabecitas que se reconocen por silueta y color, no por los ojos: suficiente para el minimapa.
+- Bañador como camiseta sin mangas.
+
+Se pidió para B1: el campo `cuerpo` (hurtbox sin implementos ni efectos), porque `cajas` incluye pelotas y jabalinas.
 
 ## Insumos que pone el juego
 
