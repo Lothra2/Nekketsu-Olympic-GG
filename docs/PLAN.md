@@ -1,810 +1,733 @@
-# Nekketsu Olympic GG: plan maestro
+# Nekketsu Olympic GG: plan maestro (v2)
 
-Un remake espiritual de los juegos deportivos "Nekketsu" de Technos para NES/Famicom (los "Atari oyunu" que todo el mundo jugó en Turquía, Latinoamérica y Asia), hecho con PixelForja como motor de personajes, mundo, efectos, interfaz y audio.
+Un remake espiritual de los juegos deportivos "Nekketsu" de Technos para NES/Famicom, los "Atari oyunu" que todo el mundo jugó en Turquía, Latinoamérica y Asia. PixelForja es el motor de personajes, mundo, efectos, interfaz y audio.
 
-La meta no es copiar el juego pixel por pixel. Es que se sienta igual de caótico, chistoso y adictivo, pero con animación de verdad, mundo vivo, más pruebas, tu familia adentro y controles que un niño de 4 años pueda usar.
+La meta no es copiar el juego pixel por pixel. Es que se sienta igual de caótico, chistoso y adictivo, pero con animación de verdad, un mundo vivo entre Vietnam, Colombia y Venezuela, más pruebas, tu familia adentro y controles que una niña de 4 años pueda usar.
+
+El pedido completo a PixelForja está en [PEDIDO_PIXEL_FORJA.md](PEDIDO_PIXEL_FORJA.md).
 
 ---
 
-## 0. Resumen en 30 segundos
+## 0. Decisiones cerradas
 
 | Tema | Decisión |
 |---|---|
-| Juego base | *Downtown Nekketsu Kōshinkyoku: Soreyuke Daiundōkai* (1990) mezclado con *Bikkuri Nekketsu Shin Kiroku* / *Crash 'n the Boys* (1992). Ver sección 1 |
-| Motor de personajes | PixelForja genera todo el arte, el audio y los datos de movimiento. El juego solo lee un kit con `manifest.json` |
+| Juegos base | *Downtown Nekketsu Kōshinkyoku: Soreyuke Daiundōkai* (1990) y *Bikkuri Nekketsu Shin Kiroku* / *Crash 'n the Boys* (1992). Se cubren TODAS las pruebas de los dos |
+| Pruebas extra | 7 más, sacadas de lo que PixelForja ya anima: fútbol, básquet, vóley playa, quemado, chapita, đá cầu y tejo |
+| Vista | 2.5D oblicua estilo Kunio-kun |
+| Escenarios | Vietnam, Colombia y Venezuela. Bonus "Cruce Loco" en Saigón, Bogotá y Caracas |
+| Tus hijas | Juegan completas, con KO incluido. El tono sigue siendo caricatura: estrellas, polvo, pajaritos, nunca sangre |
+| Uso | Personal. El equipo fan de superhéroes se puede activar en Opciones |
+| Dispositivos | Tablet táctil y computadora con mandos, los dos desde la fase F0 |
 | Motor del juego | Phaser 3 + TypeScript + Vite. PWA en Netlify. Mismo patrón que GG Abyss |
-| Vista | 2.5D oblicua estilo Kunio-kun (x de lado, y de profundidad, z de altura). No isométrica |
-| Pruebas v1 | Cross Country Callejero, Carrera de Obstáculos, Tama-wari, Natación sin Reglas, Kachinuki (batalla final) |
-| Pruebas v1.5 | Salto entre Azoteas, Martillo Loco |
-| Bonus v2 | Dodgeball Nekketsu, en línea |
-| Equipos | 4 equipos de 4 (Familia GG incluida) más un equipo secreto |
-| Jugadores | 1 a 4 en el mismo equipo o pantalla. Teclado, mandos y táctil |
-| Lo que lo hace mejor | Golpes con datos reales de impacto, técnicas sacadas de 75 animaciones, mundo vivo con luces y partículas, repetición instantánea, Modo Peques, tus personajes desde el estudio |
+| Motor de arte | PixelForja genera todo. El juego solo lee el kit y su `manifest.json` |
+| Regla de oro de los escenarios | La geometría la define el juego y PixelForja pinta encima. Una sola fuente de verdad (sección 6) |
 
 ---
 
-## 1. Qué juego estamos replicando
+## 1. Qué cubrimos del original
 
-"Nekketsu Olympic" no es el nombre oficial de ningún juego. Con ese nombre la gente recuerda dos juegos de Technos que comparten personajes y estilo:
+### 1.1 Downtown Nekketsu Kōshinkyoku (1990)
+Cuatro escuelas rivales, hasta 4 jugadores, armas tiradas en el piso, cuatro pruebas:
 
-**Downtown Nekketsu Kōshinkyoku: Soreyuke Daiundōkai** (Famicom, 1990). El "festival deportivo" de Kunio-kun. Cuatro escuelas rivales, hasta 4 jugadores, armas tiradas en el piso y cuatro pruebas:
-1. Cross country por la ciudad.
-2. Carrera de obstáculos.
-3. Tama-wari: trepar un poste y romper una bola gigante.
-4. Kachinuki kakutō: pelea a muerte para cerrar.
-
-**Bikkuri Nekketsu Shin Kiroku! Harukanaru Kin Medal** (Famicom, 1992), en Occidente *Crash 'n the Boys: Street Challenge*. Cinco pruebas "olímpicas sin reglas": vallas, martillo, natación, salto entre azoteas y judo.
-
-**Mi propuesta:** tomar el esqueleto del primero (las 4 pruebas, el cross country como estrella, la pelea final) y sumarle lo mejor del segundo (natación, azoteas, martillo). Si el que tienes en la cabeza es solo uno de los dos, me dices y recorto. Esta es la primera pregunta de la sección 19.
-
----
-
-## 2. Mi crítica antes de arrancar
-
-Te compro la idea, pero hay cinco cosas que conviene discutir antes de escribir una línea.
-
-### 2.1 Vista oblicua, no isométrica
-El kit deportivo de PixelForja y su arena están pensados para isométrica 2:1. Los Kunio-kun son 2.5D oblicuos: el piso es una franja, caminar a la derecha es ir a la derecha y la profundidad se ve como subir o bajar en pantalla.
-
-Recomiendo oblicua por tres razones:
-- Es la que da el "feeling" del original. En isométrica deja de parecer Nekketsu.
-- La vista lateral es la más fuerte de PixelForja. Los saltos, la garrocha, la jabalina y la natación están dibujados de lado (`lateral: true`) y de frente usan la diagonal. En oblicua casi todo se ve de lado, justo donde el motor brilla.
-- La izquierda es el espejo de la derecha. Con `flipX` solo necesitamos 5 filas de las 8 (`right`, `down_right`, `up_right`, `down`, `up`). Eso baja la memoria de texturas un 37 %.
-
-### 2.2 El alcance mata proyectos
-Siete pruebas, intro cinematográfica, 4 jugadores, tienda, repeticiones y 20 personajes es un juego de un estudio de 10 personas. Por eso el plan arranca con una **rebanada vertical**: un tramo del cross country más la pelea final, con 2 equipos. Si esa rebanada no es divertida, nada de lo demás importa. Si es divertida, el resto es repetir el patrón.
-
-### 2.3 Propiedad intelectual
-Kunio-kun y sus personajes son de Arc System Works. Para uso personal no pasa nada, pero si algún día lo publicas:
-- Nada de nombres originales (Kunio, Riki, Crash), ni sus canciones, ni sus sprites.
-- "Nekketsu" es una palabra japonesa común (sangre caliente). El riesgo es bajo pero no cero si el título se parece mucho al de ellos.
-- Los superhéroes del kit de PixelForja son versiones de fan. Quedan como equipo secreto opcional, apagado por defecto.
-
-Todo lo de este plan es original: personajes, música, escenarios y textos.
-
-### 2.4 Tus hijas en un juego de peleas
-Sophie y Alana van a querer jugar como ellas mismas. El tono tiene que ser caricatura pura: estrellitas, polvo, caras de susto, nadie sangra, nadie llora. Los KO son "mareado con pajaritos". Así queda divertido para ellas y sigue siendo Nekketsu.
-
-### 2.5 PixelForja no trae todo
-Faltan animaciones clave del estilo Kunio: levantar y lanzar a un rival, trepar un poste, agarrar, cargar cosas, quedar mareado, girar el martillo. También falta un bioma de ciudad (hoy hay bosque, cueva e infierno). Esto se construye en PixelForja, no en el juego, y está detallado en la sección 15. Es más o menos un tercio del trabajo total.
-
----
-
-## 3. Inventario real de PixelForja
-
-Lo revisé en el código, no en el README.
-
-### 3.1 Lo que ya sirve tal cual
-
-| Área | Qué hay | Cómo lo usamos |
-|---|---|---|
-| Personajes | Ficha v2, cuerpo chibi, 86 peinados LPC (incluye `spiked`, `flat_top`, `cowlick_tall`, `shorthawk`), caras LPC con 7 expresiones, barbas, lentes, gorros, cintas (`headband_tied`), número de camiseta, patrones de equipo | Los 16 atletas, el público y los retratos con expresión |
-| Familia | Presets de Rick, Steph, Sophie, Alana y Thor | Equipo Familia GG listo |
-| Fotos | `colorsFromPhoto` toma piel, pelo, ojos y barba de una selfie | "Métete al juego" con tu foto |
-| Atletismo | `sprint`, `sprint_start`, `hurdles`, `long_jump`, `pole_vault`, `shot_put`, `javelin` | Vallas, salto entre azoteas, base del martillo |
-| Natación | `swim`, `swim_back`, `swim_breast`, `swim_fly`, `tread_water`, `dive`, `swim_exit`, con fila de agua (`agua`) | Natación y el río del cross country |
-| Pelea | 14 golpes premium con `impacto` y `punto` del puño o pie | Todo el combate |
-| Básicas | `idle`, `walk`, `run`, `jump` en partes, `land`, `hit`, `fall_getup`, `crawl`, `celebrate`, `sad`, `kick` | Movimiento base |
-| Fútbol | `tackle`, `slide`, `header`, `chilena`, `tumble`, `stagger`, `laugh`, `point`, `dance`, `win`, `lose` y más | Técnicas especiales y reacciones (ver 7.6) |
-| Otros deportes | `bat` (béisbol), raqueta de tenis, `bike`, `skate`, `throw`, `use_item`, `whirlwind`, `dodge`, `charge`, `leap` | Armas, atajos del cross country, martillo |
-| Datos de movimiento | `eventos` (paso, impacto, suelta, despegue, aterriza), `avance` sin patinar, `desplazamiento`, `elevacion`, `rumbo`, pivote fijo | Hitboxes, sonidos, polvo, saltos, ritmo de pies exacto |
-| Efectos | Chispas de golpe, 9 elementos x 10 tipos de efecto, polvo, partículas, luces aditivas, nubes, bruma | Golpes, técnicas, ambiente |
-| Interfaz | Fuentes bitmap con ñ y tildes, logo animado con brillo, paneles 9-slice, números de daño, botones, íconos, retratos 40x40, girar tablet, íconos de app | Todo el HUD y los menús |
-| Audio | Sintetizador de efectos y música en WAV, 26 efectos, 4 temas, ambientes en bucle | Base para los temas Nekketsu |
-| Mundo | Pintor de terreno, objetos con apoyo y sólidos, Tiled JSON, agua animada, cuervos, árboles con viento | Base del bioma ciudad, parque y ribera |
-| Calidad | Pruebas de que nada se sale de la celda, pies en el piso, sin pixeles sueltos, cada golpe con su impacto | Se extienden a las animaciones nuevas |
-| Exportación | Hojas PNG por animación, manifiesto, créditos LPC automáticos, límite de 4096 px | El kit del juego |
-
-### 3.2 Lo que falta (se construye en PixelForja)
-
-| Falta | Para qué |
+| Prueba original | En nuestro juego |
 |---|---|
-| `lift`, `carry_walk`, `carry_run`, `throw_overhead` | Levantar rivales caídos, botes, llantas y lanzarlos. Es EL movimiento Kunio |
-| `carried`, `thrown_spin`, `land_flat` | El rival que es levantado y sale volando |
-| `grab`, `grabbed`, `knee_grab`, `judo_throw` | Agarre, rodillazo en agarre, proyección de judo |
-| `climb_pole`, `pole_idle`, `pole_punch`, `pole_slide`, `pole_kick_down` | Tama-wari |
-| `ledge_hang`, `pull_up`, `climb_wall`, `ladder` | Cross country: muros, escaleras de incendio |
-| `balance_walk`, `balance_wobble` | Vigas de la obra, cuerda floja |
-| `dizzy` | Mareado con pajaritos |
-| `hammer_spin`, `hammer_release` | Martillo |
-| `swim_punch`, `dunked`, `swim_turn` | Natación sin reglas |
-| `weapon_swing`, `weapon_swing_heavy` | Bate, tubo, palo de kendo |
-| `taunt_<equipo>` | Una burla propia por equipo |
-| `cheer`, `cheer_wave` en 32 px | Público |
-| Bioma "ciudad" | Calles, aceras, río con muro de concreto, escuela, obra, azoteas, alcantarilla, estadio |
-| Ropa nueva | Gakuran (chaqueta escolar cerrada de cuello alto), sailor fuku, chándal de equipo, gorra de natación, kimono de judo |
-| Datos nuevos en el manifiesto | Caja de daño por cuadro, puntos de manos y cabeza por cuadro (ver 6.6) |
-| Música y efectos | Marcha Nekketsu, temas por prueba, silbato, pistola de salida, público, chapuzón, bola que revienta |
+| Cross country por la ciudad | **Cross Country Saigón**: la prueba estrella, 4 tramos |
+| Carrera de obstáculos | **Obstáculos Comuna 13**: parkour en Medellín |
+| Tama-wari: trepar y romper la bola | **Tama-wari Hội An**: entre faroles, de noche |
+| Kachinuki kakutō: pelea final | **Kachinuki Caracas**: azotea con El Ávila de fondo |
+
+### 1.2 Bikkuri Nekketsu Shin Kiroku / Crash 'n the Boys (1992)
+Cinco pruebas olímpicas sin reglas:
+
+| Prueba original | En nuestro juego |
+|---|---|
+| Vallas con golpes | **Vallas del Café**: pista rural en el Eje Cafetero |
+| Lanzamiento de martillo | **Martillo Llanero**: en los Llanos, con chigüires que salen corriendo |
+| Natación | **Natación Hạ Long**: en el mar, entre los islotes |
+| Salto entre azoteas | **Azoteas de Cartagena**: techos coloniales al atardecer |
+| Judo | **Judo y Vovinam Hà Nội**: dojo frente al lago Hoàn Kiếm |
+
+### 1.3 Lo que mantenemos sí o sí del espíritu Nekketsu
+- Escuelas rivales con capitán, burlas y rivalidad entre equipos.
+- Todo vale: golpes en plena carrera, armas del piso, levantar al rival y tirárselo a otro.
+- 4 jugadores a la vez.
+- Puntos por prueba y un campeón general.
+- El equipo japonés Instituto Nekketsu como campeón defensor y jefe final.
+- La música de marcha escolar como identidad.
+- Humor físico exagerado.
 
 ---
 
-## 4. Qué lo hace "mucho mejor" que el original
+## 2. Las pruebas extra, sacadas del motor
 
-1. **Golpes que se sienten.** Cada golpe trae su cuadro de impacto y el punto exacto del puño. Hitstop de 2 a 4 cuadros, temblor de cámara, chispa y sonido justo donde pega. El original pegaba "más o menos por ahí".
-2. **Animación de verdad.** El original tenía 2 o 3 cuadros por acción. Aquí son 8 a 13 con poses clave, pelo que se mueve y pies que no patinan a ninguna velocidad.
-3. **Técnicas Nekketsu de 75 animaciones.** El torpedo humano es el clavado de natación en tierra. La chilena de fútbol es una patada aérea. La barrida es la `slide`. El motor ya las tiene: las convertimos en movimientos especiales.
-4. **Medidor Nekketsu.** Se llena al pegar, al recibir y al ir perdiendo. Lleno, activas tu técnica especial con pantalla de "corte" estilo anime. Es remontada controlada: el que va atrás siempre tiene chance.
-5. **Mundo vivo.** Luces de faroles al atardecer, cuervos que huyen, ropa tendida que se mueve, público generado con cientos de caras distintas, confeti, bruma en el río.
-6. **Repetición instantánea.** La simulación es determinista, así que guardamos los últimos 10 segundos y repetimos el mejor KO en cámara lenta.
-7. **Tú adentro.** Creas tu personaje en el estudio de PixelForja (o desde una selfie), exportas la ficha y entra al juego como atleta.
-8. **Modo Peques.** Correr automático, saltos asistidos, sin machacar botones. Sophie y Alana juegan de verdad.
-9. **4 jugadores en serio.** Mandos USB o Bluetooth, teclado compartido y táctil en tablet.
-10. **Desafíos y fantasmas.** Medallas de oro, plata y bronce por prueba y carrera contra tu mejor tiempo.
+PixelForja ya trae 33 animaciones de fútbol con portero, básquet, vóley, tenis y béisbol. Sería un desperdicio no usarlas. Cada prueba extra es también un guiño a otro juego de la saga Kunio-kun o al deporte de cada país.
 
----
+| Prueba | País | Guiño | Lo que ya anima PixelForja |
+|---|---|---|---|
+| **Fútbol Callejero 4 contra 4** | Colombia, Barranquilla en Carnaval | *Nekketsu Kōkō Soccer-bu* / *Nintendo World Cup* | Las 33 de fútbol más el portero |
+| **Básquet 3x3** | Venezuela, Maracaibo de noche con el relámpago del Catatumbo | *Kunio-kun no Nekketsu Street Basket* | `dribble`, `shoot`, `dunk`, `block` |
+| **Vóley Playa 2 contra 2** | Venezuela, Isla de Margarita | Vóley de la saga | Las 7 de vóley |
+| **Quemado Nekketsu** | Venezuela, liceo de tu ciudad | *Nekketsu Kōkō Dodgeball-bu*, el primer juego de la saga | `throw`, `catch`, `dodge`, `vb_dive` |
+| **Chapita** | Venezuela, barrio de Caracas | Béisbol callejero con chapas, puro Caracas | `bat`, `pitch`, `catch` |
+| **Đá cầu** | Vietnam, parque Tao Đàn en Saigón | El volante de patear de las calles de Vietnam | `volley`, `chilena`, `trap`, `header` |
+| **Tejo** | Colombia, cancha en La Candelaria con Monserrate | El deporte nacional colombiano: el disco explota la mecha | `throw` más un lanzamiento por debajo nuevo |
 
-## 5. Dirección de arte y ambiente
+**Total: 16 pruebas** más el bonus Cruce Loco en 3 versiones. Tenis queda como minijuego opcional para la v2.
 
-### 5.1 Resolución y escala
-- Resolución interna **640 x 360**. Escala entera a la pantalla (x2 = 1280 x 720, x3 = 1920 x 1080). Nunca x1.5.
-- Atletas en celda de **48**. Un chibi mide unos 44 px, el 12 % de la altura. En la NES Kunio medía el 13 %. Misma lectura, el doble de detalle.
-- Gigantes (Goro, el jefe secreto) en celda **64**.
-- Público en celda **32**, solo `idle`, `cheer` y `cheer_wave`.
-
-### 5.2 Paleta y tono
-- Base "Famicom extendida": colores saturados, contorno oscuro selectivo (ya lo hace el render), sombras de 2 tonos.
-- Cada prueba tiene su hora del día. Mañana fresca para la salida, mediodía en la piscina, atardecer naranja en las azoteas, noche con neón para la pelea final. Se logra con un tinte de pantalla más las luces aditivas del motor.
-
-### 5.3 La ciudad: "Barrio Nekketsu"
-Una ciudad japonesa de finales de los 80, inventada:
-- Calles con postes de luz y cables, máquinas expendedoras con luz, bicis paradas, gatos en los muros.
-- Ribera del río con muro de concreto, puente de hierro, cañas, pescadores.
-- Escuela con portón, patio de tierra, reloj en la fachada.
-- Obra en construcción con vigas, sacos, grúa al fondo.
-- Azoteas con tanques de agua, ropa tendida, antenas, letreros de neón.
-- Alcantarilla con agua verde, tuberías y ratas (las ratas ya existen como enemigo en PixelForja).
-- Estadio con gradas, marcador gigante y fuegos artificiales.
-
-**Idea opcional:** un tramo bonus "Saigón" con motos como obstáculo, puestos de comida callejera y cables enredados. Le da un sello tuyo. Te lo dejo como pregunta.
-
-### 5.4 Fondos en capas
-Cada escenario tiene 3 capas de paralaje:
-1. Cielo con nubes que se mueven y la hora del día.
-2. Siluetas de edificios o montañas.
-3. Fachadas cercanas.
-4. El piso jugable (la franja oblicua).
-5. Primer plano que tapa un poco: postes, barandas, cables. Le da profundidad de cine.
+Mi crítica: 16 pruebas son muchísimas. Por eso van en oleadas (sección 17) y una Olimpiada no las juega todas. Se arma una gira de 5 a 7 pruebas según el modo.
 
 ---
 
-## 6. Arquitectura técnica
+## 3. La Gira Nekketsu: estructura del juego
 
-### 6.1 Repos y flujo del kit
+### 3.1 La historia en una línea
+El Instituto Nekketsu, campeón invencible de Japón, sale de gira por primera vez y reta a tres escuelas de Vietnam, Colombia y Venezuela. La Familia GG se cuela como cuarto equipo.
+
+### 3.2 Etapas
+| Etapa | Pruebas | Bonus |
+|---|---|---|
+| **1. Vietnam** | Cross Country Saigón, Natación Hạ Long, Đá cầu, Tama-wari Hội An, Judo y Vovinam Hà Nội | Cruce Loco Saigón: motos, xích lô, sillas plásticas |
+| **2. Colombia** | Obstáculos Comuna 13, Azoteas de Cartagena, Vallas del Café, Tejo, Fútbol Callejero | Cruce Loco Bogotá: TransMilenio, busetas, vendedores |
+| **3. Venezuela** | Chapita, Vóley Playa Margarita, Martillo Llanero, Básquet Maracaibo, Quemado | Cruce Loco Caracas: autopista con camioneticas y motorizados |
+| **Final** | Kachinuki en una azotea de Caracas con El Ávila y la Cruz iluminada | Instituto Nekketsu como jefe |
+| **Secreto** | Barrio Nekketsu: la ciudad japonesa de los 80, homenaje directo al original | Se desbloquea al ganar la gira en difícil |
+
+### 3.3 Modos de gira
+- **Gira Completa:** las 3 etapas con 5 pruebas elegidas y la final. Más o menos 60 minutos, se guarda entre etapas.
+- **Gira Express:** 5 pruebas al azar más la final. Unos 25 minutos.
+- **Gira Clásica:** solo las 4 pruebas de 1990 en el orden original. Para los nostálgicos.
+- **Gira Crash:** solo las 5 pruebas de 1992.
+
+---
+
+## 4. Mi crítica actualizada
+
+### 4.1 La vista oblicua queda confirmada
+- Es la que da el feeling Kunio.
+- La vista lateral es la más fuerte de PixelForja: saltos, garrocha, jabalina y natación están dibujados de lado.
+- La izquierda es el espejo de la derecha. Solo necesitamos 5 filas de las 8 y la memoria baja un 37 %.
+
+### 4.2 Los escenarios son el riesgo número uno
+Pediste escenarios prolijos y perfectos, sin sorpresas al final. Estoy de acuerdo y es donde más proyectos se caen. Los fallos típicos son:
+- La colisión no coincide con el dibujo.
+- Costuras entre trozos de fondo.
+- Paralaje que salta al repetirse.
+- Objetos flotando sobre el piso.
+- Atletas que no se leen contra un fondo muy cargado.
+
+La solución está en la sección 6: la geometría vive en un solo archivo que diseña el juego, PixelForja pinta sobre esa geometría, y cada escenario pasa por 5 puertas de aprobación con pruebas automáticas. Nadie pinta un escenario que no se haya jugado antes en gris.
+
+### 4.3 Tus hijas con KO
+Perfecto. Al ser chibis todos tienen la misma proporción, así que Alana a los 4 años pega igual de chistoso que Rick. El KO es "volar, rebotar, quedar con estrellas y pajaritos". Nada que asuste.
+
+### 4.4 Uso personal
+- El equipo fan de superhéroes se puede activar en Opciones.
+- La música sigue siendo original. No es por la ley: una marcha nueva que sea "tuya" le da más identidad al juego que un remix de la de 1990.
+
+### 4.5 Tablet y computadora desde el día uno
+La capa de entrada se construye en F0 con táctil, teclado y mandos. Si se deja para el final, la interfaz táctil se siente pegada con cinta.
+
+---
+
+## 5. Lo que lo hace mucho mejor que el original
+
+1. **Golpes que se sienten.** Cada golpe trae su cuadro de impacto y el punto exacto del puño. Hitstop de 2 a 4 cuadros, temblor de cámara, chispa y sonido justo donde pega.
+2. **Animación de verdad.** El original tenía 2 o 3 cuadros por acción. Aquí son 8 a 13 con poses clave y pies que no patinan a ninguna velocidad.
+3. **Técnicas Nekketsu de 75 animaciones.** El torpedo humano es el clavado de natación en tierra. La chilena de fútbol es una patada aérea.
+4. **Medidor Nekketsu.** Se llena al pegar, al recibir y al ir perdiendo. Lleno, activas tu técnica con corte de anime. El que va atrás siempre tiene chance.
+5. **Tres países vivos.** Motos y lluvia de la tarde en Saigón, grafitis en Medellín, el relámpago del Catatumbo en Maracaibo, chigüires en el llano.
+6. **Clima dinámico.** Aguacero tropical que moja el piso y hace resbalar, atardeceres, noches con neón.
+7. **Comida local como energía.** Bánh mì, phở, arepa, bandeja paisa, cachapa, tequeños. La rivalidad de la arepa entre Colombia y Venezuela, incluida.
+8. **Repetición instantánea** del mejor KO en cámara lenta, gracias a la simulación determinista.
+9. **Tú adentro.** Tu personaje desde el estudio de PixelForja o una selfie.
+10. **Modo Peques** y **4 jugadores reales**.
+
+---
+
+## 6. Escenarios sin sorpresas
+
+### 6.1 Una sola fuente de verdad
+```
+Juego: data/stages/<id>.layout.json     ← geometría jugable: piso, huecos, plataformas, agua, muros
+            │
+            ▼
+PixelForja: pinta capas sobre esa geometría y devuelve PNG + colisión verificada
+            │
+            ▼
+Juego: carga el escenario. Si la colisión del kit no coincide con el layout, la prueba falla
+```
+El juego decide dónde hay un hueco, a qué altura está una azotea y dónde empieza el agua, porque eso es diseño de juego. PixelForja decide cómo se ve. Así es imposible que el dibujo diga una cosa y la colisión otra.
+
+El formato del layout está en el pedido, sección 9.2.
+
+### 6.2 Las 5 puertas de cada escenario
+| Puerta | Qué se entrega | Quién aprueba |
+|---|---|---|
+| 1. Ficha de arte | Lugar, hora, paleta de 24 colores, lista de 8 a 12 elementos icónicos, 3 detalles de vida (cosas que se mueven) | Tú, en 5 minutos |
+| 2. Gris jugable | El layout en el juego con cajas grises. Se juega y se ajusta | Tú y yo, jugando |
+| 3. Postales | PixelForja entrega 3 capturas de 640x360 (inicio, medio y final) a la hora del día elegida | Tú |
+| 4. Escenario completo | Todas las capas, objetos, luces y partículas en el juego | Pruebas automáticas |
+| 5. Prueba en tablet | 60 fps, legible, sin costuras, jugado de punta a punta | Tú, en la tablet |
+
+### 6.3 Pruebas automáticas de escenario
+- **Costuras:** los trozos de fondo pegan sin una sola línea de diferencia.
+- **Paralaje:** cada capa que se repite cierra el ciclo sin salto.
+- **Piso:** ningún hueco transparente donde el layout dice "piso".
+- **Apoyo:** todo objeto con apoyo cae sobre el piso o sobre una plataforma del layout.
+- **Colisión:** la colisión que devuelve PixelForja es igual al layout, pixel por pixel en la franja jugable.
+- **Camino:** desde la salida se llega a la meta caminando, saltando o nadando según las reglas de la prueba.
+- **Legibilidad:** contraste mínimo entre el contorno de los atletas y el fondo de la franja jugable. Si un fondo es tan cargado que un atleta se pierde, falla.
+- **Paleta:** el escenario no usa más colores que los de su ficha de arte.
+- **Rendimiento:** número máximo de capas y de luces por pantalla.
+
+### 6.4 Lista de escenarios
+| Id | Lugar | Prueba | Hora | Elementos icónicos |
+|---|---|---|---|---|
+| `saigon_hem` | Callejones del Distrito 3 | Cross Country tramo 1 | Mañana | Cables enredados, motos paradas, sillas plásticas, puestos de bánh mì, altares de la tierra |
+| `saigon_benthanh` | Mercado Bến Thành | Cross Country tramo 2 | Media mañana | Torre del reloj, toldos, frutas, vendedoras con nón lá |
+| `saigon_rio` | Río Saigón | Cross Country tramo 3 | Mediodía | Ferry, jacintos de agua, bote de bambú, Landmark 81 al fondo |
+| `saigon_azoteas` | Azoteas de Saigón | Cross Country tramo 4 | Tarde con aguacero | Cafés en azotea, tanques, ropa tendida, Bitexco al fondo |
+| `saigon_estadio` | Estadio de la meta | Llegada del Cross Country | Atardecer | Gradas, marcador, fuegos artificiales |
+| `halong` | Bahía de Hạ Long | Natación | Mañana | Islotes de piedra caliza, juncos de velas rojas, aldea flotante |
+| `taodan` | Parque Tao Đàn | Đá cầu | Amanecer | Árboles enormes, abuelos haciendo ejercicio, jaulas de pájaros |
+| `hoian` | Hội An | Tama-wari | Noche | Faroles de colores, río Thu Bồn, puente japonés, casas amarillas |
+| `hanoi_dojo` | Dojo frente al Hoàn Kiếm | Judo y Vovinam | Tarde | Tatami, ventanales al lago, Torre de la Tortuga al fondo |
+| `medellin_c13` | Comuna 13 | Obstáculos | Mañana | Escaleras eléctricas, grafitis, casas de ladrillo, metrocable al fondo |
+| `cartagena` | Ciudad amurallada | Azoteas | Atardecer | Balcones con buganvillas, Torre del Reloj, mar Caribe |
+| `cocora` | Eje Cafetero | Vallas | Mañana con neblina | Palmas de cera, cafetales, pista de tierra de escuela rural, Willys |
+| `candelaria` | La Candelaria, Bogotá | Tejo | Tarde nublada | Cancha de tejo con mechas, casas coloniales, Monserrate |
+| `barranquilla` | Calle de Barranquilla | Fútbol Callejero | Mediodía | Carnaval, Marimonda, música, arcos de piedra en la calle |
+| `caracas_barrio` | Barrio de Caracas | Chapita | Tarde | Casitas en el cerro, El Ávila, escaleras, perros, cava con refrescos |
+| `margarita` | Playa El Agua | Vóley Playa | Mediodía | Palmeras, toldos, mar turquesa, vendedores de empanadas |
+| `llanos` | Llanos de Apure | Martillo | Atardecer | Sabana, chigüires, garzas, morichales, caney |
+| `maracaibo` | Cancha frente al Lago | Básquet 3x3 | Noche | Puente Rafael Urdaneta iluminado, relámpago del Catatumbo, gaitas |
+| `liceo` | Liceo venezolano | Quemado | Mañana | Patio techado, murales patrios, cantina, pupitres |
+| `caracas_azotea` | Azotea en Parque Central | Kachinuki final | Noche | El Ávila con la Cruz iluminada, torres, neón, helicóptero |
+| `cruce_saigon` | Avenida de Saigón | Bonus | Hora pico | Ríos de motos, xích lô, vendedores |
+| `cruce_bogota` | Avenida de Bogotá | Bonus | Hora pico | TransMilenio, busetas, vendedores ambulantes, llovizna |
+| `cruce_caracas` | Autopista de Caracas | Bonus | Hora pico | Camioneticas por puesto, motorizados, vendedores de tequeños |
+| `nekketsu` | Barrio Nekketsu, Japón | Secreto | Atardecer | Escuela japonesa, expendedoras, río con muro, homenaje al original |
+
+---
+
+## 7. Dirección de arte
+
+### 7.1 Resolución y escala
+- Resolución interna **640 x 360**, escala entera a la pantalla. Nunca x1.5.
+- Atletas en celda **48** (chibi de unos 44 px). Gigantes en **64**. Jefe secreto en **96**. Público en **32**.
+
+### 7.2 Composición de la pantalla oblicua
+```
+y 0   ┌──────────────────────────────────────┐
+      │ cielo y nubes (paralaje 0.1)         │
+y 90  │ silueta lejana: Ávila, Landmark 81    │  paralaje 0.3
+y 150 │ fachadas cercanas                     │  paralaje 0.7
+y 200 ├──────────────────────────────────────┤  ← borde de atrás de la franja jugable
+      │ PISO JUGABLE (franja de 130 px)       │  paralaje 1.0
+y 330 ├──────────────────────────────────────┤  ← borde de adelante
+y 360 │ primer plano: barandas, postes        │  paralaje 1.2, tapa un poco
+      └──────────────────────────────────────┘
+```
+
+### 7.3 Paleta por país
+| País | Carácter | Colores base |
+|---|---|---|
+| Vietnam | Húmedo, verde, rojo y amarillo de bandera, neón de noche | Verde tropical, rojo laca, amarillo Hội An, gris concreto mojado |
+| Colombia | Colores vivos coloniales, montaña verde, grafiti | Amarillo, azul y rojo de bandera, buganvilla fucsia, verde café, ladrillo |
+| Venezuela | Caribe luminoso, cerro verde del Ávila, atardecer naranja | Amarillo, azul y rojo con estrellas, turquesa de playa, naranja llanero |
+
+### 7.4 Vida en cada escenario
+Cada escenario tiene al menos 3 cosas que se mueven aunque nadie juegue: motos que pasan al fondo, ropa tendida con viento, faroles que se mecen, perros que se rascan, palomas que se espantan cuando alguien corre cerca, vendedores que pregonan.
+
+---
+
+## 8. Arquitectura técnica
+
+### 8.1 Repos y flujo del kit
 ```
 Nekketsu-Olympic-GG/            el juego (este repo)
   tools/pixel_forja/            PixelForja como submódulo (solo para regenerar)
   fichas/                       personajes editados en el estudio (*.ficha.json)
+  data/stages/*.layout.json     la geometría de cada escenario (la fuente de verdad)
   public/assets/kit/            el kit generado, SE COMMITEA
   src/                          el juego
 ```
-- El generador vive en PixelForja: `src/engine/kit/olympickit.ts` y `scripts/olympic-kit.ts`. Así las animaciones nuevas pasan por sus pruebas de calidad.
-- En el juego: `"kit": "tsx tools/pixel_forja/scripts/olympic-kit.ts public/assets/kit --fichas fichas"`.
-- El kit se commitea a propósito. Netlify compila sin correr PixelForja, y si PixelForja cambia algo que no te gusta, el juego sigue igual hasta que regeneres.
-- Es exactamente el patrón documentado en `docs/KIT_JUEGO.md` de PixelForja para GG Abyss. Nada nuevo que aprender.
+- El generador vive en PixelForja: `src/engine/kit/olympickit.ts` y `scripts/olympic-kit.ts`.
+- En el juego: `"kit": "tsx tools/pixel_forja/scripts/olympic-kit.ts public/assets/kit --fichas fichas --escenarios data/stages"`.
+- El kit se commitea. Netlify compila sin correr PixelForja.
+- Es el patrón de `docs/KIT_JUEGO.md` de PixelForja para GG Abyss.
 
-### 6.2 Stack
+### 8.2 Stack
 | Pieza | Elección | Por qué |
 |---|---|---|
-| Motor | Phaser 3.90 | Escenas, cargador, entrada con mandos, audio web, tweens, RetroFont, nineslice. Ya lo usas en GG Abyss |
+| Motor | Phaser 3.90 | Escenas, cargador, mandos, audio web, tweens, RetroFont, nineslice |
 | Lenguaje | TypeScript estricto | Tipos del manifiesto compartidos con PixelForja |
 | Build | Vite | Rápido, PWA fácil |
-| Pruebas | Vitest (lógica) y Playwright (pantallas) | Igual que PixelForja |
-| Publicar | Netlify, PWA instalable | Íconos de app ya salen de PixelForja |
-| Móvil nativo (después) | Capacitor | Envolver Phaser es trivial. Expo no aporta aquí |
+| Pruebas | Vitest y Playwright | Igual que PixelForja |
+| Publicar | Netlify, PWA instalable | Íconos de app salen de PixelForja |
+| Móvil nativo (después) | Capacitor | Envolver Phaser es trivial |
 
-### 6.3 Estructura del código
+### 8.3 Estructura del código
 ```
 src/
-  main.ts                    arranque de Phaser
-  config.ts                  resolución, escala, constantes de física
-  core/
-    kit.ts                   carga y tipos del manifest
-    anim.ts                  reproductor con eventos, avance y elevación
-    input.ts                 teclado, 4 mandos, táctil, asignación de jugadores
-    audio.ts                 música con fundidos, efectos con variación de tono
-    save.ts                  récords, medallas, opciones (localStorage con try/catch)
-    rng.ts                   aleatorio con semilla (para repeticiones)
-    i18n.ts                  español e inglés
-    replay.ts                búfer circular de 10 s de estados
-  sim/
-    world.ts                 simulación a 60 Hz fija, separada del dibujo
-    projection.ts            oblicua: (x, y, z) a pantalla
-    collision.ts             franja jugable, sólidos, bordes, huecos
-    combat.ts                hitbox, hurtbox, daño, hitstop, derribo
-    items.ts                 armas y objetos del piso
-  actors/
-    actor.ts                 posición, velocidad, z, dirección, estado
-    stats.ts                 los 9 atributos y el aguante
-    states/                  una máquina de estados por familia de acciones
-    brains/                  IA por prueba y por personalidad
-  events/
-    crosscountry/  obstacles/  tamawari/  swim/  kachinuki/  rooftop/  hammer/
-  scenes/
-    Boot  Preload  Intro  Title  Mode  TeamSelect  Lineup  Versus  Event
-    Results  Locker  Podium  Credits  Options  Replay
-  ui/
-    hud.ts  dialog.ts  portrait.ts  bars.ts  menu.ts  touch.ts  banner.ts
-  data/
-    teams.json  events.json  stages/*.json  dialogs/*.json
+  main.ts  config.ts
+  core/     kit.ts  anim.ts  input.ts  audio.ts  save.ts  rng.ts  i18n.ts  replay.ts
+  sim/      world.ts  projection.ts  collision.ts  combat.ts  items.ts  ball.ts  weather.ts
+  actors/   actor.ts  stats.ts  states/  brains/
+  events/   crosscountry/ obstacles/ tamawari/ kachinuki/ hurdles/ hammer/ swim/ rooftop/ judo/
+            soccer/ basket/ beachvolley/ dodgeball/ chapita/ dacau/ tejo/ cruce/
+  scenes/   Boot Preload Intro Title Mode TourMap TeamSelect Lineup Versus Event Results Locker
+            Podium Credits Options Replay
+  ui/       hud.ts dialog.ts portrait.ts bars.ts menu.ts touch.ts banner.ts cutin.ts
+  data/     teams.json events.json tour.json dialogs/*.json stages/*.layout.json
 ```
 
-### 6.4 Simulación determinista
-- Paso fijo de 60 Hz. El dibujo interpola entre pasos.
+### 8.4 Simulación determinista
+- Paso fijo de 60 Hz, el dibujo interpola.
 - Todo lo aleatorio sale de `rng.ts` con semilla.
-- Las entradas de cada jugador se guardan por paso.
-- Con eso salen gratis: repeticiones, fantasmas de tu mejor tiempo, pruebas automáticas de "esta pelea termina igual siempre" y, algún día, juego en línea con rollback.
+- Las entradas se guardan por paso.
+- Salen gratis: repeticiones, fantasmas, pruebas de "esta partida termina igual siempre" y juego en línea con rollback algún día.
 
-### 6.5 Proyección oblicua
+### 8.5 Proyección oblicua
 ```ts
 // mundo: x a lo largo, y profundidad (0 = fondo de la franja), z altura
 pantallaX = x - camX
-pantallaY = pisoArriba + y - z
-profundidadDeDibujo = y        // se ordena por y del pivote
-sombra = elipse en (x, pisoArriba + y), escala según z
+pantallaY = bordeAtras + y - z
+orden = y del pivote
+sombra = elipse en (x, bordeAtras + y)
 ```
-Elegir la fila de la hoja según la velocidad:
-- Solo horizontal: `right` (o `right` con `flipX` para ir a la izquierda).
-- Diagonal hacia el fondo: `up_right`. Hacia el frente: `down_right`.
-- Solo profundidad (caminar): `up` o `down`.
-- Pruebas de campo (saltos, lanzamientos, natación): siempre `right`. Ahí el motor está dibujado de lado y se ve perfecto.
+Fila de la hoja según la velocidad: horizontal `right` (con `flipX` a la izquierda), diagonal `up_right` o `down_right`, solo profundidad `up` o `down`. Las pruebas de campo siempre de lado.
 
-Ritmo de pies sin patinar, en oblicua es directo porque `avance` está medido de lado:
-```ts
-anim.cuadro += (velocidad * dt) / avance * cuadros
-```
+Pies sin patinar: `anim.cuadro += (velocidad * dt) / avance * cuadros`.
 
-### 6.6 Manifiesto del kit olímpico
-Extiende el del kit deportivo. Lo nuevo va marcado.
-```jsonc
-{
-  "juego": "Nekketsu Olympic GG", "generado_con": "PixelForja", "version": 1,
-  "filas": ["right", "down_right", "up_right", "down", "up"],          // NUEVO: la izquierda es flipX
-  "atletas": {
-    "rick": {
-      "nombre": "Rick", "equipo": "familia_gg", "celda": 48, "pivote": [24, 46],
-      "stats": { "puno": 7, "patada": 5, "arma": 6, "lanzar": 8, "agilidad": 4,
-                 "defensa": 7, "salto": 4, "velocidad": 5, "nado": 5, "aguante": 120 },  // NUEVO
-      "retratos": { "neutral": "...", "feliz": "...", "enojo": "...", "triste": "...",
-                    "susto": "...", "cerrado": "..." },                                    // NUEVO: caras LPC
-      "tecnica": "puno_mach",                                                             // NUEVO
-      "packs": {
-        "base":   { "idle": { "archivo": "...", "cuadros": 6, "fps": 6, "loop": true }, "...": {} },
-        "pelea":  { "jab": { "...": "...",
-                    "eventos": [{ "tipo": "impacto", "cuadro": 3, "punto": [[12, -26], "..."] }],
-                    "cajas": [[[-8, -40, 16, 40]], "..."],          // NUEVO: hurtbox por fila y cuadro
-                    "manos": [[[10, -24], [-6, -22]], "..."],       // NUEVO: mano cercana y lejana
-                    "cabeza": [[0, -38], "..."] } },                // NUEVO: para estrellas y objetos
-        "atletismo": { "...": {} }, "natacion": { "...": {} }, "trepar": { "...": {} }
-      }
-    }
-  },
-  "publico": { "celda": 32, "variantes": 64, "anims": ["idle", "cheer", "cheer_wave"] },
-  "escenarios": { "barrio": { "capas": ["..."], "objetos": {}, "luces": {} } },
-  "objetos": { "bate": { "w": 24, "h": 8, "agarre": [4, 4], "peso": 1, "dano": 8 } },
-  "fx": { "...": {} }, "ui": { "...": {} }, "audio": { "...": {} }
-}
-```
-- `cajas` se calcula del contorno real del sprite en cada cuadro. Esquivar con `slip` de verdad baja la caja.
-- `manos` sirve para que el bate, la llanta o el rival levantado queden pegados a las manos en cada cuadro.
-- `cabeza` sirve para los pajaritos del mareo, el sudor y los objetos que caen encima.
-
-### 6.7 Presupuesto de memoria
-Cálculo honesto: un atleta con 45 animaciones, 10 cuadros promedio, 5 filas, celda 48 y RGBA son unos 20 MB de GPU. Por 16 atletas, 330 MB. Una tablet no lo aguanta.
-
-Solución: **packs por prueba**. Cada prueba carga solo lo que usa (unas 12 animaciones). Quedan unos 5 MB por atleta y unos 90 MB por prueba con todo el elenco. Además:
-- Atlas empaquetados de hasta 4096 px (el kit ya lo verifica).
-- Público en 32 px con 3 animaciones y paleta variada en tiempo real.
-- Meta: menos de 120 MB de texturas por escena y carga de menos de 4 segundos.
+### 8.6 Presupuesto de memoria
+- Packs por prueba: cada prueba carga solo sus animaciones (unas 12).
+- Con 16 atletas en pantalla: unos 90 MB de texturas. Con 20: unos 110 MB.
+- Meta: menos de 120 MB por escena y carga de menos de 4 segundos.
+- Por eso una Olimpiada tiene 4 equipos en cancha, aunque haya 6 disponibles.
 
 ---
 
-## 7. El núcleo: moverse y pelear como Kunio
+## 9. El núcleo: moverse y pelear como Kunio
 
-### 7.1 Controles
+### 9.1 Controles
 | Acción | Teclado | Mando | Táctil |
 |---|---|---|---|
 | Moverse | Flechas o WASD | Palanca o cruceta | Palanca virtual |
-| Correr | Doble toque en dirección | Doble toque o gatillo | Doble toque o botón |
-| Puño | J | X / Cuadrado | Botón A |
-| Patada | K | A / Cruz | Botón B |
-| Saltar | L (o J+K) | B / Círculo | Botón C |
+| Correr | Doble toque | Doble toque o gatillo | Doble toque o botón |
+| Puño | J | X / Cuadrado | A |
+| Patada | K | A / Cruz | B |
+| Saltar | L | B / Círculo | C |
 | Agarrar, recoger, lanzar | Puño cerca de algo | Igual | Igual |
 | Técnica Nekketsu | Puño + Patada con medidor lleno | Igual | Botón especial |
 
-Combinaciones clásicas Kunio que conservamos:
-- Correr + puño: puñetazo corriendo.
-- Correr + patada: patada voladora.
-- Saltar + patada: patada en el aire.
-- Puño junto a un rival caído: levantarlo. Puño otra vez: lanzarlo.
-- Puño junto a un objeto: recogerlo. Puño otra vez: golpe con arma. Patada: lanzarlo.
-- Agarre por cercanía: dos puños seguidos pegado al rival. Puño en agarre: rodillazo. Atrás + puño: proyección.
+Combinaciones Kunio: correr + puño, correr + patada (voladora), salto + patada, puño junto a un caído para levantarlo y otra vez para lanzarlo, puño junto a un objeto para recogerlo, agarre por cercanía con rodillazo y proyección.
 
-### 7.2 Estados del atleta
-`idle`, `walk`, `run`, `jump`, `air_attack`, `attack`, `grab`, `grabbed`, `lift`, `carry`, `throw`, `carried`, `thrown`, `hitstun`, `knockdown`, `getup`, `dizzy`, `ko`, `climb`, `hang`, `balance`, `swim`, `ride`, `taunt`, `celebrate`. Cada estado sabe qué animación usa, de qué pack y a qué estados puede saltar.
+### 9.2 Estados
+`idle`, `walk`, `run`, `jump`, `air_attack`, `attack`, `grab`, `grabbed`, `lift`, `carry`, `throw`, `carried`, `thrown`, `hitstun`, `knockdown`, `getup`, `dizzy`, `ko`, `climb`, `hang`, `balance`, `swim`, `ride`, `slip_wet`, `taunt`, `celebrate`.
 
-### 7.3 Datos de cuadro sacados del kit
-Nada de números inventados a mano:
-- **Arranque:** cuadros antes del `impacto`.
-- **Activo:** el cuadro del `impacto` y el siguiente.
-- **Recuperación:** el resto.
-- **Hitbox:** círculo de 6 px en `punto`.
-- **Hurtbox:** `cajas` del cuadro actual.
-- Si el diseñador cambia una animación en PixelForja, el balance del golpe cambia solo y de forma coherente.
+### 9.3 Datos de cuadro sacados del kit
+- Arranque: cuadros antes del `impacto`. Activo: el cuadro del impacto y el siguiente. Recuperación: el resto.
+- Hitbox: círculo de 6 px en `punto`. Hurtbox: `cajas` del cuadro actual.
+- Si una animación cambia en PixelForja, el balance cambia solo y de forma coherente.
 
-### 7.4 Daño y reacciones
+### 9.4 Daño y reacciones
 ```
-daño = base_del_golpe * (1 + stat_atacante / 10) * (1 - defensa_rival / 25) * multiplicador_arma
+daño = base * (1 + ataque / 10) * (1 - defensa_rival / 25) * multiplicador_arma
 hitstop = 2 cuadros (jab) a 4 cuadros (técnica)
 ```
-- 3 golpes en 1 segundo: derribo.
-- Golpe con arma o técnica: derribo directo, el rival vuela con `elevacion`.
-- Un rival en el aire puede recibir un golpe más (malabar), máximo uno. Así no hay combos infinitos.
-- Aguante a 0: mareado 3 segundos con pajaritos. Otro golpe: KO, sale de la prueba (en Kachinuki) o pierde 3 segundos (en carreras).
-- Invulnerabilidad de 40 cuadros al levantarse.
+- 3 golpes en 1 segundo: derribo. Arma o técnica: derribo directo con vuelo.
+- Un solo golpe extra en el aire, así no hay combos infinitos.
+- Aguante en 0: mareado 3 segundos. Otro golpe: KO.
+- 40 cuadros de invulnerabilidad al levantarse.
+- Piso mojado por aguacero: correr y frenar de golpe hace resbalar.
 
-### 7.5 Objetos del piso
-| Objeto | Peso | Golpe | Lanzado | Especial |
+### 9.5 Objetos del piso
+| Objeto | Dónde abunda | Golpe | Lanzado | Especial |
 |---|---|---|---|---|
-| Bate | Liviano | 8 | 10 | Swing con `bat` del pack béisbol |
-| Tubo | Medio | 10 | 12 | Rebota en el piso |
-| Llanta | Medio | 6 | 12 | Rueda por el piso y tumba a varios |
-| Bote de basura | Pesado | 12 | 16 | Lo puedes patear rodando |
-| Piedra | Liviano | 4 | 10 | Muchas tiradas por el piso |
-| Raqueta | Liviano | 7 | 8 | Devuelve proyectiles (exclusiva de la Academia) |
-| Pelota de dodgeball | Liviano | 0 | 14 | Bonus, guiño al Dodgeball Nekketsu |
-| Bici | Vehículo | 0 | 0 | Cross country: vas rápido, te tumban con un golpe |
-| Patineta | Vehículo | 0 | 0 | Cross country: rápida en bajada |
+| Chancleta | Todos los países | 3 | 8 | Vuelve girando como boomerang. El arma secreta de toda mamá latina |
+| Silla plástica | Vietnam | 8 | 10 | Se puede pararse encima para alcanzar algo |
+| Nón lá | Vietnam | 2 | 6 | Se lanza como frisbee |
+| Coco | Venezuela y Colombia | 6 | 12 | Rueda |
+| Bate | Venezuela | 8 | 10 | Swing con `bat` |
+| Tubo | Todos | 10 | 12 | Rebota |
+| Llanta | Todos | 6 | 12 | Rueda y tumba a varios |
+| Pote de basura | Todos | 12 | 16 | Se patea rodando |
+| Cono de tránsito | Ciudades | 4 | 8 | Si cae en la cabeza, tapa la vista 2 s |
+| Escoba | Todos | 7 | 9 | Largo alcance |
+| Bici y patineta | Cross Country | | | Más rápido, un golpe te tumba |
 
-Los objetos usan `manos` del cuadro actual para quedar pegados. Los lanzamientos salen del `punto` del evento `suelta`.
-
-### 7.6 Técnicas Nekketsu (una por atleta)
-Todas existen ya como animación en PixelForja. Solo cambia el contexto:
-
+### 9.6 Técnicas Nekketsu
 | Técnica | Animación base | Efecto |
 |---|---|---|
-| Puño Mach | `jab` en bucle a 2x fps | Ráfaga de 8 golpes |
-| Patada Huracán | `whirlwind` + `kick_martial` | Gira y barre a todos alrededor |
-| Torpedo Humano | `dive` de natación, en tierra | Cabezazo volador en línea recta |
-| Rodilla Voladora | `flying_kick` con más `elevacion` | Cruza media pantalla |
-| Uppercut del Dragón | `uppercut` con salto | Lanza al rival hacia arriba |
-| Barrida Infernal | `slide` de fútbol | Tumba a todos en la línea |
+| Puño Mach | `jab` en bucle a 2x | Ráfaga de 8 golpes |
+| Patada Huracán | `whirlwind` + `kick_martial` | Barre alrededor |
+| Torpedo Humano | `dive` en tierra | Cabezazo volador |
+| Rodilla Voladora | `flying_kick` con más elevación | Cruza media pantalla |
+| Uppercut del Dragón | `uppercut` con salto | Lanza hacia arriba |
+| Barrida Infernal | `slide` | Tumba a la línea |
 | Cabezazo Bomba | `header` | Rebota al rival contra el borde |
 | Chilena Asesina | `chilena` | Patada aérea hacia atrás |
-| Tackle Locomotora | `tackle` | Atraviesa a varios rivales |
-| Lluvia de Pelotas | `tennis_serve` repetido | Proyectiles de tenis |
-| ¡Thor al Rescate! | Thor: `run`, `bite`, `bark` | Thor entra corriendo y tumba al más cercano |
+| Tackle Locomotora | `tackle` | Atraviesa a varios |
+| Lluvia de Pelotas | `tennis_serve` repetido | Proyectiles |
+| Chancletazo Supremo | `throw` | Lluvia de chancletas que vuelven |
+| ¡Thor al Rescate! | Thor: `run`, `bite`, `bark` | Thor tumba al más cercano |
 
-Al activar una técnica: congelado de 30 cuadros, fondo con líneas de velocidad, retrato del personaje con cara de enojo y el nombre de la técnica con `fuente_titulo`. Puro anime de los 80.
+Al activar: congelado de 30 cuadros, líneas de velocidad, retrato con cara de enojo y nombre de la técnica.
 
-### 7.7 Atributos
-| Atributo | Afecta |
-|---|---|
-| Puño | Daño de puños y fuerza de agarre |
-| Patada | Daño de patadas |
-| Arma | Daño y velocidad con objetos |
-| Lanzar | Distancia y daño de lanzamientos, martillo |
-| Agilidad | Velocidad de levantarse, esquivar, trepar |
-| Defensa | Reduce daño, resiste agarres |
-| Salto | Altura y distancia de saltos, garrocha |
-| Velocidad | Correr, carreras |
-| Nado | Velocidad y aguante en el agua |
-| Aguante | Vida y energía para correr |
+### 9.7 Atributos
+Puño, Patada, Arma, Lanzar, Agilidad, Defensa, Salto, Velocidad, Nado, Balón (nuevo, para las pruebas de pelota) y Aguante.
 
 ---
 
-## 8. Equipos y personajes
+## 10. Equipos
 
-Cuatro equipos de cuatro, cada uno con identidad, uniforme, tema musical y burla propia.
+Cuatro equipos en cada Olimpiada, elegidos de seis. Cada uno con uniforme, tema musical y burla propia. Los nombres son propuestas, ver preguntas.
 
-### 8.1 Familia GG (azul y dorado)
-| Atleta | Rol | Fuerte | Débil | Técnica |
-|---|---|---|---|---|
-| Rick | Capitán, potencia | Puño, Lanzar, Defensa | Agilidad | Puño Mach |
-| Steph | Técnica, velocidad | Velocidad, Nado, Patada | Arma | Patada Huracán |
-| Sophie | Acróbata | Salto, Agilidad | Defensa | Chilena Asesina |
-| Alana | Pequeña e inesquivable | Agilidad, caja de daño chiquita | Puño | ¡Thor al Rescate! |
+### 10.1 Familia GG (azul y dorado)
+| Atleta | Rol | Fuerte | Técnica |
+|---|---|---|---|
+| Rick | Capitán, potencia | Puño, Lanzar, Defensa | Puño Mach |
+| Steph | Técnica y velocidad | Velocidad, Nado, Patada | Patada Huracán |
+| Sophie | Acróbata | Salto, Agilidad, Balón | Chilena Asesina |
+| Alana | Pequeña e inesquivable | Agilidad, caja de daño chiquita | ¡Thor al Rescate! |
 
 Thor corre por la pista animando, ladra en los récords y entra con la técnica de Alana.
 
-### 8.2 Instituto Nekketsu (gakuran negro, cinta roja)
-El homenaje directo a los rivales de siempre, con nombres originales.
+### 10.2 Rồng Sài Gòn, Dragones de Saigón (rojo y amarillo)
 | Atleta | Rol | Look | Técnica |
 |---|---|---|---|
-| Kenji "Toro" Sakamoto | Capitán delincuente | Pompadour (`cowlick_tall`), gakuran abierto | Uppercut del Dragón |
-| Ryu Takeda | Karateka | Cinta, `spiked`, kimono | Rodilla Voladora |
+| Minh | Capitán, vovinam | Cinta roja, `spiked` | Patada tijera de vovinam |
+| Lan | Corredora | Coleta, uniforme escolar con pañoleta roja | Torpedo Humano |
+| Tuấn | Đá cầu, pies mágicos | `messy1`, sandalias | Chilena Asesina |
+| Bà Hoa | La abuela del barrio, pesada | `bob` gris, nón lá | Silla Plástica Voladora |
+
+### 10.3 Parceros de Medellín (amarillo, azul y rojo)
+| Atleta | Rol | Look | Técnica |
+|---|---|---|---|
+| Santi | Capitán, futbolista | `parted`, camiseta de rayas | Cabezazo Bomba |
+| Valen | Grafitera ágil | `high_ponytail`, gorra | Barrida Infernal |
+| El Mono | Tejista, brazo de oro | `curly_short`, sombrero vueltiao | Tejo Explosivo |
+| Don Jairo | Arriero gigante (celda 64) | Bigote, poncho, carriel | Tackle Locomotora |
+
+### 10.4 Los Panas de Caracas (amarillo, azul y rojo con estrellas)
+| Atleta | Rol | Look | Técnica |
+|---|---|---|---|
+| Gabo | Capitán, pelotero | Gorra de béisbol, `buzzcut` | Batazo de Jonrón |
+| Yuli | Voleibolista | `curly_long`, uniforme de liceo | Remate Relámpago |
+| Chamo Toto | El más pequeño, rápido | `afro`, franela suelta | Puño Mach |
+| La Señora Carmen | La vecina, chancleta en mano | Rolos, bata de casa | Chancletazo Supremo |
+
+### 10.5 Instituto Nekketsu (gakuran negro, cinta roja): el jefe
+| Atleta | Rol | Look | Técnica |
+|---|---|---|---|
+| Kenji "Toro" Sakamoto | Capitán delincuente | Pompadour `cowlick_tall`, gakuran abierto | Uppercut del Dragón |
+| Ryu Takeda | Karateka | Cinta, `spiked` | Rodilla Voladora |
 | Goro Iwata | Gigante (celda 64) | `buzzcut`, sin mangas | Tackle Locomotora |
-| Tetsu Mori | Lanzador | `flat_top`, lentes oscuros | Lanzamiento de bote doble |
+| Tetsu Mori | Lanzador | `flat_top`, lentes oscuros | Doble Pote |
 
-### 8.3 Academia Kirameki (morado y plata, ricos)
-| Atleta | Rol | Look | Técnica |
-|---|---|---|---|
-| Ayame Kirishima | Capitana, tenista | Coleta alta, falda | Lluvia de Pelotas |
-| Kaito Saionji | Esgrimista | `parted`, chaqueta | Estocada (`attack_thrust`) |
-| Mei Hoshino | Gimnasta | `bunches` | Barrida Infernal |
-| Hideo Kudo | Estratega con lentes | `nerd` glasses | Trampa: suelta canicas |
+### 10.6 Equipos secretos
+- **Los del Abismo:** goblin, trol, orco y el minotauro como jefe. Crossover con GG Abyss.
+- **Equipo fan:** los seis superhéroes del kit deportivo. Para uso personal, en Opciones.
 
-### 8.4 Tiburones del Puerto (rojo y negro, pandilla de motos)
-| Atleta | Rol | Look | Técnica |
-|---|---|---|---|
-| Sabu Kurogane | Capitán motero | `longhawk`, chaqueta de cuero | Embestida en moto (`bike` + `charge`) |
-| Jin Arai | Peleador sucio | `spiked_porcupine`, bandana | Cabezazo Bomba |
-| Taka Umino | Nadador | Gorra de natación | Torpedo Humano |
-| Oda "Mamá Oda" | Luchadora pesada | `bob`, delantal | Abrazo de oso (agarre largo) |
-
-### 8.5 Equipo secreto: Los del Abismo
-Crossover con tu otro juego, GG Abyss: un goblin, un trol, un orco y el minotauro como jefe (celda 96). Las cabezas ya existen en LPC y el minotauro ya está en PixelForja. Se desbloquea ganando la Olimpiada en difícil. Es 100 % tuyo, se puede publicar.
-
-### 8.6 Equipo fan (opcional, solo uso personal)
-Los seis superhéroes del kit deportivo. Apagados por defecto, se activan en Opciones. No se publican.
-
-### 8.7 Métete al juego
-1. Abres el estudio de PixelForja, armas tu personaje o subes una selfie.
-2. Exportas la ficha y la pones en `fichas/` (o la cargas desde Opciones en el juego, que la renderiza en un worker).
-3. Eliges sus atributos con 40 puntos a repartir.
-4. Reemplaza a un atleta de cualquier equipo o arma un quinto equipo.
+### 10.7 Métete al juego
+Armas tu personaje en el estudio de PixelForja o desde una selfie, exportas la ficha, repartes 44 puntos de atributos y reemplazas a quien quieras.
 
 ---
 
-## 9. Las pruebas
+## 11. Las 16 pruebas en detalle
 
-Formato fijo para cada una: reglas, escenario, controles, IA, animaciones, lo nuevo en PixelForja y criterio de "terminado".
+Formato: reglas, mecánica, IA y criterio de terminado. Las animaciones nuevas de cada una están en el pedido a PixelForja.
 
-### 9.1 Cross Country Callejero (la estrella)
-**Reglas.** Los 16 atletas (4 por equipo) corren por la ciudad. Puntos por puesto de llegada de cada atleta. Vale todo: golpes, armas, atajos.
+### 11.1 Cross Country Saigón (estrella, fiel a 1990)
+**Reglas.** Los 16 atletas corren por Saigón. Puntos por llegada. Vale todo.
 
-**Recorrido en 4 tramos, cada uno de 5 a 7 pantallas:**
-1. **Salida en la escuela → calles del barrio.** Pistola de salida (`sprint_start`). Botes de basura, bicis paradas, perros que ladran y persiguen, un camión que pasa por la calle y tumba al que se atraviese.
-2. **Ribera del río.** Dos caminos: el puente largo o cruzar nadando (más corto, pero si te golpean en el agua pierdes mucho). Usa `swim` y `swim_exit` con la fila `agua`.
-3. **Obra en construcción.** Vigas de equilibrio (`balance_walk`), escalera de mano (`ladder`), sacos de arena que se pueden empujar, un atajo por la grúa para los que saltan bien.
-4. **Azoteas → estadio.** Saltos entre edificios (`long_jump` con `elevacion`), ropa tendida que tapa la vista, tanques de agua. Bajada por la escalera de incendio y vuelta final en el estadio con el público de pie.
+**Tramos:**
+1. **Callejones del Distrito 3.** Pistola de salida. Motos que salen de los hẻm, sillas plásticas, cables bajos que hay que agacharse para pasar, un perro que persigue.
+2. **Mercado Bến Thành.** Pasillos estrechos entre puestos, frutas que se caen y hacen resbalar, la torre del reloj de fondo.
+3. **Río Saigón.** Dos caminos: el ferry (largo, seguro) o nadar entre jacintos de agua (corto, arriesgado).
+4. **Azoteas.** Saltos entre edificios, cafés con sillitas, y el aguacero de la tarde que moja todo y hace resbalar. Bajada por la escalera de incendio al estadio.
 
-**Atajos.** Bici y patineta tiradas en el tramo 1 y 4. Alcantarilla secreta en el tramo 1 que sale en el tramo 3 (con ratas).
+**Atajos.** Bici, patineta, una alcantarilla secreta del tramo 1 al 3.
 
-**Cámara.** Sigue al jugador 1. Con varios jugadores humanos sigue al punto medio. Si alguien se queda fuera de pantalla más de 2 segundos aparece en el borde con 3 segundos de penalización, para que nadie quede abandonado.
+**Cámara.** Sigue al jugador 1 o al punto medio de los humanos. Quien queda fuera de pantalla más de 2 s reaparece en el borde con 3 s de castigo.
 
-**IA.** Tres personalidades: corredor (evita peleas), peleador (busca al más cercano) y tramposo (agarra armas y toma atajos). Rubber band suave: los últimos corren un 5 % más.
+**IA.** Corredor, peleador y tramposo. Rubber band suave del 5 %.
 
-**Animaciones.** `run`, `sprint`, `jump`, `long_jump`, `swim`, `swim_exit`, `balance_walk`, `ladder`, `ledge_hang`, `pull_up`, `bike`, `skate`, pelea completa, objetos.
+**Terminado cuando.** Se corre de punta a punta con 16 atletas a 60 fps en tablet y 10 simulaciones automáticas terminan sin que nadie se trabe.
 
-**Nuevo en PixelForja.** Bioma ciudad completo, objetos de calle, perro callejero (cuadrúpedo existente con otra paleta), camión.
+### 11.2 Obstáculos Comuna 13 (fiel a 1990)
+**Reglas.** Carrera de 4 por un recorrido vertical: subir la Comuna 13 desde abajo hasta el mirador.
 
-**Terminado cuando.** Se corre de punta a punta con 16 atletas a 60 fps en tablet, los 3 tipos de IA terminan la carrera, y en 10 carreras de prueba automáticas nadie queda trabado.
+**Obstáculos.** Escaleras eléctricas que van al revés, escalones, muros para trepar, techos de lata, vigas, tendederos, un perro dormido que despierta si lo pisas.
 
-### 9.2 Carrera de Obstáculos
-**Reglas.** 4 carriles en profundidad, 400 m con obstáculos. Te puedes cambiar de carril y pegarle al de al lado. Puntos por llegada.
+**Mecánica.** Saltar en el último paso antes del obstáculo da impulso. Puedes empujar o tumbar al de al lado.
 
-**Obstáculos.** Vallas (`hurdles`), foso de agua, campo de llantas, red para pasar arrastrándose (`crawl`), muro para trepar (`climb_wall`), cuerda floja (`balance_walk`), túnel. El orden cambia en cada partida con semilla.
+**Terminado cuando.** Con un solo botón se termina, con buen ritmo se gana por mucho.
 
-**Mecánica de ritmo.** Saltar la valla justo en el último `paso` antes de llegar da impulso. Saltar tarde tumba la valla y frena. Es fácil de entender y difícil de dominar.
-
-**IA.** Calcula el cuadro ideal de salto con el `avance` del sprint. En fácil se equivoca un 30 %.
-
-**Terminado cuando.** Con un solo botón se puede ganar, con buen ritmo se gana por mucho.
-
-### 9.3 Tama-wari (romper la bola)
-**Reglas.** Cada equipo tiene un poste con una bola gigante de papel arriba (kusudama). Hay que trepar y golpear la bola hasta romperla, mientras los rivales te bajan a patadas o rompen tu bola primero. El primer equipo en romper la bola rival gana.
-
-**Escenario.** El patio de la escuela con el público en las gradas, banderines y el director en el podio comentando.
+### 11.3 Tama-wari Hội An (fiel a 1990)
+**Reglas.** Cada equipo tiene un poste con una bola gigante de papel arriba. Gana el primero en romper la bola rival.
 
 **Mecánica.**
-- Trepar: machacar arriba (o mantener en Modo Peques). Velocidad según Agilidad.
-- Arriba: `pole_punch` resta vida a la bola. La bola se va rajando en 4 estados.
-- Desde abajo: patada al poste (`pole_kick_down`) sacude y puede tumbar al que trepa.
-- Agarrar el pie del que trepa (`grab` hacia arriba) lo baja de un jalón.
-- Al romperse: la bola se abre, sale confeti, cae un cartel con el nombre del equipo y suena la fanfarria.
+- Trepar machacando arriba, o manteniendo en Modo Peques.
+- Arriba, `pole_punch` le quita vida a la bola, que se raja en 4 estados.
+- Desde abajo, patear el poste lo sacude. Agarrar el pie del que trepa lo baja de un jalón.
+- Al romperse: confeti, cartel colgante con el nombre del equipo, fanfarria y los faroles se encienden de golpe.
 
-**Nuevo en PixelForja.** Pack `trepar` completo, poste, bola en 4 estados más la explosión de confeti, cartel colgante.
+**Terminado cuando.** Las partidas duran entre 60 y 120 s y hay remontadas.
 
-**Terminado cuando.** Una partida dura entre 60 y 120 segundos y hay remontadas reales.
-
-### 9.4 Natación sin Reglas
-**Reglas.** Piscina de 50 m, ida y vuelta. 4 nadadores, uno por equipo. Se vale hundir al de al lado.
-
-**Mecánica.**
-- **Salida.** Se llena una barra. Saltar en la zona verde da un `dive` largo, saltar antes es salida en falso con penalización.
-- **Brazada al ritmo.** Cada brazada tiene un `paso` en su evento. Apretar justo en ese cuadro da impulso. Es Track & Field con ritmo en vez de machacar.
-- **Estilos.** Crol rápido pero gasta aguante. Pecho lento y estable. Mariposa con impulso fuerte pero ritmo difícil. Espalda solo para la remontada final (ves a los rivales).
-- **Pelea en el agua.** `swim_punch` al de al lado. Si le pegas 3 veces se hunde 1 segundo (`dunked`).
-- **Vuelta.** `swim_turn` en la pared. Patear la pared en el cuadro justo da impulso.
-
-**Escenario.** Piscina techada con luz que entra en rayos, reflejos animados en el agua, banderines y el público con toallas.
-
-**Ya lo tiene PixelForja.** Los 4 estilos, el clavado, la fila del agua, la espuma y las gotas.
-
-**Terminado cuando.** Se gana con ritmo, no con machacar, y el agua se ve mejor que la arena actual.
-
-### 9.5 Kachinuki: la batalla final
-**Reglas.** Batalla campal en la azotea del edificio más alto, de noche, con neón. Todos contra todos por equipos. Sin barandas en un lado: si te tiran por el borde quedas fuera. Gana el equipo con el último en pie.
+### 11.4 Kachinuki Caracas: la final (fiel a 1990)
+**Reglas.** Todos contra todos por equipos en una azotea de Parque Central de noche. Un borde sin baranda: si te tiran, quedas fuera. Gana el último equipo en pie.
 
 **Formato.**
-- Rondas de 4 contra 4 o todos a la vez si la máquina aguanta (meta: 16 a 60 fps).
-- Cada 30 segundos cae un objeto del cielo (bate, bote, llanta) con una sombra que avisa.
-- A los 90 segundos el borde se acerca (la azotea se va quedando chica), para que no haya peleas eternas.
-- Cada KO da puntos y llena el medidor del equipo.
+- Cada 30 s cae un objeto del cielo con sombra de aviso.
+- A los 90 s la azotea se achica.
+- El Instituto Nekketsu entra como jefe si llegas invicto.
 
-**Escenario.** Tanques de agua (se rompen y mojan), letreros de neón que parpadean, helicóptero de la tele con reflector que sigue al líder, fuegos artificiales al final.
+**Ambiente.** El Ávila con la Cruz iluminada, torres con ventanas encendidas, neón que parpadea, un helicóptero con reflector que sigue al líder, fuegos artificiales al final.
 
-**IA.** Por personalidad, con lectura de los datos de cuadro: bloquea si el arranque del golpe rival es largo, castiga en la recuperación, busca el borde para tirar al rival.
+**IA.** Lee los datos de cuadro: bloquea golpes de arranque largo, castiga en la recuperación, busca el borde.
 
-**Terminado cuando.** Una pelea de 4 contra 4 en normal dura entre 2 y 4 minutos y la IA difícil te obliga a bloquear.
+**Terminado cuando.** Un 4 contra 4 en normal dura de 2 a 4 minutos y la IA difícil te obliga a bloquear.
 
-### 9.6 Salto entre Azoteas (v1.5)
-**Reglas.** Carrerita, garrocha (`pole_vault`) y salto al edificio siguiente. Cada edificio está más lejos. El que cae aterriza en un toldo, en la basura o en la piscina de un vecino. Se juega por turnos con 3 intentos.
+### 11.5 Vallas del Café (fiel a 1992)
+**Reglas.** 4 carriles en profundidad, 400 m con vallas en una pista rural entre palmas de cera. Te puedes cambiar de carril y pegarle al de al lado.
 
-**Mecánica.** Velocidad por ritmo de pasos, momento de clavar la garrocha y ángulo con un segundo botón. Viento visible con la ropa tendida.
+**Mecánica.** Saltar justo en el último `paso` antes de la valla da impulso. Saltar tarde la tumba y frena. Un Willys cargado de café cruza la pista a mitad de carrera.
 
-### 9.7 Martillo Loco (v1.5)
-**Reglas.** Girar y soltar el martillo lo más lejos posible. Si lo sueltas mal sale en cualquier dirección y destruye cosas: la ventana del director, la alarma de un carro, una paloma que sale volando.
+**Terminado cuando.** Se gana con ritmo y los golpes deciden carreras apretadas.
 
-**Mecánica.** `hammer_spin` acelera al ritmo de giros (palanca en círculos o botones alternados). `hammer_release` en el ángulo correcto. Récord en metros.
+### 11.6 Martillo Llanero (fiel a 1992)
+**Reglas.** Girar y soltar el martillo lo más lejos posible. 3 intentos.
 
-### 9.8 Dodgeball Nekketsu (v2, bonus)
-Guiño al primer juego de la saga. 4 contra 4 en la cancha de la escuela. Usa `throw`, `catch`, `dodge` y `vb_dive`.
+**Mecánica.** `hammer_spin` acelera al ritmo de giros. `hammer_release` en el ángulo justo. Si sueltas mal, el martillo sale para cualquier lado: espanta garzas, cae en el morichal, casi le pega a un chigüire que sale corriendo.
+
+**Terminado cuando.** Se entiende en 1 intento y se domina en 20.
+
+### 11.7 Natación Hạ Long (fiel a 1992)
+**Reglas.** 50 m ida y vuelta en mar abierto entre boyas. Se vale hundir al de al lado.
+
+**Mecánica.**
+- Salida desde un junco: barra de tiempo, salida en falso con castigo.
+- Brazada al ritmo: apretar en el cuadro del `paso` de cada brazada da impulso. Ritmo, no machacar.
+- Crol rápido pero cansa, pecho estable, mariposa fuerte pero difícil, espalda para ver a los rivales.
+- `swim_punch` al de al lado. 3 golpes lo hunden 1 s.
+- Vuelta en la boya con patada en el cuadro justo.
+
+**Terminado cuando.** Se gana con ritmo y el mar se ve mejor que la piscina de la arena actual.
+
+### 11.8 Azoteas de Cartagena (fiel a 1992)
+**Reglas.** Carrerita, garrocha y salto al techo siguiente, cada uno más lejos. Por turnos, 3 intentos. El que cae aterriza en un balcón con flores, en un carrito de frutas o en una palenquera que lo regaña.
+
+**Mecánica.** Velocidad por ritmo de pasos, momento de clavar la garrocha y ángulo. Viento visible con las banderitas.
+
+### 11.9 Judo y Vovinam Hà Nội (fiel a 1992)
+**Reglas.** Torneo 1 contra 1 en tatami. Ippon por proyección limpia o por sacar al rival 3 veces del tatami.
+
+**Mecánica.** Agarre por cercanía, forcejeo con la palanca, proyecciones (`judo_throw`), contra-agarre en el cuadro justo, y la patada tijera de vovinam como técnica especial de los Dragones.
+
+### 11.10 Fútbol Callejero Barranquilla (extra)
+**Reglas.** 4 contra 4 en una calle en pleno Carnaval, arcos de piedra, sin faltas. Dos tiempos de 2 minutos.
+
+**Mecánica.** Pase, tiro cargado, vaselina, cabezazo, chilena, barrida, entrada que tumba, portero que se lanza. Todo sale del pack de fútbol de PixelForja con su `impacto` en el contacto con el pie.
+
+**Ambiente.** Comparsas pasando al fondo, una Marimonda que se mete a la cancha, tambores.
+
+### 11.11 Básquet 3x3 Maracaibo (extra)
+**Reglas.** 3 contra 3, media cancha, a 11 puntos. Los golpes valen.
+
+**Mecánica.** Dribble, tiro con barra de tiempo, clavada con `elevacion`, tapón. Con el medidor lleno, clavada Nekketsu que rompe el tablero.
+
+**Ambiente.** Noche, el puente iluminado, relámpagos del Catatumbo que iluminan la cancha de golpe, gaita sonando en un carro.
+
+### 11.12 Vóley Playa Margarita (extra)
+**Reglas.** 2 contra 2, a 11 puntos. La arena frena al correr.
+
+**Mecánica.** Saque, recepción, colocación, remate, bloqueo y plancha. La IA ya sabe calcular dónde cae la pelota (la arena de PixelForja lo hace).
+
+### 11.13 Quemado Nekketsu (extra, homenaje al primer juego)
+**Reglas.** 4 contra 4 en el patio techado del liceo. El que es quemado pasa al "cementerio" detrás del rival y puede quemar desde ahí, como en el original.
+
+**Mecánica.** Lanzar, atrapar en el cuadro justo, esquivar, tiro especial con el medidor lleno.
+
+### 11.14 Chapita (extra, venezolano puro)
+**Reglas.** Béisbol callejero con chapas de refresco y un palo de escoba. 3 innings cortos.
+
+**Mecánica.** El lanzador elige chapa recta o chapa con efecto. El bateador tiene una barra de tiempo. Si la chapa pasa la casa del vecino es jonrón, y si rompe una ventana sale la Señora Carmen con la chancleta.
+
+### 11.15 Đá cầu (extra, vietnamita puro)
+**Reglas.** Mantener el volante en el aire en círculo, pasándolo con los pies. Versión duelo 2 contra 2 con red baja.
+
+**Mecánica.** Ritmo: cada toque en el cuadro justo. Toques de lujo (`chilena`, de espuela) dan más puntos.
+
+### 11.16 Tejo (extra, colombiano puro)
+**Reglas.** Lanzar el tejo a la cancha de greda a 18 m y reventar las mechas.
+
+**Mecánica.** Barra de fuerza y de ángulo, viento cero porque es techado. Mecha reventada: explosión con humo y punto. Si le pegas al tejo del rival lo mueves.
+
+**Ambiente.** Cancha techada de madera, banderines, Monserrate por la ventana, gente animando.
+
+### 11.17 Bonus: Cruce Loco
+Tres versiones de un cruce estilo Frogger con golpes.
+- **Saigón:** ríos de motos que no frenan, xích lô, vendedoras con varas al hombro.
+- **Bogotá:** TransMilenio, busetas, llovizna que moja todo.
+- **Caracas:** autopista con camioneticas por puesto, motorizados zigzagueando, vendedores de tequeños entre los carros.
+
+Premio: monedas para el vestuario y una comida especial.
 
 ---
 
-## 10. Intro, menús y flujo completo
+## 12. Intro, menús y flujo
 
-### 10.1 Mapa de pantallas
+### 12.1 Mapa de pantallas
 ```
 Arranque → Toca para empezar → Intro → Título → Modo
-  Olimpiada → Equipo → Alineación → [Presentación VS → Prueba → Resultados → Vestuario] x N → Podio → Créditos
-  Prueba libre → Prueba → Equipo → Prueba → Resultados
-  Desafíos → Medallas → Prueba con fantasma
-  Versus → Prueba → Equipos (2 a 4 jugadores) → Prueba → Resultados
-  Opciones / Métete al juego / Récords
+  Gira → Equipo → Mapa de la gira → Alineación → [VS → Prueba → Resultados → Vestuario] x N → Final → Podio → Créditos
+  Prueba libre / Versus / Desafíos / Opciones / Métete al juego / Récords
 ```
 
-### 10.2 La intro, toma por toma (40 segundos, se salta con cualquier botón)
+### 12.2 La intro, toma por toma (45 s, se salta)
 | Tiempo | Imagen | Sonido |
 |---|---|---|
-| 0:00 | Negro. Texto a máquina de escribir: "Barrio Nekketsu, 1989." | Campana de escuela sintetizada |
-| 0:04 | Paneo lento por la ciudad al amanecer, 3 capas de paralaje, cuervos que cruzan | Viento y pájaros |
-| 0:10 | El director en el podio del patio, megáfono. Cuadro de diálogo con su retrato: "¡Este año el Festival Deportivo será... SIN REGLAS!" | Pitido de megáfono, voz en "blips" |
-| 0:16 | Corte seco. Cada capitán entra caminando desde un lado: Rick, Kenji, Ayame, Sabu. Se frenan, se presenta su tarjeta con nombre, escuela y estrella de atributos | Un acorde distinto por equipo |
-| 0:30 | Los cuatro se miran. Kenji le lanza un puñetazo a la cámara. Impacto, temblor, la pantalla se raja como vidrio | Golpe crítico |
-| 0:33 | El logo "NEKKETSU OLYMPIC GG" cae de golpe sobre el vidrio roto, brillo que recorre las letras (logo animado de PixelForja) | Arranca la Marcha Nekketsu |
-| 0:36 | Estadio con el público ondeando, fuegos artificiales. "PRESIONA START" titilando | La marcha sigue en bucle |
+| 0:00 | Negro. Texto a máquina: "Japón. Instituto Nekketsu. 10 años invicto." | Campana de escuela |
+| 0:04 | Kenji en la azotea de su escuela, de espaldas, con el gakuran al viento. Arruga un papel: "¿Nadie en Japón nos aguanta? Entonces nos vamos de gira." | Viento |
+| 0:10 | Mapa mundial en pixel art. Un avión vuela a Vietnam, Colombia y Venezuela con un sello en cada país | Arpegio que sube |
+| 0:15 | Saigón al amanecer, motos, cables. Minh rompe una tabla en un patio. Tarjeta del equipo | Acorde de los Dragones |
+| 0:19 | Medellín, escaleras eléctricas. Santi hace jueguitos y la manda al aire. Tarjeta | Acorde de los Parceros |
+| 0:23 | Caracas, El Ávila. Gabo batea una chapa que sale de la pantalla. Tarjeta | Acorde de los Panas |
+| 0:27 | La chapa cae en la mesa de la Familia GG desayunando. Rick la agarra, Thor ladra, Sophie y Alana se miran. Tarjeta | Acorde de la Familia |
+| 0:33 | Los 5 capitanes en fila. Kenji le lanza un puñetazo a la cámara: impacto, temblor, la pantalla se raja | Golpe crítico |
+| 0:36 | El logo "NEKKETSU OLYMPIC GG" cae sobre el vidrio roto con brillo | Arranca la Marcha Nekketsu |
+| 0:40 | Estadio con el público ondeando banderas de los 3 países y de Japón, fuegos artificiales. "PRESIONA START" | La marcha en bucle |
 
-**Modo demo.** Si nadie toca nada en 20 segundos, la CPU juega 30 segundos de una prueba al azar y vuelve al título. Como en las maquinitas de antes.
+**Modo demo.** Si nadie toca nada en 20 s, la CPU juega 30 s de una prueba al azar. Como en las maquinitas.
 
-### 10.3 Antes de cada prueba: presentación VS
-Pantalla dividida en 4 con los capitanes y su cara de enojo (retrato LPC `anger`), un diálogo de burla corto entre dos rivales y el nombre de la prueba cayendo con `fuente_titulo`. 5 segundos, se salta.
+### 12.3 Mapa de la gira
+Mapa en pixel art con Vietnam, Colombia y Venezuela unidos por la ruta del avión. Cada prueba es una medalla en el mapa que se llena con el color de quien la ganó.
 
-### 10.4 Resultados
-- Tabla con puestos, tiempos y puntos. Los ganadores hacen `celebrate`, `win` o `dance`, los perdedores `sad` o `lose`.
-- **Repetición del mejor momento:** el KO más fuerte o la llegada más apretada, en cámara lenta con la palabra "REPLAY" en la esquina.
-- Puntos de la Olimpiada: 1° 10, 2° 6, 3° 4, 4° 2, más 1 por cada KO en Kachinuki.
+### 12.4 Presentación VS
+Los 4 capitanes con cara de enojo, una burla corta entre dos rivales con modismos de cada país, y el nombre de la prueba cayendo. 5 s, se salta.
 
-### 10.5 Vestuario (entre pruebas)
-Guiño a la tienda de River City Ransom.
-- Ganas yenes por puesto, KO y récords.
-- **Comida:** bentō, ramen y onigiri recuperan aguante. Lo que no recuperes se arrastra a la prueba siguiente.
-- **Equipo:** zapatillas (+velocidad por una prueba), cinta (+puño), gorra de natación (+nado).
-- **Alineación:** eliges quién compite en las pruebas individuales. Un atleta cansado rinde menos. Es la capa de estrategia que el original no tenía.
+### 12.5 Resultados
+Tabla de puestos y puntos, ganadores con `celebrate`, `win` o `dance`, perdedores con `sad` o `lose`, y la repetición del mejor momento en cámara lenta. Puntos: 1° 10, 2° 6, 3° 4, 4° 2, más 1 por KO en el Kachinuki.
 
-### 10.6 Podio y créditos
-Podio con los tres primeros equipos, himno del ganador, confeti, Thor corriendo alrededor. Después los créditos con los autores de las piezas LPC (obligatorio por licencia), sobre un desfile de todos los atletas caminando.
+### 12.6 Vestuario
+Guiño a la tienda de River City Ransom. Monedas GG por puesto, KO y récords.
+- **Comida del país donde estás:** bánh mì, phở, cà phê sữa đá, nước mía en Vietnam. Arepa, empanada, bandeja paisa, buñuelo, aguapanela en Colombia. Arepa, tequeños, cachapa, malta, papelón con limón en Venezuela. Recuperan aguante.
+- **Equipo:** zapatillas, cinta, gorra de natación, guantes. Mejoras por una prueba.
+- **Alineación:** quién compite en las pruebas individuales. Un atleta cansado rinde menos.
+
+### 12.7 Podio y créditos
+Podio en el estadio, himno del ganador, confeti, Thor corriendo alrededor. Créditos con los autores LPC sobre un desfile de todos los atletas.
 
 ---
 
-## 11. Audio
+## 13. Audio
 
-### 11.1 Música (sintetizada con el motor de PixelForja, todo original)
+### 13.1 Música original, sintetizada con PixelForja
 | Tema | Dónde | Carácter |
 |---|---|---|
-| Marcha Nekketsu | Título y podio | Marcha de banda escolar a 132 bpm, melodía de trompeta en onda cuadrada, redoblante con ruido |
-| Calles en Llamas | Cross country | Rock chiptune rápido, cambia de capa en cada tramo |
-| Ritmo de Vallas | Obstáculos | Funk con el bajo marcando el paso |
-| ¡Rompe la Bola! | Tama-wari | Matsuri: tambor taiko, flauta en triángulo |
-| Agua Brava | Natación | Synth acuático, arpegios |
-| Azotea de Neón | Kachinuki | El tema más intenso, en menor, con un puente que sube cuando quedan pocos |
-| Vestuario | Entre pruebas | Tranquilo, tipo tienda |
-| Victoria | Resultados | Fanfarria corta |
-| Tema por equipo | Presentaciones | 4 compases que identifican a cada escuela |
+| Marcha Nekketsu | Título, podio | Marcha de banda escolar a 132 bpm, trompeta en onda cuadrada |
+| Tema del Instituto | Jefe final, intro | Rock japonés de los 80 en menor |
+| Saigón Chạy | Etapa Vietnam | Pentatónica vietnamita, sonido tipo đàn tranh en triángulo, ritmo de ciudad |
+| Hội An de Noche | Tama-wari | Tambores de festival, flauta |
+| Parce, Corra | Etapa Colombia | Cumbia chiptune, guacharaca con ruido filtrado |
+| Café y Neblina | Vallas | Bambuco acelerado |
+| Pana, Dale | Etapa Venezuela | Joropo chiptune con arpegio tipo cuatro y maracas |
+| Gaita del Lago | Básquet Maracaibo | Gaita zuliana con furro y tambora en chiptune |
+| Azotea Final | Kachinuki | El tema más intenso, mezcla la marcha con los tres países |
+| Vestuario | Entre pruebas | Tranquilo |
+| Victoria y derrota | Resultados | Fanfarria y jingle triste |
+| Acorde de equipo | Presentaciones | 4 compases por equipo |
 
-Música adaptativa: en las carreras, cuando faltan 10 segundos o quedan dos peleando el primer lugar, sube el tempo un 10 % y entra una capa de percusión extra.
+Música adaptativa: en el final apretado sube el tempo un 10 % y entra percusión extra.
 
-### 11.2 Efectos nuevos
-Pistola de salida, silbato, golpes en 3 variantes con tono aleatorio, golpe con bate, llanta rodando, bote de basura, chapuzón y clavado, brazada, bola de papel que revienta, confeti, público que grita (sube cuando hay KO o récord), público que hace "ooooh", megáfono, "blip" de diálogo por personaje (tono distinto), perro ladrando, camión, alarma de carro, paloma.
+### 13.2 Efectos y ambientes
+Pistola, silbato, golpes en 3 variantes, chancleta, silla plástica, chapuzón, brazada, bola que revienta, mecha de tejo que explota, chapa que sale volando, ventana rota, público que grita y hace "ooooh", megáfono, blips de voz por personaje, perro, moto con corneta, camionetica, gallo, chicharras, ranas del llano, aguacero, trueno del Catatumbo.
 
-### 11.3 Mezcla
-- Música al 60 %, efectos al 100 %, público al 40 % de fondo y al 90 % en los picos.
-- Ducking: la música baja un 30 % durante las técnicas Nekketsu y los diálogos.
-- En tablets el audio arranca después del primer toque (por eso "Toca para empezar").
-
----
-
-## 12. HUD e interfaz
-
-- **Arriba:** retrato 40x40 de cada jugador humano, nombre, barra de aguante, medidor Nekketsu y puesto actual. Estilo panel 9-slice de PixelForja con el color del equipo.
-- **Carreras:** minimapa lineal arriba con la cabecita de cada atleta.
-- **Números de daño:** la hoja de números de PixelForja, rojo para golpes, amarillo para críticos.
-- **Diálogos:** caja abajo con retrato a la izquierda que cambia de expresión, texto a máquina de escribir con "blip" por letra.
-- **Banners:** "¡LISTOS!", "¡YA!", "¡KO!", "¡RÉCORD!", "¡META!" con `fuente_titulo` y zoom con rebote.
-- **Táctil:** palanca a la izquierda, 3 botones más el especial a la derecha, semitransparentes, se pueden mover y escalar.
-- **Pausa:** reanudar, reiniciar prueba, controles, salir.
+### 13.3 Mezcla
+Música 60 %, efectos 100 %, público 40 % de fondo y 90 % en los picos. La música baja un 30 % en técnicas y diálogos. En tablet el audio arranca con el primer toque.
 
 ---
 
-## 13. Modos de juego
+## 14. HUD e interfaz
+- Arriba: retrato 40x40 de cada humano, nombre, aguante, medidor Nekketsu y puesto. Paneles 9-slice con el color del equipo.
+- Carreras: minimapa lineal con las cabecitas.
+- Pelota: marcador estilo transmisión de TV.
+- Números de daño de la hoja de PixelForja.
+- Diálogos con retrato que cambia de expresión y texto a máquina con blip.
+- Banners: "¡LISTOS!", "¡YA!", "¡KO!", "¡RÉCORD!", "¡META!", "¡GOL!", "¡JONRÓN!".
+- Táctil: palanca, 3 botones y el especial, semitransparentes, movibles y escalables.
 
+---
+
+## 15. Modos de juego
 | Modo | Qué es | Jugadores |
 |---|---|---|
-| Olimpiada | Todas las pruebas seguidas con vestuario en medio, gana el equipo con más puntos | 1 a 4 en el mismo equipo |
+| Gira | Completa, Express, Clásica o Crash | 1 a 4 en el mismo equipo |
 | Prueba libre | Una prueba suelta | 1 a 4 |
 | Versus | Cada jugador con su equipo | 2 a 4 |
-| Desafíos | Tres medallas por prueba con metas fijas, fantasma de tu mejor tiempo | 1 |
-| Historia (v2) | La Olimpiada con escenas entre pruebas y el equipo secreto al final | 1 a 4 |
-| En línea (v2) | Versus con rollback gracias a la simulación determinista | 2 a 4 |
+| Desafíos | 3 medallas por prueba, fantasma de tu mejor marca | 1 |
+| Historia (v2) | La gira con escenas entre pruebas | 1 a 4 |
+| En línea (v3) | Versus con rollback | 2 a 4 |
+
+## 16. Modo Peques y accesibilidad
+- Correr automático, saltos asistidos, trepar manteniendo, IA suave, textos grandes. El KO sigue, pero se levantan más rápido.
+- Opción global "mantener en vez de machacar".
+- Remapeo, dificultad Fácil, Normal y Nekketsu, indicadores con forma además de color, interruptor de temblor y destellos.
+- Español e inglés. Los personajes sueltan palabras en vietnamita y modismos de cada país.
 
 ---
 
-## 14. Modo Peques y accesibilidad
+## 17. Hoja de ruta
 
-Pensado para Sophie y Alana desde el día uno, no como parche.
-- **Modo Peques:** correr automático hacia adelante, saltos automáticos en vallas y huecos, trepar manteniendo en vez de machacar, IA rival suave, sin KO (solo mareos), textos grandes.
-- **Sin machacar:** opción global para cambiar "machacar botón" por "mantener".
-- Remapeo de todos los controles.
-- Dificultad Fácil, Normal y Nekketsu.
-- Indicadores de color con forma además de color (para daltonismo).
-- Temblor de pantalla y destellos con interruptor.
-- Español e inglés desde el inicio.
+Cada fase termina con algo jugable en la tablet y en la computadora. Ninguna arranca sin que la anterior pase su criterio. La columna PixelForja dice qué lote del pedido tiene que estar listo antes.
 
----
-
-## 15. Trabajo en PixelForja (lista concreta)
-
-Se hace en una sesión aparte sobre el repo de PixelForja. Esta sesión solo lo puede leer.
-
-### 15.1 Animaciones nuevas
-Archivo nuevo `src/engine/anim/nekketsu.ts`, con el mismo estilo de `fight.ts` y `athletics.ts` (poses clave, eventos, `travel`, `lateral`):
-
-| Grupo | Animaciones | Notas |
-|---|---|---|
-| Cargar | `lift`, `carry_idle`, `carry_walk`, `carry_run`, `throw_overhead` | Brazos arriba. Con el chibi los brazos no pasan la cabeza: el objeto va encima de la cabeza, apoyado en las manos |
-| Ser cargado | `carried`, `thrown_spin`, `land_flat` | Cuerpo horizontal: usar la diagonal como hace el motor con la plancha de vóley |
-| Agarre | `grab`, `grab_hold`, `grabbed`, `knee_grab`, `judo_throw`, `break_free` | `impacto` en el rodillazo y en la caída |
-| Trepar | `climb_pole`, `pole_idle`, `pole_punch`, `pole_slide`, `pole_kick_down`, `ladder`, `climb_wall`, `ledge_hang`, `pull_up` | `paso` en cada agarre de mano para el sonido |
-| Equilibrio | `balance_walk`, `balance_wobble`, `balance_fall` | |
-| Estados | `dizzy`, `taunt`, `cheer`, `cheer_wave`, `shocked` | `dizzy` con punto de `cabeza` para los pajaritos |
-| Armas | `weapon_swing`, `weapon_swing_heavy`, `weapon_throw` | Reusar el render de implementos de `render/props.ts` |
-| Martillo | `hammer_spin`, `hammer_release` | Partir de `whirlwind` |
-| Agua | `swim_punch`, `dunked`, `swim_turn` | Con fila `agua` |
-
-Pruebas: todas entran al control de calidad existente (celda, pies, pixeles sueltos, altura en ciclos, impacto en cada golpe) en 32, 48 y 64.
-
-### 15.2 Datos nuevos por cuadro
-En `src/engine/export/motion.ts`:
-- `cajas`: recuadro del sprite opaco por fila y cuadro, relativo al pivote.
-- `manos`: posición de mano cercana y lejana. El esqueleto ya las calcula para dibujar los implementos, solo hay que exportarlas.
-- `cabeza`: centro de la cabeza.
-- Filtro de filas: exportar solo las 5 filas que pide el juego.
-
-### 15.3 Ropa nueva
-En la ficha y el render humano: `gakuran` (chaqueta cerrada de cuello alto con botones dorados), `sailor` (cuello marinero con pañuelo), `chandal` (chaqueta con franjas de equipo), `kimono_judo` (con cinturón de color), gorra de natación. Los colores salen de las rampas que ya existen.
-
-### 15.4 Bioma ciudad
-Carpeta nueva `src/engine/world/city/`:
-- `facades.ts`: generador de fachadas por parámetros (pisos, ventanas encendidas o no, balcones, letreros con texto real corto, persianas).
-- `street.ts`: asfalto, acera, bordillo, líneas, alcantarillas, postes con cables.
-- `river.ts`: muro de concreto, agua animada reusando la del bosque con otra paleta, puente de hierro.
-- `rooftop.ts`: piso de azotea, tanques, antenas, ropa tendida con viento (mismo truco que los árboles), neón con parpadeo y luz aditiva.
-- `school.ts`, `site.ts`, `sewer.ts`, `stadium.ts`, `pool.ts`.
-- `sky.ts`: cielos por hora del día y siluetas de ciudad para el paralaje.
-- Cada escenario sale como capas PNG más un JSON de Tiled con colisión, franja jugable, huecos, sólidos y puntos de entidades.
-
-### 15.5 Público
-`src/engine/kit/crowd.ts`: genera 64 hinchas distintos con la misma lógica de "sorpréndeme" (semilla fija), en 32 px, con camisetas del color de su equipo.
-
-### 15.6 Audio
-En `src/engine/audio/`: los temas de la sección 11, los efectos nuevos, y un generador de "blips" de voz por personaje.
-
-### 15.7 Generador del kit
-`src/engine/kit/olympickit.ts` y `scripts/olympic-kit.ts`:
-- Lee equipos y fichas.
-- Renderiza los packs por prueba solo con las animaciones que cada prueba usa.
-- Empaqueta atlas de hasta 4096 px.
-- Escribe el manifiesto de la sección 6.6 y `CREDITOS.txt`.
-- Mismo seguro que los otros kits: no borra una carpeta que no sea un kit de PixelForja.
-
----
-
-## 16. Hoja de ruta por fases
-
-Cada fase termina con algo que se puede jugar y probar en la tablet. Ninguna fase arranca si la anterior no pasó su criterio.
-
-| Fase | Qué se construye | Dónde | Criterio de terminado |
+| Fase | Qué se construye | Necesita de PixelForja | Criterio de terminado |
 |---|---|---|---|
-| **F0 Cimientos** | Repo con Phaser, Vite, TS, Netlify, submódulo, cargador del kit actual, proyección oblicua, un atleta caminando y corriendo sin patinar | Juego | Rick camina y corre por una franja vacía a 60 fps en la tablet, con pasos que suenan en el cuadro justo |
-| **F1 Motor de pelea** | Estados, combate con datos de cuadro, hitstop, derribo, levantarse, mareo, IA peleadora básica, objetos (bate y bote) | Juego | 1 contra 1 en un cuarto vacío que da ganas de jugar otra vez |
-| **F2 Animaciones Nekketsu** | Cargar, lanzar, agarre, mareo, armas, datos `cajas`, `manos`, `cabeza`, filtro de 5 filas | PixelForja | Todas pasan la calidad en 32, 48 y 64. Rick levanta a Kenji y lo tira contra otros dos |
-| **F3 Ciudad, tramo 1** | Bioma ciudad: calles y escuela, paralaje, luces, objetos de calle | PixelForja + Juego | Postal del tramo 1 a 640x360 que se vea mejor que el original |
-| **F4 Rebanada vertical** | Tramo 1 del cross country con 8 atletas (2 equipos) + Kachinuki en azotea simple, HUD, banners, música base | Juego | 3 personas distintas juegan 10 minutos sin explicación y piden otra |
-| **F5 Cross Country completo** | Tramos 2, 3 y 4, nado, trepar, equilibrio, bici, patineta, 3 personalidades de IA, 16 atletas | Ambos | Carrera de punta a punta, 10 simulaciones automáticas sin trabarse |
-| **F6 Tama-wari y Obstáculos** | Pack trepar, poste, bola, carriles, obstáculos con ritmo | Ambos | Partidas de 60 a 120 s con remontadas |
-| **F7 Natación** | Piscina, salida, brazada al ritmo, pelea en el agua, vueltas | Ambos | Se gana con ritmo, no machacando |
-| **F8 Kachinuki completo** | Azotea de neón, objetos del cielo, borde que se cierra, IA que lee datos de cuadro, técnicas Nekketsu con corte anime | Juego | 4 contra 4 de 2 a 4 minutos en normal |
-| **F9 Envoltorio** | Intro, título, demo, selección, VS, resultados con repetición, vestuario, podio, créditos, guardado | Juego | Una Olimpiada completa de principio a fin |
-| **F10 Audio completo** | Todos los temas, efectos, música adaptativa, mezcla | PixelForja + Juego | Escuchado en tablet y audífonos, nada satura |
-| **F11 Multijugador y Peques** | 4 mandos, teclado compartido, táctil, Modo Peques, accesibilidad | Juego | Sophie y Alana terminan una prueba solas |
-| **F12 Pulido y lanzamiento** | Rendimiento, PWA, Desafíos, fantasmas, equipo secreto, "Métete al juego" | Juego | 60 fps estables, carga de menos de 4 s, instalable |
-| **v1.5** | Salto entre Azoteas, Martillo Loco | Ambos | |
-| **v2** | Dodgeball, Historia, en línea | Ambos | |
+| **F0 Cimientos** | Phaser, Vite, TS, Netlify, submódulo, cargador, proyección oblicua, entrada táctil, teclado y mando, un atleta corriendo sin patinar | Ninguno, usa el kit deportivo actual | Rick corre a 60 fps en tablet y PC con pasos en el cuadro justo |
+| **F1 Motor de pelea** | Estados, combate con datos de cuadro, hitstop, derribo, mareo, KO, objetos, IA peleadora | Lote A | 1 contra 1 que da ganas de jugar otra vez |
+| **F2 Movimientos Kunio** | Levantar y lanzar, agarre, armas, chancleta | Lotes B1 y D1 | Rick levanta a Kenji y lo tira contra otros dos |
+| **F3 Gris jugable** | Layouts en gris del tramo 1 del Cross Country y la azotea final | Ninguno | Se juegan los dos en gris y se siente bien |
+| **F4 Primer escenario real** | Tramo 1 de Saigón pintado, con vida y luces | Lote E1 (sistema) + Lote C1 (Familia y Nekketsu) | Pasa las 5 puertas |
+| **F5 Rebanada vertical** | Tramo 1 con 8 atletas + Kachinuki simple + HUD + música base | Lotes F1, G1, H1 | 3 personas juegan 10 minutos sin explicación y piden otra |
+| **F6 Cross Country completo** | Los 4 tramos, nado, trepar, bici, 16 atletas, IA de 3 personalidades | Lotes B2, C2, D2, E2 | 10 simulaciones sin trabarse |
+| **F7 Resto de 1990** | Obstáculos, Tama-wari, Kachinuki completo | Lotes B3, E3 | La Gira Clásica se juega completa |
+| **F8 Las de 1992** | Vallas, Martillo, Natación, Azoteas, Judo | Lotes B4, E4 | La Gira Crash se juega completa |
+| **F9 Envoltorio** | Intro, título, demo, mapa de gira, VS, resultados con repetición, vestuario, podio, créditos, guardado | Lote G2, H2 | Una gira de principio a fin |
+| **F10 Pelotas** | Fútbol, Básquet, Vóley Playa, Quemado | Lotes B5, E5 | Partidos completos con IA decente |
+| **F11 Nacionales** | Chapita, Đá cầu, Tejo, Cruce Loco x3 | Lotes B6, E6 | Las 3 etapas completas |
+| **F12 Pulido** | Rendimiento, PWA, Desafíos, fantasmas, secretos, Barrio Nekketsu, Modo Peques final | Lote I | 60 fps estables, carga de menos de 4 s, instalable |
 
-**Orden recomendado si quieres algo jugable rápido:** F0, F1, F2, F3, F4. Con eso ya tienes la rebanada vertical y sabes si el juego funciona.
+**Para tener algo jugable rápido:** F0 a F5. Ahí ya sabes si el juego funciona.
 
 ---
 
-## 17. Calidad y pruebas
+## 18. Calidad
+- **PixelForja:** las pruebas de calidad actuales sobre todo lo nuevo, imágenes doradas, coherencia de `cajas` y `manos`, pruebas de escenario de la sección 6.3.
+- **Juego:** Vitest de física, combate, puntos e IA con semillas, 100 simulaciones CPU contra CPU por prueba, capturas de Playwright por escena en PC y teléfono, prueba de fps con 16 atletas que falla bajo 55.
+- **Familia:** al final de F5, F9 y F12, ustedes cuatro juegan sin explicación y anotamos todo.
 
-### 17.1 En PixelForja
-- Las pruebas de calidad actuales sobre cada animación nueva.
-- Imágenes doradas de un cuadro clave por animación nueva.
-- Prueba de que `cajas` y `manos` son coherentes con el sprite (la mano cae sobre pixeles opacos).
-- Prueba de que cada escenario es recorrible de inicio a fin (ya existe algo igual para el Bosque GG).
-
-### 17.2 En el juego
-- **Vitest:** física, combate, puntos, IA. Con la simulación determinista: "esta partida con esta semilla y estas entradas termina con este resultado".
-- **Simulaciones automáticas:** 100 carreras CPU contra CPU por prueba. Falla si alguien queda trabado más de 5 s o si una prueba dura más del doble de lo esperado.
-- **Playwright:** una captura por escena en computadora y teléfono, comparada con su dorada.
-- **Rendimiento:** prueba que mide los fps con 16 atletas y falla bajo 55.
-
-### 17.3 Prueba humana
-Al final de F4, F8 y F11: tú, Stephanie, Sophie y Alana juegan sin explicación. Anotamos dónde se traban y qué piden repetir. Eso pesa más que cualquier prueba automática.
-
----
-
-## 18. Riesgos y cómo los bajamos
-
+## 19. Riesgos
 | Riesgo | Impacto | Mitigación |
 |---|---|---|
-| Las animaciones de cargar y lanzar se ven raras en chibi | Alto, es el movimiento estrella | Prototiparlas primero en F2 con el editor de poses, ajustar antes de seguir |
-| 16 atletas no llegan a 60 fps en tablet | Alto | Packs por prueba, atlas, público en 32 px, LOD de IA (los lejanos piensan cada 4 cuadros), modo de 8 atletas |
-| El bioma ciudad toma más de lo pensado | Medio | Empezar con 1 tramo en F3. Las fachadas por parámetros rinden mucho más que dibujar a mano |
-| El juego no es divertido | Crítico | La rebanada vertical de F4 existe para descubrirlo temprano |
-| Alcance que crece | Alto | Lo que no está en v1 va a una lista aparte y no entra hasta terminar F12 |
-| Audio sintetizado que suena pobre | Medio | Escucharlo en F4, no al final. Si no da, se cambia la receta en `sfx.ts` |
-| Propiedad intelectual al publicar | Medio | Todo original desde el inicio, equipo fan apagado, revisar el título antes de publicar |
+| Escenarios con detalles mal hechos | Alto, lo pediste explícito | Una sola fuente de verdad, 5 puertas, 9 pruebas automáticas |
+| Levantar y lanzar se ve raro en chibi | Alto | Prototipo en el editor de poses en el lote B1, aprobación antes de seguir |
+| 16 atletas no llegan a 60 fps | Alto | Packs por prueba, atlas, público en 32 px, IA lejana cada 4 cuadros |
+| 24 escenarios es muchísimo arte | Alto | Fachadas y calles por parámetros, kits por país reutilizables, oleadas |
+| El juego no es divertido | Crítico | La rebanada vertical de F5 lo responde temprano |
+| Alcance que crece | Alto | Lo que no está en este plan va a una lista aparte |
+| Audio sintetizado pobre | Medio | Se escucha en F5, no al final |
 
----
-
-## 19. Decisiones que necesito de ti
-
-1. **¿Cuál juego tienes en la cabeza?** El del cross country y la bola (1990), el de las vallas y la natación (*Crash 'n the Boys*), o la mezcla que propongo.
-2. **¿Vista oblicua estilo Kunio?** Es mi recomendación fuerte. La otra opción es reusar la isométrica de la arena.
-3. **¿Tramo bonus Saigón?** Le da sello propio. Suma unas dos semanas de arte.
-4. **¿Tu familia en un juego de peleas, en tono caricatura?** Si prefieres, la Familia GG puede ser el equipo de "los buenos" que nunca pierde el KO, solo se marea.
-5. **¿Es para uso personal o algún día lo publicas?** Cambia cuánto cuidado ponemos con el título y el equipo fan.
-6. **¿Dispositivo principal?** Tablet, computadora con mandos o las dos. Define el orden de F11.
-
----
-
-## 20. Prompts listos para cada fase
-
-Copias y pegas en una sesión nueva de Claude Code sobre el repo indicado.
-
-**F0 (juego):**
-> En Nekketsu-Olympic-GG, arma la base del juego según docs/PLAN.md secciones 6.1 a 6.5: Phaser 3 + TypeScript + Vite, netlify.toml, PixelForja como submódulo en tools/pixel_forja, cargador del kit deportivo actual, proyección oblicua 640x360 con escala entera, y Rick caminando y corriendo sin patinar con `avance` y sonidos de paso en cada evento. Pruebas en Vitest de la proyección y el reproductor de animación.
-
-**F1 (juego):**
-> En Nekketsu-Olympic-GG, implementa el motor de pelea de docs/PLAN.md sección 7: estados, datos de cuadro sacados de `eventos` y `punto`, hitstop, derribo, levantarse con invulnerabilidad, mareo, bate y bote de basura, y una IA peleadora básica. Un cuarto de prueba 1 contra 1. Pruebas deterministas con semilla.
-
-**F2 (PixelForja):**
-> En pixel_forja, crea src/engine/anim/nekketsu.ts con los grupos Cargar, Ser cargado, Agarre, Estados y Armas de la sección 15.1 del plan de Nekketsu Olympic GG (te lo pego abajo). Exporta `cajas`, `manos` y `cabeza` por cuadro en export/motion.ts y agrega el filtro de filas. Todo debe pasar el control de calidad en 32, 48 y 64 y llevar imágenes doradas.
-
-**F3 (PixelForja):**
-> En pixel_forja, crea el bioma ciudad en src/engine/world/city/ según la sección 15.4 del plan: fachadas por parámetros, calle, escuela, cielo por hora y siluetas para paralaje. Sale como capas PNG más Tiled JSON con franja jugable, sólidos y entidades. Genera una postal 640x360 del tramo 1.
-
-**F4 (juego):**
-> En Nekketsu-Olympic-GG, arma la rebanada vertical de la fase F4 del plan: tramo 1 del cross country con 8 atletas de Familia GG e Instituto Nekketsu, y un Kachinuki simple en una azotea. HUD, banners, música base, resultados. Debe correr a 60 fps en tablet.
+## 20. Lo que me falta saber
+Está en la respuesta del chat de esta sesión y se va a cerrar en la versión 3 del plan.
 
 ---
 
 ## Fuentes
-
-- [Downtown Nekketsu Kōshinkyoku: Soreyuke Daiundōkai en Nintendo Life](https://www.nintendolife.com/games/nes/downtown_nekketsu_kshinkyoku_soreyuke_daiundkai)
+- [Downtown Nekketsu Kōshinkyoku en Nintendo Life](https://www.nintendolife.com/games/nes/downtown_nekketsu_kshinkyoku_soreyuke_daiundkai)
 - [Downtown Nekketsu March en Nintendo Wiki](https://nintendo.fandom.com/wiki/Downtown_Nekketsu_March:_Super-Awesome_Field_Day!)
-- [Crash 'n' the Boys: Street Challenge en Wikipedia](https://en.wikipedia.org/wiki/Crash_%27n%27_the_Boys:_Street_Challenge)
+- [Crash 'n' the Boys en Wikipedia](https://en.wikipedia.org/wiki/Crash_%27n%27_the_Boys:_Street_Challenge)
 - [Crash 'n the Boys en Giant Bomb](https://www.giantbomb.com/games/3030-8109/)
 - PixelForja: README.md, docs/PLAN.md, docs/KIT_DEPORTES.md, docs/KIT_JUEGO.md y el código en src/engine
