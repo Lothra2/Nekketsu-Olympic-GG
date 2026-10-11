@@ -341,7 +341,8 @@ Combinaciones Kunio: correr + puño, correr + patada (voladora), salto + patada,
 
 ### 9.3 Datos de cuadro sacados del kit
 - Arranque: cuadros antes del `impacto`. Activo: el cuadro del impacto y el siguiente. Recuperación: el resto.
-- Hitbox: círculo de 6 px en `punto`. Hurtbox: `cajas` del cuadro actual.
+- Hitbox: círculo de 6 px en `punto`. Hurtbox: `cuerpo` del cuadro actual (sin implementos ni efectos).
+- Levantar y lanzar: quien levanta trae `carga` por cuadro. El juego dibuja al rival (`carried`) o al objeto encima, con su base en la carga y una profundidad más que quien lo lleva. Al lanzar, sale desde la carga del cuadro de la `suelta`, con la física del juego.
 - Si una animación cambia en PixelForja, el balance cambia solo y de forma coherente.
 
 ### 9.4 Daño y reacciones

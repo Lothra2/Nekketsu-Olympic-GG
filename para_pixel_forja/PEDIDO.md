@@ -109,7 +109,9 @@ Las animaciones `lateral: true` usan la diagonal donde no se puedan de frente, c
               "cajas":  "[fila][cuadro] = [x, y, w, h] desde el pivote",
               "manos":  "[fila][cuadro] = [[x, y] cerca, [x, y] lejos]",
               "cabeza": "[fila][cuadro] = [x, y]",
-              "pies":   "[fila][cuadro] = [[x, y] cerca, [x, y] lejos]"
+              "pies":   "[fila][cuadro] = [[x, y] cerca, [x, y] lejos]",
+              "cuerpo": "[fila][cuadro] = [x, y, w, h], solo el cuerpo: el hurtbox",
+              "carga":  "[fila][cuadro] = [x, y], dónde apoya su base lo que se levanta (solo en las animaciones de llevar)"
             }
           }
         }
@@ -193,6 +195,8 @@ Columnas: nombre, cuadros aproximados, fps, bucle, eventos que tiene que traer y
 | `slip_wet` | 8 | 14 | no | `aterriza` | Resbalón en piso mojado |
 
 **Campo nuevo `cuerpo`** (pedido después del lote A): igual que `cajas` pero solo con el cuerpo, sin implementos, pelotas ni efectos. Es el hurtbox del juego. Sale en el kit con `--datos` junto a los demás.
+
+**Campo nuevo `carga`** (lo propuso PixelForja en B1 y queda en el contrato): dónde apoya su base lo que se levanta, por fila y cuadro. Lo levantado NO viene dibujado en el sprite de quien levanta: el juego dibuja encima al rival en `carried` o el objeto, con su base en la carga, y al lanzar lo suelta desde la carga del cuadro de la `suelta`. Regla visual: las manos tocan lo que se carga y lo cargado se apoya sin hueco.
 
 **Párate para aprobar:** primero solo `lift`, `carry_walk`, `throw_overhead`, `carried` y `thrown_spin`, con un GIF de Rick levantando a Steph y lanzándola (Kenji todavía no existe, llega en C1), y otro de Alana levantando un pote. Con chibi los brazos no pasan la cabeza: lo levantado va apoyado en las manos, encima del pelo.
 

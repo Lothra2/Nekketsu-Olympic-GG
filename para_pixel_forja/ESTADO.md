@@ -8,8 +8,8 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 
 | Orden | Lote | Qué | Depende de | Estado | PR |
 |---|---|---|---|---|---|
-| 1 | A | Datos por cuadro, filas, atlas, retratos, vestuario por pack | Nada | entregado (falta merge a main) | [pixel_forja#7](https://github.com/Lothra2/pixel_forja/pull/7) |
-| 2 | B1 + D1 | Levantar y lanzar, agarres, armas del piso | A | pendiente | |
+| 1 | A | Datos por cuadro, filas, atlas, retratos, vestuario por pack | Nada | aprobado, en main | [pixel_forja#7](https://github.com/Lothra2/pixel_forja/pull/7) |
+| 2 | B1 + D1 | Levantar y lanzar, agarres, armas del piso | A | en curso, primera parte en revisión (rama `claude/olimpico-lote-b1-d1`) | |
 | 3 | C1 | Familia GG e Instituto Nekketsu | A | pendiente | |
 | 4 | G1 fuentes | Acentos del vietnamita en las fuentes | Nada | pendiente | |
 | 5 | I inicial | Kit a medida por configuración | A | pendiente | |
@@ -32,6 +32,10 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 - Bañador como camiseta sin mangas.
 
 Se pidió para B1: el campo `cuerpo` (hurtbox sin implementos ni efectos), porque `cajas` incluye pelotas y jabalinas.
+
+**Lote B1, primera parte** (levantar, llevar y lanzar), revisada con los GIFs de aprobación:
+- Trae `cuerpo` y un campo nuevo, `carga` `[fila][cuadro]`: dónde apoya su base lo que se levanta. Lo levantado no viene dibujado en el sprite de quien levanta. El juego dibuja encima al rival (`carried`) o el objeto, con su base en la carga, y al lanzar lo suelta desde la carga del cuadro de la `suelta`.
+- Ajustes pedidos antes de seguir: las manos tienen que tocar lo que se carga (hoy el pote de Alana flota sobre su cabeza con aire en medio y sus brazos quedan abajo), lo cargado se apoya sin hueco, y un cuadro de `thrown_spin` sale cortado por el borde de la celda.
 
 ## Insumos que pone el juego
 
