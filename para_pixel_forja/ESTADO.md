@@ -31,7 +31,7 @@ Lo que PixelForja lee de este repo y todavía no existe. Cada uno lo produce una
 | Insumo | Ruta | Lo necesita | Lo produce | Estado |
 |---|---|---|---|---|
 | Configuración del kit | `kit.config.json` | I, para generar el kit real | Juego F0 (versión inicial). El lote I puede arrancar antes con su propio ejemplo en `docs/ejemplos/nekketsu/` | pendiente |
-| Equipos | `data/teams.json` | C, I | Juego F0 | pendiente |
+| Equipos | `data/teams.json` | I. El lote C no lo necesita: las tablas de equipos están en el pedido | Juego F0 | pendiente |
 | Layout del tramo 1 de Saigón | `data/stages/saigon_hem.layout.json` | E1 | Juego F3 (gris jugable) | pendiente |
 | Layout de la azotea final | `data/stages/caracas_azotea.layout.json` | E3 | Juego F3 | pendiente |
 | Resto de layouts | `data/stages/*.layout.json` | E2 a E6 | Juego F6 a F11 | pendiente |
