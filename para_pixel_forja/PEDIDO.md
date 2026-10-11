@@ -111,7 +111,8 @@ Las animaciones `lateral: true` usan la diagonal donde no se puedan de frente, c
               "cabeza": "[fila][cuadro] = [x, y]",
               "pies":   "[fila][cuadro] = [[x, y] cerca, [x, y] lejos]",
               "cuerpo": "[fila][cuadro] = [x, y, w, h], solo el cuerpo: el hurtbox",
-              "carga":  "[fila][cuadro] = [x, y], dónde apoya su base lo que se levanta (solo en las animaciones de llevar)"
+              "carga":  "[fila][cuadro] = [x, y], dónde apoya su base lo que se levanta (solo en las animaciones de llevar)",
+              "arma":   "[fila][cuadro] = [x, y, angulo, detras], agarre del arma en la mano (solo en las animaciones de armas)"
             }
           }
         }
@@ -197,6 +198,8 @@ Columnas: nombre, cuadros aproximados, fps, bucle, eventos que tiene que traer y
 **Campo nuevo `cuerpo`** (pedido después del lote A): igual que `cajas` pero solo con el cuerpo, sin implementos, pelotas ni efectos. Es el hurtbox del juego. Sale en el kit con `--datos` junto a los demás.
 
 **Campo nuevo `carga`** (lo propuso PixelForja en B1 y queda en el contrato): dónde apoya su base lo que se levanta, por fila y cuadro. Lo levantado NO viene dibujado en el sprite de quien levanta: el juego dibuja encima al rival en `carried` o el objeto, con su base en la carga, y al lanzar lo suelta desde la carga del cuadro de la `suelta`. Regla visual: las manos tocan lo que se carga y lo cargado se apoya sin hueco.
+
+**Campo nuevo `arma`** (entregado en B1): `[x, y, angulo, detras]` por fila y cuadro. El arma NO viene dibujada en el sprite. El juego dibuja el cuadro `<id>_mano_<k>` del atlas de objetos, con `k = round(angulo / 22.5)`, centrado en `arma[x, y]`, y detrás del personaje si `detras = 1`. La pelea callejera sale con `--deportes calle` y las armas con `--objetos`. Reglas completas y ejemplo en Phaser en `docs/KIT_DEPORTES.md` de PixelForja, sección "Pelea callejera".
 
 **Párate para aprobar:** primero solo `lift`, `carry_walk`, `throw_overhead`, `carried` y `thrown_spin`, con un GIF de Rick levantando a Steph y lanzándola (Kenji todavía no existe, llega en C1), y otro de Alana levantando un pote. Con chibi los brazos no pasan la cabeza: lo levantado va apoyado en las manos, encima del pelo.
 
