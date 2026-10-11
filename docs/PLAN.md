@@ -4,7 +4,7 @@ Un remake espiritual de los juegos deportivos "Nekketsu" de Technos para NES/Fam
 
 La meta no es copiar el juego pixel por pixel. Es que se sienta igual de caótico, chistoso y adictivo, pero con animación de verdad, un mundo vivo entre Vietnam, Colombia y Venezuela, más pruebas, tu familia adentro y controles que una niña de 4 años pueda usar.
 
-El pedido completo a PixelForja está en [PEDIDO_PIXEL_FORJA.md](PEDIDO_PIXEL_FORJA.md).
+El pedido completo a PixelForja está en [para_pixel_forja/PEDIDO.md](../para_pixel_forja/PEDIDO.md). Las sesiones de PixelForja leen sus instrucciones de esa carpeta.
 
 ---
 

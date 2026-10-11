@@ -5,4 +5,4 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
 Estado: planificación.
 
 - [docs/PLAN.md](docs/PLAN.md): el plan maestro del juego.
-- [docs/PEDIDO_PIXEL_FORJA.md](docs/PEDIDO_PIXEL_FORJA.md): todo lo que el juego necesita de PixelForja, por lotes y con prompts listos.
+- [para_pixel_forja/](para_pixel_forja/LEEME.md): todo lo que el juego necesita de PixelForja. Las sesiones de PixelForja leen sus instrucciones de aquí.

@@ -1,6 +1,6 @@
 # Pedido a PixelForja para Nekketsu Olympic GG (v2)
 
-Este documento es todo lo que el juego *Nekketsu Olympic GG* necesita de PixelForja. Está escrito para pegarse tal cual en una sesión de Claude Code abierta sobre el repo `Lothra2/pixel_forja`. Es autosuficiente. El plan del juego vive en `Lothra2/Nekketsu-Olympic-GG/docs/PLAN.md`.
+Este documento es todo lo que el juego *Nekketsu Olympic GG* necesita de PixelForja. Lo lee una sesión de Claude Code abierta sobre `Lothra2/pixel_forja`, siguiendo el protocolo de [LEEME.md](LEEME.md). El estado de cada lote está en [ESTADO.md](ESTADO.md) y el plan del juego en [../docs/PLAN.md](../docs/PLAN.md).
 
 Tiene dos metas al mismo tiempo:
 1. Darle al juego todo lo que necesita.
@@ -10,13 +10,11 @@ Tiene dos metas al mismo tiempo:
 
 ## 1. Cómo usar este pedido
 
-1. **Un lote por sesión y un PR por lote contra `main`**, en el orden de la sección 16.
+El protocolo completo está en [LEEME.md](LEEME.md). En corto:
+1. **Un lote por sesión y un PR por lote contra `main` de PixelForja**, en el orden de la sección 16.
 2. Cada lote tiene criterios de aceptación. Un lote no está terminado si falla uno.
-3. Si algo no se puede hacer bien con el esqueleto o el render actual, se dice en el PR en "Límites honestos", con la alternativa propuesta. No se entrega nada roto en silencio.
-4. Cada PR trae pruebas en verde, imágenes doradas, un tablero PNG con lo nuevo, GIFs de las animaciones clave, la tabla de calidad actualizada y la sección "Decisiones que tomé sin preguntar".
-5. Donde un lote dice **"párate para aprobar"**, la sesión se detiene, muestra el resultado y espera el visto bueno de Rick antes de seguir.
-
----
+3. Si algo no se puede hacer bien con el esqueleto o el render actual, se dice en "Límites honestos", con la alternativa propuesta. No se entrega nada roto en silencio.
+4. Donde un lote dice **"párate para aprobar"**, la sesión se detiene, muestra el resultado y espera el visto bueno de Rick.
 
 ## 2. Qué es el juego
 
@@ -750,6 +748,7 @@ Cada PR contra `main` trae:
 5. Tabla de calidad actualizada.
 6. "Decisiones que tomé sin preguntar".
 7. "Límites honestos", con lo que no quedó perfecto y la alternativa.
+8. `docs/olimpico/<lote>/ENTREGA.md` con el formato de [LEEME.md](LEEME.md), sección 4. Así la siguiente sesión sabe qué está hecho.
 
 ---
 
@@ -775,27 +774,12 @@ Cada PR contra `main` trae:
 
 ---
 
-## 17. Prompts listos
+## 17. Cómo se arranca cada lote
 
-Abrir una sesión de Claude Code sobre `Lothra2/pixel_forja` y pegar:
+Ya no hay que pegar el pedido. En una sesión nueva de Claude Code sobre `Lothra2/pixel_forja` basta con:
 
-**Lote A:**
-> Lee el pedido de Nekketsu Olympic GG (Lothra2/Nekketsu-Olympic-GG/docs/PEDIDO_PIXEL_FORJA.md, o te lo pego abajo). Haz el Lote A completo: filtro de filas, cajas, manos, cabeza y pies por cuadro, atlas por pack, retratos con 7 expresiones en 40 y 96, cabecitas, vestuario por pack y el interruptor "Ver datos" del estudio. Cumple la sección 3: todo es capacidad general del motor, nada atado al juego. Entrega según la sección 15, en un PR contra main.
+> Clona https://github.com/Lothra2/Nekketsu-Olympic-GG (solo lectura) y sigue para_pixel_forja/LEEME.md. Haz el siguiente lote pendiente.
 
-**Lote B1 + D1:**
-> Del pedido de Nekketsu Olympic GG, haz el Lote B1 (beat 'em up) y D1 (armas del piso). Primero solo lift, carry_walk, throw_overhead, carried y thrown_spin, con un GIF de Rick levantando a Kenji y lanzándolo y otro de Alana levantando un pote, y párate para que lo apruebe. Después el resto. Todo visible en el estudio.
+O, para un lote en particular:
 
-**Lote C1:**
-> Del pedido de Nekketsu Olympic GG, haz el Lote C1: Familia GG con su look de pixel art (Sophie en verde, Alana en rosado, el GG dorado en el pecho), Thor, e Instituto Nekketsu, con la ropa de C4 que necesiten (gakuran y chándal) en el catálogo general. Párate a aprobar el tablero de cada equipo.
-
-**Lote G1, fuentes:**
-> Del pedido de Nekketsu Olympic GG, haz solo la parte de fuentes del Lote G1: todos los acentos del vietnamita en las fuentes bitmap, compuestos sobre las letras base. Prueba que "Rồng Sài Gòn", "Đá cầu", "Bà Hoa", "Tuấn" y "Trời ơi" se leen a 8 px.
-
-**Lote I:**
-> Del pedido de Nekketsu Olympic GG, haz la versión inicial del Lote I: el generador de kits por configuración (buildCustomKit, el script kit-a-medida, el esquema JSON y el ejemplo de Nekketsu), que exprese también el kit deportivo como configuración de ejemplo.
-
-**Lote E1:**
-> Del pedido de Nekketsu Olympic GG, haz el Lote E1: el sistema de escenarios oblicuos de la sección 10, el formato de layout, las salidas, las 9 pruebas y el paso Escena del estudio. Piloto: saigon_hem con el layout que te paso. Arranca por la ficha de arte y párate para que la apruebe antes de pintar. Después párate otra vez en las postales.
-
-**Lotes siguientes:**
-> Del pedido de Nekketsu Olympic GG, haz el Lote <X>. Respeta la sección 3 y para en cada "párate para aprobar".
+> Clona https://github.com/Lothra2/Nekketsu-Olympic-GG (solo lectura) y sigue para_pixel_forja/LEEME.md. Haz el lote B1.
