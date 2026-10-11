@@ -1,4 +1,4 @@
-# Nekketsu Olympic GG: plan maestro (v2)
+# Nekketsu Olympic GG: plan maestro (v3)
 
 Un remake espiritual de los juegos deportivos "Nekketsu" de Technos para NES/Famicom, los "Atari oyunu" que todo el mundo jugó en Turquía, Latinoamérica y Asia. PixelForja es el motor de personajes, mundo, efectos, interfaz y audio.
 
@@ -16,9 +16,14 @@ El pedido completo a PixelForja está en [PEDIDO_PIXEL_FORJA.md](PEDIDO_PIXEL_FO
 | Pruebas extra | 7 más, sacadas de lo que PixelForja ya anima: fútbol, básquet, vóley playa, quemado, chapita, đá cầu y tejo |
 | Vista | 2.5D oblicua estilo Kunio-kun |
 | Escenarios | Vietnam, Colombia y Venezuela. Bonus "Cruce Loco" en Saigón, Bogotá y Caracas |
-| Tus hijas | Juegan completas, con KO incluido. El tono sigue siendo caricatura: estrellas, polvo, pajaritos, nunca sangre |
+| Tus hijas | Juegan completas, con KO incluido. El tono sigue siendo caricatura: estrellas, polvo, pajaritos, nunca sangre. Sophie va en verde y Alana en rosado, con su look de pixel art actual |
+| Familia GG | De Caracas, viviendo en Saigón. Juega de local en las dos etapas |
+| Equipos | 6 principales: Familia GG, Dragones de Saigón, Rolos de Chapinero, Panas de Caracas, Maracuchos del Lago e Instituto Nekketsu. Más 2 secretos |
+| Duración | La Gira Completa es el modo principal: las 16 pruebas, los 3 bonus y la final, de 90 a 120 minutos con guardado entre pruebas |
+| Humor | Modismos de cada país, chistes y todo retro como el juego original. Sin groserías porque lo juegan las niñas |
 | Uso | Personal. El equipo fan de superhéroes se puede activar en Opciones |
-| Dispositivos | Tablet táctil y computadora con mandos, los dos desde la fase F0 |
+| Dispositivos | Tablet táctil y computadora con mandos, los dos desde la fase F0. Meta de rendimiento: una tablet de gama media (tipo iPad de 9a generación o Galaxy Tab A8) y mandos estándar por la Gamepad API (Xbox, PlayStation, 8BitDo) |
+| PixelForja | Todo lo que se le pide es capacidad general del motor, no código atado a este juego. El juego le pasa su configuración |
 | Motor del juego | Phaser 3 + TypeScript + Vite. PWA en Netlify. Mismo patrón que GG Abyss |
 | Motor de arte | PixelForja genera todo. El juego solo lee el kit y su `manifest.json` |
 | Regla de oro de los escenarios | La geometría la define el juego y PixelForja pinta encima. Una sola fuente de verdad (sección 6) |
@@ -68,7 +73,7 @@ PixelForja ya trae 33 animaciones de fútbol con portero, básquet, vóley, teni
 | **Fútbol Callejero 4 contra 4** | Colombia, Barranquilla en Carnaval | *Nekketsu Kōkō Soccer-bu* / *Nintendo World Cup* | Las 33 de fútbol más el portero |
 | **Básquet 3x3** | Venezuela, Maracaibo de noche con el relámpago del Catatumbo | *Kunio-kun no Nekketsu Street Basket* | `dribble`, `shoot`, `dunk`, `block` |
 | **Vóley Playa 2 contra 2** | Venezuela, Isla de Margarita | Vóley de la saga | Las 7 de vóley |
-| **Quemado Nekketsu** | Venezuela, liceo de tu ciudad | *Nekketsu Kōkō Dodgeball-bu*, el primer juego de la saga | `throw`, `catch`, `dodge`, `vb_dive` |
+| **Quemado Nekketsu** | Venezuela, liceo de Caracas | *Nekketsu Kōkō Dodgeball-bu*, el primer juego de la saga | `throw`, `catch`, `dodge`, `vb_dive` |
 | **Chapita** | Venezuela, barrio de Caracas | Béisbol callejero con chapas, puro Caracas | `bat`, `pitch`, `catch` |
 | **Đá cầu** | Vietnam, parque Tao Đàn en Saigón | El volante de patear de las calles de Vietnam | `volley`, `chilena`, `trap`, `header` |
 | **Tejo** | Colombia, cancha en La Candelaria con Monserrate | El deporte nacional colombiano: el disco explota la mecha | `throw` más un lanzamiento por debajo nuevo |
@@ -82,7 +87,12 @@ Mi crítica: 16 pruebas son muchísimas. Por eso van en oleadas (sección 17) y 
 ## 3. La Gira Nekketsu: estructura del juego
 
 ### 3.1 La historia en una línea
-El Instituto Nekketsu, campeón invencible de Japón, sale de gira por primera vez y reta a tres escuelas de Vietnam, Colombia y Venezuela. La Familia GG se cuela como cuarto equipo.
+El Instituto Nekketsu, campeón invencible de Japón, sale de gira por primera vez y reta a los mejores de Vietnam, Colombia y Venezuela. La Familia GG, caraqueña viviendo en Saigón, se cuela en la gira.
+
+### 3.1.1 Cuántos equipos juegan
+- En cancha siempre hay **4 equipos**, como en el original. Así son 16 atletas y la tablet aguanta.
+- Tu equipo más 3 rivales que cambian en cada gira, sacados de Dragones, Rolos, Panas, Maracuchos y la Familia GG si no la elegiste. Cada gira se siente distinta.
+- El **Instituto Nekketsu** no compite en las pruebas: espera en la final. Si llegas primero a la final, el Kachinuki termina con un 4 contra 4 contra ellos.
 
 ### 3.2 Etapas
 | Etapa | Pruebas | Bonus |
@@ -94,7 +104,8 @@ El Instituto Nekketsu, campeón invencible de Japón, sale de gira por primera v
 | **Secreto** | Barrio Nekketsu: la ciudad japonesa de los 80, homenaje directo al original | Se desbloquea al ganar la gira en difícil |
 
 ### 3.3 Modos de gira
-- **Gira Completa:** las 3 etapas con 5 pruebas elegidas y la final. Más o menos 60 minutos, se guarda entre etapas.
+- **Gira Completa (el modo principal):** las 16 pruebas, los 3 bonus Cruce Loco y la final. De 90 a 120 minutos. Se guarda después de cada prueba y se puede seguir otro día.
+- **Gira Estándar:** 3 pruebas por país, 1 bonus y la final. Unos 60 minutos.
 - **Gira Express:** 5 pruebas al azar más la final. Unos 25 minutos.
 - **Gira Clásica:** solo las 4 pruebas de 1990 en el orden original. Para los nostálgicos.
 - **Gira Crash:** solo las 5 pruebas de 1992.
@@ -159,7 +170,7 @@ Juego: carga el escenario. Si la colisión del kit no coincide con el layout, la
 ```
 El juego decide dónde hay un hueco, a qué altura está una azotea y dónde empieza el agua, porque eso es diseño de juego. PixelForja decide cómo se ve. Así es imposible que el dibujo diga una cosa y la colisión otra.
 
-El formato del layout está en el pedido, sección 9.2.
+El formato del layout está en el pedido, sección 10.2.
 
 ### 6.2 Las 5 puertas de cada escenario
 | Puerta | Qué se entrega | Quién aprueba |
@@ -202,7 +213,7 @@ El formato del layout está en el pedido, sección 9.2.
 | `margarita` | Playa El Agua | Vóley Playa | Mediodía | Palmeras, toldos, mar turquesa, vendedores de empanadas |
 | `llanos` | Llanos de Apure | Martillo | Atardecer | Sabana, chigüires, garzas, morichales, caney |
 | `maracaibo` | Cancha frente al Lago | Básquet 3x3 | Noche | Puente Rafael Urdaneta iluminado, relámpago del Catatumbo, gaitas |
-| `liceo` | Liceo venezolano | Quemado | Mañana | Patio techado, murales patrios, cantina, pupitres |
+| `liceo` | Liceo caraqueño en el centro | Quemado | Mañana | Patio techado, murales patrios, cantina, pupitres, El Ávila asomado detrás del techo |
 | `caracas_azotea` | Azotea en Parque Central | Kachinuki final | Noche | El Ávila con la Cruz iluminada, torres, neón, helicóptero |
 | `cruce_saigon` | Avenida de Saigón | Bonus | Hora pico | Ríos de motos, xích lô, vendedores |
 | `cruce_bogota` | Avenida de Bogotá | Bonus | Hora pico | TransMilenio, busetas, vendedores ambulantes, llovizna |
@@ -248,13 +259,14 @@ Cada escenario tiene al menos 3 cosas que se mueven aunque nadie juegue: motos q
 ```
 Nekketsu-Olympic-GG/            el juego (este repo)
   tools/pixel_forja/            PixelForja como submódulo (solo para regenerar)
+  kit.config.json               qué le pide el juego a PixelForja
   fichas/                       personajes editados en el estudio (*.ficha.json)
   data/stages/*.layout.json     la geometría de cada escenario (la fuente de verdad)
   public/assets/kit/            el kit generado, SE COMMITEA
   src/                          el juego
 ```
-- El generador vive en PixelForja: `src/engine/kit/olympickit.ts` y `scripts/olympic-kit.ts`.
-- En el juego: `"kit": "tsx tools/pixel_forja/scripts/olympic-kit.ts public/assets/kit --fichas fichas --escenarios data/stages"`.
+- PixelForja gana un generador general de kits por configuración (`kit-a-medida`). El juego solo escribe su `kit.config.json` con atletas, packs, escenarios, efectos y audio.
+- En el juego: `"kit": "tsx tools/pixel_forja/scripts/kit-a-medida.ts public/assets/kit --config kit.config.json"`.
 - El kit se commitea. Netlify compila sin correr PixelForja.
 - Es el patrón de `docs/KIT_JUEGO.md` de PixelForja para GG Abyss.
 
@@ -356,6 +368,9 @@ hitstop = 2 cuadros (jab) a 4 cuadros (técnica)
 | Pote de basura | Todos | 12 | 16 | Se patea rodando |
 | Cono de tránsito | Ciudades | 4 | 8 | Si cae en la cabeza, tapa la vista 2 s |
 | Escoba | Todos | 7 | 9 | Largo alcance |
+| Paraguas | Bogotá, de los Rolos | 7 | 8 | Abierto bloquea proyectiles |
+| Abanico | Maracaibo, de los Maracuchos | 2 | 4 | No pega, empuja |
+| Termo de tinto | Bogotá | 6 | 10 | Suelta una nube de vapor que marea 1 s |
 | Bici y patineta | Cross Country | | | Más rápido, un golpe te tumba |
 
 ### 9.6 Técnicas Nekketsu
@@ -374,6 +389,8 @@ hitstop = 2 cuadros (jab) a 4 cuadros (técnica)
 | Chancletazo Supremo | `throw` | Lluvia de chancletas que vuelven |
 | ¡Thor al Rescate! | Thor: `run`, `bite`, `bark` | Thor tumba al más cercano |
 
+Las técnicas propias de cada atleta de la sección 10 (Tejo Explosivo, Ciclovía Infernal, Furrazo, Clavada Catatumbo, Abanicazo, Batazo de Jonrón y las demás) se arman igual: una animación que ya existe o que está en el pedido, más un efecto.
+
 Al activar: congelado de 30 cuadros, líneas de velocidad, retrato con cara de enojo y nombre de la técnica.
 
 ### 9.7 Atributos
@@ -383,19 +400,23 @@ Puño, Patada, Arma, Lanzar, Agilidad, Defensa, Salto, Velocidad, Nado, Balón (
 
 ## 10. Equipos
 
-Cuatro equipos en cada Olimpiada, elegidos de seis. Cada uno con uniforme, tema musical y burla propia. Los nombres son propuestas, ver preguntas.
+Seis equipos principales y dos secretos. En cancha juegan 4 (sección 3.1.1). Cada uno con uniforme, tema musical, burla y forma de hablar propia.
 
-### 10.1 Familia GG (azul y dorado)
-| Atleta | Rol | Fuerte | Técnica |
-|---|---|---|---|
-| Rick | Capitán, potencia | Puño, Lanzar, Defensa | Puño Mach |
-| Steph | Técnica y velocidad | Velocidad, Nado, Patada | Patada Huracán |
-| Sophie | Acróbata | Salto, Agilidad, Balón | Chilena Asesina |
-| Alana | Pequeña e inesquivable | Agilidad, caja de daño chiquita | ¡Thor al Rescate! |
+### 10.1 Familia GG (De Caracas a Saigón, azul y dorado)
+Cada uno lleva su look de pixel art actual con su color personal. El dorado del "GG" en el pecho y el número los une como equipo.
 
-Thor corre por la pista animando, ladra en los récords y entra con la técnica de Alana.
+| Atleta | Color | Rol | Fuerte | Técnica |
+|---|---|---|---|---|
+| Rick | Azul | Capitán, potencia | Puño, Lanzar, Defensa | Puño Mach |
+| Steph | El de su preset | Técnica y velocidad | Velocidad, Nado, Patada | Patada Huracán |
+| Sophie | Verde | Acróbata | Salto, Agilidad, Balón | Chilena Asesina |
+| Alana | Rosado | Pequeña e inesquivable | Agilidad, caja de daño chiquita | ¡Thor al Rescate! |
+
+Thor corre por la pista animando, ladra en los récords y entra con la técnica de Alana. Hablan venezolano caraqueño con palabras en vietnamita que aprendieron en Saigón.
 
 ### 10.2 Rồng Sài Gòn, Dragones de Saigón (rojo y amarillo)
+Los vecinos de la Familia GG en Saigón. Hablan un español "aprendido por correspondencia" mezclado con vietnamita, puro doblaje retro.
+
 | Atleta | Rol | Look | Técnica |
 |---|---|---|---|
 | Minh | Capitán, vovinam | Cinta roja, `spiked` | Patada tijera de vovinam |
@@ -403,15 +424,21 @@ Thor corre por la pista animando, ladra en los récords y entra con la técnica 
 | Tuấn | Đá cầu, pies mágicos | `messy1`, sandalias | Chilena Asesina |
 | Bà Hoa | La abuela del barrio, pesada | `bob` gris, nón lá | Silla Plástica Voladora |
 
-### 10.3 Parceros de Medellín (amarillo, azul y rojo)
+### 10.3 Rolos de Chapinero (Bogotá, amarillo y rojo)
+Friolentos, elegantes, con paraguas siempre a mano porque en Bogotá llueve cuando le da la gana.
+
 | Atleta | Rol | Look | Técnica |
 |---|---|---|---|
-| Santi | Capitán, futbolista | `parted`, camiseta de rayas | Cabezazo Bomba |
-| Valen | Grafitera ágil | `high_ponytail`, gorra | Barrida Infernal |
-| El Mono | Tejista, brazo de oro | `curly_short`, sombrero vueltiao | Tejo Explosivo |
-| Don Jairo | Arriero gigante (celda 64) | Bigote, poncho, carriel | Tackle Locomotora |
+| Andrés "El Doctor" | Capitán, tejista de brazo fino | `parted`, ruana, paraguas negro | Tejo Explosivo |
+| Camila "Sumercé" | Ciclista de la ciclovía | `high_ponytail`, casco, chaqueta impermeable | Ciclovía Infernal (embestida en bici) |
+| Pipe | Hincha futbolero | `messy2`, camiseta azul sin escudo | Cabezazo Bomba |
+| Don Hernando | Gigante del tinto (celda 64) | Bigote, saco de paño, termo de tinto | Termo Volador (nube de vapor que marea) |
+
+Arma propia: el **paraguas**. Golpea como bate y, abierto, bloquea proyectiles.
 
 ### 10.4 Los Panas de Caracas (amarillo, azul y rojo con estrellas)
+Los vecinos de la Familia GG en Caracas. La rivalidad es de cuadra.
+
 | Atleta | Rol | Look | Técnica |
 |---|---|---|---|
 | Gabo | Capitán, pelotero | Gorra de béisbol, `buzzcut` | Batazo de Jonrón |
@@ -419,7 +446,19 @@ Thor corre por la pista animando, ladra en los récords y entra con la técnica 
 | Chamo Toto | El más pequeño, rápido | `afro`, franela suelta | Puño Mach |
 | La Señora Carmen | La vecina, chancleta en mano | Rolos, bata de casa | Chancletazo Supremo |
 
-### 10.5 Instituto Nekketsu (gakuran negro, cinta roja): el jefe
+### 10.5 Maracuchos del Lago (Maracaibo, azul, amarillo y negro)
+El cuarto equipo nacional. Hablan con voseo maracucho, se quejan del calor y todo es "¡qué molleja!". Caracas contra Maracaibo es la rivalidad más vieja de Venezuela, y en el juego se nota.
+
+| Atleta | Rol | Look | Técnica |
+|---|---|---|---|
+| Ender "El Primo" | Capitán gaitero | Bigote, guayabera, sombrero de pelo e' guama | Furrazo (onda de sonido de gaita que empuja a todos) |
+| Yusmary | Basquetbolista | `curly_long` recogido, camiseta sin mangas | Clavada Catatumbo (con rayo) |
+| Jhonder | Velocista | `shorthawk`, franela de rayas | Relámpago del Catatumbo (carrera con rayo) |
+| Abuela Nerva | La abuela con abanico | `bob` gris, bata, abanico | Abanicazo (ráfaga que tumba) |
+
+Arma propia: el **abanico**. Corto alcance, empuja en vez de pegar.
+
+### 10.6 Instituto Nekketsu (gakuran negro, cinta roja): el jefe
 | Atleta | Rol | Look | Técnica |
 |---|---|---|---|
 | Kenji "Toro" Sakamoto | Capitán delincuente | Pompadour `cowlick_tall`, gakuran abierto | Uppercut del Dragón |
@@ -427,11 +466,11 @@ Thor corre por la pista animando, ladra en los récords y entra con la técnica 
 | Goro Iwata | Gigante (celda 64) | `buzzcut`, sin mangas | Tackle Locomotora |
 | Tetsu Mori | Lanzador | `flat_top`, lentes oscuros | Doble Pote |
 
-### 10.6 Equipos secretos
+### 10.7 Equipos secretos
 - **Los del Abismo:** goblin, trol, orco y el minotauro como jefe. Crossover con GG Abyss.
 - **Equipo fan:** los seis superhéroes del kit deportivo. Para uso personal, en Opciones.
 
-### 10.7 Métete al juego
+### 10.8 Métete al juego
 Armas tu personaje en el estudio de PixelForja o desde una selfie, exportas la ficha, repartes 44 puntos de atributos y reemplazas a quien quieras.
 
 ---
@@ -587,19 +626,20 @@ Arranque → Toca para empezar → Intro → Título → Modo
   Prueba libre / Versus / Desafíos / Opciones / Métete al juego / Récords
 ```
 
-### 12.2 La intro, toma por toma (45 s, se salta)
+### 12.2 La intro, toma por toma (55 s, se salta)
 | Tiempo | Imagen | Sonido |
 |---|---|---|
-| 0:00 | Negro. Texto a máquina: "Japón. Instituto Nekketsu. 10 años invicto." | Campana de escuela |
-| 0:04 | Kenji en la azotea de su escuela, de espaldas, con el gakuran al viento. Arruga un papel: "¿Nadie en Japón nos aguanta? Entonces nos vamos de gira." | Viento |
+| 0:00 | Negro. Texto a máquina: "JAPÓN. INSTITUTO NEKKETSU. 10 AÑOS INVICTO." | Campana de escuela |
+| 0:04 | Kenji en la azotea de su escuela, de espaldas, con el gakuran al viento. Arruga un papel: "¿NADIE EN JAPÓN NOS AGUANTA? ENTONCES NOS VAMOS DE GIRA." | Viento |
 | 0:10 | Mapa mundial en pixel art. Un avión vuela a Vietnam, Colombia y Venezuela con un sello en cada país | Arpegio que sube |
-| 0:15 | Saigón al amanecer, motos, cables. Minh rompe una tabla en un patio. Tarjeta del equipo | Acorde de los Dragones |
-| 0:19 | Medellín, escaleras eléctricas. Santi hace jueguitos y la manda al aire. Tarjeta | Acorde de los Parceros |
-| 0:23 | Caracas, El Ávila. Gabo batea una chapa que sale de la pantalla. Tarjeta | Acorde de los Panas |
-| 0:27 | La chapa cae en la mesa de la Familia GG desayunando. Rick la agarra, Thor ladra, Sophie y Alana se miran. Tarjeta | Acorde de la Familia |
-| 0:33 | Los 5 capitanes en fila. Kenji le lanza un puñetazo a la cámara: impacto, temblor, la pantalla se raja | Golpe crítico |
-| 0:36 | El logo "NEKKETSU OLYMPIC GG" cae sobre el vidrio roto con brillo | Arranca la Marcha Nekketsu |
-| 0:40 | Estadio con el público ondeando banderas de los 3 países y de Japón, fuegos artificiales. "PRESIONA START" | La marcha en bucle |
+| 0:15 | Saigón al amanecer, motos, cables. Minh rompe una tabla en un patio: "¡MỘT, HAI, BA, DÔ!" Tarjeta del equipo | Acorde de los Dragones |
+| 0:20 | Bogotá bajo la lluvia. Andrés abre el paraguas con elegancia, una buseta pasa y lo empapa igual: "¡AY, NO, QUÉ BOLETA!" Tarjeta | Acorde de los Rolos |
+| 0:25 | Maracaibo, mediodía con calor que deforma el aire. Ender se abanica: "¿VOS SABÉIS LO QUE ES CALOR, PRIMO?" Tarjeta | Acorde de los Maracuchos |
+| 0:30 | Caracas, El Ávila. Gabo batea una chapa que sale de la pantalla: "¡ÉPALE!" Tarjeta | Acorde de los Panas |
+| 0:34 | La chapa cruza el mundo y cae en el café de la Familia GG desayunando en Saigón. Rick la agarra, Thor ladra, Sophie y Alana se miran: "¡NOS VAMOS DE GIRA!" Tarjeta | Acorde de la Familia |
+| 0:41 | Los 6 capitanes en fila. Kenji le lanza un puñetazo a la cámara: impacto, temblor, la pantalla se raja | Golpe crítico |
+| 0:44 | El logo "NEKKETSU OLYMPIC GG" cae sobre el vidrio roto con brillo | Arranca la Marcha Nekketsu |
+| 0:48 | Estadio con el público ondeando banderas de los 3 países y de Japón, fuegos artificiales. "PRESIONA START" titilando | La marcha en bucle |
 
 **Modo demo.** Si nadie toca nada en 20 s, la CPU juega 30 s de una prueba al azar. Como en las maquinitas.
 
@@ -623,6 +663,43 @@ Podio en el estadio, himno del ganador, confeti, Thor corriendo alrededor. Créd
 
 ---
 
+### 12.8 Textos, humor y tono retro
+Todo el texto se escribe como un juego de NES traducido en los 90: frases cortas, MAYÚSCULAS en los momentos grandes, un toque de "traducción rara" a propósito y mucho humor físico. Cero groserías.
+
+**Pantallas del sistema, versión retro:**
+| Original | En el juego |
+|---|---|
+| GAME OVER | SE ACABÓ LA VAINA |
+| CONTINUE? | ¿OTRA PARTIDITA? 9... 8... 7... |
+| PAUSE | ¡ÉPALE, PAUSA! |
+| NEW RECORD | ¡RÉCORD, MI PANA! |
+| KO | ¡CHAO, PESCAO! |
+| YOU WIN | ¡GANASTE, CAMPEÓN! |
+| Carga | "CALENTANDO LOS MÚSCULOS..." |
+
+**Cómo habla cada equipo:**
+| Equipo | Modismos | Ejemplo de burla | Ejemplo al perder |
+|---|---|---|---|
+| Familia GG | Caraqueño con vietnamita: "chamo", "burda", "fino", "chévere", "trời ơi" | "¡CHAMO, AGARRA ESA CHANCLETA!" | "¡TRỜI ƠI, QUÉ LADILLA!" |
+| Dragones de Saigón | Vietnamita con español de doblaje: "trời ơi", "nhanh lên", "chết rồi", "dô" | "¡TÚ ERES LENTO COMO TRÁFICO DE LAS SEIS!" | "¡CHẾT RỒI! ME DERROTÓ UN TURISTA." |
+| Rolos de Chapinero | "sumercé", "qué boleta", "qué jartera", "bacano", "ala", "¿sí o qué?" | "ALA, SUMERCÉ, CORRA QUE SE MOJA." | "QUÉ BOLETA... Y SIN TINTO." |
+| Panas de Caracas | "épale", "pana", "qué ladilla", "burda de", "chévere", "¡ñooo!" | "¡ÉPALE! ¿ESO ES TODO, CHAMO?" | "¡ÑOOO, VALE! ME TUMBARON." |
+| Maracuchos del Lago | Voseo maracucho, "primo", "¡qué molleja!", "mollejúo", "muérgano" | "¿VOS SABÉIS CON QUIÉN TE METISTE, PRIMO?" | "AH NO, PRIMO, ES QUE HACE MUCHO CALOR." |
+| Instituto Nekketsu | Japonés retro de anime: "ikuzo", "nani", "omae" | "¡IKUZO! ESTA GIRA ES NUESTRA." | "¡¿NANI?! ESTO NO SALÍA EN EL MANUAL..." |
+
+**Chistes que se repiten en todo el juego:**
+- La rivalidad de la arepa: colombianos y venezolanos pelean en el vestuario sobre de quién es la arepa. En la tienda, la arepa de cada país tiene una descripción que provoca al otro.
+- Los rolos siempre llevan paraguas, incluso en Margarita a pleno sol.
+- Los maracuchos se quejan del calor en todos lados, incluso en la neblina del Eje Cafetero.
+- La Señora Carmen aparece de la nada con la chancleta cuando alguien rompe algo.
+- Bà Hoa y la Abuela Nerva se hacen amigas y se pasan la gira compartiendo comida.
+- Thor se roba algo en cada escenario: un bánh mì, una arepa, un tequeño.
+- Kenji nunca entiende los modismos y pide traducción.
+
+**Locutor.** Comenta cada prueba con frases cortas tipo transmisión de los 80: "¡QUÉ GOLPE, SEÑORES!", "¡ESTO NO LO VE UNO TODOS LOS DÍAS!", "¡LA CHANCLETA HA HABLADO!".
+
+Los textos viven en `src/data/dialogs/*.json`, en español e inglés, con un campo `voz` que define el tono de los blips.
+
 ## 13. Audio
 
 ### 13.1 Música original, sintetizada con PixelForja
@@ -634,8 +711,9 @@ Podio en el estadio, himno del ganador, confeti, Thor corriendo alrededor. Créd
 | Hội An de Noche | Tama-wari | Tambores de festival, flauta |
 | Parce, Corra | Etapa Colombia | Cumbia chiptune, guacharaca con ruido filtrado |
 | Café y Neblina | Vallas | Bambuco acelerado |
+| Ajiaco Rock | Rolos de Chapinero | Rock en español bogotano de los 90 en chiptune, con lluvia de fondo |
 | Pana, Dale | Etapa Venezuela | Joropo chiptune con arpegio tipo cuatro y maracas |
-| Gaita del Lago | Básquet Maracaibo | Gaita zuliana con furro y tambora en chiptune |
+| Gaita del Lago | Básquet Maracaibo y Maracuchos | Gaita zuliana con furro y tambora en chiptune |
 | Azotea Final | Kachinuki | El tema más intenso, mezcla la marcha con los tres países |
 | Vestuario | Entre pruebas | Tranquilo |
 | Victoria y derrota | Resultados | Fanfarria y jingle triste |
@@ -677,6 +755,7 @@ Música 60 %, efectos 100 %, público 40 % de fondo y 90 % en los picos. La mús
 - Opción global "mantener en vez de machacar".
 - Remapeo, dificultad Fácil, Normal y Nekketsu, indicadores con forma además de color, interruptor de temblor y destellos.
 - Español e inglés. Los personajes sueltan palabras en vietnamita y modismos de cada país.
+- Las fuentes traen todos los acentos del vietnamita (ă, â, ê, ô, ơ, ư, đ y los 5 tonos), así "Rồng Sài Gòn" y "Đá cầu" se escriben bien. Hoy el motor no los tiene: está en el pedido.
 
 ---
 
@@ -690,7 +769,7 @@ Cada fase termina con algo jugable en la tablet y en la computadora. Ninguna arr
 | **F1 Motor de pelea** | Estados, combate con datos de cuadro, hitstop, derribo, mareo, KO, objetos, IA peleadora | Lote A | 1 contra 1 que da ganas de jugar otra vez |
 | **F2 Movimientos Kunio** | Levantar y lanzar, agarre, armas, chancleta | Lotes B1 y D1 | Rick levanta a Kenji y lo tira contra otros dos |
 | **F3 Gris jugable** | Layouts en gris del tramo 1 del Cross Country y la azotea final | Ninguno | Se juegan los dos en gris y se siente bien |
-| **F4 Primer escenario real** | Tramo 1 de Saigón pintado, con vida y luces | Lote E1 (sistema) + Lote C1 (Familia y Nekketsu) | Pasa las 5 puertas |
+| **F4 Primer escenario real** | Tramo 1 de Saigón pintado, con vida y luces | Lotes C1, G1 (fuentes), I y E1 | Pasa las 5 puertas |
 | **F5 Rebanada vertical** | Tramo 1 con 8 atletas + Kachinuki simple + HUD + música base | Lotes F1, G1, H1 | 3 personas juegan 10 minutos sin explicación y piden otra |
 | **F6 Cross Country completo** | Los 4 tramos, nado, trepar, bici, 16 atletas, IA de 3 personalidades | Lotes B2, C2, D2, E2 | 10 simulaciones sin trabarse |
 | **F7 Resto de 1990** | Obstáculos, Tama-wari, Kachinuki completo | Lotes B3, E3 | La Gira Clásica se juega completa |
@@ -721,9 +800,7 @@ Cada fase termina con algo jugable en la tablet y en la computadora. Ninguna arr
 | Audio sintetizado pobre | Medio | Se escucha en F5, no al final |
 
 ## 20. Lo que me falta saber
-Está en la respuesta del chat de esta sesión y se va a cerrar en la versión 3 del plan.
-
----
+Nada que bloquee. Las decisiones están cerradas. Lo que queda se decide en las puertas de aprobación de cada lote y de cada escenario.
 
 ## Fuentes
 - [Downtown Nekketsu Kōshinkyoku en Nintendo Life](https://www.nintendolife.com/games/nes/downtown_nekketsu_kshinkyoku_soreyuke_daiundkai)
