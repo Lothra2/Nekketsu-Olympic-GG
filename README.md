@@ -31,11 +31,17 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
   - Cada 30 s cae algo pesado del cielo. Antes aparece su sombra con un aro rojo.
   - A los 1:30 la azotea se achica: el borde avanza hasta la mitad.
   - Thor te salva si te caes: siempre en Paseo, una vez en Normal y nunca en Nekketsu.
-  - Golpes con combos, patadas, patada voladora corriendo, salto con patada.
+  - Combo de jab, jab y gancho, patadas, patada voladora saltando corriendo, salto con patada.
+  - Agarre: pégate a un rival recién golpeado o mareado y lo agarras. Puño son rodillazos (el tercero lo tumba), patada lo bota. El agarrado forcejea y se suelta machacando botones.
+  - Guardia: mantén ★ sin la barra llena y te cubres de lo que viene de frente. Tres golpes seguidos o uno muy pesado la rompen.
+  - Pisotón: patada al que está en el piso.
+  - Onomatopeyas de cómic (¡POW!, ¡PAF!), contador de golpes seguidos y burlas del Instituto cuando te tumba: si le pegas mientras se ríe, se lo merece.
+  - Una arepa cae cada tanto: quien la pisa recupera vida. La máquina va por ella cuando está mal.
+  - Pantalla VS con lo que se dicen antes de pelear, y un K.O. grande al final.
   - Levantar al rival caído, caminar con él y lanzarlo contra los demás.
   - Armas del piso: chancleta (vuelve girando), tubo, silla plástica, pote, coco, paraguas, escoba. Caen más del cielo.
   - Barra Nekketsu y técnicas con corte de anime: Puño Mach (Rick), Patada Huracán (Steph), Chilena Asesina (Sophie), ¡Thor al Rescate! (Alana), Uppercut del Dragón (Kenji).
-  - Cámara lenta en el KO final, victoria con fanfarria y "SE ACABÓ LA VAINA" si pierdes.
+  - Cámara lenta en el K.O. final, victoria con fanfarria y "SE ACABÓ LA VAINA" si pierdes.
 - Música original sintetizada en el momento: Marcha Nekketsu, tema de pelea, tensión de la intro y fanfarria.
 
 ## Controles
@@ -47,7 +53,7 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
 | Puño (levantar, recoger, lanzar lo cargado) | J | X / Cuadrado | A |
 | Patada (lanzar el arma) | K | A / Cruz | B |
 | Salto | L o Espacio | B / Círculo | C |
-| Técnica Nekketsu (barra llena) | U | Y o RB | ★ |
+| Técnica Nekketsu (barra llena) / guardia (mantenida, sin barra) | U | Y o RB | ★ |
 | Pausa | Enter | Start | ‖ |
 
 ## Correr el juego
@@ -79,6 +85,7 @@ Con el servidor corriendo:
 ```bash
 node scripts/capturas.mjs http://localhost:5173/ capturas          # intro, título, selección y pelea
 node scripts/prueba-pelea.mjs http://localhost:5173/ capturas rick kenji   # combo, levantar, lanzar, técnica, chancleta
+node scripts/prueba-pelea-nueva.mjs http://localhost:5173/ capturas/pelea_nueva   # VS, guardia, agarre, rodillazos, pisotón, voladora, arepa, burla y racha
 node scripts/prueba-kachinuki.mjs http://localhost:5173/ capturas/kachinuki   # el borde, el rescate de Thor, lo que cae del cielo y la azotea que se achica
 node scripts/prueba-pruebas.mjs http://localhost:5173/ capturas/pruebas  # vallas, natación, jabalina y medallero
 node scripts/prueba-entrenamiento.mjs http://localhost:5173/ capturas/entrenamiento  # completa los 4 entrenamientos

@@ -46,6 +46,7 @@ async function entrenar(scene, d, jugar, limite = 60) {
   await page.waitForTimeout(900);
   await page.screenshot({ path: `${out}/${scene}_fin.png` });
   console.log(scene, fin === 99 ? 'completo' : `se quedó en el paso ${fin + 1}`);
+  if (fin !== 99) console.log('  así quedaron:', await page.evaluate((s) => (window.game.scene.getScene(s).actors ?? []).map((a) => `${a.id} ${a.st}/${a.fig.anim.name} x${Math.round(a.x)} y${Math.round(a.y)} z${Math.round(a.z)}`).join(' | '), scene));
 }
 
 if (!solo.length || solo.includes('cross')) {
@@ -105,17 +106,25 @@ if (!solo.length || solo.includes('pelea')) {
     if (i === 1) { if (await acercar(s.dx, s.dy)) { await key('j'); await page.waitForTimeout(160); } return; }
     if (i === 2) { if (await acercar(s.dx, s.dy)) { await key('k'); await page.waitForTimeout(400); } return; }
     if (i === 3) { if (await acercar(s.dx, s.dy, 34)) { await key('l'); await page.waitForTimeout(120); await key('k'); await page.waitForTimeout(700); } return; }
-    if (i === 4) { await key('ArrowLeft', 40); await page.waitForTimeout(40); await page.keyboard.down('ArrowLeft'); await page.waitForTimeout(300); await page.keyboard.up('ArrowLeft'); return; }
-    if (i === 5) { if (s.rst === 'down' && (await acercar(s.dx, s.dy, 20))) await key('j'); else await page.waitForTimeout(80); return; }
-    if (i === 6) { await key('ArrowRight', 200); await key('j'); await page.waitForTimeout(300); return; }
-    if (i === 7) {
+    if (i === 4) { await page.keyboard.down('u'); await page.waitForTimeout(900); await page.keyboard.up('u'); return; }
+    if (i === 5) {
+      if (s.st === 'grab') { await key('j'); await page.waitForTimeout(250); return; }
+      // un golpe y caminar hacia él (pegando seguido sale el combo y el gancho lo tumba)
+      if (s.rst !== 'idle') { await page.waitForTimeout(150); return; }
+      if (await acercar(s.dx, s.dy)) { await page.waitForTimeout(800); await key('j'); await page.waitForTimeout(120); await page.keyboard.down(s.dx > 0 ? 'ArrowRight' : 'ArrowLeft'); await page.waitForTimeout(260); await page.keyboard.up(s.dx > 0 ? 'ArrowRight' : 'ArrowLeft'); }
+      return;
+    }
+    if (i === 6) { await key('ArrowLeft', 40); await page.waitForTimeout(40); await page.keyboard.down('ArrowLeft'); await page.waitForTimeout(300); await page.keyboard.up('ArrowLeft'); return; }
+    if (i === 7) { if (s.rst === 'down' && (await acercar(s.dx, s.dy, 20))) await key('j'); else await page.waitForTimeout(80); return; }
+    if (i === 8) { await key('ArrowRight', 200); await key('j'); await page.waitForTimeout(300); return; }
+    if (i === 9) {
       if (Math.abs(s.cy) > 4) await key(s.cy > 0 ? 'ArrowDown' : 'ArrowUp', 60);
       else if (Math.abs(s.cx) > 10) await key(s.cx > 0 ? 'ArrowRight' : 'ArrowLeft', 60);
       else { await key('j'); await page.waitForTimeout(400); }
       return;
     }
-    if (i === 8) { await key('k'); await page.waitForTimeout(300); return; }
-    if (i === 9) { await key('u'); await page.waitForTimeout(500); return; }
+    if (i === 10) { await key('k'); await page.waitForTimeout(300); return; }
+    if (i === 11) { await key('u'); await page.waitForTimeout(500); return; }
   }, 90);
 }
 console.log(logs.length ? logs.join('\n') : 'sin errores');

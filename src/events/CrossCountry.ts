@@ -56,6 +56,8 @@ const FT = 200;
 const DEPTH = 130;
 /** escala 1: el arte de PixelForja está pensado para verse entero, sin pixeles disparejos */
 const ZOOM = 1;
+/** la vista inclinada del gris: la misma diagonal de las juntas del piso de la azotea de la pelea */
+const INCLINA = 0.35;
 /** lo que se sube de un paso, sin saltar */
 const PASO = 6;
 const ALTO = 44;
@@ -96,6 +98,8 @@ export class CrossCountry extends EventScene implements World {
   items: Item[] = [];
   floorTop = FT;
   limites = { xmin: 12, xmax: 3828, depth: DEPTH };
+  /** la del arte de PixelForja (0 mientras lo pinte derecho); INCLINA en el gris */
+  inclinacion = 0;
   private L!: Layout;
   private tramo = 0;
   /** un tramo suelto (desde Pruebas sueltas): termina con su tabla, sin seguir al siguiente */
@@ -185,10 +189,12 @@ export class CrossCountry extends EventScene implements World {
     const salida = L.entidades.find((e) => e.tipo === 'salida')?.x ?? 40;
     this.vehT = this.vias().map((e) => (e.cada ?? 5) * 0.6);
     this.setup(ZOOM, L.largo);
-    this.armarFerry();
-    // el arte de PixelForja si ya llegó; si no, el gris
+    // el arte de PixelForja si ya llegó; si no, el gris, visto inclinado
     this.arte = hayArte(this, L.id) ? pintarEscenario(this, L.id, 5000) : null;
+    this.inclinacion = this.arte ? this.arte.inclinacion : INCLINA;
+    this.cameras.main.setBounds(0, 0, L.largo + this.inclinacion * DEPTH, 360);
     if (!this.arte) this.dibujar();
+    this.armarFerry();
     this.sparks = this.add.particles(0, 0, 'px', { speed: { min: 60, max: 180 }, lifespan: 260, scale: { start: 0.9, end: 0 }, tint: [0xffffff, 0xffe040, 0xffa020], emitting: false }).setDepth(5000);
     this.dusts = this.add.particles(0, 0, 'px', { speedX: { min: -40, max: 40 }, speedY: { min: -30, max: -6 }, lifespan: 380, scale: { start: 0.8, end: 0 }, tint: 0xb0a8b8, alpha: { start: 0.7, end: 0 }, emitting: false }).setDepth(4999);
     this.splash = this.add.particles(0, 0, 'px', { speed: { min: 30, max: 90 }, angle: { min: 200, max: 340 }, gravityY: 300, lifespan: 420, scale: { start: 1, end: 0.3 }, tint: [0xffffff, 0x9ad8f0], emitting: false }).setDepth(5000);
@@ -226,7 +232,7 @@ export class CrossCountry extends EventScene implements World {
   /** Entrenamiento: te lleva a cada obstáculo y espera a que lo pases. */
   private pasos(): Paso[] {
     const r = () => this.gente2[0];
-    const ir = (x: number, y: number) => () => { const a = r().a; a.x = x; a.y = y; a.z = 0; a.setSt('idle', 'idle'); r().safe = [x, y]; this.cameras.main.centerOn(x + 80, 360 - 180 / ZOOM); flash(this, 120); };
+    const ir = (x: number, y: number) => () => { const a = r().a; a.x = x; a.y = y; a.z = 0; a.setSt('idle', 'idle'); r().safe = [x, y]; this.cameras.main.centerOn(this.px(x, y) + 80, 360 - 180 / ZOOM); flash(this, 120); };
     if (this.L.id === 'medellin_c13') return [
       { texto: 'MANTÉN {MOVER} ADELANTE\nY ARRANCAS A CORRER', botones: ['stick'], listo: () => r().a.st === 'run' },
       { texto: 'UN PERRO DORMIDO: NO LO PISES,\nSÁLTALO CON {SALTO}', botones: ['stick', 'jump'], antes: ir(340, 30), listo: () => r().a.x > 470 && r().a.grounded },
@@ -277,8 +283,8 @@ export class CrossCountry extends EventScene implements World {
     const r = this.gente2.find((g) => g.a === a);
     if (!r) return;
     const agua = this.L.huecos.find((h) => a.x >= h.x0 && a.x < h.x1)?.caida !== 'vacio';
-    if (agua) { if (!efecto(this, 'chapuzon_grande', a.x, FT + a.y - 40, { depth: 5003 })) this.splash.explode(16, a.x, FT + a.y); }
-    else efecto(this, 'polvo_caer_grande', r.safe[0], FT + r.safe[1]);
+    if (agua) { if (!efecto(this, 'chapuzon_grande', this.px(a.x, a.y), FT + a.y - 40, { depth: 5003 })) this.splash.explode(16, this.px(a.x, a.y), FT + a.y); }
+    else efecto(this, 'polvo_caer_grande', this.px(r.safe[0], r.safe[1]), FT + r.safe[1]);
     this.sfx('esquiva', 0.4);
     if (a.human) this.letrero(a, agua ? '¡AL AGUA!' : '¡CASI TE CAES DEL EDIFICIO!', 0x9ad8ff);
     a.x = r.safe[0]; a.y = r.safe[1]; a.z = 0; a.vx = 0; a.vy = 0; a.vz = 0;
@@ -293,20 +299,20 @@ export class CrossCountry extends EventScene implements World {
   shake(ms: number, k: number) { this.cameras.main.shake(ms, k); }
   sfx(name: string, vol = 0.5) { if (this.cache.audio.exists(name)) this.sound.play(name, { volume: vol }); }
   spark(x: number, y: number, z: number, big: boolean) {
-    efecto(this, big ? 'chispa_golpe_pesado' : 'chispa_golpe_medio', x, FT + y - z, { depth: 5002 });
-    this.sparks.explode(big ? 8 : 4, x, FT + y - z);
+    efecto(this, big ? 'chispa_golpe_pesado' : 'chispa_golpe_medio', this.px(x, y), FT + y - z, { depth: 5002 });
+    this.sparks.explode(big ? 8 : 4, this.px(x, y), FT + y - z);
   }
   dust(x: number, y: number) {
     // en el agua salpica; en seco, polvo
     const enAgua = !!this.aguaEn(x, y);
-    if (!efecto(this, enAgua ? 'salpicadura_piso' : 'polvo_caer_medio', x, FT + y)) this.dusts.explode(7, x, FT + y);
+    if (!efecto(this, enAgua ? 'salpicadura_piso' : 'polvo_caer_medio', this.px(x, y), FT + y)) this.dusts.explode(7, this.px(x, y), FT + y);
   }
 
   /** Cada paso: nubecita o salpicadura, y el sonido del piso (piedra, madera o agua). */
   paso(a: Actor) {
     const piso = this.pisoBajo(a);
-    if (piso === 'agua') efecto(this, 'salpicadura_piso', a.x, FT + a.y, { flip: a.left });
-    else if (a.st === 'run') efecto(this, `polvo_correr_${talla(a.fig.celda)}`, a.x, FT + a.y - a.base, { flip: a.left, depth: a.fig.depth + 0.1 });
+    if (piso === 'agua') efecto(this, 'salpicadura_piso', this.px(a.x, a.y), FT + a.y, { flip: a.left });
+    else if (a.st === 'run') efecto(this, `polvo_correr_${talla(a.fig.celda)}`, this.px(a.x, a.y), FT + a.y - a.base, { flip: a.left, depth: a.fig.depth + 0.1 });
     if (a.human) this.sfx(`paso_${piso}_${Math.floor(Math.random() * 3)}`, 0.28);
   }
 
@@ -322,7 +328,7 @@ export class CrossCountry extends EventScene implements World {
     return p === 'madera' ? 'madera' : p === 'tierra' || p === 'cancha' ? 'tierra' : 'piedra';
   }
   number(x: number, y: number, n: number) {
-    const t = txt(this, x, FT + y - 52, `${n}`, 'fuente_ui', 1).setTint(0xff6060).setDepth(6000);
+    const t = txt(this, this.px(x, y), FT + y - 52, `${n}`, 'fuente_ui', 1).setTint(0xff6060).setDepth(6000);
     this.tweens.add({ targets: t, y: t.y - 16, alpha: 0, duration: 650, onComplete: () => t.destroy() });
   }
   onHit(_from: Actor | null, v: Actor, _dmg: number, kd: boolean) {
@@ -400,7 +406,7 @@ export class CrossCountry extends EventScene implements World {
       const k = ag.nivel >= HONDO ? 0.74 : 0.62;
       a.x = prevX + (a.x - prevX) * k + (ag.corriente ?? 0) * dt;
       if (ag.nivel >= HONDO) a.y = prevY + (a.y - prevY) * k;
-      if (Math.abs(a.x - prevX) > 0.5 && Math.random() < dt * 10) this.splash.explode(2, a.x, FT + a.y);
+      if (Math.abs(a.x - prevX) > 0.5 && Math.random() < dt * 10) this.splash.explode(2, this.px(a.x, a.y), FT + a.y);
     }
     const charco = !!ag && ag.nivel <= CHARCO && a.grounded && a.base === 0;
     if (charco && !r.enCharco && a.st === 'run' && Math.random() < (a.human ? 0.45 : 0.3)) this.resbalar(r, '¡RESBALÓN EN EL CHARCO!');
@@ -460,6 +466,8 @@ export class CrossCountry extends EventScene implements World {
     if (r.resbalo > 0 || !a.canBeHit() || a.carrying) return;
     r.resbalo = 2.5;
     a.knockdown(a.left ? -1 : 1, 70, 90);
+    // el resbalón mojado del kit: los pies para arriba y de nalgas
+    if (a.tiene('slip_wet')) a.play('slip_wet', true);
     this.sfx('esquiva', a.human ? 0.45 : 0.15);
     if (a.human) this.letrero(a, s, 0x9ad8ff);
   }
@@ -474,7 +482,7 @@ export class CrossCountry extends EventScene implements World {
     const col = [0xff9a20, 0xffd040, 0x7ac83a, 0xe8403a, 0xb04ad0];
     for (let i = 0; i < 26; i++) {
       const x = f.x0 + Math.random() * (f.x1 - f.x0), y = f.y0 + 2 + Math.random() * (f.y1 - f.y0 - 4);
-      f.g.fillStyle(col[i % col.length]).fillCircle(Math.round(x), Math.round(FT + y), 2 + (i % 2));
+      f.g.fillStyle(col[i % col.length]).fillCircle(Math.round(this.px(x, y)), Math.round(FT + y), 2 + (i % 2));
     }
     f.g.setDepth(FT + f.y0 - 0.2);
     this.frutas.push(f);
@@ -497,7 +505,7 @@ export class CrossCountry extends EventScene implements World {
   }
 
   /** El brillito del impulso a los pies. */
-  private fx(a: Actor) { efecto(this, 'brillo_record', a.x, FT + a.y - a.z - 10, { depth: a.fig.depth + 0.2 }); }
+  private fx(a: Actor) { efecto(this, 'brillo_record', this.px(a.x, a.y), FT + a.y - a.z - 10, { depth: a.fig.depth + 0.2 }); }
 
   // ------------------------------------------------------------------ comuna: perros dormidos
 
@@ -507,9 +515,9 @@ export class CrossCountry extends EventScene implements World {
       const x = e.x ?? 0, y = e.y ?? 60;
       const z = Math.max(0, this.suelo(x, y, 999));
       // un perro de la calle: Thor más oscuro, echado
-      const f = new Figura(this, x, FT + y - z, 'thor', 'lie').setTint(0x8a7a6a);
+      const f = new Figura(this, this.px(x, y), FT + y - z, 'thor', 'lie').setTint(0x8a7a6a);
       f.row = 'down_right';
-      const zz = txt(this, x + 10, FT + y - z - 30, 'Z z', 'fuente_ui', 1).setTint(0xc8d8ff);
+      const zz = txt(this, this.px(x, y) + 10, FT + y - z - 30, 'Z z', 'fuente_ui', 1).setTint(0xc8d8ff);
       this.tweens.add({ targets: zz, y: zz.y - 6, alpha: 0.3, duration: 900, yoyo: true, repeat: -1 });
       this.perros.push({ x, y, z, x0: x, f, zz, despierto: 0, presa: null });
     }
@@ -535,25 +543,25 @@ export class CrossCountry extends EventScene implements World {
       if (npc === 'bailarines_break') {
         const col = [0xff4fa0, 0x40d0ff, 0xffd040];
         this.ruedas.push({ x, y, z, r: (e as { radio?: number }).radio ?? 26, t: 0, g: col.map((c) => this.monito(c)) });
-        if (!this.arte) this.rotulo(x - 30, FT + y - z - 50, 'BAILARINES DE BREAK');
+        if (!this.arte) this.rotulo(this.px(x, y) - 30, FT + y - z - 50, 'BAILARINES DE BREAK');
       } else if (npc === 'pelados_futbol') {
         this.pelados.push({ x, cada: e.cada ?? 3, t: 1, bola: null });
         if (!this.arte) {
           // los pelados al fondo del callejón, esperando el pase
-          for (const [k, c] of [0x40c060, 0xe0e0e8].entries()) this.monito(c).setPosition(x - 20 + k * 40, FT + 2 - Math.max(0, this.suelo(x, 2, 999))).setDepth(FT + 2);
-          this.rotulo(x - 30, FT - Math.max(0, this.suelo(x, 2, 999)) - 40, 'LOS PELADOS JUEGAN FÚTBOL');
+          for (const [k, c] of [0x40c060, 0xe0e0e8].entries()) this.monito(c).setPosition(this.px(x - 20 + k * 40, 2), FT + 2 - Math.max(0, this.suelo(x, 2, 999))).setDepth(FT + 2);
+          this.rotulo(this.px(x, 2) - 30, FT - Math.max(0, this.suelo(x, 2, 999)) - 40, 'LOS PELADOS JUEGAN FÚTBOL');
         }
       } else if (!this.arte) {
         // los demás son adorno en el gris: grafitero, músicos, vendedor
-        this.monito(npc === 'grafitero' ? 0xb04ad0 : npc === 'musicos' ? 0xf2a03a : 0x6a9ad0).setPosition(x, FT + y - z).setDepth(FT + y);
-        this.rotulo(x - 24, FT + y - z - 40, npc.toUpperCase().replace(/_/g, ' '));
+        this.monito(npc === 'grafitero' ? 0xb04ad0 : npc === 'musicos' ? 0xf2a03a : 0x6a9ad0).setPosition(this.px(x, y), FT + y - z).setDepth(FT + y);
+        this.rotulo(this.px(x, y) - 24, FT + y - z - 40, npc.toUpperCase().replace(/_/g, ' '));
       }
     }
     for (const e of this.L.entidades) if (e.tipo === 'animal' && e.animal === 'gallo' && !this.arte) {
       const x = e.x ?? 0, y = e.y ?? 20, z = Math.max(0, this.suelo(x, y, 999));
-      const g = this.add.graphics().setPosition(x, FT + y - z).setDepth(FT + y);
+      const g = this.add.graphics().setPosition(this.px(x, y), FT + y - z).setDepth(FT + y);
       g.fillStyle(0xe8e0d0).fillEllipse(0, -6, 12, 9).fillStyle(0xd03020).fillRect(2, -14, 4, 4).fillStyle(0xf2c230).fillRect(6, -9, 3, 2).fillStyle(0x2a6a3a).fillRect(-8, -12, 4, 6);
-      this.rotulo(x - 12, FT + y - z - 22, 'GALLO');
+      this.rotulo(this.px(x, y) - 12, FT + y - z - 22, 'GALLO');
     }
   }
 
@@ -564,7 +572,7 @@ export class CrossCountry extends EventScene implements World {
         const a = w.t * 1.8 + (i * Math.PI * 2) / w.g.length;
         const x = w.x + Math.cos(a) * w.r, y = w.y + Math.sin(a) * w.r * 0.5;
         // uno hace el molino de cabeza, los otros bailan de pie
-        g.setPosition(Math.round(x), Math.round(FT + y - w.z)).setDepth(FT + y).setAngle(i === 0 ? (w.t * 720) % 360 : Math.sin(w.t * 8 + i) * 12);
+        g.setPosition(Math.round(this.px(x, y)), Math.round(FT + y - w.z)).setDepth(FT + y).setAngle(i === 0 ? (w.t * 720) % 360 : Math.sin(w.t * 8 + i) * 12);
         for (const r of this.gente2) {
           const a2 = r.a;
           if (a2.z > w.z + 10 || Math.abs(a2.x - x) > 12 || Math.abs(a2.y - y) > 7) continue;
@@ -585,7 +593,7 @@ export class CrossCountry extends EventScene implements World {
       const b = p.bola;
       b.y += 120 * dt;
       const z = Math.max(0, this.suelo(b.x, Math.min(DEPTH - 1, Math.max(0, b.y)), 999));
-      b.g.setPosition(Math.round(b.x), Math.round(FT + b.y - z - Math.abs(Math.sin(b.y / 9)) * 6)).setAngle(b.y * 8).setDepth(FT + b.y);
+      b.g.setPosition(Math.round(this.px(b.x, b.y)), Math.round(FT + b.y - z - Math.abs(Math.sin(b.y / 9)) * 6)).setAngle(b.y * 8).setDepth(FT + b.y);
       for (const r of this.gente2) {
         const a = r.a;
         if (a.z > z + 8 || Math.abs(a.x - b.x) > 9 || Math.abs(a.y - b.y) > 6) continue;
@@ -624,7 +632,7 @@ export class CrossCountry extends EventScene implements World {
         }
       }
       p.f.step(dt);
-      p.f.setPosition(Math.round(p.x), FT + p.y - p.z).setDepth(FT + p.y + 0.2);
+      p.f.setPosition(Math.round(this.px(p.x, p.y)), FT + p.y - p.z).setDepth(FT + p.y + 0.2);
     }
   }
 
@@ -635,13 +643,18 @@ export class CrossCountry extends EventScene implements World {
     const e = this.L.entidades.find((v) => v.tipo === 'vehiculo' && v.vehiculo === 'ferry');
     if (!e) return;
     const w = e.w ?? 110, d = e.d ?? 40, z = e.z ?? 12, x0 = e.x0 ?? 0, y = e.y ?? 0;
-    const g = this.add.container(x0, FT + y);
+    const K = this.inclinacion;
+    const g = this.add.container(Math.round(this.px(x0, y)), FT + y);
+    // la cubierta, el casco rojo al frente y su costado izquierdo, en la misma vista inclinada que el resto
     const casco = this.add.graphics();
-    casco.fillStyle(0xd8d0b8).fillRect(0, -z, w, d);
-    casco.fillStyle(0x8a3a2a).fillRect(0, d - z, w, z);
-    casco.fillStyle(0x30303a).fillRect(0, d - z, w, 2);
-    casco.lineStyle(1, 0x303038).strokeRect(0.5, -z + 0.5, w - 1, d + z - 1);
-    g.add([casco, this.add.bitmapText(w / 2, -z - 6, 'fuente_ui', 'FERRY').setOrigin(0.5).setTint(0xf0f0f8)]);
+    const kd = Math.round(K * d);
+    casco.fillStyle(0x6a2a1e).fillPoints([{ x: 0, y: -z }, { x: kd, y: d - z }, { x: kd, y: d }, { x: 0, y: 0 }], true);
+    casco.fillStyle(0xd8d0b8).fillPoints([{ x: 0, y: -z }, { x: w, y: -z }, { x: w + kd, y: d - z }, { x: kd, y: d - z }], true);
+    for (let x = 12; x < w; x += 12) casco.fillStyle(0x000000, 0.1).fillRect(x + Math.round(K * d / 2), d / 2 - z, 1, 1);
+    casco.fillStyle(0x8a3a2a).fillRect(kd, d - z, w, z);
+    casco.fillStyle(0x30303a).fillRect(kd, d - z, w, 2);
+    casco.lineStyle(1, 0x303038).strokeRect(kd + 0.5, d - z + 0.5, w - 1, z - 1);
+    g.add([casco, this.add.bitmapText(w / 2 + kd / 2, -z - 6, 'fuente_ui', 'FERRY').setOrigin(0.5).setTint(0xf0f0f8)]);
     g.setDepth(FT + y + d - 0.5);
     this.ferry = { x: x0, y, w, d, z, tipo: 'ferry', x0, x1: e.x1 ?? x0 + 400, v: e.velocidad ?? 80, espera: e.espera ?? 2, quieto: e.espera ?? 2, dir: 1, g };
     this.cajas.push(this.ferry);
@@ -661,7 +674,7 @@ export class CrossCountry extends EventScene implements World {
     if (!dx) return;
     for (const a of this.actors) if (a.grounded && Math.abs(a.base - f.z) < 1 && a.x >= f.x && a.x < f.x + f.w && a.y >= f.y && a.y < f.y + f.d) a.x += dx;
     f.x += dx;
-    f.g.setX(Math.round(f.x));
+    f.g.setX(Math.round(this.px(f.x, f.y)));
   }
 
   /** ¿El ferry está atracado en este muelle (izquierda o derecha)? */
@@ -694,13 +707,13 @@ export class CrossCountry extends EventScene implements World {
     for (const j of this.jacintos) {
       const w = this.aguaEn(j.x, j.y);
       j.x += ((w?.corriente ?? -12) * 1.6 - 8) * dt;
-      j.g.setPosition(Math.round(j.x), Math.round(FT + j.y)).setDepth(FT + j.y + 0.3);
+      j.g.setPosition(Math.round(this.px(j.x, j.y)), Math.round(FT + j.y)).setDepth(FT + j.y + 0.3);
       for (const r of this.gente2) {
         const a = r.a;
         if (j.tocados.has(a) || a.z > 4 || Math.abs(a.x - j.x) > 15 || Math.abs(a.y - j.y) > 8) continue;
         j.tocados.add(a);
         r.enredo = 0.8;
-        this.splash.explode(4, a.x, FT + a.y);
+        this.splash.explode(4, this.px(a.x, a.y), FT + a.y);
         this.sfx('bloqueo', a.human ? 0.4 : 0.1);
         if (a.human) this.letrero(a, '¡TE ENREDASTE EN LOS JACINTOS!', 0x8ae08a);
       }
@@ -813,7 +826,7 @@ export class CrossCountry extends EventScene implements World {
       const y = L.carriles[Math.max(0, (v.carril ?? 1) - 1)].y;
       const x = Math.min(x1 + 40, me.x + 420);
       const moto = v.vehiculo !== 'xich_lo';
-      const g = this.add.container(x, FT + y);
+      const g = this.add.container(this.px(x, y), FT + y);
       const sombra = this.add.graphics();
       sombra.fillStyle(0x000000, 0.3).fillEllipse(0, 0, moto ? 44 : 56, 8);
       g.add(sombra);
@@ -846,7 +859,7 @@ export class CrossCountry extends EventScene implements World {
     });
     for (const m of this.vehiculos) {
       m.x += m.v * dt;
-      m.g.setPosition(Math.round(m.x), FT + m.y).setDepth(FT + m.y);
+      m.g.setPosition(Math.round(this.px(m.x, m.y)), FT + m.y).setDepth(FT + m.y);
       for (const r of this.gente2) {
         const a = r.a;
         if (Math.abs(a.x - m.x) < 20 && Math.abs(a.y - m.y) < 10 && a.z < 14 && a.canBeHit()) {
@@ -862,7 +875,7 @@ export class CrossCountry extends EventScene implements World {
   }
 
   private letrero(a: Actor, s: string, color: number) {
-    const t = txt(this, a.x, FT + a.y - a.z - 62, s, 'fuente_ui', 1).setDepth(6000).setTint(color);
+    const t = txt(this, this.px(a.x, a.y), FT + a.y - a.z - 62, s, 'fuente_ui', 1).setDepth(6000).setTint(color);
     this.tweens.add({ targets: t, y: t.y - 14, alpha: 0, duration: 900, onComplete: () => t.destroy() });
   }
 
@@ -877,18 +890,53 @@ export class CrossCountry extends EventScene implements World {
     this.add.particles(0, 0, 'px', { x: { min: 0, max: 700 }, y: -10, speedY: { min: 380, max: 460 }, speedX: -60, lifespan: 1000, quantity: 3, scaleY: 3, alpha: 0.4, tint: 0xc8e0ff }).setScrollFactor(0).setDepth(7000);
   }
 
+  /** La x de pantalla de un punto del mundo: con la vista inclinada, lo del fondo queda a la izquierda. */
+  private px(x: number, y: number) { return x + this.inclinacion * y; }
+
+  /** Un rectángulo del mundo (x0 a x1 a lo largo, y0 a y1 de fondo) a la altura z, visto inclinado: un paralelogramo. */
+  private plano(g: Phaser.GameObjects.Graphics, x0: number, x1: number, y0: number, y1: number, z = 0) {
+    const p = (x: number, y: number) => ({ x: Math.round(this.px(x, y)), y: FT + y - z });
+    g.fillPoints([p(x0, y0), p(x1, y0), p(x1, y1), p(x0, y1)], true);
+  }
+
+  /** Una línea de un pixel que va hacia el fondo (de y0 a y1, a la altura z), en escalera como la dibujaría un pixelero. */
+  private junta(g: Phaser.GameObjects.Graphics, x: number, y0: number, y1: number, z = 0) {
+    for (let ya = y0; ya < y1;) {
+      const cx = Math.round(this.px(x, ya));
+      let yb = ya + 1;
+      while (yb < y1 && Math.round(this.px(x, yb)) === cx) yb++;
+      g.fillRect(cx, FT + ya - z, 1, yb - ya);
+      ya = yb;
+    }
+  }
+
+  /** La altura de lo que hay pegado a la izquierda de una caja, por tramos de fondo: hasta ahí su cara de ese lado queda tapada. */
+  private alLado(c: Caja): { y0: number; y1: number; z: number }[] {
+    const x = c.x - 0.5;
+    const vecinos = this.cajas.filter((o) => o !== c && o !== this.ferry && x >= o.x && x < o.x + o.w && o.y < c.y + c.d && o.y + o.d > c.y);
+    const cortes = [...new Set([c.y, c.y + c.d, ...vecinos.flatMap((o) => [o.y, o.y + o.d])])].filter((y) => y >= c.y && y <= c.y + c.d).sort((p, q) => p - q);
+    const tramos: { y0: number; y1: number; z: number }[] = [];
+    for (let i = 0; i < cortes.length - 1; i++) {
+      const m = (cortes[i] + cortes[i + 1]) / 2;
+      const z = Math.min(c.z, Math.max(0, ...vecinos.filter((o) => m >= o.y && m < o.y + o.d).map((o) => o.z)));
+      tramos.push({ y0: cortes[i], y1: cortes[i + 1], z });
+    }
+    return tramos;
+  }
+
   /** El escenario en gris: cielo según la hora, piso por tipo, huecos, agua, cajas con su nombre, postes, toldos, salida y meta. */
   private dibujar() {
     const L = this.L;
     const W = L.largo;
+    const K = this.inclinacion;
     const cielo: Record<string, [number, number]> = { manana: [0x8ab0d0, 0xd8e4ec], mediodia: [0x6aa8e0, 0xcfe6f6], tarde: [0x5a6070, 0x9aa0aa], atardecer: [0xd07a4a, 0xf2c890] };
     const [c0, c1] = cielo[L.hora] ?? cielo.manana;
     const sky = this.add.graphics().setScrollFactor(0).setDepth(-20);
     sky.fillGradientStyle(c0, c0, c1, c1).fillRect(0, 0, 640, 360);
-    // fachadas en bloques grises (en las azoteas, la ciudad queda abajo y lejos)
+    // fachadas en bloques grises al fondo de la franja (en las azoteas, la ciudad queda abajo y lejos)
     const fondo = this.add.graphics().setDepth(-10);
     const bajos = L.id === 'saigon_azoteas';
-    for (let x = 0, k = 0; x < W; k++) {
+    for (let x = 0, k = 0; x < W + 80; k++) {
       const w = 60 + ((k * 37) % 50), h = (bajos ? 30 : 70) + ((k * 53) % 60);
       fondo.fillStyle(k % 2 ? 0x9a9aa4 : 0xa8a8b2).fillRect(x, FT - h, w, h);
       for (let wy = FT - h + 8; wy < FT - 10; wy += 16) for (let wx = x + 6; wx < x + w - 8; wx += 14) fondo.fillStyle(0x7a7a86).fillRect(wx, wy, 7, 8);
@@ -896,76 +944,133 @@ export class CrossCountry extends EventScene implements World {
     }
     const g = this.add.graphics().setDepth(-5);
     const PISO: Record<string, number> = { asfalto: 0x5a5a64, acera: 0x8a8a94, baldosa: 0x8e8278, tierra: 0x8a6a4a, madera: 0x7a5a3a, metal: 0x7a8490, cancha: 0xa8483a, agua: 0x2a6aa0, pasto: 0x4a8a3a };
-    for (const p of L.piso) g.fillStyle(PISO[p.tipo] ?? 0x5a5a64).fillRect(p.x0, FT + (p.y0 ?? 0), p.x1 - p.x0, (p.y1 ?? DEPTH) - (p.y0 ?? 0));
-    // la inclinación: juntas del piso en diagonal 1:2 (hacia atrás, un pixel a la derecha por cada dos hacia arriba),
-    // como la azotea de la pelea; así el piso se lee como un plano que se va hacia atrás
-    const juntas = this.add.graphics().setDepth(-4.9);
-    for (let x = -DEPTH; x < W; x += 32) {
-      for (let k = 0; k < DEPTH; k += 2) juntas.fillStyle(0x000000, 0.14).fillRect(x + Math.floor((DEPTH - k) / 2), FT + k, 1, 2);
+    const color = (t: string) => PISO[t] ?? 0x5a5a64;
+    // el piso: cada tipo es un paralelogramo; los bordes del mundo se estiran para que no quede un triángulo vacío
+    const ext = (x0: number, x1: number) => [x0 <= 0 ? -K * DEPTH - 20 : x0, x1 >= W ? W + 20 : x1];
+    for (const p of L.piso) { const [x0, x1] = ext(p.x0, p.x1); g.fillStyle(color(p.tipo)); this.plano(g, x0, x1, p.y0 ?? 0, p.y1 ?? DEPTH); }
+    // el borde de adelante: la cara del piso que da a la cámara, como el bordillo de la azotea de la pelea
+    const borde = this.add.graphics().setDepth(FT + DEPTH + 1);
+    const frenteDe = (x: number) => { let t = 'asfalto'; for (const p of L.piso) if (x >= p.x0 && x < p.x1 && (p.y1 ?? DEPTH) >= DEPTH) t = p.tipo; return t; };
+    for (let x = -60; x < W + 20; x += 8) {
+      const col = Phaser.Display.Color.ValueToColor(color(frenteDe(Math.max(0, x)))).darken(28).color;
+      borde.fillStyle(col).fillRect(Math.round(x + K * DEPTH), FT + DEPTH, 8, 360 - FT - DEPTH);
     }
-    for (let y = 26; y < DEPTH; y += 26) juntas.fillStyle(0xffffff, 0.06).fillRect(0, FT + y, W, 1);
-    if (L.id === 'saigon_hem') for (let x = 0; x < W; x += 80) g.fillStyle(0x66666f).fillRect(x, FT + 64, 40, 2);
-    if (L.id === 'saigon_estadio') for (const y of [35, 65, 95]) g.fillStyle(0xf4f4f4, 0.7).fillRect(300, FT + y, W - 300, 1);
-    for (const p of L.piso) if (p.nombre && p.tipo !== 'agua') this.rotulo(p.x0 + 4, FT + (p.y0 ?? 0) + 6, p.nombre.toUpperCase());
+    borde.fillStyle(0xffffff, 0.18).fillRect(-60, FT + DEPTH, W + 200, 1);
+    for (let x = 0; x < W + 60; x += 32) borde.fillStyle(0x000000, 0.25).fillRect(Math.round(x + K * DEPTH), FT + DEPTH + 1, 1, 360 - FT - DEPTH);
+    // las juntas del piso: hacia el fondo, en la misma diagonal que todo lo demás, y a lo ancho cada vez más separadas
+    const juntas = this.add.graphics().setDepth(-4.9);
+    juntas.fillStyle(0x000000, 0.16);
+    for (let x = -64; x < W + 40; x += 32) this.junta(juntas, x, 0, DEPTH);
+    for (let y = 18, paso = 16; y < DEPTH; paso += 4, y += paso) juntas.fillStyle(0xffffff, 0.07).fillRect(Math.round(this.px(-60, y)), FT + y, W + 120, 1);
+    if (L.id === 'saigon_hem') for (let x = 0; x < W; x += 80) { g.fillStyle(0x66666f); this.plano(g, x, x + 40, 63, 65); }
+    if (L.id === 'saigon_estadio') for (const y of [35, 65, 95]) { g.fillStyle(0xf4f4f4, 0.7); this.plano(g, 300, W, y, y + 1); }
+    for (const p of L.piso) if (p.nombre && p.tipo !== 'agua') this.rotulo(this.px(Math.max(4, p.x0 + 4), (p.y0 ?? 0) + 6), FT + (p.y0 ?? 0) + 6, p.nombre.toUpperCase());
     // agua: charcos, calle inundada y río
     for (const w of L.agua) {
       const y0 = w.y0 ?? 0, y1 = w.y1 ?? DEPTH;
       const hondo = w.nivel >= HONDO;
-      g.fillStyle(hondo ? 0x285a90 : 0x3a7ab0, w.nivel <= CHARCO ? 0.55 : 0.8).fillRect(w.x0, FT + y0, w.x1 - w.x0, y1 - y0);
-      for (let x = w.x0 + 6; x < w.x1; x += 22) for (let y = y0 + 8; y < y1; y += 18) g.fillStyle(0x9ad8f0, 0.7).fillRect(x + (y % 11), FT + y, 8, 1);
+      g.fillStyle(hondo ? 0x285a90 : 0x3a7ab0, w.nivel <= CHARCO ? 0.55 : 0.8);
+      this.plano(g, w.x0, w.x1, y0, y1);
+      for (let x = w.x0 + 6; x < w.x1 - 8; x += 22) for (let y = y0 + 8; y < y1; y += 18) g.fillStyle(0x9ad8f0, 0.7).fillRect(Math.round(this.px(x + (y % 11), y)), FT + y, 8, 1);
       const dice = w.nivel <= CHARCO ? 'CHARCO · RESBALA' : hondo ? `${(w.nombre ?? 'río').split(':')[0].toUpperCase()} · SE NADA` : 'CALLE INUNDADA · TE FRENA Y TE EMPUJA';
-      this.rotulo(w.x0 + 4, w.nivel <= CHARCO ? FT + y0 - 4 : hondo ? FT + y0 + 8 : FT + DEPTH + 10, dice);
+      this.rotulo(this.px(w.x0 + 4, y0), w.nivel <= CHARCO ? FT + y0 - 4 : hondo ? FT + y0 + 8 : FT + DEPTH + 12, dice);
     }
-    // huecos: canal con agua al fondo, o el vacío entre edificios
-    for (const h of L.huecos) {
-      if (h.caida === 'vacio') {
-        g.fillStyle(0x16161e).fillRect(h.x0, FT + h.y0, h.x1 - h.x0, h.y1 - h.y0);
-        g.fillStyle(0x30303c).fillRect(h.x0, FT + h.y0, 2, h.y1 - h.y0).fillRect(h.x1 - 2, FT + h.y0, 2, h.y1 - h.y0);
-      } else {
-        g.fillStyle(0x1a2a40).fillRect(h.x0, FT + h.y0, h.x1 - h.x0, h.y1 - h.y0);
-        g.fillStyle(0x2a5a90).fillRect(h.x0, FT + h.y0 + 18, h.x1 - h.x0, h.y1 - h.y0 - 18);
-        g.fillStyle(0x9ad8f0).fillRect(h.x0, FT + h.y0 + 18, h.x1 - h.x0, 1);
+    // huecos: se ve la pared del fondo, la del lado de allá (inclinada) y abajo el agua del canal o el vacío
+    // los huecos de la misma columna separados por una viga o una baranda se dibujan como uno solo: abajo no hay piso
+    const huecos = [...L.huecos].sort((p, q) => p.x0 - q.x0 || p.y0 - q.y0).reduce<typeof L.huecos>((acc, h) => {
+      const u = acc[acc.length - 1];
+      if (u && u.x0 === h.x0 && u.x1 === h.x1 && u.caida === h.caida && h.y0 - u.y1 <= 20) acc[acc.length - 1] = { ...u, y1: h.y1 };
+      else acc.push({ ...h });
+      return acc;
+    }, []);
+    for (const h of huecos) {
+      const hondo = h.caida === 'vacio' ? 60 : 18;
+      g.fillStyle(h.caida === 'vacio' ? 0x101018 : 0x1a2a40);
+      this.plano(g, h.x0, h.x1, h.y0, h.y1);
+      if (h.caida === 'agua') {
+        g.fillStyle(0x2a5a90).fillPoints([
+          { x: Math.round(this.px(h.x0, h.y0)), y: FT + h.y0 + hondo }, { x: Math.round(this.px(h.x1, h.y0)), y: FT + h.y0 + hondo },
+          { x: Math.round(this.px(h.x1, h.y1 - hondo)), y: FT + h.y1 }, { x: Math.round(this.px(h.x0, h.y1 - hondo)), y: FT + h.y1 },
+        ], true);
+        g.fillStyle(0x9ad8f0).fillRect(Math.round(this.px(h.x0, h.y0)), FT + h.y0 + hondo, h.x1 - h.x0, 1);
       }
-      if (h.y0 === 0 || h.y1 === DEPTH) this.rotulo(h.x0, FT + DEPTH + 10, h.caida === 'vacio' ? '¡SALTA CORRIENDO!' : h.y1 < DEPTH ? 'CANAL · PUENTECITO ADELANTE' : 'CANAL · ¡SALTA CORRIENDO!');
+      // la pared del fondo del hueco (de frente) y la del otro lado (la cara de la izquierda del piso que sigue)
+      const prof = Math.min(hondo, h.y1 - h.y0);
+      g.fillStyle(h.caida === 'vacio' ? 0x3a3a46 : 0x4a4a54).fillRect(Math.round(this.px(h.x0, h.y0)), FT + h.y0, h.x1 - h.x0, prof);
+      g.fillStyle(h.caida === 'vacio' ? 0x2a2a34 : 0x3a3a44).fillPoints([
+        { x: Math.round(this.px(h.x1, h.y0)), y: FT + h.y0 }, { x: Math.round(this.px(h.x1, h.y1)), y: FT + h.y1 },
+        { x: Math.round(this.px(h.x1, h.y1 - prof)), y: FT + h.y1 }, { x: Math.round(this.px(h.x1, h.y0)), y: FT + h.y0 + prof },
+      ], true);
+      // si llega adelante, el corte se ve en el borde
+      if (h.y1 >= DEPTH) {
+        borde.fillStyle(h.caida === 'vacio' ? 0x08080e : 0x141e30).fillRect(Math.round(this.px(h.x0, DEPTH)), FT + DEPTH, h.x1 - h.x0, 360 - FT - DEPTH);
+        if (h.caida === 'agua') borde.fillStyle(0x2a5a90).fillRect(Math.round(this.px(h.x0, DEPTH)), FT + DEPTH + hondo, h.x1 - h.x0, 360 - FT - DEPTH - hondo);
+      }
+      if (h.y0 === 0 || h.y1 === DEPTH) this.rotulo(this.px(h.x0, DEPTH), FT + DEPTH + 12, h.caida === 'vacio' ? '¡SALTA CORRIENDO!' : h.y1 < DEPTH ? 'CANAL · PUENTECITO ADELANTE' : 'CANAL · ¡SALTA CORRIENDO!');
     }
-    // marcas cada 320 px
-    for (let x = 320; x < W; x += 320) { g.fillStyle(0xffffff, 0.35).fillRect(x, FT, 1, DEPTH); this.rotulo(x + 2, FT + 6, `${x}`); }
-    // salida y meta
+    // marcas cada 320 px, en diagonal como las juntas
+    for (let x = 320; x < W; x += 320) { g.fillStyle(0xffffff, 0.35); this.junta(g, x, 0, DEPTH); this.rotulo(this.px(x + 3, 6), FT + 6, `${x}`); }
+    // salida y meta: la cuadrícula sigue la diagonal
     const sal = L.entidades.find((e) => e.tipo === 'salida')?.x ?? 40;
     for (const [x, s] of [[sal, 'SALIDA'], [this.meta, 'META']] as [number, string][]) {
-      for (let y = 0; y < DEPTH; y += 6) for (let k = 0; k < 2; k++) g.fillStyle((y / 6 + k) % 2 ? 0x101010 : 0xf4f4f4).fillRect(x + k * 4, FT + y, 4, 6);
+      for (let y = 0; y < DEPTH; y += 6) for (let k = 0; k < 2; k++) { g.fillStyle((y / 6 + k) % 2 ? 0x101010 : 0xf4f4f4); this.plano(g, x + k * 4, x + k * 4 + 4, y, y + 6); }
       this.add.bitmapText(x + 4, FT - 30, 'fuente_titulo', s).setOrigin(0.5).setDepth(-4);
     }
-    // postes
-    for (const p of L.postes) { g.fillStyle(0x4a4a54).fillRect(p.x, FT + p.y - p.alto, 4, p.alto); g.fillStyle(0xf2e090).fillRect(p.x - 6, FT + p.y - p.alto, 12, 4); }
-    // lo que cuelga bajo: toldos, lámparas, ropa, redes
+    // postes, parados en lo que tengan debajo
+    for (const p of L.postes) {
+      const z = Math.max(0, this.suelo(p.x, p.y, 999)), x = Math.round(this.px(p.x, p.y)), y = FT + p.y - z;
+      const t = this.add.graphics().setDepth(FT + p.y);
+      t.fillStyle(0x4a4a54).fillRect(x, y - p.alto, 4, p.alto).fillStyle(0x34343e).fillRect(x + 3, y - p.alto, 1, p.alto);
+      if (p.tipo !== 'asta_bandera') t.fillStyle(0xf2e090).fillRect(x - 6, y - p.alto, 12, 4);
+      t.fillStyle(0x000000, 0.25).fillEllipse(x + 2, y, 10, 3);
+    }
+    // lo que cuelga bajo: toldos, techos, ropa
     for (const b of L.bajo) {
       const t = this.add.graphics().setDepth(FT + b.y1);
       if (b.tipo === 'techo_escalera') {
-        // el techo naranja ondulado de las escaleras eléctricas de la Comuna 13, en su estructura gris
-        t.fillStyle(0x6a6a74).fillRect(b.x0, FT + b.y0 - b.z + 6, 3, b.z - 10).fillRect(b.x1 - 3, FT + b.y0 - b.z + 6, 3, b.z - 10);
-        t.fillStyle(0xe8742a).fillRect(b.x0 - 4, FT + b.y0 - b.z, b.x1 - b.x0 + 8, 8);
-        for (let x = b.x0 - 4; x < b.x1 + 4; x += 6) t.fillStyle(0xb8501a).fillRect(x, FT + b.y0 - b.z, 2, 8);
+        // el techo naranja ondulado de las escaleras eléctricas de la Comuna 13, sobre cuatro columnas grises
+        for (const [cx, cy] of [[b.x0, b.y0], [b.x1 - 3, b.y0], [b.x0, b.y1 - 1], [b.x1 - 3, b.y1 - 1]]) {
+          const z0 = Math.max(0, this.suelo(cx + 1, cy, 999));
+          const col = this.add.graphics().setDepth(FT + cy + (cy > b.y0 ? 0.6 : -0.6));
+          col.fillStyle(cy > b.y0 ? 0x6a6a74 : 0x54545e).fillRect(Math.round(this.px(cx, cy)), FT + cy - b.z, 3, b.z - z0);
+        }
+        t.fillStyle(0xe8742a); this.plano(t, b.x0 - 4, b.x1 + 4, b.y0, b.y1, b.z);
+        t.fillStyle(0xb8501a);
+        for (let x = b.x0; x < b.x1 + 4; x += 6) this.junta(t, x, b.y0, b.y1, b.z);
+        t.fillStyle(0xa04a18).fillRect(Math.round(this.px(b.x0 - 4, b.y1)), FT + b.y1 - b.z, b.x1 - b.x0 + 8, 4);
         continue;
       }
       if (b.tipo === 'tendedero') {
-        // la cuerda con ropa de colores
-        const y = FT + b.y0 - b.z;
-        t.lineStyle(1, 0x30303a).lineBetween(b.x0, y, b.x1, y);
+        // la cuerda con ropa de colores, de un lado a otro del callejón
+        const ym = Math.round((b.y0 + b.y1) / 2), y = FT + ym - b.z;
+        t.setDepth(FT + ym);
+        t.lineStyle(1, 0x30303a).lineBetween(this.px(b.x0, ym), y, this.px(b.x1, ym), y);
         const ropa = [0xe84a4a, 0x4a8ae8, 0xf2c230, 0x5ac85a, 0xf4f4f4, 0xd06ad0];
-        for (let x = b.x0 + 6, k = 0; x < b.x1 - 8; x += 16, k++) t.fillStyle(ropa[k % ropa.length]).fillRect(x, y, 10, 12 + (k % 3) * 3);
-        this.rotulo(b.x0, y - 8, 'TENDEDERO · NO SALTES ABAJO');
+        for (let x = b.x0 + 6, k = 0; x < b.x1 - 8; x += 16, k++) t.fillStyle(ropa[k % ropa.length]).fillRect(Math.round(this.px(x, ym)), y, 10, 12 + (k % 3) * 3);
+        this.rotulo(this.px(b.x0, ym), y - 8, 'TENDEDERO · NO SALTES ABAJO');
         continue;
       }
-      t.fillStyle(0xc85a3a, 0.85).fillRect(b.x0, FT + b.y0 - b.z, b.x1 - b.x0, b.y1 - b.y0);
-      for (let x = b.x0; x < b.x1; x += 12) t.fillStyle(0xf4e8d0, 0.85).fillRect(x, FT + b.y0 - b.z, 6, b.y1 - b.y0);
-      this.rotulo(b.x0, FT + b.y0 - b.z - 8, `${(b.tipo ?? 'TOLDO').toUpperCase().replace(/_/g, ' ')} · NO SALTES ABAJO`);
+      t.fillStyle(0xc85a3a, 0.85); this.plano(t, b.x0, b.x1, b.y0, b.y1, b.z);
+      t.fillStyle(0xf4e8d0, 0.85);
+      for (let x = b.x0; x < b.x1; x += 12) this.plano(t, x, Math.min(b.x1, x + 6), b.y0, b.y1, b.z);
+      t.fillStyle(0x8a3a22).fillRect(Math.round(this.px(b.x0, b.y1)), FT + b.y1 - b.z, b.x1 - b.x0, 3);
+      this.rotulo(this.px(b.x0, b.y0), FT + b.y0 - b.z - 8, `${(b.tipo ?? 'TOLDO').toUpperCase().replace(/_/g, ' ')} · NO SALTES ABAJO`);
     }
     // la bandera en su asta
-    for (const p of L.postes) if (p.tipo === 'asta_bandera' && this.textures.exists('flag_co')) this.add.image(p.x + 4, FT + p.y - Math.max(0, this.suelo(p.x, p.y, 999)) - p.alto + 10, 'flag_co').setOrigin(0, 0.5).setScale(0.9).setDepth(FT + p.y);
+    for (const p of L.postes) if (p.tipo === 'asta_bandera' && this.textures.exists('flag_co')) this.add.image(this.px(p.x, p.y) + 4, FT + p.y - Math.max(0, this.suelo(p.x, p.y, 999)) - p.alto + 10, 'flag_co').setOrigin(0, 0.5).setScale(0.9).setDepth(FT + p.y);
     this.adornos();
+    for (const c of this.cajas) this.caja(c);
     this.escaleras();
-    // cajas: techo claro, frente oscuro, con su nombre
+  }
+
+  /**
+   * Una caja en vista inclinada, como un volumen de verdad: el techo es un paralelogramo, el frente un rectángulo y la cara
+   * de la izquierda (la que queda a la vista) sube desde lo que tenga pegado a ese lado. En un tramo de escalones esa cara
+   * es la contrahuella, así que la escalera se lee escalón por escalón.
+   */
+  private caja(c: Caja) {
+    const L = this.L;
+    const K = this.inclinacion;
     // techo y frente por tipo, para leer el gris: ladrillo, zinc, la escalera eléctrica, la fruta
     const COLOR: Record<string, [number, number]> = {
       puesto_frutas: [0xe0b060, 0x9a6a30], terraza: [0xc89a7a, 0x9a5a3a], muro_ladrillo: [0xb8704a, 0x8a4a2a],
@@ -974,54 +1079,74 @@ export class CrossCountry extends EventScene implements World {
       muro_grafiti: [0xd8b8a0, 0xb04ad0], escalera_pintada: [0xf2c230, 0x40a0d0], mirador: [0xd8c8b0, 0xa88868],
       letras_comuna13: [0x30303a, 0x20202a], carrito_paletas: [0xf2e060, 0x40a040], tanque_agua: [0x3a3a44, 0x24242c],
     };
-    for (const c of this.cajas) {
-      if (c === this.ferry) continue;
-      const box = this.add.graphics().setDepth(FT + c.y + c.d - 0.5);
-      const muro = L.muros.includes(c);
-      const [techo, frente] = COLOR[c.tipo ?? ''] ?? (muro ? [0xb0a090, 0x807060] : [0xc8c8d0, 0x8a8a96]);
-      box.fillStyle(techo).fillRect(c.x, FT + c.y - c.z, c.w, c.d);
-      box.fillStyle(frente).fillRect(c.x, FT + c.y + c.d - c.z, c.w, c.z);
-      // la tapa también lleva las juntas en diagonal, como el piso
-      for (let x0 = c.x - c.d; x0 < c.x + c.w; x0 += 16) {
-        for (let k = 0; k < c.d; k += 2) {
-          const x = x0 + Math.floor((c.d - k) / 2);
-          if (x > c.x && x < c.x + c.w - 1) box.fillStyle(0x000000, 0.1).fillRect(x, FT + c.y - c.z + k, 1, 2);
-        }
-      }
-      // la escalera eléctrica va al revés: flechitas hacia atrás en cada escalón
-      if (c.tipo === 'escalera_electrica') for (let y = c.y + 6; y < c.y + c.d - 2; y += 14) box.fillStyle(0x30303a).fillTriangle(c.x + 3, FT + y - c.z, c.x + c.w - 4, FT + y - 4 - c.z, c.x + c.w - 4, FT + y + 4 - c.z);
-      if (c.tipo === 'terraza' || c.tipo === 'muro_ladrillo') for (let y = FT + c.y + c.d - c.z + 6; y < FT + c.y + c.d; y += 8) box.fillStyle(0x7a3a22, 0.5).fillRect(c.x, y, c.w, 1);
-      box.lineStyle(1, 0x303038, 0.8).strokeRect(c.x + 0.5, FT + c.y - c.z + 0.5, c.w - 1, c.d + c.z - 1);
-      // la cara lateral derecha, inclinada como las juntas del piso; y la sombra hacia el otro lado
-      const s = Math.min(6, Math.floor(c.d / 2));
-      if (s >= 2) {
-        const xr = c.x + c.w, yb = FT + c.y + c.d;
-        box.fillStyle(Phaser.Display.Color.ValueToColor(frente).darken(25).color).fillPoints([{ x: xr, y: yb - c.z }, { x: xr + s, y: yb - c.z - 2 * s }, { x: xr + s, y: yb - 2 * s }, { x: xr, y: yb }], true);
-        const sombra = this.add.graphics().setDepth(-4.5);
-        sombra.fillStyle(0x000000, 0.18).fillPoints([{ x: c.x, y: yb }, { x: xr, y: yb }, { x: xr - 8, y: yb + 4 }, { x: c.x - 8, y: yb + 4 }], true);
-      }
-      // las letras grandes del mirador, una de cada color
-      if (c.tipo === 'letras_comuna13') {
-        const col = [0xff4fa0, 0xf2c230, 0x40d0ff, 0x5ac85a, 0xff8a30, 0xb04ad0];
-        'COMUNA 13'.split('').forEach((ch, i) => this.add.bitmapText(c.x + 10 + i * 18, FT + c.y - c.z - 20, 'fuente_titulo', ch).setScale(2).setTint(col[i % col.length]).setDepth(FT + c.y + c.d - 0.3));
-        continue;
-      }
-      // el nombre encima, una vez por grupo (los escalones seguidos llevan uno solo)
-      const seguido = this.cajas.some((o) => o !== c && o.tipo === c.tipo && Math.abs(o.x + o.w - c.x) < 1 && o.y === c.y);
-      if (!seguido) this.add.bitmapText(c.x + c.w / 2, FT + c.y - c.z - 6, 'fuente_ui', (c.tipo ?? '').toUpperCase().replace(/_/g, ' ')).setOrigin(0.5).setDepth(FT + c.y + c.d - 0.4).setTint(0xf0f0f8).setAlpha(0.8);
+    const muro = L.muros.includes(c);
+    const [techo, frente] = COLOR[c.tipo ?? ''] ?? (muro ? [0xb0a090, 0x807060] : [0xc8c8d0, 0x8a8a96]);
+    const lado = Phaser.Display.Color.ValueToColor(frente).darken(18).color;
+    const x0 = c.x, x1 = c.x + c.w, y0 = c.y, y1 = c.y + c.d;
+    const fx = Math.round(this.px(x0, y1));
+    // una viga o una baranda es delgada: se ve el canto, no un muro hasta el piso
+    const alto = c.tipo === 'viga' || c.tipo === 'baranda' ? Math.min(c.z, 8) : c.z;
+    const box = this.add.graphics().setDepth(FT + y1 - 0.5);
+    box.fillStyle(techo); this.plano(box, x0, x1, y0, y1, c.z);
+    box.fillStyle(frente).fillRect(fx, FT + y1 - c.z, c.w, alto);
+    // las juntas del techo van hacia el fondo, igual que las del piso
+    box.fillStyle(0x000000, 0.12);
+    const cada = c.w > 120 ? 32 : 16;
+    for (let x = x0 + cada; x < x1 - 2; x += cada) this.junta(box, x, y0, y1, c.z);
+    // ladrillo o zinc en el frente
+    if (c.tipo === 'terraza' || c.tipo === 'muro_ladrillo' || c.tipo === 'mirador') for (let y = FT + y1 - c.z + 6; y < FT + y1 - c.z + alto; y += 8) box.fillStyle(0x000000, 0.14).fillRect(fx, y, c.w, 1);
+    if (c.tipo === 'techo_lata') for (let x = fx + 3; x < fx + c.w; x += 5) box.fillStyle(0x000000, 0.12).fillRect(x, FT + y1 - c.z, 1, alto);
+    // la escalera eléctrica va al revés: flechitas hacia atrás en cada escalón
+    if (c.tipo === 'escalera_electrica') for (let y = y0 + 8; y < y1 - 4; y += 14) {
+      const ax = Math.round(this.px(x0 + 3, y)), ay = FT + y - c.z;
+      box.fillStyle(0x30303a).fillTriangle(ax, ay, ax + c.w - 7, ay - 4, ax + c.w - 7, ay + 4);
     }
+    // el canto del frente con luz y el contorno, para que cada volumen se separe del de al lado
+    box.fillStyle(0xffffff, 0.3).fillRect(fx, FT + y1 - c.z, c.w, 1);
+    box.lineStyle(1, 0x24242c, 0.85).strokeRect(fx + 0.5, FT + y1 - c.z + 0.5, c.w - 1, alto - 1);
+    const t0 = { x: Math.round(this.px(x0, y0)), y: FT + y0 - c.z }, t1 = { x: Math.round(this.px(x1, y0)), y: FT + y0 - c.z }, t2 = { x: fx + c.w, y: FT + y1 - c.z };
+    box.lineBetween(t0.x + 0.5, t0.y + 0.5, t1.x - 0.5, t1.y + 0.5).lineBetween(t1.x - 0.5, t1.y + 0.5, t2.x - 0.5, t2.y + 0.5);
+    // la cara de la izquierda, en su propia capa: delante de lo que va detrás de la caja y detrás de quien va a su lado
+    if (K > 0) {
+      const cara = this.add.graphics().setDepth(FT + y0 + 0.1);
+      for (const s of this.alLado(c)) {
+        const zb = Math.max(s.z, c.z - alto);
+        if (zb >= c.z) continue;
+        cara.fillStyle(lado).fillPoints([
+          { x: Math.round(this.px(x0, s.y0)), y: FT + s.y0 - c.z }, { x: Math.round(this.px(x0, s.y1)), y: FT + s.y1 - c.z },
+          { x: Math.round(this.px(x0, s.y1)), y: FT + s.y1 - zb }, { x: Math.round(this.px(x0, s.y0)), y: FT + s.y0 - zb },
+        ], true);
+        // la nariz del escalón (el borde de arriba de esa cara) con luz, y su pie con sombra
+        cara.fillStyle(0xffffff, 0.35); this.junta(cara, x0, s.y0, s.y1, c.z);
+        cara.fillStyle(0x000000, 0.3); this.junta(cara, x0, s.y0, s.y1, zb - 1);
+      }
+      // la sombra en el piso, hacia la derecha (la luz viene de la izquierda)
+      if (Math.max(0, this.suelo(x1 + 2, (y0 + y1) / 2, c.z - PASO - 1)) === 0 && alto === c.z) {
+        const sombra = this.add.graphics().setDepth(-4.5);
+        sombra.fillStyle(0x000000, 0.2); this.plano(sombra, x1, x1 + Math.min(14, 4 + c.z / 6), y0, y1);
+      }
+    }
+    // las letras grandes del mirador, una de cada color
+    if (c.tipo === 'letras_comuna13') {
+      const col = [0xff4fa0, 0xf2c230, 0x40d0ff, 0x5ac85a, 0xff8a30, 0xb04ad0];
+      // sobre el frente del letrero: arriba de la caja quedarían debajo del marcador
+      'COMUNA 13'.split('').forEach((ch, i) => this.add.bitmapText(fx + 12 + i * 18, FT + y1 - c.z + Math.min(alto, 40) / 2, 'fuente_titulo', ch).setOrigin(0, 0.5).setScale(2).setTint(col[i % col.length]).setDepth(FT + y1 - 0.3));
+      return;
+    }
+    // el nombre encima, una vez por grupo (los escalones seguidos llevan uno solo)
+    const seguido = this.cajas.some((o) => o !== c && o.tipo === c.tipo && Math.abs(o.x + o.w - c.x) < 1 && o.y === c.y);
+    if (!seguido) this.add.bitmapText(Math.round(this.px(x0 + c.w / 2, y0 + c.d / 2)), FT + y0 + c.d / 2 - c.z, 'fuente_ui', (c.tipo ?? '').toUpperCase().replace(/_/g, ' ')).setOrigin(0.5).setDepth(FT + y1 - 0.4).setTint(0xf0f0f8).setAlpha(0.8);
   }
 
   /**
-   * Las escaleras se leen inclinadas: cada tramo de escalones seguidos lleva su zanca (la viga del costado que sigue
-   * la pendiente) y las escaleras eléctricas, además, su pasamanos de vidrio con la baranda negra.
+   * Las escaleras eléctricas llevan su pasamanos de vidrio con la baranda negra a los dos lados: la del fondo detrás
+   * de los escalones y la de adelante delante, las dos subiendo con la pendiente.
    */
   private escaleras() {
-    const tipos = ['escalon', 'escalones', 'escalera_pintada', 'escalera_electrica'];
     const usados = new Set<Caja>();
     for (const c of this.cajas) {
-      if (!tipos.includes(c.tipo ?? '') || usados.has(c)) continue;
-      // el tramo: los escalones del mismo tipo y la misma fila, uno pegado al otro
+      if (c.tipo !== 'escalera_electrica' || usados.has(c)) continue;
+      // el tramo: los escalones de la misma fila, uno pegado al otro
       const tramo = [c];
       usados.add(c);
       for (let sig = c; ;) {
@@ -1031,19 +1156,17 @@ export class CrossCountry extends EventScene implements World {
       }
       if (tramo.length < 2) continue;
       const a = tramo[0], b = tramo[tramo.length - 1];
-      const g = this.add.graphics().setDepth(FT + a.y + a.d - 0.3);
-      // la zanca al frente: una franja que une las narices de los escalones, de abajo hasta arriba
-      const yf = FT + a.y + a.d;
-      const x0 = a.x, y0 = yf - a.z + a.z / 2, x1 = b.x + b.w, y1 = yf - b.z;
-      g.fillStyle(0x2a2a34, 0.55).fillPoints([{ x: x0, y: yf }, { x: x0, y: y0 }, { x: x1, y: y1 }, { x: x1, y: y1 + 5 }, { x: x0 + 4, y: yf }], true);
-      if (c.tipo !== 'escalera_electrica') continue;
-      // el pasamanos: vidrio claro con la baranda negra arriba, a 18 de altura sobre los escalones, a los dos lados
-      for (const yy of [FT + a.y, yf]) {
-        const p0 = { x: a.x, y: yy - a.z + 6 }, p1 = { x: b.x + b.w + 6, y: yy - b.z };
-        const g2 = this.add.graphics().setDepth(yy === yf ? FT + a.y + a.d + 0.2 : FT + a.y - 0.2);
+      for (const yy of [a.y + 1, a.y + a.d - 1]) {
+        const p0 = { x: this.px(a.x, yy), y: FT + yy - a.z + 4 }, p1 = { x: this.px(b.x + b.w, yy), y: FT + yy - b.z };
+        const g2 = this.add.graphics().setDepth(yy > a.y + 1 ? FT + a.y + a.d + 0.2 : FT + a.y - 0.2);
         g2.fillStyle(0xc8e0f0, 0.35).fillPoints([p0, p1, { x: p1.x, y: p1.y - 18 }, { x: p0.x, y: p0.y - 18 }], true);
         g2.lineStyle(3, 0x1e1e26).lineBetween(p0.x, p0.y - 18, p1.x, p1.y - 18);
         g2.lineStyle(1, 0x6a6a78).lineBetween(p0.x, p0.y, p1.x, p1.y);
+        // los parales del vidrio
+        for (let k = 0; k <= tramo.length; k += 2) {
+          const t = k / tramo.length, x = p0.x + (p1.x - p0.x) * t, y = p0.y + (p1.y - p0.y) * t;
+          g2.fillStyle(0x4a4a58).fillRect(Math.round(x), Math.round(y - 18), 1, 18);
+        }
       }
     }
   }
@@ -1080,7 +1203,8 @@ export class CrossCountry extends EventScene implements World {
   }
 
   private rotulo(x: number, y: number, s: string) {
-    this.add.bitmapText(x, y, 'fuente_ui', s).setOrigin(0, 0.5).setDepth(-3).setTint(0xf0f0f8);
+    // debajo de la franja va delante del borde del piso; arriba, detrás de las cajas
+    this.add.bitmapText(Math.round(x), y, 'fuente_ui', s).setOrigin(0, 0.5).setDepth(y > FT + DEPTH ? FT + DEPTH + 2 : -3).setTint(0xf0f0f8);
   }
 
   /**
@@ -1089,7 +1213,8 @@ export class CrossCountry extends EventScene implements World {
    */
   private silueta(a: Actor) {
     const pies = FT + a.y - a.z, cabeza = pies - ALTO;
-    const tapa = this.cajas.find((c) => c.y > a.y && a.x > c.x - 6 && a.x < c.x + c.w + 6 && FT + c.y - c.z < (pies + cabeza) / 2 && c.z > a.z + ALTO / 2);
+    const sx = this.px(a.x, a.y);
+    const tapa = this.cajas.find((c) => c.y > a.y && sx > this.px(c.x, c.y) - 6 && sx < this.px(c.x + c.w, c.y + c.d) + 6 && FT + c.y - c.z < (pies + cabeza) / 2 && c.z > a.z + ALTO / 2);
     let s = this.siluetas.get(a);
     if (!tapa || !a.fig.visible) { s?.setVisible(false); return; }
     if (!s) {
@@ -1121,16 +1246,17 @@ export class CrossCountry extends EventScene implements World {
         // en el río, del color del río: se ve medio cuerpo afuera y el resto bajo el agua
         const hondo = w.nivel >= HONDO;
         const n = Math.min(w.nivel, 26);
-        const x = Math.round(a.x), y = Math.round(FT + a.y);
+        const x = Math.round(this.px(a.x, a.y)), y = Math.round(FT + a.y);
         g.fillStyle(hondo ? (this.arte ? 0x2a6aa0 : 0x285a90) : 0x3a8ac0, hondo ? 0.92 : 0.55).fillRect(x - 15, y - n, 30, n + 2);
         g.fillStyle(0xc8ecff, 0.85).fillRect(x - 13 + (Math.floor(this.time.now / 200) % 3), y - n, 9, 1).fillRect(x + 3 - (Math.floor(this.time.now / 260) % 3), y - n, 7, 1);
       }
     }
     const me = this.gente2[0].a;
     const cam = this.cameras.main;
-    const cur = cam.midPoint.x || me.x;
-    cam.centerOn(cur + (me.x + 80 - cur) * 0.1, 360 - 180 / ZOOM);
-    this.arte?.tick(this.game.loop.delta / 1000, cam.scrollX, (x, y) => this.actors.some((a) => Math.abs(a.x - x) < 70 && FT + a.y - y < 160));
+    const meX = this.px(me.x, me.y);
+    const cur = cam.midPoint.x || meX;
+    cam.centerOn(cur + (meX + 80 - cur) * 0.1, 360 - 180 / ZOOM);
+    this.arte?.tick(this.game.loop.delta / 1000, cam.scrollX, (x, y) => this.actors.some((a) => Math.abs(this.px(a.x, a.y) - x) < 70 && FT + a.y - y < 160));
     if (this.lluvia) {
       this.lluvia.setFrame(Math.floor(this.time.now / 62) % 8);
       this.lluvia.tilePositionX = cam.scrollX * 0.6;

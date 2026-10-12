@@ -5,7 +5,7 @@ import { efecto } from '../core/fx';
 import { ATTACKS, DEPTH, FLOOR_TOP, GRAVITY, HP, PESO_DMG, SPEED, XMAX, XMIN, type AttackDef } from './defs';
 
 /** Lo que un atleta quiere hacer en este cuadro (de la palanca o de la máquina). */
-export interface Intent { x: number; y: number; run: boolean; punch: boolean; kick: boolean; jump: boolean; special: boolean }
+export interface Intent { x: number; y: number; run: boolean; punch: boolean; kick: boolean; jump: boolean; special: boolean; guard?: boolean }
 export const NOTHING: Intent = { x: 0, y: 0, run: false, punch: false, kick: false, jump: false, special: false };
 
 /** Lo que el atleta necesita del mundo. */
@@ -38,6 +38,15 @@ export interface World {
   paso?(a: Actor): void;
   /** multiplicador del daño de un golpe (el nivel de dificultad) */
   multDaño?(from: Actor | null, victim: Actor): number;
+  /** un cartelito de cómic sobre alguien (¡BLOQUEO!, ¡ÑAM!) */
+  aviso?(a: Actor, s: string, color: number): void;
+  /** la comida que hay en el piso (la máquina va por ella si está mal de vida) */
+  comida?: { x: number; y: number }[];
+  /**
+   * La vista inclinada: cuántos pixeles se corre a la derecha cada pixel de profundidad (lo del fondo queda a la
+   * izquierda, como las juntas del piso de la azotea). 0 o nada: todo derecho. Solo cambia el dibujo, no el mundo.
+   */
+  inclinacion?: number;
 }
 
 /** Lo que devuelve `suelo` donde no hay piso. */
@@ -45,7 +54,8 @@ export const HUECO = -1000;
 
 export type St =
   | 'idle' | 'walk' | 'run' | 'jump' | 'attack' | 'hurt' | 'fall' | 'down' | 'getup' | 'dizzy'
-  | 'lifted' | 'thrown' | 'lift' | 'carry' | 'throw' | 'pick' | 'ko' | 'win' | 'lose' | 'special' | 'frozen';
+  | 'lifted' | 'thrown' | 'lift' | 'carry' | 'throw' | 'pick' | 'ko' | 'win' | 'lose' | 'special' | 'frozen'
+  | 'guard' | 'grab' | 'grabbed' | 'taunt';
 
 const ACTIVE: St[] = ['idle', 'walk', 'run'];
 
@@ -80,6 +90,18 @@ export class Actor {
   /** las estrellas de mareo del kit, mientras dura el mareo (undefined: el kit no las trae) */
   private estrellas: Phaser.GameObjects.Sprite | null | undefined = null;
   readonly nombre: string;
+  /** a quién tengo agarrado, y quién me tiene agarrado */
+  agarra: Actor | null = null;
+  agarrador: Actor | null = null;
+  private rodillazos = 0;
+  /** un ratito después de un golpe (sin caer) se le puede agarrar */
+  agarrable = 0;
+  /** los golpes que paró la guardia hace poco: al tercero se rompe */
+  private bloqueos: number[] = [];
+  /** el rival tirado que voy a pisar */
+  private pisado: Actor | null = null;
+  /** cuánto dura la burla en curso */
+  private burlaT = 0;
 
   constructor(readonly w: World, readonly id: string, readonly team: 0 | 1, x: number, y: number, readonly human = false) {
     this.x = x;
@@ -135,6 +157,7 @@ export class Actor {
   update(dt: number, it: Intent) {
     this.t += dt;
     if (this.invul > 0) this.invul -= dt;
+    if (this.agarrable > 0) this.agarrable -= dt;
     if (this.comboT > 0) { this.comboT -= dt; if (this.comboT <= 0) this.combo = 0; }
     switch (this.st) {
       case 'idle': case 'walk': case 'run': this.move(dt, it); break;
@@ -154,12 +177,16 @@ export class Actor {
       case 'ko': this.fig.step(dt); break;
       case 'win': case 'lose': this.fig.step(dt); if (this.st === 'win' && this.fig.anim.done) this.play('celebrate'); break;
       case 'special': case 'frozen': break;
+      case 'guard': this.guardTick(dt, it); break;
+      case 'grab': this.grabTick(dt, it); break;
+      case 'grabbed': this.grabbedTick(dt, it); break;
+      case 'taunt': this.fig.step(dt); if (this.t > this.burlaT) this.setSt('idle', 'idle'); break;
     }
     this.clamp();
   }
 
   private clamp() {
-    if (this.st === 'lifted') return;
+    if (this.st === 'lifted' || this.st === 'grabbed') return;
     const l = this.w.limites;
     this.x = Phaser.Math.Clamp(this.x, l?.xmin ?? XMIN, l?.xmax ?? XMAX);
     this.y = Phaser.Math.Clamp(this.y, 0, l?.depth ?? DEPTH);
@@ -177,12 +204,15 @@ export class Actor {
   private move(dt: number, it: Intent) {
     if (it.special && this.meter >= 100) { this.w.special(this); return; }
     if (it.jump) { this.jump(it); return; }
+    if (it.guard && !this.weapon && !this.carrying) { this.setSt('guard', 'guard'); this.vx = 0; return; }
     if (it.punch) { if (this.weapon) this.swing(); else this.punchOrGrab(); return; }
     if (it.kick) { if (this.weapon) this.throwWeapon(); else this.kickAttack(); return; }
     if (it.x) this.left = it.x < 0;
     const running = it.run && it.x !== 0;
     const sx = (running ? SPEED.runX : SPEED.walkX) * this.vel, sy = (running ? SPEED.runY : SPEED.walkY) * this.vel;
     const dx = it.x * sx * dt, dy = it.y * sy * dt;
+    // pegándose a un rival aturdido (recién golpeado o mareado), lo agarras, caminando o corriendo
+    if (it.x && !this.weapon && this.intentaAgarrar(it.x)) return;
     this.desplazar(dx, dy);
     // un escalón chico se sube solo; si se acaba el piso, se cae
     const base = this.base;
@@ -220,7 +250,8 @@ export class Actor {
 
   private air(dt: number, it: Intent) {
     this.physics(dt);
-    if (it.kick || it.punch) { this.startAttack('air_kick'); return; }
+    // saltando corriendo, la patada voladora de verdad; parado, la de siempre
+    if (it.kick || it.punch) { this.startAttack(Math.abs(this.vx) > 110 && this.tiene('flying_kick') ? 'flying_kick' : 'air_kick'); return; }
     if (this.grounded) { this.land(); return; }
     this.play(this.vz > 70 ? 'jump_rise' : this.vz > -70 ? 'jump_apex' : 'jump_fall');
     this.fig.step(dt);
@@ -247,6 +278,8 @@ export class Actor {
     // un rival tirado cerca: levantarlo
     const body = this.w.actors.find((a) => a !== this && a.team !== this.team && a.st === 'down' && Math.abs(a.x - this.x) < 30 && Math.abs(a.y - this.y) < 12);
     if (body) { this.startLift(body); return; }
+    // un mareado al alcance: se agarra con el puño
+    if (!this.weapon && this.intentaAgarrar(this.dir, true)) return;
     const item = this.w.items.find((i) => i.st === 'floor' && Math.abs(i.x - this.x) < 22 && Math.abs(i.y - this.y) < 12);
     if (item) {
       if (item.def.peso === 'pesado') this.startLift(item);
@@ -254,13 +287,24 @@ export class Actor {
       return;
     }
     if (this.st === 'run') { this.startAttack('run_punch'); this.vx = this.dir * 150; return; }
-    const seq = ['jab', 'jab', 'punch'];
+    // jab, jab y el gancho que tumba
+    const seq = ['jab', 'jab', this.tiene('hook') ? 'hook' : 'punch'];
     this.startAttack(seq[Math.min(this.combo, 2)]);
     this.combo = (this.combo + 1) % 3;
     this.comboT = 0.75;
   }
 
   private kickAttack() {
+    // uno tirado al lado: pisotón
+    const tirado = this.w.actors.find((a) => a !== this && a.team !== this.team && a.st === 'down' && a.hp > 0 && Math.abs(a.x - this.x) < 26 && Math.abs(a.y - this.y) < 10);
+    if (tirado && this.st !== 'run') {
+      this.left = tirado.x < this.x;
+      this.pisado = tirado;
+      this.startAttack('low_kick');
+      this.attack = ATTACKS.pisoton;
+      return;
+    }
+    this.pisado = null;
     if (this.st === 'run') { this.startAttack('run_kick'); this.vx = this.dir * 160; return; }
     const seq = ['low_kick', 'kick_martial'];
     this.startAttack(seq[Math.min(this.combo % 2, 1)]);
@@ -282,18 +326,20 @@ export class Actor {
     this.hitThisAttack.clear();
     this.queued = null;
     this.play(name, true);
-    if (name !== 'run_punch' && name !== 'run_kick' && name !== 'air_kick') this.vx = 0;
+    if (name !== 'run_punch' && name !== 'run_kick' && name !== 'air_kick' && name !== 'flying_kick') this.vx = 0;
+    if (name !== 'low_kick') this.pisado = null;
   }
 
   private attacking(dt: number, it: Intent) {
-    const airborne = !this.grounded || this.fig.anim.name === 'air_kick';
+    const airborne = !this.grounded || this.fig.anim.name === 'air_kick' || this.fig.anim.name === 'flying_kick';
     if (airborne) this.physics(dt);
     else { this.desplazar(this.vx * dt, 0); this.vx *= Math.pow(0.02, dt); }
     if (it.punch && this.fig.anim.name !== 'weapon_throw') this.queued = 'punch';
     if (it.kick) this.queued = 'kick';
     const ev = this.fig.step(dt);
     for (const e of ev) {
-      if (e.tipo === 'impacto' && this.attack) this.resolveHit(e.punto);
+      if (e.tipo === 'impacto' && this.attack && this.pisado) this.pisar();
+      else if (e.tipo === 'impacto' && this.attack) this.resolveHit(e.punto);
       if (e.tipo === 'suelta' && this.weapon) this.releaseWeapon();
     }
     if (airborne && this.grounded && this.t > 0.05) { this.land(); return; }
@@ -334,6 +380,28 @@ export class Actor {
 
   takeHit(from: Actor | null, def: AttackDef, dir: number) {
     const now = this.w.sc.time.now;
+    // la guardia para lo que viene de frente; lo muy pesado, o tres golpes seguidos, la rompen
+    if (this.st === 'guard' && from && (from.x - this.x) * this.dir > 0) {
+      this.bloqueos = this.bloqueos.filter((t) => now - t < 1500);
+      this.bloqueos.push(now);
+      if (def.dmg < 14 && this.bloqueos.length < 3) {
+        const poco = Math.max(1, Math.round(def.dmg * 0.15));
+        this.hp = Math.max(1, this.hp - poco);
+        this.vx = dir * 30;
+        this.desplazar(dir * 4, 0);
+        this.play('fight_block', true);
+        this.w.sfx('bloqueo', 0.5);
+        this.w.aviso?.(this, '¡BLOQUEO!', 0x9ad8ff);
+        from.meter = Math.min(100, from.meter + 2);
+        return;
+      }
+      this.bloqueos = [];
+      this.w.aviso?.(this, '¡SE ROMPIÓ LA GUARDIA!', 0xffa060);
+      this.w.sfx('critico', 0.4);
+      this.setSt('hurt', this.tiene('stagger') ? 'stagger' : 'fight_hit');
+      this.vx = dir * 40;
+      return;
+    }
     this.hitTimes = this.hitTimes.filter((t) => now - t < 1400);
     this.hitTimes.push(now);
     const dmg = def.dmg * (this.team === 0 && !this.human ? 0.85 : 1) * (this.w.multDaño?.(from, this) ?? 1);
@@ -341,6 +409,7 @@ export class Actor {
     this.meter = Math.min(100, this.meter + 7);
     if (from) from.meter = Math.min(100, from.meter + 6);
     const kd = !!def.kd || this.hitTimes.length >= 3 || this.hp <= 0;
+    this.soltar();
     this.dropAll();
     this.left = dir > 0;
     this.w.onHit(from, this, dmg, kd);
@@ -349,11 +418,13 @@ export class Actor {
     else {
       this.setSt('hurt', 'fight_hit');
       this.vx = dir * def.push;
+      this.agarrable = 0.6;
     }
   }
 
   knockdown(dir: number, push: number, launch = 150) {
     this.hitTimes = [];
+    this.soltar();
     this.dropAll();
     this.setSt('fall', 'ko_bounce');
     this.vx = dir * push;
@@ -366,7 +437,134 @@ export class Actor {
     this.desplazar(this.vx * dt, 0);
     this.vx *= Math.pow(0.01, dt);
     this.fig.step(dt);
-    if (this.t > 0.32) this.setSt('idle', 'idle');
+    // tambaleando (guardia rota) dura más
+    if (this.t > (this.fig.anim.name === 'stagger' ? 0.85 : 0.32)) this.setSt('idle', 'idle');
+  }
+
+  /** ¿El kit trae esta animación para este atleta? */
+  tiene(anim: string) { return !!kit().atletas[this.id] && Object.values(kit().atletas[this.id].packs).some((p) => anim in p.anims); }
+
+  // ------------------------------------------------------------------ guardia, agarre, pisotón y burla
+
+  private guardTick(dt: number, it: Intent) {
+    this.desplazar(this.vx * dt, 0);
+    this.vx *= Math.pow(0.02, dt);
+    this.fig.step(dt);
+    if (this.fig.anim.name === 'fight_block' && this.fig.anim.done) this.play('guard');
+    if (!it.guard) this.setSt('idle', 'idle');
+  }
+
+  /** Agarra al rival que tenga justo delante si está aturdido (recién golpeado o mareado). */
+  private intentaAgarrar(hacia: number, soloMareado = false): boolean {
+    if (!this.tiene('grab')) return false;
+    const v = this.w.actors.find((a) => a !== this && a.team !== this.team && a.agarrador === null && a.grounded && this.grounded
+      && (a.st === 'dizzy' || (!soloMareado && a.agarrable > 0 && (a.st === 'hurt' || a.controllable) && a.fig.anim.name !== 'stagger'))
+      && Math.sign(a.x - this.x) === Math.sign(hacia) && Math.abs(a.x - this.x) < (soloMareado ? 24 : 20) && Math.abs(a.y - this.y) < 7);
+    if (!v) return false;
+    v.dropAll();
+    this.left = v.x < this.x;
+    this.agarra = v;
+    this.rodillazos = 0;
+    this.setSt('grab', 'grab');
+    v.agarrador = this;
+    v.left = !this.left;
+    v.setSt('grabbed', 'grabbed');
+    v.agarrable = 0;
+    v.vx = 0;
+    this.w.sfx('recoger', 0.4);
+    this.w.aviso?.(v, v.human ? '¡TE AGARRÓ!' : this.human ? '¡LO AGARRASTE!' : '¡AGARRADO!', 0xffe080);
+    return true;
+  }
+
+  /** Agarrando: puño son rodillazos (el tercero tumba), patada lo bota al piso. */
+  private grabTick(dt: number, it: Intent) {
+    const v = this.agarra;
+    if (!v || v.st !== 'grabbed' || v.agarrador !== this) { this.soltar(); this.setSt('idle', 'idle'); return; }
+    const ev = this.fig.step(dt);
+    const nombre = this.fig.anim.name;
+    if (nombre === 'grab' && this.fig.anim.done) this.play('grab_hold');
+    if (nombre === 'knee_grab') {
+      if (ev.some((e) => e.tipo === 'impacto')) {
+        this.rodillazos++;
+        const ultimo = this.rodillazos >= 3;
+        const dmg = (ultimo ? 8 : 5) * (this.w.multDaño?.(this, v) ?? 1);
+        v.hp = Math.max(0, v.hp - dmg);
+        this.meter = Math.min(100, this.meter + 5);
+        this.w.onHit(this, v, dmg, ultimo);
+        this.w.number(v.x, v.y, Math.round(dmg));
+        this.w.spark(v.x - this.dir * 4, v.y, 18, ultimo);
+        if (ultimo || v.hp <= 0) { this.soltar(); v.knockdown(this.dir, 110, 190); this.setSt('idle', 'idle'); return; }
+      }
+      if (this.fig.anim.done) this.play('grab_hold');
+    } else if (it.punch) this.play(this.tiene('knee_grab') ? 'knee_grab' : 'jab', true);
+    else if (it.kick) {
+      // lo bota al piso con todo
+      const dmg = 9 * (this.w.multDaño?.(this, v) ?? 1);
+      v.hp = Math.max(0, v.hp - dmg);
+      this.soltar();
+      this.w.onHit(this, v, dmg, true);
+      this.w.number(v.x, v.y, Math.round(dmg));
+      v.knockdown(this.dir, 190, 230);
+      this.startAttack('kick_martial');
+      this.attack = null;
+      return;
+    }
+    // lo lleva pegado a las manos
+    v.x = this.x + this.dir * 13;
+    v.y = this.y;
+    v.z = this.z;
+  }
+
+  /** Agarrado: forcejea; machacando botones se suelta antes. La máquina se suelta sola al rato. */
+  private grabbedTick(dt: number, it: Intent) {
+    const g = this.agarrador;
+    this.fig.step(dt);
+    if (!g || g.agarra !== this || g.st !== 'grab') { this.agarrador = null; this.setSt('idle', 'idle'); return; }
+    if (it.punch || it.kick || it.jump || (it.x && Math.random() < 0.2)) this.t += 0.22;
+    if (this.t > 2.4) {
+      // se zafa: empuja al otro y queda libre
+      g.soltar();
+      g.setSt('hurt', 'fight_hit');
+      g.vx = -g.dir * 90;
+      this.setSt('attack', this.tiene('break_free') ? 'break_free' : 'fight_block');
+      this.attack = null;
+      this.invul = 0.4;
+      this.w.sfx('esquiva', 0.4);
+      this.w.aviso?.(this, '¡ME SOLTÉ!', 0x8ae08a);
+    }
+  }
+
+  /** Suelta a quien tenga agarrado (o se suelta de quien lo tenga). */
+  soltar() {
+    const v = this.agarra;
+    if (v) { this.agarra = null; if (v.agarrador === this) { v.agarrador = null; if (v.st === 'grabbed') v.setSt('idle', 'idle'); } }
+    const g = this.agarrador;
+    if (g) { this.agarrador = null; if (g.agarra === this) { g.agarra = null; if (g.st === 'grab') g.setSt('idle', 'idle'); } }
+  }
+
+  /** El pisotón al que está tirado: poquito daño, pero lo deja más rato en el piso. */
+  private pisar() {
+    const v = this.pisado;
+    this.pisado = null;
+    if (!v || v.st !== 'down') return;
+    const dmg = (this.attack?.dmg ?? 4) * (this.w.multDaño?.(this, v) ?? 1);
+    v.hp = Math.max(0, v.hp - dmg);
+    v.t = Math.min(v.t, 0.35);
+    this.meter = Math.min(100, this.meter + 4);
+    this.w.onHit(this, v, dmg, false);
+    this.w.number(v.x, v.y, Math.round(dmg));
+    this.w.dust(v.x, v.y);
+    this.w.aviso?.(v, '¡PISOTÓN!', 0xffb040);
+  }
+
+  /** Burlarse un ratito (riéndose o señalando): queda abierto a que le peguen. */
+  burla(seg = 1) {
+    if (!this.controllable) return false;
+    const anim = Math.random() < 0.5 && this.tiene('laugh') ? 'laugh' : this.tiene('point') ? 'point' : 'taunt';
+    this.burlaT = seg;
+    this.setSt('taunt', anim);
+    this.vx = 0;
+    return true;
   }
 
   private falling(dt: number) {
@@ -402,6 +600,7 @@ export class Actor {
   /** Fuera de combate sin pasar por el piso: se cayó de la azotea. */
   fuera() {
     this.hp = 0;
+    this.soltar();
     this.dropAll();
     this.ko();
   }
@@ -584,13 +783,17 @@ export class Actor {
 
   // ------------------------------------------------------------------ dibujo
 
+  /** La x de pantalla de un punto del mundo, con la vista inclinada. */
+  sx(x: number, y: number) { return x + (this.w.inclinacion ?? 0) * y; }
+
   render() {
     const elev = this.fig.anim.data.elevacion?.[this.fig.anim.frame] ?? 0;
-    this.fig.setPosition(Math.round(this.x), Math.round(this.ft + this.y - this.z - elev));
+    const px = this.sx(this.x, this.y);
+    this.fig.setPosition(Math.round(px), Math.round(this.ft + this.y - this.z - elev));
     const sortY = this.st === 'lifted' && this.carrier ? this.carrier.y + 0.5 : this.y;
     this.fig.setDepth(this.ft + sortY);
     const piso = this.base;
-    this.shadow.setPosition(Math.round(this.x), Math.round(this.ft + this.y - Math.max(0, piso)));
+    this.shadow.setPosition(Math.round(px), Math.round(this.ft + this.y - Math.max(0, piso)));
     const s = Math.max(0.4, 1 - (this.z - Math.max(0, piso) + elev) / 140);
     this.shadow.setScale(s).setDepth(this.ft - 1);
     this.shadow.setVisible(this.st !== 'lifted' && piso > HUECO / 2);
@@ -606,7 +809,7 @@ export class Actor {
     if (!on) { this.estrellas?.destroy(); this.estrellas = null; return; }
     const a = this.fig.anim;
     const head = a.data.cabeza?.[this.fig.rowIndex]?.[a.frame] ?? [0, -38];
-    const hx = this.x + this.dir * head[0], hy = this.ft + this.y - this.z + head[1] - 8;
+    const hx = this.sx(this.x, this.y) + this.dir * head[0], hy = this.ft + this.y - this.z + head[1] - 8;
     g.setDepth(this.ft + this.y + 1);
     // las estrellas y pajaritos del kit (lote F); si no están, las de siempre
     if (this.estrellas === undefined || this.estrellas === null) this.estrellas = efecto(this.w.sc, 'estrellas_mareo', hx, hy + 6) ?? undefined;
@@ -721,7 +924,7 @@ export class Item {
       const [ax, ay, ang, behind] = arma ?? [hand[0], hand[1], 300, 0];
       const k = ((Math.round(ang / 22.5) % 16) + 16) % 16;
       s.setFrame(`${this.kind}_mano_${k}`).setOrigin(0.5, 0.5).setFlipX(o.left);
-      s.setPosition(Math.round(o.x + o.dir * ax), Math.round(this.ft + o.y - o.z - elev + ay));
+      s.setPosition(Math.round(o.sx(o.x, o.y) + o.dir * ax), Math.round(this.ft + o.y - o.z - elev + ay));
       s.setDepth(this.ft + o.y + (behind ? -0.2 : 0.2));
       this.shadow.setVisible(false);
       if (o.st === 'ko' || o.st === 'down') s.setVisible(false);
@@ -731,8 +934,8 @@ export class Item {
       const p = this.owner.cargaPoint();
       const o = this.owner;
       s.setFrame(`${this.kind}_quieto_0`).setOrigin(0.5, 22 / 24).setFlipX(false);
-      if (p) s.setPosition(Math.round(p[0]), Math.round(this.ft + o.y - p[1]));
-      else s.setPosition(Math.round(o.x + o.dir * 12), Math.round(this.ft + o.y));
+      if (p) s.setPosition(Math.round(o.sx(p[0], o.y)), Math.round(this.ft + o.y - p[1]));
+      else s.setPosition(Math.round(o.sx(o.x, o.y) + o.dir * 12), Math.round(this.ft + o.y));
       s.setDepth(this.ft + o.y + 0.4);
       this.shadow.setVisible(false);
       return;
@@ -741,9 +944,10 @@ export class Item {
     if (spinning) s.setFrame(`${this.kind}_girando_${Math.floor(this.t * 16) % 8}`).setOrigin(0.5, 0.5);
     else s.setFrame(`${this.kind}_quieto_0`).setOrigin(0.5, 22 / 24);
     s.setFlipX(false);
-    s.setPosition(Math.round(this.x), Math.round(this.ft + this.y - this.z - (spinning ? 6 : 0)));
+    const px = this.x + (this.w.inclinacion ?? 0) * this.y;
+    s.setPosition(Math.round(px), Math.round(this.ft + this.y - this.z - (spinning ? 6 : 0)));
     s.setDepth(this.ft + this.y);
-    this.shadow.setVisible(true).setPosition(Math.round(this.x), Math.round(this.ft + this.y)).setDepth(this.ft - 1).setScale(Math.max(0.4, 1 - this.z / 200));
+    this.shadow.setVisible(true).setPosition(Math.round(px), Math.round(this.ft + this.y)).setDepth(this.ft - 1).setScale(Math.max(0.4, 1 - this.z / 200));
   }
 
   destroy() { this.sprite.destroy(); this.shadow.destroy(); }

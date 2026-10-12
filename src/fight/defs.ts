@@ -22,6 +22,9 @@ export const ATTACKS: Record<string, AttackDef> = {
   run_punch: { dmg: 11, kd: true, push: 150 },
   run_kick: { dmg: 14, kd: true, push: 170 },
   air_kick: { dmg: 10, kd: true, push: 130 },
+  hook: { dmg: 10, kd: true, push: 105, launch: 170 },
+  flying_kick: { dmg: 14, kd: true, push: 175, launch: 180 },
+  pisoton: { dmg: 4, push: 0 },
   weapon_swing: { dmg: 12, kd: true, push: 125, reach: 10 },
   weapon_swing_heavy: { dmg: 17, kd: true, push: 150, reach: 12 },
 };

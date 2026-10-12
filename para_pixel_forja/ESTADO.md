@@ -24,6 +24,25 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 | 14 | B6, B7, C3, E6 | Tradicionales, técnicas, secretos y Barrio Nekketsu | E1 | pendiente | |
 | 15 | J | Estudio | Todo | pendiente | |
 
+## Lo último del lado del juego
+
+- **Vista inclinada de verdad en el gris** (`src/events/CrossCountry.ts`). Es la misma proyección del piso de la pelea: `px = x + 0.35 * y`, y lo del fondo queda a la izquierda.
+  - Cajas como volúmenes (techo, frente y la cara izquierda).
+  - Escalones con su contrahuella, escaleras eléctricas con pasamanos y huecos con sus paredes.
+  - El bordillo de adelante.
+  - Los atletas, los efectos y los vehículos van proyectados.
+  - Capturas de referencia en `referencias/gris_inclinado/`.
+  - El juego lee `inclinacion` de `escenario.json` cuando el arte la traiga. Sin el campo, los atletas quedan derechos sobre el arte.
+  - **Esto reemplaza el punto 1 de la v1 de `NOCHE.md`** (juntas 1:2 y cara derecha), que estaba mal.
+- **La pelea nueva:**
+  - Agarre con rodillazos y forcejeo, guardia que se rompe y pisotón.
+  - Jab, jab y gancho. Patada voladora corriendo.
+  - Onomatopeyas, contador de golpes y burlas.
+  - Arepa que cura. VS y K.O. grande.
+  - Usa `grab`, `grab_hold`, `grabbed`, `knee_grab`, `break_free`, `guard`, `fight_block`, `stagger`, `hook`, `flying_kick`, `laugh` y `point`, ya en el kit (`kit.config.json`).
+  - Lo que falta en arte está en el lote P1 de `NOCHE.md`.
+- **`NOCHE.md` v2:** el pedido completo de la noche, con la proyección exacta, la pelea como prioridad y qué cuenta como lote completo.
+
 ## Notas de lo entregado
 
 **Lote A**, revisado del lado del juego: compila y pasan 170 de 170 pruebas en la rama. Se aceptan:

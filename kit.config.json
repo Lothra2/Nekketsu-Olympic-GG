@@ -41,7 +41,12 @@
       "victory",
       "taunt",
       "dizzy",
-      "ko_bounce"
+      "ko_bounce",
+      "slip_wet",
+      "stagger",
+      "laugh",
+      "point",
+      "guard"
     ],
     "ngg_golpe": [
       "jab",
@@ -53,7 +58,9 @@
       "run_kick",
       "air_kick",
       "fight_hit",
-      "fight_block"
+      "fight_block",
+      "hook",
+      "flying_kick"
     ],
     "ngg_carga": [
       "lift",
@@ -67,7 +74,14 @@
       "weapon_pick",
       "weapon_swing",
       "weapon_swing_heavy",
-      "weapon_throw"
+      "weapon_throw",
+      "grab",
+      "grab_hold",
+      "grabbed",
+      "knee_grab",
+      "break_free",
+      "umbrella_block",
+      "fan_gust"
     ],
     "atletismo": [
       "idle",

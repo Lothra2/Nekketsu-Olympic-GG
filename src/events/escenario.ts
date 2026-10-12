@@ -18,6 +18,8 @@ interface Luz { x: number; y: number; color: string; radio: number; latido?: num
 interface Particula { tipo: string; fx?: string; x0: number; x1: number; y0: number; y1: number; color?: string[]; cada: number; sube?: number; vida?: number }
 export interface EscenarioJson {
   id: string; franja: { atras: number; adelante: number }; largo: number; clima: string[];
+  /** la vista inclinada con que PixelForja pintó el piso (px = x + inclinacion * y); sin el campo, derecho */
+  inclinacion?: number;
   capas: Record<string, Capa>;
   vida: { imagen: string; piezas: Pieza[] };
 }
@@ -97,6 +99,8 @@ export function pintarEscenario(scene: Phaser.Scene, id: string, depthFrente: nu
   });
 
   return {
+    /** con cuánto se inclinó el dibujo: el juego corre a los atletas igual */
+    inclinacion: e.inclinacion ?? 0,
     /** Paralaje, vida y luces. `cerca(x, y)` dice si hay un atleta a mano (para espantar palomas). */
     tick(dt: number, camX: number, cerca: (x: number, y: number) => boolean) {
       lejos.tilePositionX = camX * (C.lejos.paralaje ?? 0.25);

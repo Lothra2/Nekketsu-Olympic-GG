@@ -14,6 +14,8 @@ export class Brain {
   private goal: 'fight' | 'item' | 'lift' | 'flee' = 'fight';
   private item: Item | null = null;
   private body: Actor | null = null;
+  /** cuánto le queda cubriéndose */
+  private guardT = 0;
 
   constructor(private me: Actor, private level = 1) {}
 
@@ -30,6 +32,15 @@ export class Brain {
       this.pressT = 0.17 + Math.random() * 0.08;
     }
     if (me.st === 'dizzy') { out.punch = Math.random() < 0.3; return out; }
+    // agarrado: forcejea; agarrando: rodillazos y a veces lo bota
+    if (me.st === 'grabbed') { out.punch = Math.random() < 0.12 * this.level; return out; }
+    if (me.st === 'grab') {
+      if (this.cool <= 0) { this.cool = 0.38 + Math.random() * 0.2; if (Math.random() < 0.25) out.kick = true; else out.punch = true; }
+      return out;
+    }
+    // cubriéndose mientras le tiran golpes
+    this.guardT -= dt;
+    if (this.guardT > 0 && (me.st === 'guard' || me.controllable)) return { ...NOTHING, guard: true };
     if (!me.controllable && me.st !== 'carry' && me.st !== 'attack') return out;
     if (this.think > 0) return out;
     this.think = 0.12 + Math.random() * 0.12 / this.level;
@@ -38,6 +49,17 @@ export class Brain {
     if (!enemies.length) { this.plan = { ...NOTHING }; return out; }
     const near = (a: { x: number; y: number }) => Math.abs(a.x - me.x) + Math.abs(a.y - me.y) * 2;
     const target = enemies.filter((e) => e.st !== 'down' && e.st !== 'lifted').sort((a, b) => near(a) - near(b))[0] ?? enemies[0];
+
+    // le van a pegar de frente: a veces se cubre
+    if (me.controllable && !me.weapon && target.st === 'attack' && Math.abs(target.x - me.x) < 40 && Math.abs(target.y - me.y) < 10
+      && (me.x - target.x) * target.dir > 0 && Math.random() < 0.22 * this.level) {
+      me.left = target.x < me.x;
+      this.guardT = 0.45 + Math.random() * 0.3;
+      return { ...NOTHING, guard: true };
+    }
+    // mal de vida y hay comida en el piso: va por ella
+    const comida = (me.w.comida ?? []).sort((a, b) => near(a) - near(b))[0];
+    if (comida && me.hp < me.maxHp * 0.5 && near(comida) < 260 && !me.carrying) return { ...out, ...this.walkTo(comida.x, comida.y, 4, out), punch: false };
 
     // técnica especial con la barra llena
     if (me.meter >= 100 && Math.abs(target.x - me.x) < 70 && Math.abs(target.y - me.y) < 10 && Math.random() < 0.5) { out.special = true; return out; }
@@ -82,7 +104,10 @@ export class Brain {
     const want = me.weapon ? 26 : 20;
     const plan: Intent = { ...NOTHING };
     if (Math.abs(dy) > 4) plan.y = Math.sign(dy);
-    if (Math.abs(dx) > want + 6) plan.x = Math.sign(dx);
+    // el rival quedó aturdido al lado: a veces se le pega para agarrarlo
+    const aturdido = (target.st === 'hurt' || target.st === 'dizzy') && Math.abs(dx) < 34 && Math.abs(dy) < 6 && !me.weapon;
+    if (aturdido && Math.random() < 0.5 * this.level) plan.x = Math.sign(dx);
+    else if (Math.abs(dx) > want + 6) plan.x = Math.sign(dx);
     else if (Math.abs(dx) < want - 8) plan.x = -Math.sign(dx);
     plan.run = Math.abs(dx) > 150 && Math.random() < 0.6;
     this.plan = plan;

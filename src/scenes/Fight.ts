@@ -34,6 +34,17 @@ const CADA_GRANDE = 30;
 const ACHICA = 90;
 const PESADOS = ['llanta', 'pote_basura', 'silla_plastica'];
 
+/** Lo que dice cada uno en la pantalla del VS. */
+const FRASE: Record<string, string> = {
+  rick: '¡AQUÍ NADIE SE RINDE, PANA!', steph: '¡ORDEN EN ESTA AZOTEA!', sophie: '¡TE VOY A GANAR, YA VERÁS!', alana: '¡THOR Y YO TE GANAMOS!',
+  kenji: '¡ESTA AZOTEA ES MÍA!', ryu: '¡ERES DEMASIADO LENTO!', goro: '¡GORO TIENE HAMBRE!', tetsu: '¡JE, JE! ¡PREPÁRATE!',
+};
+/** Las burlas del Instituto cuando te tumba. */
+const BURLAS = ['¡JAJAJA!', '¿ESO ES TODO?', '¡QUÉ LENTO!', '¡NI ME DESPEINÉ!', '¡LEVÁNTATE, PUES!'];
+/** Las onomatopeyas de cómic de los golpes fuertes. */
+const PUM = ['¡POW!', '¡BAM!', '¡CATAPLUM!', '¡PUM!', '¡KRAK!'];
+const PAF = ['¡PAF!', '¡ZAS!', '¡TOING!', '¡PLAF!'];
+
 export class Fight extends Phaser.Scene implements World {
   actors: Actor[] = [];
   items: Item[] = [];
@@ -78,6 +89,12 @@ export class Fight extends Phaser.Scene implements World {
   private bordeG: Phaser.GameObjects.Graphics | null = null;
   private relojTxt: Phaser.GameObjects.BitmapText | null = null;
   private pesado: { it: Item; sombra: Phaser.GameObjects.Ellipse } | null = null;
+  /** la arepa que cae de vez en cuando: quien la pisa recupera vida */
+  private arepas: { x: number; y: number; g: Phaser.GameObjects.Graphics; t: number }[] = [];
+  private arepaT = 24;
+  /** el contador de golpes seguidos de la persona */
+  private racha = { n: 0, t: 0 };
+  private rachaTxt: Phaser.GameObjects.BitmapText | null = null;
 
   constructor() { super('Fight'); }
 
@@ -104,11 +121,38 @@ export class Fight extends Phaser.Scene implements World {
     this.caidos.clear();
     this.rescates = ajustes().rescates;
     this.pesado = null;
+    this.arepas = [];
+    this.arepaT = 20 + Math.random() * 8;
+    this.racha = { n: 0, t: 0 };
+    this.rachaTxt = null;
     // entrenando no hay borde: el saco y tú no se caen
     this.limites = this.data0.practica ? undefined : { xmin: XMIN, xmax: 700, depth: DEPTH };
   }
 
   get sc(): Phaser.Scene { return this; }
+
+  /** Para la máquina: dónde hay comida en el piso. */
+  get comida() { return this.arepas.map((a) => ({ x: a.x, y: a.y })); }
+
+  /** Un cartelito de cómic chiquito sobre alguien. */
+  aviso(a: Actor, s: string, color: number) {
+    const t = txt(this, a.x, FLOOR_TOP + a.y - a.z - 58, s, 'fuente_ui', 1).setTint(color).setDepth(6000);
+    this.tweens.add({ targets: t, y: t.y - 14, alpha: 0, delay: 350, duration: 550, onComplete: () => t.destroy() });
+  }
+
+  /** Una onomatopeya de cómic con su estallido detrás: ¡POW! */
+  private onomatopeya(x: number, y: number, s: string, grande: boolean) {
+    const g = this.add.graphics().setDepth(6000).setPosition(x, y);
+    const n = 12, R = grande ? 22 : 15, r = grande ? 13 : 9;
+    const pts = Array.from({ length: n * 2 }, (_, i) => { const ang = (i * Math.PI) / n + Math.random() * 0.15, rr = i % 2 ? r : R + Math.random() * 4; return { x: Math.cos(ang) * rr * 1.5, y: Math.sin(ang) * rr }; });
+    g.fillStyle(grande ? 0xffe040 : 0xffffff).fillPoints(pts, true);
+    g.lineStyle(2, 0x1e1418).strokePoints(pts, true, true);
+    const t = txt(this, x, y, s, grande ? 'fuente_titulo' : 'fuente_ui', 1).setDepth(6001).setTint(grande ? 0xe8402a : 0x1e1418);
+    const todo = [g, t];
+    g.setScale(0.2); t.setScale(0.2);
+    this.tweens.add({ targets: todo, scale: 1, angle: Phaser.Math.Between(-12, 12), duration: 110, ease: 'Back.out' });
+    this.tweens.add({ targets: todo, alpha: 0, y: y - 10, delay: 380, duration: 260, onComplete: () => todo.forEach((o) => o.destroy()) });
+  }
 
   /** Tu equipo pega más según el nivel. */
   multDaño(from: Actor | null) { return from?.team === 0 ? ajustes().daño : 1; }
@@ -222,6 +266,11 @@ export class Fight extends Phaser.Scene implements World {
       { texto: '{PUÑO} ES PUÑO: PÉGALE\n3 VECES SEGUIDAS', botones: ['punch'], antes: marca, listo: () => desde().length >= 3 },
       { texto: '{PATADA} ES PATADA:\nPÉGALE UNA PATADA', botones: ['kick'], antes: marca, listo: () => desde().some((g) => g.includes('kick')) },
       { texto: '{SALTO} ES SALTO: SALTA Y EN EL AIRE\nTOCA {PATADA}, ¡PATADA VOLADORA!', botones: ['jump', 'kick'], antes: marca, listo: () => desde().some((g) => g === 'air_kick') },
+      { texto: 'MANTÉN {ESPECIAL} Y TE CUBRES:\nLOS GOLPES DE FRENTE CASI NO DUELEN', botones: ['special'], listo: () => yo.st === 'guard' && yo.t > 0.6 },
+      {
+        texto: 'PÉGALE Y SIGUE CAMINANDO HACIA ÉL: ¡LO AGARRAS!\n{PUÑO} RODILLAZO · {PATADA} LO BOTAS', botones: ['punch', 'stick'], antes: marca,
+        listo: () => desde().some((g) => g === 'knee_grab' || g === 'grab_hold'),
+      },
       { texto: 'PARA CORRER USA\n{CORRER}', botones: ['correr'], listo: () => yo.st === 'run' },
       {
         texto: 'ESTÁ EN EL PISO: PÁRATE AL LADO\nY TOCA {PUÑO} PARA LEVANTARLO', botones: ['punch'],
@@ -286,6 +335,36 @@ export class Fight extends Phaser.Scene implements World {
     this.hitstop(kd ? 0.09 : 0.05);
     if (kd) this.shake(110, 0.006);
     if (kd && v.team === 1 && this.thorFan?.visible && Math.random() < 0.5) { this.thorFan.set('bark', true); this.sfx('ladrido', 0.35); }
+    // los golpes seguidos de la persona: el contador y, cada tanto, la onomatopeya
+    if (from === this.player && !this.data0.practica) {
+      const now = this.time.now;
+      this.racha.n = now - this.racha.t < 1100 ? this.racha.n + 1 : 1;
+      this.racha.t = now;
+      if (this.racha.n >= 2) this.mostrarRacha();
+    }
+    const cabeza = FLOOR_TOP + v.y - v.z - 40;
+    if (kd) this.onomatopeya(v.x + (from ? from.dir * 10 : 0), cabeza, Phaser.Utils.Array.GetRandom(PUM), true);
+    else if (from === this.player && this.racha.n % 3 === 0) this.onomatopeya(v.x, cabeza, Phaser.Utils.Array.GetRandom(PAF), false);
+    // el Instituto se burla cuando te tumba (y si le pegas mientras se ríe, se lo merece)
+    if (kd && v.human && from && from.team === 1 && this.phase === 'play' && Math.random() < 0.65) {
+      this.time.delayedCall(520, () => {
+        if (!from.alive || this.phase !== 'play' || !from.burla(1.1)) return;
+        const t = txt(this, from.x, FLOOR_TOP + from.y - 62, Phaser.Utils.Array.GetRandom(BURLAS), 'fuente_ui', 1).setDepth(6000).setTint(0xffa0a0);
+        this.tweens.add({ targets: t, y: t.y - 8, alpha: 0, delay: 700, duration: 400, onComplete: () => t.destroy() });
+      });
+    }
+  }
+
+  /** "3 GOLPES": crece con la racha y se va solo. */
+  private mostrarRacha() {
+    const n = this.racha.n;
+    this.rachaTxt?.destroy();
+    const t = this.uiAdd(txt(this, 24, 78, n >= 5 ? `¡${n} GOLPES! ¡NEKKETSU!` : `${n} GOLPES`, 'fuente_titulo', 1, 0).setDepth(8100).setTint(n >= 5 ? 0xff6040 : n >= 3 ? 0xffe040 : 0xffffff));
+    t.setScale(1.6);
+    this.tweens.add({ targets: t, scale: 1, duration: 140, ease: 'Back.out' });
+    this.tweens.add({ targets: t, alpha: 0, delay: 900, duration: 300, onComplete: () => t.destroy() });
+    this.rachaTxt = t;
+    if (n >= 3) chip.blip(660 + n * 60, 0.06, 'sq25', 0.1, 990 + n * 60);
   }
   onKO(a: Actor) {
     this.sfx('enemigo_muere', 0.5);
@@ -299,6 +378,12 @@ export class Fight extends Phaser.Scene implements World {
       this.cameras.main.zoomTo(this.zoom * 1.3, 250);
       this.cameras.main.pan(a.x, FLOOR_TOP + a.y - 30, 250);
       flash(this, 200);
+      // el K.O. grande, de pantalla completa
+      this.shake(380, 0.014);
+      chip.boom(0.9);
+      const ko = this.uiAdd(txt(this, 320, 140, 'K.O.', 'fuente_titulo', 7).setDepth(8700).setTint(a.team === 1 ? 0xffe040 : 0xff5a4a));
+      this.tweens.add({ targets: ko, scale: { from: 12, to: 6 }, duration: 260, ease: 'Back.out' });
+      this.tweens.add({ targets: ko, alpha: 0, delay: 1150, duration: 300, onComplete: () => ko.destroy() });
       this.time.delayedCall(1400, () => { this.cameras.main.zoomTo(this.zoom, 300); this.time.delayedCall(320, () => { this.camLock = false; }); });
     }
   }
@@ -332,7 +417,8 @@ export class Fight extends Phaser.Scene implements World {
     if (this.stop > 0) { this.stop -= dt; this.renderAll(); this.drawHud(); return; }
 
     const playing = this.phase === 'play';
-    const human: Intent = playing ? { x: p.x, y: p.y, run: p.run, punch: p.pressed.punch, kick: p.pressed.kick, jump: p.pressed.jump, special: p.pressed.special } : NOTHING;
+    // la estrella con la barra llena es la técnica; sin barra, mantenida, te cubres
+    const human: Intent = playing ? { x: p.x, y: p.y, run: p.run, punch: p.pressed.punch, kick: p.pressed.kick, jump: p.pressed.jump, special: p.pressed.special, guard: p.held.special && this.player.meter < 100 } : NOTHING;
     for (const a of this.actors) {
       if (this.specials.has(a)) { this.specialTick(a, dt); continue; }
       const it = a === this.player ? human : playing ? (this.brains.get(a)?.update(dt) ?? NOTHING) : NOTHING;
@@ -353,6 +439,7 @@ export class Fight extends Phaser.Scene implements World {
       this.dropT -= dt;
       if (this.dropT <= 0) { this.dropT = 9 + Math.random() * 5; this.skyDrop(); }
       if (this.limites) this.kachinuki(dt);
+      this.arepaTick(dt);
       if (this.slow <= 0) this.checkEnd();
     }
     this.renderAll();
@@ -396,10 +483,38 @@ export class Fight extends Phaser.Scene implements World {
   // ------------------------------------------------------------------ inicio y final
 
   private async roundIntro() {
+    await this.vs();
     await this.banner('¡LISTOS!', 'fuente_titulo_plata', 3, 800);
     this.phase = 'play';
     chip.blip(1320, 0.2, 'sq50', 0.2, 1760);
     await this.banner('¡YA!', 'fuente_titulo', 5, 600);
+  }
+
+  /** La pantalla del VS antes de pelear: los dos retratos, sus nombres y lo que se dicen. */
+  private vs() {
+    return new Promise<void>((res) => {
+      const yo = this.player, el = this.actors.find((a) => a.team === 1)!;
+      const objs: Phaser.GameObjects.GameObject[] = [];
+      const add = <T extends Phaser.GameObjects.GameObject>(o: T) => { objs.push(this.uiAdd(o)); return o; };
+      add(this.add.rectangle(320, 180, 640, 360, 0x000000, 0.7).setDepth(8600));
+      add(this.add.rectangle(160, 160, 320, 150, 0x1a3a9a, 0.95).setDepth(8601));
+      add(this.add.rectangle(480, 160, 320, 150, 0x9a1a2a, 0.95).setDepth(8601));
+      add(speedLines(this, 8602));
+      const pa = add(this.add.image(-120, 150, `retratos:${yo.id}`, 'grande_enojo').setDepth(8603));
+      const pb = add(this.add.image(760, 150, `retratos:${el.id}`, 'grande_enojo').setDepth(8603).setFlipX(true));
+      this.tweens.add({ targets: pa, x: 150, duration: 260, ease: 'Back.out' });
+      this.tweens.add({ targets: pb, x: 490, duration: 260, ease: 'Back.out', delay: 120 });
+      const modo4 = this.data0.modo === '4v4';
+      add(txt(this, 150, 246, modo4 ? 'FAMILIA GG' : yo.nombre.toUpperCase(), 'fuente_ui', 2).setDepth(8604).setTint(0x9ac8ff));
+      add(txt(this, 490, 246, modo4 ? 'INSTITUTO NEKKETSU' : el.nombre.toUpperCase(), 'fuente_ui', 2).setDepth(8604).setTint(0xffa0a0));
+      const fa = add(txt(this, 150, 268, FRASE[yo.id] ?? '¡VAMOS!', 'fuente_ui', 1).setDepth(8604).setAlpha(0));
+      const fb = add(txt(this, 490, 268, FRASE[el.id] ?? '¡VEN!', 'fuente_ui', 1).setDepth(8604).setAlpha(0));
+      this.tweens.add({ targets: fa, alpha: 1, delay: 500, duration: 150 });
+      this.tweens.add({ targets: fb, alpha: 1, delay: 1000, duration: 150 });
+      const v = add(txt(this, 320, 150, 'VS', 'fuente_titulo', 4).setDepth(8605).setAlpha(0));
+      this.time.delayedCall(320, () => { v.setAlpha(1); this.tweens.add({ targets: v, scale: { from: 9, to: 4 }, duration: 220, ease: 'Back.out' }); chip.boom(0.6); this.shake(150, 0.006); });
+      this.time.delayedCall(2300, () => this.tweens.add({ targets: objs, alpha: 0, duration: 220, onComplete: () => { objs.forEach((o) => o.destroy()); res(); } }));
+    });
   }
 
   private banner(s: string, font: 'fuente_titulo' | 'fuente_titulo_plata' | 'fuente_ui', scale: number, hold: number) {
@@ -605,6 +720,45 @@ export class Fight extends Phaser.Scene implements World {
   }
 
   // ------------------------------------------------------------------ escenario
+
+  /** Una arepa que cae cada tanto: quien la pise se la come y recupera vida. */
+  private arepaTick(dt: number) {
+    if (this.data0.practica) return;
+    this.arepaT -= dt;
+    if (this.arepaT <= 0 && this.arepas.length === 0) {
+      this.arepaT = 22 + Math.random() * 12;
+      const x = Phaser.Math.Between(XMIN + 50, Math.min(XMAX, this.borde) - 70), y = Phaser.Math.Between(12, DEPTH - 12);
+      const g = this.add.graphics().setPosition(x, FLOOR_TOP + y).setDepth(FLOOR_TOP + y - 0.5);
+      // la arepa rellena: la masa dorada, el relleno asomado y las marcas del budare
+      g.fillStyle(0x000000, 0.3).fillEllipse(0, 1, 18, 5);
+      g.fillStyle(0xc8903a).fillEllipse(0, -3, 16, 9);
+      g.fillStyle(0xf0d090).fillEllipse(0, -4, 14, 7);
+      g.fillStyle(0x8a5a2a).fillRect(-4, -6, 2, 1).fillRect(2, -3, 2, 1).fillRect(-1, -5, 1, 1);
+      g.fillStyle(0xf4f4e8).fillRect(-6, -3, 12, 1);
+      g.fillStyle(0x2a1a14).fillRect(-5, -2, 10, 1);
+      g.fillStyle(0xffffff, 0.6).fillRect(-2, -12, 1, 3).fillRect(2, -14, 1, 3);
+      g.setScale(0).setY(FLOOR_TOP + y - 60);
+      this.tweens.add({ targets: g, scale: 1.5, y: FLOOR_TOP + y, duration: 420, ease: 'Bounce.out' });
+      this.arepas.push({ x, y, g, t: 14 });
+      const t = txt(this, x, FLOOR_TOP + y - 26, '¡UNA AREPA!', 'fuente_ui', 1).setDepth(6000).setTint(0xffd080);
+      this.tweens.add({ targets: t, y: t.y - 10, alpha: 0, delay: 900, duration: 500, onComplete: () => t.destroy() });
+      chip.blip(988, 0.1, 'sq25', 0.12, 1318);
+    }
+    for (const ar of this.arepas) {
+      ar.t -= dt;
+      if (ar.t < 3) ar.g.setAlpha(Math.floor(ar.t * 6) % 2 ? 0.4 : 1);
+      const quien = this.actors.find((a) => a.alive && a.grounded && ['idle', 'walk', 'run'].includes(a.st) && Math.abs(a.x - ar.x) < 13 && Math.abs(a.y - ar.y) < 8);
+      if (quien) {
+        ar.t = 0;
+        const cura = Math.min(quien.maxHp - quien.hp, Math.round(quien.maxHp * 0.25));
+        quien.hp += cura;
+        this.sfx('recoger', 0.5);
+        chip.blip(784, 0.08, 'sq25', 0.14, 1568);
+        this.aviso(quien, `¡ÑAM! +${cura}`, 0x8ae08a);
+      }
+    }
+    this.arepas = this.arepas.filter((ar) => { if (ar.t <= 0) { ar.g.destroy(); return false; } return true; });
+  }
 
   /** Las reglas de la final: el reloj, lo pesado que cae cada 30 s y la azotea que se achica a los 90 s. */
   private kachinuki(dt: number) {
