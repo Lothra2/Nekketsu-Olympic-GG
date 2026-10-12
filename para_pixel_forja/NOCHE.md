@@ -13,6 +13,14 @@ Rick quiere que PixelForja trabaje toda la noche, de corrido, y que cada lote sa
 5. **Antes de cada lote**, vuelve a leer `para_pixel_forja/ESTADO.md`, este archivo y los layouts de `data/stages/` en la rama `claude/sweet-albattani-6orfv8` del juego.
 6. **Al final de la noche**, un resumen único en `docs/olimpico/NOCHE.md` de PixelForja: qué quedó en cada rama, qué aprobar primero, qué falta y qué decidiste sin preguntar.
 
+## Los conceptos de cada mundo
+
+En `para_pixel_forja/referencias/conceptos/` hay arte conceptual de los 8 escenarios (10 imágenes: tres de la Comuna 13, una de cada uno de los demás) y un `LEEME.md` que dice qué tomar y qué ignorar de cada una.
+
+- **Son la referencia de ambiente** para todos los lotes de escenarios (1, 3 y 8): paleta, elementos que hacen reconocible el lugar, capas y densidad de detalle.
+- **La perspectiva y la geometría NO salen de ahí.** Salen del punto 1 y de `referencias/gris_inclinado/`.
+- **La vara:** la postal de PixelForja no puede quedar por debajo de su concepto en identidad y detalle.
+
 ## Qué cuenta como completo
 
 Vale para todos los lotes:
@@ -22,7 +30,7 @@ Vale para todos los lotes:
 - **Metadatos completos en cada cuadro.** Eventos (`impacto` con su `punto`, `suelta`, `aterriza`, `despegue`), `cuerpo` y `cajas`, `manos` y `cabeza`. Si un golpe pega, su `impacto` dice dónde.
 - **Nada de relleno.** No van cuadros repetidos para completar, ni placeholders, ni colores planos donde el resto tiene detalle.
 - **Las pruebas en verde.** Las 9 del escenario, las del kit y las de animación, con el reporte en el PR.
-- **Para aprobar:** GIFs con Sophie y Alana, postales de escenario y una hoja de contacto con todo lo nuevo.
+- **Para aprobar:** GIFs con Sophie y Alana, postales de escenario y una hoja de contacto con todo lo nuevo. Las postales de escenario van al lado de su concepto.
 - **El nombre del pack y la línea de `kit.config.json`.** Así el juego lo integra en un paso.
 - **"Límites honestos" en `ENTREGA.md`.** Qué no quedó como querías y por qué.
 

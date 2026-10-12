@@ -41,6 +41,7 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
   - Arepa que cura. VS y K.O. grande.
   - Usa `grab`, `grab_hold`, `grabbed`, `knee_grab`, `break_free`, `guard`, `fight_block`, `stagger`, `hook`, `flying_kick`, `laugh` y `point`, ya en el kit (`kit.config.json`).
   - Lo que falta en arte está en el lote P1 de `NOCHE.md`.
+- **Conceptos de los 8 mundos** en `referencias/conceptos/`, con un `LEEME.md` de qué tomar y qué ignorar en cada uno. Son la referencia de ambiente para los lotes de escenarios.
 - **`NOCHE.md` v2:** el pedido completo de la noche, con la proyección exacta, la pelea como prioridad y qué cuenta como lote completo.
 
 ## Notas de lo entregado
