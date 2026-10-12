@@ -1,0 +1,24 @@
+// Captura en tablet (iPad acostado, con toque): título, selección y pelea con los controles táctiles.
+import { chromium } from '@playwright/test';
+const out = process.argv[2] ?? 'capturas';
+const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader'] });
+const ctx = await browser.newContext({ viewport: { width: 1180, height: 820 }, hasTouch: true, isMobile: true, deviceScaleFactor: 1 });
+const page = await ctx.newPage();
+page.on('pageerror', (e) => console.log('pageerror', e.message));
+await page.goto('http://localhost:5173/');
+await page.waitForTimeout(2500);
+await page.touchscreen.tap(590, 410);
+await page.waitForTimeout(800);
+await page.evaluate(() => { const g = window.game; g.scene.getScenes(true).forEach((s) => g.scene.stop(s.scene.key)); g.scene.start('Select', { modo: '4v4' }); });
+await page.waitForTimeout(800);
+await page.screenshot({ path: `${out}/tablet_seleccion.png` });
+await page.evaluate(() => { const g = window.game; g.scene.getScenes(true).forEach((s) => g.scene.stop(s.scene.key)); g.scene.start('Fight', { modo: '4v4', jugador: 'sophie', rival: 'kenji' }); });
+await page.waitForTimeout(3500);
+await page.screenshot({ path: `${out}/tablet_pelea.png` });
+await ctx.close();
+const ctx2 = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+const p2 = await ctx2.newPage();
+await p2.goto('http://localhost:5173/');
+await p2.waitForTimeout(2000);
+await p2.screenshot({ path: `${out}/telefono_vertical.png` });
+await browser.close();

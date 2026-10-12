@@ -1,0 +1,24 @@
+{
+  "name": "nekketsu-olympic-gg",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "kit": "tools/pixel_forja/node_modules/.bin/tsx scripts/kit.ts",
+    "kit:preparar": "git submodule update --init && cd tools/pixel_forja && npm ci"
+  },
+  "dependencies": {
+    "phaser": "3.90.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "typescript": "5.9.3",
+    "vite": "7.1.12",
+    "vitest": "3.2.4"
+  }
+}
