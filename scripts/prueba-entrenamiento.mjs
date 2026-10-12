@@ -31,6 +31,8 @@ async function entrenar(scene, d, jugar, limite = 60) {
   while (Date.now() - t0 < limite * 1000) {
     const i = await paso(scene);
     if (i === 99) break;
+    // si ya había pasos y ahora no hay cartel, el entrenamiento terminó y se eligió "jugar de verdad" con las mismas teclas
+    if (visto >= 0 && i === -1 && !(await page.evaluate((s) => window.game.scene.getScene(s).d?.practica, scene))) { visto = 99; break; }
     if (i !== visto) {
       visto = i;
       await page.waitForTimeout(150);
@@ -40,7 +42,7 @@ async function entrenar(scene, d, jugar, limite = 60) {
     if (i >= 0) await jugar(i);
     else await page.waitForTimeout(100);
   }
-  const fin = await paso(scene);
+  const fin = visto === 99 ? 99 : await paso(scene);
   await page.waitForTimeout(900);
   await page.screenshot({ path: `${out}/${scene}_fin.png` });
   console.log(scene, fin === 99 ? 'completo' : `se quedó en el paso ${fin + 1}`);
@@ -80,8 +82,8 @@ if (!solo.length || solo.includes('natacion')) {
 }
 if (!solo.length || solo.includes('jabalina')) {
   await entrenar('Jabalina', { jugador: 'rick', practica: true }, async () => {
-    const s = await page.evaluate(() => { const j = window.game.scene.getScene('Jabalina'); return { st: j.st, x: j.x }; });
-    if (s.st !== 'carrera') { await page.waitForTimeout(150); return; }
+    const s = await page.evaluate(() => { const j = window.game.scene.getScene('Jabalina'); return { st: j.st, x: j.x, listo: !j.coach || j.coach.done }; });
+    if (s.listo || s.st !== 'carrera') { await page.waitForTimeout(150); return; }
     for (let k = 0; k < 16; k++) await key(k % 2 ? 'j' : 'k', 25);
     await page.keyboard.down('l');
     // sube la flecha hasta cerca de 45 grados
