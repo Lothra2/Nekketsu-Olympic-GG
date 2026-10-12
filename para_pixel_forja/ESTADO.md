@@ -13,9 +13,9 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 | 3 | C1 | Familia GG e Instituto Nekketsu | A | aprobado, en main | [pixel_forja#9](https://github.com/Lothra2/pixel_forja/pull/9) |
 | 4 | G1 fuentes | Acentos del vietnamita en las fuentes | Nada | aprobado, en main | [pixel_forja#10](https://github.com/Lothra2/pixel_forja/pull/10) |
 | 5 | I inicial | Kit a medida por configuración | A | aprobado, en main | [pixel_forja#11](https://github.com/Lothra2/pixel_forja/pull/11) |
-| 6 | E1 | Sistema de escenarios oblicuos + `saigon_hem` | A, I, layout de `saigon_hem` | entregado, falta la aprobación de Rick | [pixel_forja#14](https://github.com/Lothra2/pixel_forja/pull/14) |
+| 6 | E1 | Sistema de escenarios oblicuos + `saigon_hem` | A, I, layout de `saigon_hem` | aprobado, en main | [pixel_forja#14](https://github.com/Lothra2/pixel_forja/pull/14) |
 | 7 | F | Efectos (y audio por configuración) | Nada | aprobado, en main | [pixel_forja#12](https://github.com/Lothra2/pixel_forja/pull/12) |
-| 8 | G1, H1 | Resto de interfaz y audio de la rebanada vertical | Nada | pendiente | |
+| 8 | G1, H1 | Resto de interfaz y audio de la rebanada vertical | Nada | entregado, falta la aprobación de Rick | [pixel_forja#13](https://github.com/Lothra2/pixel_forja/pull/13) |
 | 9 | B2, C2, D2, E2 | Cross Country completo y equipos nacionales | E1 | pendiente | |
 | 10 | B3, E3 | Obstáculos, Tama-wari, Kachinuki | E1 | pendiente | |
 | 11 | B4, E4 | Pruebas de 1992 | E1 | pendiente | |
@@ -106,7 +106,13 @@ Se pidió para B1: el campo `cuerpo` (hurtbox sin implementos ni efectos), porqu
 - El portón sale como objeto con `orden` 131, delante de todos. Se probó con los 4 atletas pasando por el hueco de abajo: el poste y la hoja tapan solo las piernas un instante, y se lee bien.
 - El Cross Country corre de punta a punta con el arte nuevo, sin errores.
 - `"escenarios"` en `kit.config.json` no se usa por ahora. El script aparte tarda menos de 2 s contra los 20 s del kit, falla por su cuenta y escribe el `index.json` que lee el juego.
-- El arte no se sube al juego hasta que E1 esté en `main`. Cuando entre: subir el submódulo y correr `npm run escenarios`.
+- E1 ya está en `main`. El submódulo apunta a `main` y el arte de `saigon_hem` está en el juego (`public/assets/escenarios/saigon_hem/`). Pasan todas las pruebas del juego con el arte. El kit regenerado con `main` sale igual: solo cambia una línea de `CREDITOS.txt`.
+
+**G1 resto y H1** (PR #13), esperando la revisión de Rick. Cuando entre a `main`, el juego pide en `kit.config.json`:
+- `ui.logo` y `ui.interfaz`: logo animado, diálogo 9-slice, paneles por equipo, barras, banners, controles táctiles, minimapa y números.
+- El audio de H1: `silbato`, `pistola`, `marcha_nekketsu` y el resto. Con eso `manifest.pendiente` queda vacío.
+- Voces en blips: cada atleta trae `voz { tono, timbre, archivos }`.
+- La victoria nueva se llama `victoria_banda`. `victoria` sigue siendo la de GG Abyss.
 
 **Kit del juego por `kit.config.json`, con I y F en `main`:**
 - El puente `scripts/kit.ts` ya no existe. `npm run kit` corre `kit-a-medida` del submódulo con `kit.config.json` en la raíz del juego.

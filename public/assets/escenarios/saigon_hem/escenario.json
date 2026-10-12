@@ -1,0 +1,1584 @@
+{
+ "generado_con": "PixelForja",
+ "id": "saigon_hem",
+ "nombre": "HẺM DE SAIGÓN",
+ "escala": 1,
+ "resolucion": [
+  640,
+  360
+ ],
+ "franja": {
+  "atras": 200,
+  "adelante": 330
+ },
+ "largo": 3840,
+ "hora": "manana",
+ "clima": [
+  "despejado",
+  "aguacero"
+ ],
+ "capas": {
+  "cielo": {
+   "archivo": "cielo_manana.png",
+   "y": 0,
+   "paralaje": 0,
+   "repetir_x": true
+  },
+  "lejos": {
+   "archivo": "lejos.png",
+   "y": 0,
+   "paralaje": 0.25,
+   "repetir_x": true
+  },
+  "tras_cerca": {
+   "nota": "la vida con capa tras_cerca va aquí: se ve por los callejones"
+  },
+  "cerca": {
+   "archivos": [
+    "cerca_0.png",
+    "cerca_1.png",
+    "cerca_2.png"
+   ],
+   "trozo": 1280,
+   "y": 0,
+   "paralaje": 1
+  },
+  "piso": {
+   "archivos": [
+    "piso_0.png",
+    "piso_1.png",
+    "piso_2.png"
+   ],
+   "trozo": 1280,
+   "y": 200,
+   "paralaje": 1,
+   "nota": "las primeras 130 filas son la franja, las de abajo la orilla de enfrente"
+  },
+  "piso_mojado": {
+   "archivos": [
+    "piso_mojado_0.png",
+    "piso_mojado_1.png",
+    "piso_mojado_2.png"
+   ],
+   "trozo": 1280,
+   "y": 200,
+   "clima": "aguacero",
+   "nota": "va encima del piso cuando llueve"
+  },
+  "objetos": {
+   "archivo": "objetos.json",
+   "nota": "entre el piso y el frente, ordenados con los atletas"
+  },
+  "frente": {
+   "archivos": [
+    "frente_0.png",
+    "frente_1.png",
+    "frente_2.png"
+   ],
+   "trozo": 1280,
+   "y": 316,
+   "paralaje": 1
+  }
+ },
+ "vida": {
+  "imagen": "vida.png",
+  "piezas": [
+   {
+    "id": "ropa_0",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 19,
+    "y": 111,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 34,
+      "h": 10
+     },
+     {
+      "x": 35,
+      "y": 0,
+      "w": 34,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_1",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 12,
+    "y": 23,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 70,
+      "y": 0,
+      "w": 47,
+      "h": 10
+     },
+     {
+      "x": 118,
+      "y": 0,
+      "w": 47,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_2",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 92,
+    "y": 111,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 166,
+      "y": 0,
+      "w": 34,
+      "h": 10
+     },
+     {
+      "x": 201,
+      "y": 0,
+      "w": 34,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_3",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 156,
+    "y": 111,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 236,
+      "y": 0,
+      "w": 38,
+      "h": 10
+     },
+     {
+      "x": 275,
+      "y": 0,
+      "w": 38,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_4",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 151,
+    "y": 67,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 314,
+      "y": 0,
+      "w": 46,
+      "h": 10
+     },
+     {
+      "x": 361,
+      "y": 0,
+      "w": 46,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_5",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 209,
+    "y": 111,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 408,
+      "y": 0,
+      "w": 28,
+      "h": 10
+     },
+     {
+      "x": 437,
+      "y": 0,
+      "w": 28,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_6",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 990,
+    "y": 111,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 466,
+      "y": 0,
+      "w": 49,
+      "h": 10
+     },
+     {
+      "x": 516,
+      "y": 0,
+      "w": 49,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_7",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 1093,
+    "y": 67,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 566,
+      "y": 0,
+      "w": 45,
+      "h": 10
+     },
+     {
+      "x": 612,
+      "y": 0,
+      "w": 45,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_8",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 1400,
+    "y": 111,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 658,
+      "y": 0,
+      "w": 28,
+      "h": 10
+     },
+     {
+      "x": 687,
+      "y": 0,
+      "w": 28,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_9",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 1382,
+    "y": 67,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 716,
+      "y": 0,
+      "w": 49,
+      "h": 10
+     },
+     {
+      "x": 766,
+      "y": 0,
+      "w": 49,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_10",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 1669,
+    "y": 23,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 816,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 857,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_11",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 1766,
+    "y": 111,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 898,
+      "y": 0,
+      "w": 28,
+      "h": 10
+     },
+     {
+      "x": 927,
+      "y": 0,
+      "w": 28,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_12",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 1760,
+    "y": 67,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 956,
+      "y": 0,
+      "w": 48,
+      "h": 10
+     },
+     {
+      "x": 1005,
+      "y": 0,
+      "w": 48,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_13",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 1858,
+    "y": 111,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 1054,
+      "y": 0,
+      "w": 28,
+      "h": 10
+     },
+     {
+      "x": 1083,
+      "y": 0,
+      "w": 28,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_14",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 2041,
+    "y": 67,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 1112,
+      "y": 0,
+      "w": 29,
+      "h": 10
+     },
+     {
+      "x": 1142,
+      "y": 0,
+      "w": 29,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_15",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 2154,
+    "y": 23,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 1172,
+      "y": 0,
+      "w": 32,
+      "h": 10
+     },
+     {
+      "x": 1205,
+      "y": 0,
+      "w": 32,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_16",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 2224,
+    "y": 67,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 1238,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 1279,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_17",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 2289,
+    "y": 23,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 1320,
+      "y": 0,
+      "w": 30,
+      "h": 10
+     },
+     {
+      "x": 1351,
+      "y": 0,
+      "w": 30,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_18",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 2380,
+    "y": 111,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 1382,
+      "y": 0,
+      "w": 48,
+      "h": 10
+     },
+     {
+      "x": 1431,
+      "y": 0,
+      "w": 48,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_19",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 2381,
+    "y": 67,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 1480,
+      "y": 0,
+      "w": 38,
+      "h": 10
+     },
+     {
+      "x": 1519,
+      "y": 0,
+      "w": 38,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_20",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 2376,
+    "y": 23,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 1558,
+      "y": 0,
+      "w": 28,
+      "h": 10
+     },
+     {
+      "x": 1587,
+      "y": 0,
+      "w": 28,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_21",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 2494,
+    "y": 23,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 1616,
+      "y": 0,
+      "w": 39,
+      "h": 10
+     },
+     {
+      "x": 1656,
+      "y": 0,
+      "w": 39,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_22",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 2641,
+    "y": 23,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 1696,
+      "y": 0,
+      "w": 46,
+      "h": 10
+     },
+     {
+      "x": 1743,
+      "y": 0,
+      "w": 46,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_23",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 2820,
+    "y": 111,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 1790,
+      "y": 0,
+      "w": 42,
+      "h": 10
+     },
+     {
+      "x": 1833,
+      "y": 0,
+      "w": 42,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_24",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 2876,
+    "y": 111,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 1876,
+      "y": 0,
+      "w": 45,
+      "h": 10
+     },
+     {
+      "x": 1922,
+      "y": 0,
+      "w": 45,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_25",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 2949,
+    "y": 67,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 1968,
+      "y": 0,
+      "w": 33,
+      "h": 10
+     },
+     {
+      "x": 2002,
+      "y": 0,
+      "w": 33,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_26",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 2959,
+    "y": 23,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 0,
+      "y": 11,
+      "w": 41,
+      "h": 10
+     },
+     {
+      "x": 42,
+      "y": 11,
+      "w": 41,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_27",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 3097,
+    "y": 67,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 84,
+      "y": 11,
+      "w": 30,
+      "h": 10
+     },
+     {
+      "x": 115,
+      "y": 11,
+      "w": 30,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_28",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 3310,
+    "y": 23,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 146,
+      "y": 11,
+      "w": 44,
+      "h": 10
+     },
+     {
+      "x": 191,
+      "y": 11,
+      "w": 44,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_29",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 3367,
+    "y": 111,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 236,
+      "y": 11,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 277,
+      "y": 11,
+      "w": 40,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_30",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 3433,
+    "y": 111,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 318,
+      "y": 11,
+      "w": 30,
+      "h": 10
+     },
+     {
+      "x": 349,
+      "y": 11,
+      "w": 30,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_31",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 3516,
+    "y": 111,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 380,
+      "y": 11,
+      "w": 41,
+      "h": 10
+     },
+     {
+      "x": 422,
+      "y": 11,
+      "w": 41,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_32",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 3670,
+    "y": 111,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 464,
+      "y": 11,
+      "w": 32,
+      "h": 10
+     },
+     {
+      "x": 497,
+      "y": 11,
+      "w": 32,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_33",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 3656,
+    "y": 67,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 530,
+      "y": 11,
+      "w": 31,
+      "h": 10
+     },
+     {
+      "x": 562,
+      "y": 11,
+      "w": 31,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ropa_34",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 3818,
+    "y": 111,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 594,
+      "y": 11,
+      "w": 38,
+      "h": 10
+     },
+     {
+      "x": 633,
+      "y": 11,
+      "w": 38,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "cables_0",
+    "tipo": "cables_viento",
+    "capa": "cerca",
+    "x": 0,
+    "y": 49,
+    "fps": 1,
+    "cuadros": [
+     {
+      "x": 672,
+      "y": 11,
+      "w": 628,
+      "h": 37
+     },
+     {
+      "x": 1301,
+      "y": 11,
+      "w": 628,
+      "h": 37
+     }
+    ]
+   },
+   {
+    "id": "palomas_0",
+    "tipo": "palomas",
+    "capa": "cerca",
+    "x": 339,
+    "y": 65,
+    "fps": 4,
+    "cuadros": [
+     {
+      "x": 1930,
+      "y": 11,
+      "w": 34,
+      "h": 10
+     },
+     {
+      "x": 1965,
+      "y": 11,
+      "w": 34,
+      "h": 10
+     },
+     {
+      "x": 2000,
+      "y": 11,
+      "w": 34,
+      "h": 10
+     },
+     {
+      "x": 0,
+      "y": 49,
+      "w": 34,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "cables_1",
+    "tipo": "cables_viento",
+    "capa": "cerca",
+    "x": 656,
+    "y": 49,
+    "fps": 1,
+    "cuadros": [
+     {
+      "x": 35,
+      "y": 49,
+      "w": 1252,
+      "h": 43
+     },
+     {
+      "x": 0,
+      "y": 93,
+      "w": 1252,
+      "h": 43
+     }
+    ]
+   },
+   {
+    "id": "palomas_1",
+    "tipo": "palomas",
+    "capa": "cerca",
+    "x": 1237,
+    "y": 76,
+    "fps": 4,
+    "cuadros": [
+     {
+      "x": 1253,
+      "y": 93,
+      "w": 34,
+      "h": 10
+     },
+     {
+      "x": 1288,
+      "y": 93,
+      "w": 34,
+      "h": 10
+     },
+     {
+      "x": 1323,
+      "y": 93,
+      "w": 34,
+      "h": 10
+     },
+     {
+      "x": 1358,
+      "y": 93,
+      "w": 34,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "cables_2",
+    "tipo": "cables_viento",
+    "capa": "cerca",
+    "x": 1936,
+    "y": 49,
+    "fps": 1,
+    "cuadros": [
+     {
+      "x": 0,
+      "y": 137,
+      "w": 1252,
+      "h": 43
+     },
+     {
+      "x": 0,
+      "y": 181,
+      "w": 1252,
+      "h": 43
+     }
+    ]
+   },
+   {
+    "id": "palomas_2",
+    "tipo": "palomas",
+    "capa": "cerca",
+    "x": 2467,
+    "y": 75,
+    "fps": 4,
+    "cuadros": [
+     {
+      "x": 1253,
+      "y": 181,
+      "w": 34,
+      "h": 10
+     },
+     {
+      "x": 1288,
+      "y": 181,
+      "w": 34,
+      "h": 10
+     },
+     {
+      "x": 1323,
+      "y": 181,
+      "w": 34,
+      "h": 10
+     },
+     {
+      "x": 1358,
+      "y": 181,
+      "w": 34,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "cables_3",
+    "tipo": "cables_viento",
+    "capa": "cerca",
+    "x": 3216,
+    "y": 49,
+    "fps": 1,
+    "cuadros": [
+     {
+      "x": 1393,
+      "y": 181,
+      "w": 624,
+      "h": 37
+     },
+     {
+      "x": 0,
+      "y": 225,
+      "w": 624,
+      "h": 37
+     }
+    ]
+   },
+   {
+    "id": "palomas_3",
+    "tipo": "palomas",
+    "capa": "cerca",
+    "x": 3592,
+    "y": 66,
+    "fps": 4,
+    "cuadros": [
+     {
+      "x": 625,
+      "y": 225,
+      "w": 34,
+      "h": 10
+     },
+     {
+      "x": 660,
+      "y": 225,
+      "w": 34,
+      "h": 10
+     },
+     {
+      "x": 695,
+      "y": 225,
+      "w": 34,
+      "h": 10
+     },
+     {
+      "x": 730,
+      "y": 225,
+      "w": 34,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "motos_fondo",
+    "tipo": "motos_fondo",
+    "capa": "tras_cerca",
+    "x": 3840,
+    "y": 138,
+    "fps": 8,
+    "velocidad": -70,
+    "cada": 5,
+    "cuadros": [
+     {
+      "x": 765,
+      "y": 225,
+      "w": 52,
+      "h": 40
+     },
+     {
+      "x": 818,
+      "y": 225,
+      "w": 52,
+      "h": 40
+     }
+    ]
+   }
+  ]
+ },
+ "callejones": [
+  {
+   "x0": 480,
+   "x1": 506,
+   "tipo": "callejon"
+  },
+  {
+   "x0": 1060,
+   "x1": 1086,
+   "tipo": "callejon"
+  },
+  {
+   "x0": 1200,
+   "x1": 1258,
+   "tipo": "canal"
+  },
+  {
+   "x0": 1820,
+   "x1": 1846,
+   "tipo": "callejon"
+  },
+  {
+   "x0": 2340,
+   "x1": 2366,
+   "tipo": "callejon"
+  },
+  {
+   "x0": 3020,
+   "x1": 3076,
+   "tipo": "canal"
+  },
+  {
+   "x0": 3280,
+   "x1": 3306,
+   "tipo": "callejon"
+  },
+  {
+   "x0": 3620,
+   "x1": 3646,
+   "tipo": "callejon"
+  }
+ ],
+ "superficie": {
+  "archivo": "superficie.png",
+  "y": 200,
+  "leyenda": [
+   {
+    "id": "acera",
+    "color": "#d0d0d0",
+    "paso": "paso_piedra",
+    "resbala": false
+   },
+   {
+    "id": "hueco",
+    "color": "#000000",
+    "paso": "",
+    "resbala": false
+   },
+   {
+    "id": "agua",
+    "color": "#3060ff",
+    "paso": "paso_agua",
+    "resbala": true
+   },
+   {
+    "id": "asfalto",
+    "color": "#808080",
+    "paso": "paso_piedra",
+    "resbala": false
+   },
+   {
+    "id": "puente",
+    "color": "#f0f0f0",
+    "paso": "paso_piedra",
+    "resbala": false
+   }
+  ]
+ },
+ "colision": "colision.json",
+ "luces": "luces.json",
+ "particulas": "particulas.json",
+ "paleta": [
+  {
+   "nombre": "tinta",
+   "hex": "#231c28"
+  },
+  {
+   "nombre": "sombra",
+   "hex": "#3d3442"
+  },
+  {
+   "nombre": "asfalto",
+   "hex": "#57505a"
+  },
+  {
+   "nombre": "asfalto_claro",
+   "hex": "#7a7178"
+  },
+  {
+   "nombre": "cemento",
+   "hex": "#a39a98"
+  },
+  {
+   "nombre": "cemento_claro",
+   "hex": "#cdc3b8"
+  },
+  {
+   "nombre": "crema",
+   "hex": "#efe4cb"
+  },
+  {
+   "nombre": "luz",
+   "hex": "#fff8e6"
+  },
+  {
+   "nombre": "amarillo",
+   "hex": "#f0cc66"
+  },
+  {
+   "nombre": "ocre",
+   "hex": "#c4913f"
+  },
+  {
+   "nombre": "terracota",
+   "hex": "#a8553a"
+  },
+  {
+   "nombre": "rojo",
+   "hex": "#d93a2e"
+  },
+  {
+   "nombre": "vino",
+   "hex": "#82242c"
+  },
+  {
+   "nombre": "salmon",
+   "hex": "#ec9f8c"
+  },
+  {
+   "nombre": "menta",
+   "hex": "#93cdb0"
+  },
+  {
+   "nombre": "verde",
+   "hex": "#4f8f55"
+  },
+  {
+   "nombre": "verde_oscuro",
+   "hex": "#2d5a3e"
+  },
+  {
+   "nombre": "celeste",
+   "hex": "#8fbfdc"
+  },
+  {
+   "nombre": "cielo",
+   "hex": "#d4e8f0"
+  },
+  {
+   "nombre": "azul",
+   "hex": "#3f71a3"
+  },
+  {
+   "nombre": "azul_noche",
+   "hex": "#283d5e"
+  },
+  {
+   "nombre": "canal",
+   "hex": "#5b7a68"
+  },
+  {
+   "nombre": "oro",
+   "hex": "#f5b52e"
+  },
+  {
+   "nombre": "bruma",
+   "hex": "#e9cfae"
+  }
+ ],
+ "verificacion": "verificacion.md",
+ "layout": {
+  "id": "saigon_hem",
+  "pais": "vietnam",
+  "prueba": "crosscountry",
+  "tramo": 1,
+  "nombre": "HẺM DE SAIGÓN",
+  "largo": 3840,
+  "franja": {
+   "atras": 200,
+   "adelante": 330
+  },
+  "hora": "manana",
+  "clima": [
+   "despejado",
+   "aguacero"
+  ],
+  "paralaje": {
+   "cielo": "auto",
+   "lejos": "saigon_skyline",
+   "cerca": "hem"
+  },
+  "piso": [
+   {
+    "x0": 0,
+    "x1": 3840,
+    "tipo": "asfalto"
+   },
+   {
+    "x0": 0,
+    "x1": 3840,
+    "y0": 0,
+    "y1": 24,
+    "tipo": "acera"
+   }
+  ],
+  "huecos": [
+   {
+    "x0": 1200,
+    "x1": 1258,
+    "y0": 0,
+    "y1": 100,
+    "caida": "agua",
+    "nombre": "canal con puentecito adelante"
+   },
+   {
+    "x0": 3020,
+    "x1": 3076,
+    "y0": 0,
+    "y1": 130,
+    "caida": "agua",
+    "nombre": "canal ancho"
+   }
+  ],
+  "plataformas": [
+   {
+    "x": 800,
+    "y": 20,
+    "w": 96,
+    "d": 30,
+    "z": 24,
+    "tipo": "carro",
+    "subible": true
+   },
+   {
+    "x": 1000,
+    "y": 74,
+    "w": 40,
+    "d": 24,
+    "z": 30,
+    "tipo": "puesto_banhmi",
+    "subible": true
+   },
+   {
+    "x": 1600,
+    "y": 44,
+    "w": 40,
+    "d": 40,
+    "z": 18,
+    "tipo": "cajas",
+    "subible": true
+   },
+   {
+    "x": 1640,
+    "y": 44,
+    "w": 40,
+    "d": 40,
+    "z": 36,
+    "tipo": "cajas",
+    "subible": true
+   },
+   {
+    "x": 2100,
+    "y": 84,
+    "w": 64,
+    "d": 26,
+    "z": 22,
+    "tipo": "moto_estacionada",
+    "subible": true
+   },
+   {
+    "x": 3300,
+    "y": 30,
+    "w": 48,
+    "d": 30,
+    "z": 20,
+    "tipo": "mesas_plasticas",
+    "subible": true
+   },
+   {
+    "x": 3348,
+    "y": 30,
+    "w": 48,
+    "d": 30,
+    "z": 34,
+    "tipo": "mesas_plasticas",
+    "subible": true
+   }
+  ],
+  "muros": [
+   {
+    "x": 1400,
+    "y": 0,
+    "w": 18,
+    "d": 130,
+    "z": 28,
+    "trepable": false,
+    "tipo": "muro_bajo"
+   },
+   {
+    "x": 1700,
+    "y": 0,
+    "w": 24,
+    "d": 92,
+    "z": 52,
+    "trepable": false,
+    "tipo": "muro_alto",
+    "nota": "portón abierto adelante (y 92 a 130); las cajas son el atajo por encima"
+   }
+  ],
+  "escaleras": [],
+  "postes": [
+   {
+    "x": 640,
+    "y": 4,
+    "alto": 160,
+    "tipo": "poste_luz"
+   },
+   {
+    "x": 1920,
+    "y": 4,
+    "alto": 160,
+    "tipo": "poste_luz"
+   },
+   {
+    "x": 3200,
+    "y": 4,
+    "alto": 160,
+    "tipo": "poste_luz"
+   }
+  ],
+  "agua": [
+   {
+    "x0": 2400,
+    "x1": 2900,
+    "nivel": 8,
+    "corriente": -10,
+    "nombre": "calle inundada"
+   }
+  ],
+  "bajo": [
+   {
+    "x0": 300,
+    "x1": 420,
+    "y0": 0,
+    "y1": 40,
+    "z": 56,
+    "tipo": "toldo"
+   }
+  ],
+  "solidos": [
+   {
+    "x": 560,
+    "y": 0,
+    "w": 30,
+    "d": 18,
+    "z": 40,
+    "tipo": "tanque_agua"
+   },
+   {
+    "x": 2600,
+    "y": 0,
+    "w": 36,
+    "d": 22,
+    "z": 44,
+    "tipo": "kiosco"
+   }
+  ],
+  "carriles": [
+   {
+    "y": 20
+   },
+   {
+    "y": 50
+   },
+   {
+    "y": 80
+   },
+   {
+    "y": 110
+   }
+  ],
+  "entidades": [
+   {
+    "tipo": "salida",
+    "x": 40
+   },
+   {
+    "tipo": "meta",
+    "x": 3790
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "silla_plastica",
+    "x": 520,
+    "y": 64
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "chancleta",
+    "x": 700,
+    "y": 104
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "coco",
+    "x": 1100,
+    "y": 40
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "paraguas",
+    "x": 1880,
+    "y": 96
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "escoba",
+    "x": 2300,
+    "y": 30
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "pote_basura",
+    "x": 3150,
+    "y": 70
+   },
+   {
+    "tipo": "vehiculo",
+    "vehiculo": "moto",
+    "carril": 2,
+    "cada": 4.5,
+    "desde": "derecha"
+   },
+   {
+    "tipo": "vehiculo",
+    "vehiculo": "moto",
+    "carril": 4,
+    "cada": 6.5,
+    "desde": "derecha"
+   }
+  ],
+  "ranuras_deco": [
+   {
+    "x0": 0,
+    "x1": 3840,
+    "capa": "cerca",
+    "tema": "hem_casa_tubo"
+   },
+   {
+    "x0": 900,
+    "x1": 1100,
+    "capa": "cerca",
+    "tema": "puesto_comida"
+   },
+   {
+    "x0": 2400,
+    "x1": 2900,
+    "capa": "cerca",
+    "tema": "fachadas_inundadas"
+   }
+  ],
+  "vida": [
+   "motos_fondo",
+   "ropa_tendida",
+   "palomas",
+   "cables_viento"
+  ]
+ }
+}

@@ -1,0 +1,200 @@
+{
+ "hora": "manana",
+ "luces": [
+  {
+   "x": 332,
+   "y": 190,
+   "color": "#d93a2e",
+   "radio": 12,
+   "latido": 0.5,
+   "encendida": true,
+   "nota": "bombillo rojo del altar"
+  },
+  {
+   "x": 436,
+   "y": 190,
+   "color": "#d93a2e",
+   "radio": 12,
+   "latido": 0.5,
+   "encendida": true,
+   "nota": "bombillo rojo del altar"
+  },
+  {
+   "x": 518,
+   "y": 190,
+   "color": "#d93a2e",
+   "radio": 12,
+   "latido": 0.5,
+   "encendida": true,
+   "nota": "bombillo rojo del altar"
+  },
+  {
+   "x": 767,
+   "y": 190,
+   "color": "#d93a2e",
+   "radio": 12,
+   "latido": 0.5,
+   "encendida": true,
+   "nota": "bombillo rojo del altar"
+  },
+  {
+   "x": 790,
+   "y": 190,
+   "color": "#d93a2e",
+   "radio": 12,
+   "latido": 0.5,
+   "encendida": true,
+   "nota": "bombillo rojo del altar"
+  },
+  {
+   "x": 1202,
+   "y": 190,
+   "color": "#d93a2e",
+   "radio": 12,
+   "latido": 0.5,
+   "encendida": true,
+   "nota": "bombillo rojo del altar"
+  },
+  {
+   "x": 1270,
+   "y": 190,
+   "color": "#d93a2e",
+   "radio": 12,
+   "latido": 0.5,
+   "encendida": true,
+   "nota": "bombillo rojo del altar"
+  },
+  {
+   "x": 1858,
+   "y": 190,
+   "color": "#d93a2e",
+   "radio": 12,
+   "latido": 0.5,
+   "encendida": true,
+   "nota": "bombillo rojo del altar"
+  },
+  {
+   "x": 2083,
+   "y": 190,
+   "color": "#d93a2e",
+   "radio": 12,
+   "latido": 0.5,
+   "encendida": true,
+   "nota": "bombillo rojo del altar"
+  },
+  {
+   "x": 2106,
+   "y": 190,
+   "color": "#d93a2e",
+   "radio": 12,
+   "latido": 0.5,
+   "encendida": true,
+   "nota": "bombillo rojo del altar"
+  },
+  {
+   "x": 2259,
+   "y": 190,
+   "color": "#d93a2e",
+   "radio": 12,
+   "latido": 0.5,
+   "encendida": true,
+   "nota": "bombillo rojo del altar"
+  },
+  {
+   "x": 2691,
+   "y": 190,
+   "color": "#d93a2e",
+   "radio": 12,
+   "latido": 0.5,
+   "encendida": true,
+   "nota": "bombillo rojo del altar"
+  },
+  {
+   "x": 3009,
+   "y": 190,
+   "color": "#d93a2e",
+   "radio": 12,
+   "latido": 0.5,
+   "encendida": true,
+   "nota": "bombillo rojo del altar"
+  },
+  {
+   "x": 3088,
+   "y": 190,
+   "color": "#d93a2e",
+   "radio": 12,
+   "latido": 0.5,
+   "encendida": true,
+   "nota": "bombillo rojo del altar"
+  },
+  {
+   "x": 3192,
+   "y": 190,
+   "color": "#d93a2e",
+   "radio": 12,
+   "latido": 0.5,
+   "encendida": true,
+   "nota": "bombillo rojo del altar"
+  },
+  {
+   "x": 3318,
+   "y": 190,
+   "color": "#d93a2e",
+   "radio": 12,
+   "latido": 0.5,
+   "encendida": true,
+   "nota": "bombillo rojo del altar"
+  },
+  {
+   "x": 3430,
+   "y": 190,
+   "color": "#d93a2e",
+   "radio": 12,
+   "latido": 0.5,
+   "encendida": true,
+   "nota": "bombillo rojo del altar"
+  },
+  {
+   "x": 3574,
+   "y": 190,
+   "color": "#d93a2e",
+   "radio": 12,
+   "latido": 0.5,
+   "encendida": true,
+   "nota": "bombillo rojo del altar"
+  },
+  {
+   "x": 3853,
+   "y": 190,
+   "color": "#d93a2e",
+   "radio": 12,
+   "latido": 0.5,
+   "encendida": true,
+   "nota": "bombillo rojo del altar"
+  },
+  {
+   "x": 658,
+   "y": 66,
+   "color": "#f5b52e",
+   "radio": 40,
+   "encendida": false,
+   "nota": "lámpara del poste: de día va apagada"
+  },
+  {
+   "x": 1938,
+   "y": 66,
+   "color": "#f5b52e",
+   "radio": 40,
+   "encendida": false,
+   "nota": "lámpara del poste: de día va apagada"
+  },
+  {
+   "x": 3218,
+   "y": 66,
+   "color": "#f5b52e",
+   "radio": 40,
+   "encendida": false,
+   "nota": "lámpara del poste: de día va apagada"
+  }
+ ]
+}

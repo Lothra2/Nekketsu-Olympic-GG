@@ -1,0 +1,241 @@
+{
+ "imagen": "objetos.png",
+ "nota": "x, y: esquina de arriba a la izquierda en el mundo a escala 1. orden: la profundidad para ordenar con los atletas (se dibuja después de todo atleta con y menor). En Phaser: setDepth(franja.atras + orden).",
+ "objetos": [
+  {
+   "id": "poste_luz_0",
+   "tipo": "poste_luz",
+   "origen": "postes",
+   "cuadro": {
+    "x": 0,
+    "y": 0,
+    "w": 44,
+    "h": 166
+   },
+   "x": 620,
+   "y": 39,
+   "orden": 4
+  },
+  {
+   "id": "poste_luz_1",
+   "tipo": "poste_luz",
+   "origen": "postes",
+   "cuadro": {
+    "x": 45,
+    "y": 0,
+    "w": 44,
+    "h": 166
+   },
+   "x": 1900,
+   "y": 39,
+   "orden": 4
+  },
+  {
+   "id": "poste_luz_2",
+   "tipo": "poste_luz",
+   "origen": "postes",
+   "cuadro": {
+    "x": 90,
+    "y": 0,
+    "w": 44,
+    "h": 166
+   },
+   "x": 3180,
+   "y": 39,
+   "orden": 4
+  },
+  {
+   "id": "tanque_agua_0",
+   "tipo": "tanque_agua",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 135,
+    "y": 0,
+    "w": 30,
+    "h": 58
+   },
+   "x": 560,
+   "y": 160,
+   "orden": 18,
+   "superficie": "metal"
+  },
+  {
+   "id": "kiosco_1",
+   "tipo": "kiosco",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 166,
+    "y": 0,
+    "w": 36,
+    "h": 68
+   },
+   "x": 2600,
+   "y": 154,
+   "orden": 22,
+   "superficie": "metal"
+  },
+  {
+   "id": "toldo_0",
+   "tipo": "toldo",
+   "origen": "bajo",
+   "cuadro": {
+    "x": 203,
+    "y": 0,
+    "w": 120,
+    "h": 45
+   },
+   "x": 300,
+   "y": 144,
+   "orden": 40
+  },
+  {
+   "id": "carro_2",
+   "tipo": "carro",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 324,
+    "y": 0,
+    "w": 96,
+    "h": 68
+   },
+   "x": 800,
+   "y": 182,
+   "orden": 50,
+   "superficie": "madera"
+  },
+  {
+   "id": "mesas_plasticas_3",
+   "tipo": "mesas_plasticas",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 421,
+    "y": 0,
+    "w": 48,
+    "h": 50
+   },
+   "x": 3300,
+   "y": 210,
+   "orden": 60,
+   "superficie": "plastico"
+  },
+  {
+   "id": "mesas_plasticas_4",
+   "tipo": "mesas_plasticas",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 470,
+    "y": 0,
+    "w": 48,
+    "h": 64
+   },
+   "x": 3348,
+   "y": 196,
+   "orden": 60,
+   "superficie": "plastico"
+  },
+  {
+   "id": "cajas_5",
+   "tipo": "cajas",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 519,
+    "y": 0,
+    "w": 40,
+    "h": 58
+   },
+   "x": 1600,
+   "y": 226,
+   "orden": 84,
+   "superficie": "plastico"
+  },
+  {
+   "id": "cajas_6",
+   "tipo": "cajas",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 560,
+    "y": 0,
+    "w": 40,
+    "h": 76
+   },
+   "x": 1640,
+   "y": 208,
+   "orden": 84,
+   "superficie": "plastico"
+  },
+  {
+   "id": "muro_alto_7",
+   "tipo": "muro_alto",
+   "origen": "muros",
+   "cuadro": {
+    "x": 601,
+    "y": 0,
+    "w": 24,
+    "h": 148
+   },
+   "x": 1700,
+   "y": 144,
+   "orden": 92,
+   "superficie": "piedra"
+  },
+  {
+   "id": "puesto_banhmi_8",
+   "tipo": "puesto_banhmi",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 626,
+    "y": 0,
+    "w": 40,
+    "h": 54
+   },
+   "x": 1000,
+   "y": 244,
+   "orden": 98,
+   "superficie": "metal"
+  },
+  {
+   "id": "moto_estacionada_9",
+   "tipo": "moto_estacionada",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 667,
+    "y": 0,
+    "w": 64,
+    "h": 56
+   },
+   "x": 2100,
+   "y": 254,
+   "orden": 110,
+   "superficie": "metal"
+  },
+  {
+   "id": "muro_bajo_10",
+   "tipo": "muro_bajo",
+   "origen": "muros",
+   "cuadro": {
+    "x": 732,
+    "y": 0,
+    "w": 18,
+    "h": 158
+   },
+   "x": 1400,
+   "y": 172,
+   "orden": 130,
+   "superficie": "piedra"
+  },
+  {
+   "id": "porton_1",
+   "tipo": "porton",
+   "origen": "muros",
+   "cuadro": {
+    "x": 751,
+    "y": 0,
+    "w": 62,
+    "h": 113
+   },
+   "x": 1698,
+   "y": 218,
+   "orden": 131
+  }
+ ]
+}
