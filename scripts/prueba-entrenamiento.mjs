@@ -29,7 +29,12 @@ async function entrenar(scene, d, jugar, limite = 60) {
   while (Date.now() - t0 < limite * 1000) {
     const i = await paso(scene);
     if (i === 99) break;
-    if (i !== visto) { visto = i; await page.waitForTimeout(150); await page.screenshot({ path: `${out}/${scene}_${i}.png` }); }
+    if (i !== visto) {
+      visto = i;
+      await page.waitForTimeout(150);
+      await page.screenshot({ path: `${out}/${scene}_${i}.png` });
+      if (i >= 0) console.log(`  ${scene} ${i + 1}:`, await page.evaluate((s) => { const c = window.game.scene.getScene(s).coach; return `${c.main.text.replace(/\n/g, ' ')} | ${c.keys.text}`; }, scene));
+    }
     if (i >= 0) await jugar(i);
     else await page.waitForTimeout(100);
   }

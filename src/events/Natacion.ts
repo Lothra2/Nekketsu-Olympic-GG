@@ -78,16 +78,16 @@ export class Natacion extends EventScene {
     chip.play(PELEA);
     this.time.delayedCall(2200, () => { this.armed = true; });
     if (this.d.practica) void this.entrenar('NATACIÓN HẠ LONG', this.pasos());
-    else void this.previa('NATACIÓN HẠ LONG', 'BAHÍA DE HẠ LONG, VIETNAM', 'SALTO PARA LANZARTE · ALTERNA PUÑO Y PATADA · ESTRELLA: PATADA DE DELFÍN');
+    else void this.previa('NATACIÓN HẠ LONG', 'BAHÍA DE HẠ LONG, VIETNAM', '{SALTO} PARA LANZARTE · ALTERNA {PUÑO} Y {PATADA} · {ESPECIAL} DELFÍN');
   }
 
   private pasos(): Paso[] {
     const me = () => this.swimmers[0];
     return [
-      { texto: 'TOCA C PARA TIRARTE AL AGUA\nEN LA CARRERA, ESPERA EL ¡YA!', teclas: 'L O ESPACIO', botones: ['jump'], listo: () => me().st === 'swim' },
-      { texto: 'ALTERNA A Y B PARA NADAR\nMIENTRAS MÁS RÁPIDO, MEJOR', teclas: 'J Y K, UNA Y OTRA', botones: ['punch', 'kick'], listo: () => me().boost > 45 },
-      { texto: 'TOCA LA ESTRELLA: DELFÍN\nCUANDO LA BARRA VERDE ESTÉ LLENA', teclas: 'U', botones: ['special'], listo: () => me().jalon > 0 },
-      { texto: 'SIGUE NADANDO\nHASTA TOCAR LA PARED', teclas: 'J Y K, UNA Y OTRA', botones: ['punch', 'kick'], listo: () => me().st === 'done' },
+      { texto: 'TOCA {SALTO} PARA TIRARTE AL AGUA\nEN LA CARRERA, ESPERA EL ¡YA!', botones: ['jump'], listo: () => me().st === 'swim' },
+      { texto: 'ALTERNA {PUÑO} Y {PATADA} PARA NADAR\nMIENTRAS MÁS RÁPIDO, MEJOR', botones: ['punch', 'kick'], listo: () => me().boost > 45 },
+      { texto: 'TOCA {ESPECIAL}: PATADA DE DELFÍN\nCUANDO LA BARRA VERDE ESTÉ LLENA', botones: ['special'], listo: () => me().jalon > 0 },
+      { texto: 'SIGUE NADANDO\nHASTA TOCAR LA PARED', botones: ['punch', 'kick'], listo: () => me().st === 'done' },
     ];
   }
 

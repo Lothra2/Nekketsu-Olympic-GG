@@ -140,7 +140,7 @@ export class Select extends Phaser.Scene {
       this.refresh();
     }
     if (p.x === 0) this.nextMove = 0;
-    if (p.pressed.punch || p.pressed.start || p.pressed.kick) this.confirm();
+    if (p.pressed.punch || p.pressed.start || p.pressed.kick || p.pressed.jump) this.confirm();
     if (p.pressed.back) {
       if (this.paso === 'rival') { this.paso = 'jugador'; this.build(); } else this.scene.start('Title');
     }

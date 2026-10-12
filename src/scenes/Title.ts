@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { Figura } from '../core/figura';
-import { Input } from '../core/input';
+import { Input, rotular } from '../core/input';
 import { chip, MARCHA } from '../core/music';
 import { txt } from '../core/ui';
 import { buildLogo, fireworks } from './logo';
@@ -83,7 +83,7 @@ export class Title extends Phaser.Scene {
     this.nivel = 'raiz';
     this.sel = 0;
     this.buildMenu();
-    txt(this, 320, 352, 'FLECHAS MOVER · J PUÑO · K PATADA · L SALTO · U ESPECIAL', 'fuente_ui', 1).setTint(0x8a8ab0);
+    txt(this, 320, 352, rotular('{MOVER}: MOVER · {PUÑO}: PUÑO · {PATADA}: PATADA · {SALTO}: SALTO · {ESPECIAL}: TÉCNICA', this.pad.fuente), 'fuente_ui', 1).setTint(0x8a8ab0);
     this.input.on('pointerdown', () => { if (!this.started) this.openMenu(); });
     this.refresh();
   }
@@ -147,7 +147,7 @@ export class Title extends Phaser.Scene {
       this.refresh();
     }
     if (p.y === 0) this.data.set('next', 0);
-    if (p.pressed.start || p.pressed.punch || p.pressed.kick) this.choose();
+    if (p.pressed.start || p.pressed.punch || p.pressed.kick || p.pressed.jump) this.choose();
     if (p.pressed.back && this.nivel !== 'raiz') this.atras();
   }
 

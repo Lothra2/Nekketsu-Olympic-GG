@@ -67,18 +67,18 @@ export class Vallas extends EventScene {
     this.racers.forEach((r) => this.uiAdd(this.add.image(0, 22, 'cabecitas', r.c.id).setDepth(8002).setData('r', r)));
     chip.play(PELEA);
     if (this.d.practica) void this.entrenar('VALLAS DEL CAFÉ', this.pasos());
-    else void this.previa('VALLAS DEL CAFÉ', 'EJE CAFETERO, COLOMBIA', 'ALTERNA PUÑO Y PATADA PARA CORRER · SALTO PARA LAS VALLAS · ESTRELLA: CODAZO');
+    else void this.previa('VALLAS DEL CAFÉ', 'EJE CAFETERO, COLOMBIA', 'ALTERNA {PUÑO} Y {PATADA} PARA CORRER · {SALTO} SALTA · {ESPECIAL} CODAZO');
   }
 
   private pasos(): Paso[] {
     const me = () => this.racers[0];
     let base = 0;
     return [
-      { texto: 'ALTERNA A Y B RÁPIDO\nPARA CORRER', teclas: 'J Y K, UNA Y OTRA', botones: ['punch', 'kick'], listo: () => me().boost > 45 },
-      { texto: 'TOCA C JUSTO ANTES\nDE LA VALLA PARA SALTARLA', teclas: 'L O ESPACIO', botones: ['jump'], listo: () => this.saltadas >= 1 },
-      { texto: '¡ESO! SALTA 3 VALLAS MÁS\nSIN TUMBARLAS', teclas: 'J Y K PARA CORRER · L PARA SALTAR', botones: ['punch', 'kick', 'jump'], antes: () => { base = this.saltadas; }, listo: () => this.saltadas - base >= 3 },
-      { texto: 'MUEVE LA PALANCA ARRIBA O ABAJO\nPARA CAMBIAR DE CARRIL', teclas: 'FLECHA ARRIBA O ABAJO', botones: ['stick'], listo: () => this.cambios >= 1 },
-      { texto: 'LLEGA A LA META\nLA ESTRELLA ES EL CODAZO', teclas: 'U ES EL CODAZO', botones: ['punch', 'kick', 'special'], listo: () => me().st === 'done' },
+      { texto: 'ALTERNA {PUÑO} Y {PATADA} RÁPIDO\nPARA CORRER', botones: ['punch', 'kick'], listo: () => me().boost > 45 },
+      { texto: 'TOCA {SALTO} JUSTO ANTES\nDE LA VALLA PARA SALTARLA', botones: ['jump'], listo: () => this.saltadas >= 1 },
+      { texto: '¡ESO! SALTA 3 VALLAS MÁS\nSIN TUMBARLAS', botones: ['punch', 'kick', 'jump'], antes: () => { base = this.saltadas; }, listo: () => this.saltadas - base >= 3 },
+      { texto: 'USA {MOVER} ARRIBA O ABAJO\nPARA CAMBIAR DE CARRIL', botones: ['stick'], listo: () => this.cambios >= 1 },
+      { texto: 'LLEGA A LA META\nEN LA CARRERA, {ESPECIAL} ES EL CODAZO', botones: ['punch', 'kick', 'special'], listo: () => me().st === 'done' },
     ];
   }
 

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { Input } from '../core/input';
+import { Input, rotular } from '../core/input';
 import { chip, VICTORIA } from '../core/music';
 import { kit } from '../core/kit';
 import { txt, flash } from '../core/ui';
@@ -120,7 +120,7 @@ export abstract class EventScene extends Phaser.Scene {
     band.fillStyle(0xf2c230).fillRect(0, 100, 640, 2).fillRect(0, 190, 640, 2);
     const t1 = this.uiAdd(txt(this, 320, 120, nombre, 'fuente_titulo', 2).setDepth(8500));
     const t2 = this.uiAdd(txt(this, 320, 150, lugar, 'fuente_ui', 2).setDepth(8500).setTint(0xffe080));
-    const t3 = this.uiAdd(txt(this, 320, 178, ayuda, 'fuente_ui', 1).setDepth(8500).setTint(0xc0c0e0));
+    const t3 = this.uiAdd(txt(this, 320, 178, rotular(ayuda, this.pad.fuente), 'fuente_ui', 1).setDepth(8500).setTint(0xc0c0e0));
     await new Promise<void>((r) => this.time.delayedCall(2200, r));
     t1.destroy(); t2.destroy(); t3.destroy(); band.destroy();
     await this.banner('EN SUS MARCAS', 'fuente_titulo_plata', 2, 600);
@@ -179,7 +179,7 @@ export abstract class EventScene extends Phaser.Scene {
       if (lock > 0) return;
       if (p.x !== 0 && p.x !== lx) { sel = (sel + p.x + opts.length) % opts.length; draw(); chip.blip(660, 0.04); }
       lx = p.x;
-      if (p.pressed.punch || p.pressed.start || p.pressed.kick) go(sel);
+      if (p.pressed.punch || p.pressed.start || p.pressed.kick || p.pressed.jump) go(sel);
     };
   }
 

@@ -81,17 +81,17 @@ export class Jabalina extends EventScene {
     chip.play(PELEA);
     this.cameras.main.centerOn(this.camX, 360 - 180 / ZOOM);
     if (this.d.practica) void this.entrenar('JABALINA LLANERA', this.pasos(), 100);
-    else void this.previa('JABALINA LLANERA', 'LLANOS DE APURE, VENEZUELA', 'ALTERNA PUÑO Y PATADA PARA CORRER · MANTÉN SALTO Y SUELTA PARA LANZAR');
+    else void this.previa('JABALINA LLANERA', 'LLANOS DE APURE, VENEZUELA', 'ALTERNA {PUÑO} Y {PATADA} PARA CORRER · MANTÉN {SALTO} Y SUELTA PARA LANZAR');
   }
 
   private pasos(): Paso[] {
     const validos = () => this.gente2[0].marcas.filter((m) => m > 0).length;
     let base = 0;
     return [
-      { texto: 'ALTERNA A Y B PARA\nAGARRAR VELOCIDAD', teclas: 'J Y K, UNA Y OTRA', botones: ['punch', 'kick'], listo: () => this.boost > 50 },
-      { texto: 'MANTÉN C APRETADO: LA FLECHA\nAMARILLA DE ABAJO SUBE Y BAJA', teclas: 'MANTÉN L', botones: ['jump'], listo: () => this.holding && this.angT > 0.2 },
-      { texto: 'SUELTA C PARA LANZAR\nANTES DE LA RAYA BLANCA', teclas: 'SUELTA L', botones: ['punch', 'kick', 'jump'], antes: () => { base = validos(); }, listo: () => validos() > base },
-      { texto: 'EL TRUCO: MUCHA VELOCIDAD Y\nSOLTAR CERCA DE 45°. ¡PASA LOS 40 M!', teclas: 'J Y K, LUEGO MANTÉN Y SUELTA L', botones: ['punch', 'kick', 'jump'], listo: () => this.gente2[0].best > 40 },
+      { texto: 'ALTERNA {PUÑO} Y {PATADA} PARA\nAGARRAR VELOCIDAD', botones: ['punch', 'kick'], listo: () => this.boost > 50 },
+      { texto: 'MANTÉN {SALTO} APRETADO: LA FLECHA\nAMARILLA DE ABAJO SUBE Y BAJA', botones: ['jump'], listo: () => this.holding && this.angT > 0.2 },
+      { texto: 'SUELTA {SALTO} PARA LANZAR\nANTES DE LA RAYA BLANCA', botones: ['punch', 'kick', 'jump'], antes: () => { base = validos(); }, listo: () => validos() > base },
+      { texto: 'EL TRUCO: MUCHA VELOCIDAD Y\nSOLTAR CERCA DE 45°. ¡PASA LOS 40 M!', botones: ['punch', 'kick', 'jump'], listo: () => this.gente2[0].best > 40 },
     ];
   }
 

@@ -5,7 +5,7 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
 ## Qué se puede jugar hoy
 
 - **Intro épica** de unos 50 segundos: Kenji en la azotea de Japón, la ruta de la gira, la Familia GG en Saigón, los rivales en silueta en Bogotá, Maracaibo y Caracas, el VS, el puñetazo a la cámara y el logo con la Marcha Nekketsu.
-- **Entrenamiento** para cada prueba y para la pelea: sin rivales ni reloj, un cartel dice qué hacer, espera a que lo hagas y los botones táctiles del paso laten en pantalla. Al final te ofrece jugar de verdad.
+- **Entrenamiento** para cada prueba y para la pelea: sin rivales ni reloj, un cartel dice qué hacer, espera a que lo hagas y los botones táctiles del paso laten en pantalla. Los carteles nombran el botón de lo que estés usando: J y K en teclado, A y B en la tablet, X y A en un control. Al final te ofrece jugar de verdad.
 - **Olimpiada Express**: Familia GG contra el Instituto en 4 pruebas seguidas con medallero por equipos (10, 6, 4 y 2 puntos por puesto) y una final a pelea que vale 20. Termina con podio y fuegos artificiales.
 - **Pruebas sueltas**:
   - *Vallas del Café* (Eje Cafetero): alterna puño y patada para correr, salta las vallas, codazo con ★. Si tocas una valla, se cae y te frena.
@@ -57,6 +57,8 @@ node scripts/capturas.mjs http://localhost:5173/ capturas          # intro, tít
 node scripts/prueba-pelea.mjs http://localhost:5173/ capturas rick kenji   # combo, levantar, lanzar, técnica, chancleta
 node scripts/prueba-pruebas.mjs http://localhost:5173/ capturas/pruebas  # vallas, natación, jabalina y medallero
 node scripts/prueba-entrenamiento.mjs http://localhost:5173/ capturas/entrenamiento  # completa los 4 entrenamientos
+node scripts/prueba-teclas.mjs http://localhost:5173/   # cada tecla que nombra el juego hace lo que dice
+node scripts/prueba-tactil.mjs http://localhost:5173/ capturas   # en tablet el cartel nombra A, B y C y tocándolos avanza
 node scripts/tablet.mjs capturas                                   # tablet con controles táctiles
 ```
 

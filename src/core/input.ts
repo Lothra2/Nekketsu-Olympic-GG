@@ -17,6 +17,35 @@ export interface Pad {
 
 const empty = (): Record<Btn, boolean> => ({ punch: false, kick: false, jump: false, special: false, start: false, back: false });
 
+/** Con qué se está jugando: los textos nombran los botones de eso. */
+export type Fuente = 'teclado' | 'tactil' | 'mando';
+
+/**
+ * Nombre de cada control según con qué se juega. Sale del mismo mapa que lee `Input.read`,
+ * así lo que dicen los carteles es lo que de verdad funciona.
+ */
+const NOMBRE: Record<Fuente, Record<Control | 'correr', string>> = {
+  teclado: { punch: 'J', kick: 'K', jump: 'L', special: 'U', start: 'ENTER', back: 'ESC', stick: 'LAS FLECHAS', correr: 'DOS TOQUES ADELANTE' },
+  tactil: { punch: 'A', kick: 'B', jump: 'C', special: 'LA ESTRELLA', start: 'PAUSA', back: 'ATRÁS', stick: 'LA PALANCA', correr: 'LA PALANCA HASTA EL BORDE' },
+  mando: { punch: 'X', kick: 'A', jump: 'B', special: 'Y', start: 'START', back: 'SELECT', stick: 'LA CRUCETA', correr: 'DOS TOQUES ADELANTE' },
+};
+/** Las teclas que también sirven, para la línea chiquita del cartel. */
+const TECLAS: Record<Control | 'correr', string> = {
+  punch: 'J O Z', kick: 'K O X', jump: 'L, C O ESPACIO', special: 'U O V', start: 'ENTER', back: 'ESC', stick: 'FLECHAS O WASD', correr: 'DOS TOQUES ADELANTE O SHIFT',
+};
+const TOKENS: Record<string, Control | 'correr'> = { PUÑO: 'punch', PATADA: 'kick', SALTO: 'jump', ESPECIAL: 'special', PAUSA: 'start', MOVER: 'stick', CORRER: 'correr' };
+
+/** Cambia {PUÑO}, {PATADA}, {SALTO}, {ESPECIAL}, {MOVER} y {CORRER} por el botón de verdad. */
+export function rotular(s: string, f: Fuente): string {
+  return s.replace(/\{([A-ZÑ]+)\}/g, (m, k: string) => (TOKENS[k] ? NOMBRE[f][TOKENS[k]] : m));
+}
+
+/** Línea de ayuda con todas las teclas que sirven para esos controles. */
+export function teclasDe(ctrls: (Control | 'correr')[]): string {
+  const n: Record<string, string> = { punch: 'PUÑO', kick: 'PATADA', jump: 'SALTO', special: 'ESPECIAL', stick: 'MOVER', correr: 'CORRER', start: 'PAUSA', back: 'VOLVER' };
+  return ctrls.map((c) => `${n[c]}: ${TECLAS[c]}`).join(' · ');
+}
+
 /** Hay pantalla táctil (tablet o teléfono). */
 export const isTouch = () => typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
 
@@ -31,6 +60,8 @@ export class Input {
   private lastTap = { dir: 0, t: 0 };
   private prevX = 0;
   running = false;
+  /** lo último que se tocó: teclado, pantalla o mando */
+  fuente: Fuente;
 
   constructor(private scene: Phaser.Scene, withTouch = isTouch(), layer?: Phaser.GameObjects.Layer) {
     const kb = scene.input.keyboard;
@@ -43,7 +74,10 @@ export class Input {
       for (const [n, c] of Object.entries(map)) this.keys[n] = kb.addKey(c, true, false);
     }
     if (withTouch) this.touch = new TouchPad(scene, layer);
+    this.fuente = (scene.registry.get('fuente') as Fuente | undefined) ?? (isTouch() ? 'tactil' : 'teclado');
   }
+
+  private usa(f: Fuente) { if (this.fuente !== f) { this.fuente = f; this.scene.registry.set('fuente', f); } }
 
   private key(n: string) { return this.keys[n]?.isDown ?? false; }
 
@@ -58,9 +92,10 @@ export class Input {
     held.kick = this.key('k') || this.key('x');
     held.jump = this.key('l') || this.key('c') || this.key('space');
     held.special = this.key('u') || this.key('v');
-    held.start = this.key('enter') || this.key('space');
+    held.start = this.key('enter');
     held.back = this.key('esc');
     let shift = this.key('shift');
+    if (x || y || shift || BTNS.some((n) => held[n])) this.usa('teclado');
 
     const gp = this.scene.input.gamepad;
     if (gp) for (const p of gp.gamepads) {
@@ -80,10 +115,12 @@ export class Input {
       held.start ||= b(9);
       held.back ||= b(8);
       shift ||= b(4) || b(7);
+      if (p.buttons.some((k) => k?.pressed) || Math.abs(ax) > 0.35 || Math.abs(ay) > 0.35) this.usa('mando');
     }
 
     if (this.touch) {
       const t = this.touch.read();
+      if (t.x || t.y || t.run || BTNS.some((n) => t.held[n])) this.usa('tactil');
       if (t.x || t.y) { x = t.x; y = t.y; }
       for (const n of BTNS) held[n] ||= t.held[n];
       shift ||= t.run;

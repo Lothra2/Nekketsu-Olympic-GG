@@ -140,24 +140,24 @@ export class Fight extends Phaser.Scene implements World {
     const desde = () => this.golpes.slice(n0);
     const marca = () => { n0 = this.golpes.length; };
     return [
-      { texto: 'MUÉVETE CON LA PALANCA\nY ACÉRCATE AL RIVAL', teclas: 'FLECHAS O WASD', botones: ['stick'], antes: () => { x0 = yo.x; y0 = yo.y; }, listo: () => Math.hypot(yo.x - x0, yo.y - y0) > 50 },
-      { texto: 'A ES PUÑO: PÉGALE\n3 VECES SEGUIDAS', teclas: 'J', botones: ['punch'], antes: marca, listo: () => desde().length >= 3 },
-      { texto: 'B ES PATADA:\nPÉGALE UNA PATADA', teclas: 'K', botones: ['kick'], antes: marca, listo: () => desde().some((g) => g.includes('kick')) },
-      { texto: 'C ES SALTO: SALTA Y EN EL AIRE\nTOCA B, ¡PATADA VOLADORA!', teclas: 'L Y LUEGO K', botones: ['jump', 'kick'], antes: marca, listo: () => desde().some((g) => g === 'air_kick') },
-      { texto: 'EMPUJA LA PALANCA HASTA EL BORDE\nPARA CORRER', teclas: 'DOS VECES ADELANTE, O SHIFT', botones: ['stick'], listo: () => yo.st === 'run' },
+      { texto: 'MUÉVETE CON {MOVER}\nY ACÉRCATE AL RIVAL', botones: ['stick'], antes: () => { x0 = yo.x; y0 = yo.y; }, listo: () => Math.hypot(yo.x - x0, yo.y - y0) > 50 },
+      { texto: '{PUÑO} ES PUÑO: PÉGALE\n3 VECES SEGUIDAS', botones: ['punch'], antes: marca, listo: () => desde().length >= 3 },
+      { texto: '{PATADA} ES PATADA:\nPÉGALE UNA PATADA', botones: ['kick'], antes: marca, listo: () => desde().some((g) => g.includes('kick')) },
+      { texto: '{SALTO} ES SALTO: SALTA Y EN EL AIRE\nTOCA {PATADA}, ¡PATADA VOLADORA!', botones: ['jump', 'kick'], antes: marca, listo: () => desde().some((g) => g === 'air_kick') },
+      { texto: 'PARA CORRER USA\n{CORRER}', botones: ['correr'], listo: () => yo.st === 'run' },
       {
-        texto: 'ESTÁ EN EL PISO: PÁRATE AL LADO\nY TOCA A PARA LEVANTARLO', teclas: 'J', botones: ['punch'],
+        texto: 'ESTÁ EN EL PISO: PÁRATE AL LADO\nY TOCA {PUÑO} PARA LEVANTARLO', botones: ['punch'],
         cada: () => { if (['idle', 'walk', 'dizzy', 'hurt'].includes(saco.st)) saco.knockdown(yo.x < saco.x ? 1 : -1, 10, 60); },
         listo: () => yo.carrying === saco,
       },
-      { texto: '¡ARRIBA! CAMINA SI QUIERES\nY TOCA A PARA LANZARLO', teclas: 'J', botones: ['punch'], listo: () => saco.st === 'thrown' },
+      { texto: '¡ARRIBA! CAMINA SI QUIERES\nY TOCA {PUÑO} PARA LANZARLO', botones: ['punch'], listo: () => saco.st === 'thrown' },
       {
-        texto: 'RECOGE UN ARMA DEL PISO:\nPÁRATE ENCIMA Y TOCA A', teclas: 'J', botones: ['punch', 'stick'],
+        texto: 'RECOGE UN ARMA DEL PISO:\nPÁRATE ENCIMA Y TOCA {PUÑO}', botones: ['punch', 'stick'],
         antes: () => { const c = chancla(); if (c && c.st !== 'hand') { c.st = 'floor'; c.x = yo.x + yo.dir * 30; c.y = yo.y; c.z = 0; } },
         listo: () => !!yo.weapon,
       },
-      { texto: 'B LA LANZA\n¡LA CHANCLETA VUELVE GIRANDO!', teclas: 'K', botones: ['kick'], listo: () => this.items.some((i) => i.st === 'flying' && i.thrower === yo) },
-      { texto: 'TU BARRA NEKKETSU ESTÁ LLENA:\nTOCA LA ESTRELLA: TU TÉCNICA', teclas: 'U', botones: ['special'], antes: () => { yo.meter = 100; }, listo: () => this.specials.has(yo) || yo.st === 'special' },
+      { texto: '{PATADA} LA LANZA\n¡LA CHANCLETA VUELVE GIRANDO!', botones: ['kick'], listo: () => this.items.some((i) => i.st === 'flying' && i.thrower === yo) },
+      { texto: 'TU BARRA NEKKETSU ESTÁ LLENA:\nTOCA {ESPECIAL}: TU TÉCNICA', botones: ['special'], antes: () => { yo.meter = 100; }, listo: () => this.specials.has(yo) || yo.st === 'special' },
     ];
   }
 
@@ -381,7 +381,7 @@ export class Fight extends Phaser.Scene implements World {
       if (lock > 0) return;
       if (p.x !== 0 && p.x !== (this.data.get('lx') ?? 0)) { sel = (sel + p.x + opts.length) % opts.length; draw(); chip.blip(660, 0.04); }
       this.data.set('lx', p.x);
-      if (p.pressed.punch || p.pressed.start) pick(sel);
+      if (p.pressed.punch || p.pressed.start || p.pressed.kick || p.pressed.jump) pick(sel);
       if (p.pressed.back && !solo) this.toMenu();
       for (const a of this.actors) a.update(1 / 60, NOTHING);
       this.thorFan?.step(1 / 60);
