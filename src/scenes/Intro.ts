@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { Figura } from '../core/figura';
-import { chip, MARCHA, SAIGON, TENSION } from '../core/music';
+import { chip, MARCHA, PELEA, SAIGON, TENSION } from '../core/music';
 import { txt, typewrite, wait, panel, flash, speedLines } from '../core/ui';
 import { Input } from '../core/input';
 import { buildLogo, fireworks } from './logo';
@@ -19,6 +19,8 @@ export class Intro extends Phaser.Scene {
   private input2!: Input;
   private layer!: Phaser.GameObjects.Container;
   private tick: ((dt: number) => void)[] = [];
+  /** máscaras de los paneles inclinados del montaje (no se dibujan; se borran con la toma) */
+  private masks: Phaser.GameObjects.Graphics[] = [];
 
   constructor() { super('Intro'); }
 
@@ -55,7 +57,12 @@ export class Intro extends Phaser.Scene {
   private clear() {
     this.layer.removeAll(true);
     this.tick = [];
-    this.cameras.main.setScroll(0, 0);
+    for (const m of this.masks) m.destroy();
+    this.masks = [];
+    const cam = this.cameras.main;
+    cam.panEffect.reset();
+    cam.zoomEffect.reset();
+    cam.setZoom(1).setScroll(0, 0);
     this.blinds();
   }
 
@@ -94,6 +101,11 @@ export class Intro extends Phaser.Scene {
     const S = this;
     const alive = () => !S.done && S.scene.isActive();
 
+    // 0. la presentación
+    await this.presenta();
+    if (!alive()) return;
+    this.clear();
+
     // 1. negro y texto
     const l1 = this.add2(txt(this, 320, 160, '', 'fuente_ui', 2));
     const l2 = this.add2(txt(this, 320, 192, '', 'fuente_ui', 2).setTint(0xff4040));
@@ -117,7 +129,17 @@ export class Intro extends Phaser.Scene {
     if (!alive()) return;
     kenji.row = 'down';
     kenji.set('taunt', true);
+    // rayo, trueno y Kenji se agranda (el cuadro de diálogo queda quieto)
+    flash(this, 200, 0xd0c0ff, 0.8);
+    chip.boom(0.8);
+    this.cameras.main.shake(260, 0.012);
+    const aura = this.add2(speedLines(this, 1, 0xff4040));
+    aura.setAlpha(0.45);
+    this.layer.bringToTop(kenji);
+    this.tweens.add({ targets: kenji, scale: 3, duration: 380, ease: 'Back.out' });
     await typewrite(this, box.text, '¡ENTONCES NOS VAMOS DE GIRA!', 26, 330);
+    this.tweens.add({ targets: kenji, scale: 2, duration: 300 });
+    aura.destroy();
     for (const [i, id] of ['ryu', 'goro', 'tetsu'].entries()) {
       const fromLeft = i % 2 === 0, tx = [210, 440, 140][i];
       const f = this.fig(id, fromLeft ? -40 : 680, 262, 'run', 2);
@@ -221,6 +243,11 @@ export class Intro extends Phaser.Scene {
     await wait(this, 1800);
     if (!alive()) return;
 
+    // 4b. el montaje de las pruebas
+    await this.montaje(alive);
+    if (!alive()) return;
+    chip.play(TENSION);
+
     // 5. los rivales que esperan
     const rivales: [string, string, string[]][] = [
       ['bg_bogota', 'BOGOTÁ, COLOMBIA', ['ryu', 'tetsu']],
@@ -322,6 +349,111 @@ export class Intro extends Phaser.Scene {
     this.add2(fireworks(this));
     await wait(this, 2600);
     this.finish();
+  }
+
+  /** "FAMILIA GG PRESENTA": letra por letra, con Thor moviendo la cola. */
+  private async presenta() {
+    const word = 'FAMILIA GG';
+    const letters: Phaser.GameObjects.BitmapText[] = [];
+    const w = 34;
+    for (let i = 0; i < word.length; i++) {
+      if (word[i] === ' ') continue;
+      const t = this.add2(txt(this, 320 + (i - (word.length - 1) / 2) * w, 150, word[i], 'fuente_titulo', 3));
+      t.setAlpha(0).setY(110);
+      letters.push(t);
+      this.tweens.add({ targets: t, alpha: 1, y: 150, duration: 260, delay: i * 70, ease: 'Bounce.out', onStart: () => chip.blip(660 + i * 90, 0.06, 'sq25', 0.14) });
+    }
+    await wait(this, word.length * 70 + 300);
+    const pre = this.add2(txt(this, 320, 196, 'PRESENTA', 'fuente_ui', 2).setTint(0xffe080).setAlpha(0));
+    this.tweens.add({ targets: pre, alpha: 1, duration: 300 });
+    const thor = this.fig('thor', 320, 270, 'wag', 2);
+    thor.row = 'down_right';
+    chip.blip(1320, 0.3, 'sq25', 0.18, 1760);
+    this.time.delayedCall(140, () => chip.blip(1760, 0.4, 'sq25', 0.16, 2093));
+    this.sound.play('ladrido', { volume: 0.5 });
+    // brillo que cruza las letras
+    for (const [i, t] of letters.entries()) this.time.delayedCall(500 + i * 50, () => { if (t.active) { t.setTintFill(0xffffff); this.time.delayedCall(70, () => t.active && t.clearTint()); } });
+    await wait(this, 1900);
+  }
+
+  /**
+   * Montaje estilo anime: cortes rápidos de cada prueba en paneles inclinados con líneas de velocidad,
+   * y al final los cuatro a la vez con "¡A COMPETIR!".
+   */
+  private async montaje(alive: () => boolean) {
+    chip.play(PELEA);
+    const cortes = [
+      { bg: 'bg_cocora', color: 0x3cc86a, id: 'sophie', pack: 'atletismo', anim: 'hurdles', palabra: '¡VALLAS!', agua: false },
+      { bg: 'bg_halong', color: 0x40c0ff, id: 'alana', pack: 'natacion', anim: 'swim_fly', palabra: '¡NATACIÓN!', agua: true },
+      { bg: 'bg_llanos', color: 0xf2a03a, id: 'rick', pack: 'atletismo', anim: 'javelin', palabra: '¡JABALINA!', agua: false },
+      { bg: 'bg_caracas', color: 0xd0303a, id: 'steph', pack: 'ngg_golpe', anim: 'kick_martial', palabra: '¡PELEA!', agua: false },
+    ];
+    for (const [n, c] of cortes.entries()) {
+      this.clear();
+      const der = n % 2 === 0;
+      this.add2(this.add.rectangle(320, 180, 640, 360, 0x05050c));
+      // panel inclinado con el escenario adentro
+      const poly = der
+        ? [{ x: 120, y: 0 }, { x: 640, y: 0 }, { x: 640, y: 360 }, { x: 20, y: 360 }]
+        : [{ x: 0, y: 0 }, { x: 520, y: 0 }, { x: 620, y: 360 }, { x: 0, y: 360 }];
+      const bg = this.add2(this.add.image(320, 180, c.bg).setScale(1.25));
+      bg.setMask(this.mask(poly));
+      this.tweens.add({ targets: bg, x: der ? 300 : 340, duration: 1300 });
+      const tinte = this.add2(this.add.graphics());
+      tinte.fillStyle(c.color, 0.25).fillPoints(poly, true);
+      const lines = this.add2(speedLines(this, 1, 0xffffff));
+      lines.setAlpha(0.5).setDepth(0);
+      if (c.agua) { const a = this.add2(this.add.graphics()); a.fillStyle(0x1f7fb8, 0.75).fillRect(0, 300, 640, 60); a.fillStyle(0x9ad8f0).fillRect(0, 300, 640, 2); }
+      // el atleta grande, entrando de lado
+      const f = this.fig(c.id, der ? -80 : 720, c.agua ? 330 : 340, 'idle', 4);
+      f.anim.prefer = c.pack;
+      f.set(c.anim, true);
+      f.left = !der;
+      this.tick.push(() => { if (f.active && f.anim.done) f.set(c.anim, true); });
+      this.tweens.add({ targets: f, x: der ? 250 : 390, duration: 260, ease: 'Quad.out' });
+      // el borde blanco del corte
+      const filo = this.add2(this.add.graphics());
+      filo.fillStyle(0xffffff).fillPoints(der ? [{ x: 114, y: 0 }, { x: 124, y: 0 }, { x: 24, y: 360 }, { x: 14, y: 360 }] : [{ x: 516, y: 0 }, { x: 526, y: 0 }, { x: 626, y: 360 }, { x: 616, y: 360 }], true);
+      flash(this, 90);
+      chip.boom(0.5);
+      await wait(this, 220);
+      const w = this.add2(txt(this, der ? 450 : 190, 100, c.palabra, 'fuente_titulo', 3));
+      w.setScale(9).setAngle(der ? -6 : 6);
+      this.tweens.add({ targets: w, scale: 3, duration: 180, ease: 'Quad.in', onComplete: () => { chip.boom(0.7); this.cameras.main.shake(160, 0.012); } });
+      await wait(this, 1080);
+      if (!alive()) return;
+    }
+    // los cuatro a la vez
+    this.clear();
+    this.add2(this.add.rectangle(320, 180, 640, 360, 0xffffff));
+    for (const [i, c] of cortes.entries()) {
+      const x0 = -40 + i * 170;
+      const poly = [{ x: x0 + 40, y: 0 }, { x: x0 + 204, y: 0 }, { x: x0 + 164, y: 360 }, { x: x0, y: 360 }];
+      const bg = this.add2(this.add.image(x0 + 100, 180, c.bg));
+      bg.setMask(this.mask(poly));
+      const tinte = this.add2(this.add.graphics());
+      tinte.fillStyle(c.color, 0.3).fillPoints(poly, true);
+      if (c.agua) { const a = this.add2(this.add.graphics()); a.fillStyle(0x1f7fb8, 0.8).fillPoints([{ x: x0 + 17, y: 280 }, { x: x0 + 181, y: 280 }, { x: x0 + 164, y: 360 }, { x: x0, y: 360 }], true); }
+      const f = this.fig(c.id, x0 + 96, c.agua ? 300 : 316, 'idle', 2.5);
+      f.anim.prefer = c.pack;
+      f.set(c.anim, true);
+      this.tick.push(() => { if (f.active && f.anim.done) f.set(c.anim, true); });
+      f.setAlpha(0);
+      this.tweens.add({ targets: f, alpha: 1, duration: 120, delay: i * 110, onStart: () => chip.blip(520 + i * 130, 0.08, 'sq25', 0.16) });
+    }
+    await wait(this, 520);
+    const go = this.add2(txt(this, 320, 110, '¡A COMPETIR!', 'fuente_titulo', 4));
+    go.setScale(12);
+    this.tweens.add({ targets: go, scale: 4, duration: 220, ease: 'Quad.in', onComplete: () => { chip.boom(0.9); flash(this, 160); this.cameras.main.shake(280, 0.018); } });
+    await wait(this, 1700);
+  }
+
+  /** Máscara con la forma de un panel. */
+  private mask(poly: { x: number; y: number }[]) {
+    const g = this.make.graphics({}, false);
+    g.fillStyle(0xffffff).fillPoints(poly, true);
+    this.masks.push(g);
+    return g.createGeometryMask();
   }
 
   /** Caja de diálogo con retrato. */
