@@ -12,6 +12,22 @@ Arte conceptual de cada escenario, generado con Higgsfield para fijar la identid
   - **El acabado borroso o pintado.** El arte final es pixel art de verdad, con la paleta limitada del estilo de cada país.
 - **La vara:** quien conozca el lugar tiene que reconocerlo en la postal sin leer el nombre. Si la postal de PixelForja queda por debajo de su concepto en identidad y en detalle, no está lista.
 
+## Traducir, no copiar: el estilo del juego manda
+
+Los conceptos vienen pintados, con mucho detalle y mucha saturación. Si se copian, matan el estilo que ya tiene el juego y los atletas se pierden en el fondo. PixelForja los **traduce** a su propio pixel art, el mismo de `saigon_hem` (E1) y de los sprites del kit:
+
+1. **La misma escala de pixel que los sprites.** Un pixel del escenario es un pixel del juego a 640x360, igual que en un atleta. Nada de detalle más fino que el de un sprite: si un farol o una ventana no se lee con los pixeles de una cabeza de atleta, se simplifica.
+2. **La paleta del estilo de cada país,** limitada como hoy (`vietnam_*`, `colombia_ladrillo`, `venezuela_ciudad`). El concepto dice qué colores tiene el lugar. El estilo dice cuántos y cuáles exactamente.
+3. **Los contornos y el sombreado del kit.** El contorno `#1e1418` en lo que va en el plano de juego, sombreado por bandas sin degradados ni pinceladas, y la luz de la izquierda.
+4. **Jerarquía de valor: los atletas mandan.**
+   - El fondo lejano va más apagado y con menos contraste.
+   - El plano de juego va claro y limpio.
+   - Lo más saturado y contrastado de la pantalla son los atletas.
+   - Los murales de la Comuna 13 y los faroles de Hội An pueden ser intensos, pero en las capas de atrás y nunca detrás de la franja donde se pelea con el mismo valor que la ropa de los atletas.
+   - La prueba de legibilidad tiene que seguir en verde.
+5. **Menos objetos, mejor elegidos.** De cada concepto salen los 4 o 5 elementos que hacen reconocible el lugar, bien dibujados. Lo demás se resume. Mejor un mural enorme y claro que diez chiquitos que se vuelven ruido.
+6. **La prueba final:** una captura del juego con atletas encima del escenario nuevo, al lado de una de `saigon_hem`. Tienen que verse del mismo juego.
+
 ## Mundo por mundo
 
 ### `medellin_c13`, Comuna 13 (tres conceptos, uno por tramo)

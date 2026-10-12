@@ -19,7 +19,8 @@ En `para_pixel_forja/referencias/conceptos/` hay arte conceptual de los 8 escena
 
 - **Son la referencia de ambiente** para todos los lotes de escenarios (1, 3 y 8): paleta, elementos que hacen reconocible el lugar, capas y densidad de detalle.
 - **La perspectiva y la geometría NO salen de ahí.** Salen del punto 1 y de `referencias/gris_inclinado/`.
-- **La vara:** la postal de PixelForja no puede quedar por debajo de su concepto en identidad y detalle.
+- **Se traducen, no se copian.** Van al pixel art y a la paleta del estilo de cada país, con la misma escala de pixel que los sprites, y los atletas siempre son lo que más resalta. Las reglas están en el `LEEME.md` de los conceptos.
+- **La vara:** la postal de PixelForja no puede quedar por debajo de su concepto en identidad. Y una captura con atletas encima tiene que verse del mismo juego que `saigon_hem`.
 
 ## Qué cuenta como completo
 
