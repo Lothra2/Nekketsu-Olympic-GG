@@ -12,9 +12,9 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 | 2 | B1 + D1 | Levantar y lanzar, agarres, armas del piso | A | aprobado, en main | [pixel_forja#8](https://github.com/Lothra2/pixel_forja/pull/8) |
 | 3 | C1 | Familia GG e Instituto Nekketsu | A | aprobado, en main | [pixel_forja#9](https://github.com/Lothra2/pixel_forja/pull/9) |
 | 4 | G1 fuentes | Acentos del vietnamita en las fuentes | Nada | aprobado, en main | [pixel_forja#10](https://github.com/Lothra2/pixel_forja/pull/10) |
-| 5 | I inicial | Kit a medida por configuración | A | entregado, falta aprobación de Rick | [pixel_forja#11](https://github.com/Lothra2/pixel_forja/pull/11) |
+| 5 | I inicial | Kit a medida por configuración | A | aprobado, en main | [pixel_forja#11](https://github.com/Lothra2/pixel_forja/pull/11) |
 | 6 | E1 | Sistema de escenarios oblicuos + `saigon_hem` | A, I, layout de `saigon_hem` | pendiente | |
-| 7 | F | Efectos | Nada | pendiente | |
+| 7 | F | Efectos (y audio por configuración) | Nada | entregado, falta aprobación de Rick | [pixel_forja#12](https://github.com/Lothra2/pixel_forja/issues/12) |
 | 8 | G1, H1 | Resto de interfaz y audio de la rebanada vertical | Nada | pendiente | |
 | 9 | B2, C2, D2, E2 | Cross Country completo y equipos nacionales | E1 | pendiente | |
 | 10 | B3, E3 | Obstáculos, Tama-wari, Kachinuki | E1 | pendiente | |
@@ -55,7 +55,7 @@ Se pidió para B1: el campo `cuerpo` (hurtbox sin implementos ni efectos), porqu
 - Silkscreen solo tiene mayúsculas: todo el texto del juego sale en mayúsculas. Va con el tono retro.
 - Ajuste pedido: en ấ, ầ, ẩ el tono a la derecha del circunflejo agranda la letra y deja un hueco ("CẦU" se lee casi "CÂ U"). Que el tono se meta sobre las filas de marcas vacías de la letra siguiente, sin agrandar la letra, y que solo agrande si la siguiente también lleva marca.
 
-**Lote I inicial** (PR #11), entregado. Falta la aprobación de Rick y el merge a `main`. Lo que trae:
+**Lote I inicial** (PR #11), aprobado y en `main`. Lo que trae:
 - Kit a medida: `npx tsx tools/pixel_forja/scripts/kit-a-medida.ts public/assets/kit --config kit.config.json`. Para arrancar se copian los ejemplos de `kit.config.json` y `equipos.json`.
 - El manifiesto trae `equipos`, `equipo` por atleta, `pruebas`, y `pendiente` con lo que todavía no está hecho de lotes futuros.
 - `swim_punch`, `dunked` y `swim_turn` no existen todavía: si el config los pide, el kit da error. No pedirlos hasta su lote.
@@ -68,6 +68,14 @@ Se pidió para B1: el campo `cuerpo` (hurtbox sin implementos ni efectos), porqu
 **Del lado del juego, con lo que ya está en main:** vallas, natación y jabalina usan los packs `atletismo` y `natacion` del motor. Se aprovechan `agua` (la superficie en la fila 40 se alinea con el carril), `desplazamiento` y `elevacion` del clavado, la `suelta` de la jabalina y la jabalina dibujada en el sprite hasta ese cuadro. Funciona bien. Para lotes siguientes sería útil:
 - Una carrerita de jabalina en bucle (`javelin_run`) con la jabalina al hombro. Hoy el juego reusa los primeros 3 cuadros de `javelin`.
 - Un salto de valla aislado (`hurdle_clear`) sin la valla dibujada: `hurdles` trae su propia valla y el juego dibuja las suyas, que se tumban si las tocas.
+
+**Lote F** (pixel_forja#12), entregado. Falta la aprobación de Rick y el merge a `main`. Lo que trae:
+- Efectos con `"fx": true` en `kit.config.json`: salen `fx/<id>.png` y `manifest.fx`, cada uno con `ancla`, `se_pega_a`, `capa`, `cuadros`, `fps` y `columnas`.
+- Qué efecto va con qué evento (`paso` con polvo, `impacto` con chispa en el `punto`, `dizzy` con estrellas) y cómo cargarlos en Phaser: `docs/EFECTOS.md`.
+- Audio por configuración, por ejemplo `"audio": { "sfx": ["golpe", "esquiva", "bloqueo", "paso_tierra_0"], "ambientes": ["agua"] }`. Salen WAV en `audio/sfx/` y `audio/ambiente/`, con `manifest.audio.<sección>.<nombre> = { archivo, duracion, bucle? }`. Con esto el juego deja de generar el audio en su puente.
+- Nombres del lote H (`silbato`, `pistola`, `marcha_nekketsu`) se pueden pedir desde ya: se saltan con aviso en `manifest.pendiente` y aparecen solos con H1.
+- Los efectos miran a la derecha: para la izquierda, `flipX` y espejar el ancla. La lluvia y el calor van con opacidad baja. La bola del Tama-wari trae un cuadro por estado de daño y el juego elige cuál.
+- Del lado del juego: cuando F esté en `main`, el kit pasa del puente `scripts/kit.ts` a `kit.config.json` con `kit-a-medida`, con efectos y audio incluidos, y el juego cambia `ui.fuentes.*.alto` por `alto_linea` y lee el audio por sección.
 
 ## Insumos que pone el juego
 
