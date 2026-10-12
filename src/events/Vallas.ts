@@ -18,6 +18,8 @@ interface Racer {
   c: Competidor; fig: Figura; shadow: Phaser.GameObjects.Ellipse;
   x: number; y: number; lane: number; z: number; vz: number; v: number; boost: number;
   st: 'set' | 'start' | 'run' | 'air' | 'stumble' | 'done'; t: number; time: number; react: number; last: string; cool: number; top: number;
+  /** entrenamiento: corre pegado a la persona para que practique el codazo */
+  sombra?: boolean;
 }
 interface Hurdle { x: number; lane: number; down: boolean; img: Phaser.GameObjects.Image }
 
@@ -26,6 +28,7 @@ export class Vallas extends EventScene {
   private racers: Racer[] = [];
   /** entrenamiento: vallas pasadas sin tumbar y cambios de carril */
   private saltadas = 0;
+  private codazos = 0;
   private cambios = 0;
   private hurdles: Hurdle[] = [];
   private clock = 0;
@@ -38,6 +41,7 @@ export class Vallas extends EventScene {
   create() {
     this.racers = [];
     this.saltadas = 0;
+    this.codazos = 0;
     this.cambios = 0;
     this.hurdles = [];
     this.clock = 0;
@@ -52,7 +56,8 @@ export class Vallas extends EventScene {
     }
     this.gente.forEach((c, k) => {
       // entrenando vas solo por el carril 2: así puedes cambiar hacia arriba y hacia abajo
-      const i = this.d.practica ? 1 : k;
+      // tú en el carril 2 con un rival a cada lado (así el codazo siempre tiene a quién); tu compañero en el 4
+      const i = this.d.practica ? 1 : [1, 3, 0, 2][k];
       const fig = new Figura(this, START, TOP + LANES[i], c.id, 'idle');
       fig.anim.prefer = 'atletismo';
       fig.set('sprint_start', true);
@@ -78,7 +83,11 @@ export class Vallas extends EventScene {
       { texto: 'TOCA {SALTO} JUSTO ANTES\nDE LA VALLA PARA SALTARLA', botones: ['jump'], listo: () => this.saltadas >= 1 },
       { texto: '¡ESO! SALTA 3 VALLAS MÁS\nSIN TUMBARLAS', botones: ['punch', 'kick', 'jump'], antes: () => { base = this.saltadas; }, listo: () => this.saltadas - base >= 3 },
       { texto: 'USA {MOVER} ARRIBA O ABAJO\nPARA CAMBIAR DE CARRIL', botones: ['stick'], listo: () => this.cambios >= 1 },
-      { texto: 'LLEGA A LA META\nEN LA CARRERA, {ESPECIAL} ES EL CODAZO', botones: ['punch', 'kick', 'special'], listo: () => me().st === 'done' },
+      {
+        texto: 'KENJI CORRE PEGADO A TI:\nTOCA {ESPECIAL} PARA EL CODAZO', botones: ['special'],
+        antes: () => this.sparring(), listo: () => this.codazos >= 1,
+      },
+      { texto: '¡TUMBADO! AHORA\nLLEGA A LA META', botones: ['punch', 'kick', 'jump'], listo: () => me().st === 'done' },
     ];
   }
 
@@ -150,12 +159,13 @@ export class Vallas extends EventScene {
       if (p.y !== 0 && Math.abs(r.y - LANES[r.lane]) < 2) { const nl = Phaser.Math.Clamp(r.lane + p.y, 0, 3); if (nl !== r.lane && !this.racers.some((o) => o !== r && o.lane === nl && Math.abs(o.x - r.x) < 14)) { r.lane = nl; this.cambios++; } }
       if (p.pressed.special) this.codazo(r);
     } else {
-      target = r.top + Math.sin(r.t * 2 + r.react * 20) * 10;
+      const me = this.racers[0];
+      target = r.sombra ? me.v + Phaser.Math.Clamp((me.x - 4 - r.x) * 3, -60, 60) : r.top + Math.sin(r.t * 2 + r.react * 20) * 10;
       const next = this.hurdles.find((h) => h.lane === r.lane && !h.down && h.x > r.x);
       if (next && r.st !== 'air' && next.x - r.x < 26 + r.v * 0.05 && Math.random() < 0.92) this.jump(r);
       else if (next && r.st !== 'air' && next.x - r.x < 12) this.jump(r);
       const h = this.racers.find((o) => o !== r && o.c.team !== r.c.team && Math.abs(o.lane - r.lane) === 1 && Math.abs(o.x - r.x) < 22);
-      if (h && r.cool <= 0 && Math.random() < 0.6 * dt) this.codazo(r);
+      if (h && !r.sombra && r.cool <= 0 && Math.random() < 0.6 * dt) this.codazo(r);
     }
     if (r.st === 'stumble') { target *= 0.3; if (r.t > 0.4) { r.st = 'run'; r.fig.set('sprint'); } }
     r.v += Phaser.Math.Clamp(target - r.v, -260 * dt, 230 * dt);
@@ -210,15 +220,45 @@ export class Vallas extends EventScene {
 
   private codazo(r: Racer) {
     if (r.cool > 0) return;
-    r.cool = 1.8;
-    const v = this.racers.find((o) => o !== r && o.st !== 'done' && Math.abs(o.lane - r.lane) === 1 && Math.abs(o.x - r.x) < 24);
-    if (!v) { if (r.c.human) this.sound.play('esquiva', { volume: 0.3 }); return; }
+    // el de al lado más cercano, primero los rivales
+    const cerca = this.racers
+      .filter((o) => o !== r && o.st !== 'done' && Math.abs(o.lane - r.lane) === 1 && Math.abs(o.x - r.x) < 40)
+      .sort((a, b) => Number(a.c.team === r.c.team) - Number(b.c.team === r.c.team) || Math.abs(a.x - r.x) - Math.abs(b.x - r.x));
+    const v = cerca[0];
+    if (!v) {
+      // falló: se nota, y se puede volver a intentar enseguida
+      r.cool = 0.4;
+      if (r.c.human) {
+        this.sound.play('esquiva', { volume: 0.4 });
+        const t = txt(this, r.x, TOP + r.y - 54, '¡NADIE AL LADO!', 'fuente_ui', 1).setDepth(6000).setTint(0xff9090);
+        this.tweens.add({ targets: t, y: t.y - 10, alpha: 0, duration: 600, onComplete: () => t.destroy() });
+      }
+      return;
+    }
+    r.cool = 1.4;
+    if (r.c.human) this.codazos++;
+    // se lanza de lado hacia el otro y vuelve solo a su carril
+    r.y += Math.sign(v.y - r.y) * 9;
     this.stumble(v);
-    v.lane = Phaser.Math.Clamp(v.lane + Math.sign(v.lane - r.lane), 0, 3);
+    // lo saca de su carril, salvo que ahí venga alguien pegado
+    const nl = Phaser.Math.Clamp(v.lane + Math.sign(v.lane - r.lane), 0, 3);
+    if (!this.racers.some((o) => o !== v && o.lane === nl && Math.abs(o.x - v.x) < 16)) v.lane = nl;
     this.sound.play('golpe', { volume: 0.5 });
     this.cameras.main.shake(90, 0.005);
     const t = txt(this, (r.x + v.x) / 2, TOP + (r.y + v.y) / 2 - 50, '¡CODAZO!', 'fuente_ui', 1).setDepth(6000).setTint(0xffe040);
     this.tweens.add({ targets: t, y: t.y - 14, alpha: 0, duration: 700, onComplete: () => t.destroy() });
+  }
+
+  /** Entrenamiento: Kenji sale a correr pegado a la persona, en el carril de al lado. */
+  private sparring() {
+    if (this.racers.some((r) => r.sombra)) return;
+    const me = this.racers[0];
+    const lane = me.lane < 3 ? me.lane + 1 : me.lane - 1;
+    const fig = new Figura(this, me.x - 30, TOP + LANES[lane], 'kenji', 'idle');
+    fig.anim.prefer = 'atletismo';
+    fig.set('sprint', true);
+    const shadow = this.add.ellipse(me.x - 30, TOP + LANES[lane], 20, 5, 0x000000, 0.3);
+    this.racers.push({ c: { id: 'kenji', team: 1, human: false }, fig, shadow, x: me.x - 30, y: LANES[lane], lane, z: 0, vz: 0, v: me.v, boost: 0, st: 'run', t: 0, time: 0, react: 0.1, last: '', cool: 0, top: 0, sombra: true });
   }
 
   private placeOf(r: Racer) {

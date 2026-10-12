@@ -49,6 +49,7 @@ if (!solo.length || solo.includes('vallas')) {
   await entrenar('Vallas', { jugador: 'sophie', practica: true }, async (i) => {
     const v = await page.evaluate(() => { const s = window.game.scene.getScene('Vallas'); const me = s.racers[0]; const h = s.hurdles.filter((h) => h.lane === me.lane && !h.down && h.x > me.x).map((h) => h.x)[0]; return { gap: h ? h - me.x : 999, v: me.v }; });
     if (i === 3) { await key('ArrowUp', 60); return; }
+    if (i === 4) { await key(Math.random() < 0.5 ? 'j' : 'k', 25); await key('u', 30); return; }
     if (v.gap < 22 + v.v * 0.06 && v.gap > 0) await key('l', 30);
     else await key(Math.random() < 0.5 ? 'j' : 'k', 25);
   });
