@@ -86,6 +86,7 @@ Con el servidor corriendo:
 node scripts/capturas.mjs http://localhost:5173/ capturas          # intro, título, selección y pelea
 node scripts/prueba-pelea.mjs http://localhost:5173/ capturas rick kenji   # combo, levantar, lanzar, técnica, chancleta
 node scripts/prueba-pelea-nueva.mjs http://localhost:5173/ capturas/pelea_nueva   # VS, guardia, agarre, rodillazos, pisotón, voladora, arepa, burla y racha
+node scripts/prueba-intro.mjs http://localhost:5173/ capturas/intro   # la intro cuadro a cuadro: reacciones, tarjetas y textos enteros y sin tapar
 node scripts/prueba-borde.mjs http://localhost:5173/   # pegada al borde de arriba o de abajo, los muros y los huecos siguen valiendo
 node scripts/prueba-kachinuki.mjs http://localhost:5173/ capturas/kachinuki   # el borde, el rescate de Thor, lo que cae del cielo y la azotea que se achica
 node scripts/prueba-pruebas.mjs http://localhost:5173/ capturas/pruebas  # vallas, natación, jabalina y medallero

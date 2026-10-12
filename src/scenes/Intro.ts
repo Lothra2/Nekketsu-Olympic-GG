@@ -17,6 +17,13 @@ const FAMILIA = [
 const INSTITUTO = ['kenji', 'ryu', 'goro', 'tetsu'];
 
 /**
+ * La altura de los ojos de cada uno, en pixeles del kit bajo su punto `cabeza` (medida en su sprite de frente). El
+ * punto `cabeza` del kit no cae en el mismo lugar de la cara en todos: en Rick está a la altura de los lentes y en
+ * Goro en la frente. Las lágrimas salen de aquí y el sonrojo va un poco más abajo.
+ */
+const OJOS: Record<string, number> = { rick: -1, steph: 5, sophie: 5, alana: 5, kenji: 3, ryu: 3, goro: 7, tetsu: 4 };
+
+/**
  * La intro: la presentación (con Thor arreglando el letrero), Japón, la gira, la Familia GG entrando cada uno a su
  * manera, el montaje de las pruebas, el encuentro con el Instituto (que termina con Goro asustado de Thor), el VS,
  * el puñetazo a la cámara y el logo. Se salta con cualquier botón.
@@ -26,6 +33,8 @@ export class Intro extends Phaser.Scene {
   private input2!: Input;
   private layer!: Phaser.GameObjects.Container;
   private tick: ((dt: number) => void)[] = [];
+  /** las reacciones que van sobre la cabeza: siempre encima de todo */
+  private marcas: Phaser.GameObjects.GameObject[] = [];
   /** máscaras de los paneles inclinados del montaje (no se dibujan; se borran con la toma) */
   private masks: Phaser.GameObjects.Graphics[] = [];
 
@@ -63,6 +72,7 @@ export class Intro extends Phaser.Scene {
   private clear() {
     this.layer.removeAll(true);
     this.tick = [];
+    this.marcas = [];
     for (const m of this.masks) m.destroy();
     this.masks = [];
     const cam = this.cameras.main;
@@ -112,9 +122,20 @@ export class Intro extends Phaser.Scene {
   /** Dónde va cada reacción: las lágrimas desde los ojos, el sonrojo en los cachetes y lo demás arriba al costado. */
   private puntoReac(f: Figura, id: string): [number, number] {
     const [x, y, r] = this.cabeza(f);
-    if (id === 'lagrima_comica') return [x, y - r * 0.05];
-    if (id === 'sonrojo') return [x, y + r * 0.3];
-    return [x + r * 0.45, y - r * 0.6];
+    const ojos = y + (OJOS[f.who] ?? 4) * f.scaleY;
+    if (id === 'lagrima_comica') return [x, ojos];
+    if (id === 'sonrojo') return [x, ojos + 3 * f.scaleY];
+    // las estrellas giran centradas sobre la cabeza
+    if (id === 'estrellas_mareo') return [Phaser.Math.Clamp(x, 16 * f.scaleX + 4, 636 - 16 * f.scaleX), y - r * 0.8];
+    // arriba a la derecha de la cabeza; pegado al borde derecho, a la izquierda (el efecto se dibuja espejado)
+    const ancho = 16 * f.scaleX;
+    return x + r * 0.45 + ancho > 636 ? [x - r * 0.45, y - r * 0.6] : [x + r * 0.45, y - r * 0.6];
+  }
+
+  /** Trae una figura al frente sin tapar las reacciones que van sobre las cabezas. */
+  private alFrente(f: Figura) {
+    this.layer.bringToTop(f);
+    for (const m of this.marcas) if (m.active) this.layer.bringToTop(m);
   }
 
   /** Una reacción de manga (vena, gota, ¡!, lágrima, sonrojo) pegada a la cabeza, que la sigue mientras dura. */
@@ -123,14 +144,28 @@ export class Intro extends Phaser.Scene {
     const s = efecto(this, id, ...this.puntoReac(f, id), { scale: f.scaleX, queda: true });
     if (!s) return;
     this.add2(s);
-    this.tick.push(() => { if (s.active && f.active) s.setPosition(...this.puntoReac(f, id)); });
+    s.setName(`reac:${id}:${f.who}`);
+    // lo que va en la cara queda pegado a su figura (si alguien está delante, la tapa igual que a la cara);
+    // lo que va sobre la cabeza queda encima de todo, también de las tarjetas que salgan después
+    if (id === 'lagrima_comica' || id === 'sonrojo') this.layer.moveAbove(s, f);
+    else this.marcas.push(s);
+    this.tick.push(() => {
+      if (!s.active || !f.active) return;
+      const [x, y] = this.puntoReac(f, id);
+      s.setPosition(x, y);
+      // del lado izquierdo de la cabeza va espejado, para que siga saliendo hacia afuera
+      if (id !== 'lagrima_comica' && id !== 'sonrojo' && id !== 'estrellas_mareo') s.setFlipX(x < this.cabeza(f)[0]).setOrigin(x < this.cabeza(f)[0] ? 1 - 0.5 / 16 : 0.5 / 16, s.originY);
+      // si su figura se va de la pantalla, la reacción se va con ella
+      if (f.x < -10 || f.x > 650) s.destroy();
+    });
     this.time.delayedCall(ms, () => { if (s.active) this.tweens.add({ targets: s, alpha: 0, duration: 160, onComplete: () => s.destroy() }); });
   }
 
-  /** Un efecto suelto en la toma (polvo, chispa, chapuzón). */
-  private fx(id: string, x: number, y: number, scale = 2, flip = false) {
+  /** Un efecto suelto en la toma (polvo, chispa, chapuzón). Con `dura`, los que se repiten se apagan solos. */
+  private fx(id: string, x: number, y: number, scale = 2, flip = false, dura = 0) {
     const s = efecto(this, id, x, y, { scale, flip });
     if (s) this.add2(s);
+    if (s && dura) this.time.delayedCall(dura, () => { if (s.active) this.tweens.add({ targets: s, alpha: 0, duration: 150, onComplete: () => s.destroy() }); });
     return s;
   }
 
@@ -303,8 +338,9 @@ export class Intro extends Phaser.Scene {
     thor.row = 'down_right';
     const pre = this.add2(txt(this, 320, 196, 'PRESENTA', 'fuente_ui', 2).setTint(0xffe080).setAlpha(0));
     this.tweens.add({ targets: pre, alpha: 1, duration: 300 });
-    // brillo que cruza las letras
-    for (const [i, t] of letters.entries()) this.time.delayedCall(200 + i * 50, () => { if (t.active) { t.setTintFill(0xffffff); this.time.delayedCall(70, () => t.active && t.clearTint()); } });
+    // una ola que recorre las letras (cada una salta un poquito) y un destello al final
+    for (const [i, t] of letters.entries()) this.tweens.add({ targets: t, y: t.y - 6, duration: 90, yoyo: true, delay: 200 + i * 55, ease: 'Quad.out' });
+    this.time.delayedCall(200 + letters.length * 55, () => { const ul = letters[letters.length - 1]; if (ul?.active) this.fx('brillo_record', ul.x + 6, ul.y - 4, 2, false, 700); });
     await wait(this, 1500);
   }
 
@@ -330,7 +366,7 @@ export class Intro extends Phaser.Scene {
     this.cameras.main.shake(260, 0.012);
     const aura = this.add2(speedLines(this, 1, 0xff4040));
     aura.setAlpha(0.45);
-    this.layer.bringToTop(kenji);
+    this.alFrente(kenji);
     this.tweens.add({ targets: kenji, scale: 3, duration: 380, ease: 'Back.out' });
     await typewrite(this, box.text, '¡ENTONCES NOS VAMOS DE GIRA!', 26, 330);
     this.tweens.add({ targets: kenji, scale: 2, duration: 300 });
@@ -357,8 +393,13 @@ export class Intro extends Phaser.Scene {
     chip.blip(330, 0.4, 'tri', 0.14, 220);
     await typewrite(this, box.text, '...', 6, 220);
     tetsu.set('fall_getup', true);
-    this.reac(tetsu, 'sonrojo', 1100);
-    await wait(this, 900);
+    await wait(this, 450);
+    if (!alive()) return;
+    // se para, mira a la cámara y se pone colorado
+    tetsu.row = 'down';
+    tetsu.set('idle');
+    this.reac(tetsu, 'sonrojo', 1000);
+    await wait(this, 800);
   }
 
   /** La Familia GG llega a Saigón, cada uno con su entrada; después Thor. */
@@ -390,7 +431,7 @@ export class Intro extends Phaser.Scene {
     if (!alive()) return;
     rick.row = 'down';
     rick.set('victory', true);
-    this.fx('brillo_record', rick.x + 8, Y - 50, 2);
+    this.fx('brillo_record', rick.x + 8, Y - 50, 2, false, 750);
     chip.blip(1760, 0.12, 'sq25', 0.12);
     await tarjeta(0);
     if (!alive()) return;
@@ -637,7 +678,7 @@ export class Intro extends Phaser.Scene {
     const rec = this.add2(txt(this, der ? 500 : 140, 150, '¡RÉCORD!', 'fuente_titulo', 2).setTint(0xffe040));
     rec.setScale(5);
     this.tweens.add({ targets: rec, scale: 2, duration: 160, ease: 'Quad.in' });
-    this.fx('brillo_record', der ? 560 : 80, 140, 3);
+    this.fx('brillo_record', der ? 560 : 80, 140, 3, false, 700);
     await wait(this, 520);
   }
 
@@ -705,7 +746,7 @@ export class Intro extends Phaser.Scene {
       return f;
     });
     this.layer.bringToTop(sombra);
-    for (const f of [...fam, thor, ...inst]) this.layer.bringToTop(f);
+    for (const f of [...fam, thor, ...inst]) this.alFrente(f);
     await wait(this, 1100);
     if (!alive()) return;
     flash(this, 140);
@@ -753,16 +794,19 @@ export class Intro extends Phaser.Scene {
     chip.blip(660, 0.3, 'sq50', 0.18, 1760);
     // ... y cae detrás de Kenji, que no lo tapa ni a la mitad
     this.tweens.add({ targets: goro, y: Y - 80, duration: 280, ease: 'Quad.out', yoyo: true });
-    await this.ir(goro, { x: kenji.x + 22 }, 560);
+    // se asoma por un lado: el cuerpo detrás de Kenji y la cara afuera, para que se vea el llanto
+    await this.ir(goro, { x: kenji.x + 34 }, 560);
     this.layer.moveBelow(goro, kenji);
     // de frente, temblando detrás de Kenji (que no lo tapa ni a la mitad), llorando a chorros
     goro.row = 'down';
     goro.set('sad', true);
-    this.tweens.add({ targets: goro, x: goro.x + 2, duration: 50, yoyo: true, repeat: 30 });
+    const tiembla = this.tweens.add({ targets: goro, x: goro.x + 2, duration: 50, yoyo: true, repeat: -1 });
     this.reac(goro, 'lagrima_comica', 1900);
     this.pop(goro.x + 30, this.cabeza(goro)[1] - 26, '¡BUAAA!', 0x9ad8ff, 1);
     thor.set('bark', true);
     this.sound.play('ladrido', { volume: 0.6 });
+    // Ryu se aparta del llorón, y Tetsu tampoco sabe qué hacer
+    this.tweens.add({ targets: ryu, x: ryu.x + 34, duration: 260, ease: 'Quad.out' });
     for (const f of [ryu, tetsu]) this.reac(f, 'gota_nervios', 1500);
     await wait(this, 700);
     if (!alive()) return;
@@ -773,6 +817,10 @@ export class Intro extends Phaser.Scene {
     const box3 = this.dialog('kenji', 'enojo', true);
     await typewrite(this, box3.text, '¡N-NOS VEMOS EN LA PISTA!', 26, 330);
     if (!alive()) return;
+    // deja de temblar para salir corriendo con los demás
+    tiembla.stop();
+    goro.row = 'right';
+    kenji.row = 'right';
     for (const [i, f] of inst.entries()) { f.left = false; f.set('run'); this.tweens.add({ targets: f, x: 760 + i * 20, duration: 520, delay: (3 - i) * 60 }); }
     chip.blip(880, 0.4, 'sq25', 0.12, 220);
     await wait(this, 600);
@@ -992,7 +1040,7 @@ export class Intro extends Phaser.Scene {
 
   /** Caja de diálogo con retrato. `arriba` la pone arriba, para no tapar a nadie. `close` la quita. */
   private dialog(id: string, expr: string, arriba = false) {
-    const c = this.add2(this.add.container(0, arriba ? -262 : 0));
+    const c = this.add2(this.add.container(0, arriba ? -262 : 0)).setName('dialogo');
     c.add(panel(this, 20, 286, 600, 64));
     c.add(this.add.image(54, 318, `retratos:${id}`, `chico_${expr}`).setScale(1));
     const nombres: Record<string, string> = { kenji: 'KENJI "TORO" SAKAMOTO', alana: 'ALANA, LA PEQUEÑA TERRIBLE' };
@@ -1012,7 +1060,7 @@ export class Intro extends Phaser.Scene {
     const [hx, hy, r] = this.cabeza(f);
     const cx = Phaser.Math.Clamp(hx, W / 2 + 10, 640 - W / 2 - 10), x0 = Math.round(cx - W / 2);
     const y1 = Math.round(hy - r - 14), y0 = y1 - H;
-    const c = this.add.container(0, 0);
+    const c = this.add.container(0, 0).setName('tarjeta');
     this.layer.add(c);
     const g = this.add.graphics();
     g.fillStyle(0x000000, 0.35).fillRect(x0 + 4, y0 + 4, W, H);
@@ -1025,6 +1073,8 @@ export class Intro extends Phaser.Scene {
     g.fillStyle(0x08081a).fillTriangle(px - 5, y1 - 1, px + 5, y1 - 1, hx, y1 + 6);
     c.add(g);
     llenar(c, x0, y0);
+    // las reacciones que ya están en pantalla siguen viéndose encima de la tarjeta
+    for (const m of this.marcas) if (m.active) this.layer.bringToTop(m);
     // aparece desde arriba, con rebote
     c.setY(y0 - 30).setAlpha(0);
     this.tweens.add({ targets: c, y: 0, alpha: 1, duration: 260, ease: 'Back.out' });
