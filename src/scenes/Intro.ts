@@ -97,19 +97,33 @@ export class Intro extends Phaser.Scene {
     return new Promise<void>((res) => this.tweens.add({ targets, ...props, duration: ms, ease, onComplete: () => res() }));
   }
 
-  /** Arriba a la derecha de la cabeza: donde van las reacciones de manga. */
-  private cabeza(f: Figura): [number, number] {
+  /**
+   * El centro de la cabeza en el cuadro que se ve ahora y su radio, con los datos por cuadro del kit (`cabeza`): así
+   * sigue a la cabeza aunque se agache, salte o mire al otro lado.
+   */
+  private cabeza(f: Figura): [number, number, number] {
     const s = f.scaleX;
-    return [f.x + 6 * s, f.y - (f.pivote[1] - f.celda * 0.16) * s];
+    const r = f.celda * 0.19 * s;
+    const c = f.anim.data.cabeza?.[f.rowIndex]?.[f.anim.frame];
+    if (c) { const [cx, cy] = f.mirror(c); return [f.x + cx * s, f.y + cy * s, r]; }
+    return [f.x, f.y - (f.pivote[1] - f.celda * 0.3) * s, r];
   }
 
-  /** Una reacción de manga sobre la cabeza (vena, gota, ¡!, lágrima, sonrojo) que sigue a la figura un rato. */
+  /** Dónde va cada reacción: las lágrimas desde los ojos, el sonrojo en los cachetes y lo demás arriba al costado. */
+  private puntoReac(f: Figura, id: string): [number, number] {
+    const [x, y, r] = this.cabeza(f);
+    if (id === 'lagrima_comica') return [x, y - r * 0.05];
+    if (id === 'sonrojo') return [x, y + r * 0.3];
+    return [x + r * 0.45, y - r * 0.6];
+  }
+
+  /** Una reacción de manga (vena, gota, ¡!, lágrima, sonrojo) pegada a la cabeza, que la sigue mientras dura. */
   private reac(f: Figura, id: string, ms = 1400) {
-    const [x, y] = this.cabeza(f);
-    const s = efecto(this, id, x, y, { scale: f.scaleX * 1.2, queda: true });
+    // a escala entera, como la figura: los pixeles quedan parejos
+    const s = efecto(this, id, ...this.puntoReac(f, id), { scale: f.scaleX, queda: true });
     if (!s) return;
     this.add2(s);
-    this.tick.push(() => { if (s.active && f.active) s.setPosition(...this.cabeza(f)); });
+    this.tick.push(() => { if (s.active && f.active) s.setPosition(...this.puntoReac(f, id)); });
     this.time.delayedCall(ms, () => { if (s.active) this.tweens.add({ targets: s, alpha: 0, duration: 160, onComplete: () => s.destroy() }); });
   }
 
@@ -362,11 +376,12 @@ export class Intro extends Phaser.Scene {
     await wait(this, 800);
     const Y = 316, spots = [190, 270, 350, 430];
     const [rick, steph, sophie, alana] = FAMILIA.map((m) => this.fig(m.id, -60, Y, 'idle', 2));
+    const todos = [rick, steph, sophie, alana];
     const tarjeta = async (i: number, ms = 1250) => {
-      const card = this.card(FAMILIA[i]);
+      const card = this.card(FAMILIA[i], todos[i], todos);
       chip.blip(660 + i * 110, 0.1, 'sq25', 0.16);
       await wait(this, ms);
-      card.destroy();
+      await card.cerrar();
     };
 
     // Rick: llega, posa y brilla
@@ -436,10 +451,10 @@ export class Intro extends Phaser.Scene {
     if (!alive()) return;
     thor2.set('wag');
     thor2.row = 'down_right';
-    const tc = this.thorCard();
+    const tc = this.thorCard(thor2, [...todos, thor2]);
     this.sound.play('ladrido', { volume: 0.6 });
     await wait(this, 1300);
-    tc.destroy();
+    await tc.cerrar();
     if (!alive()) return;
     for (const f of [rick, steph, sophie, alana]) { f.row = 'down'; f.set('victory', true); }
     thor2.set('celebrate', true);
@@ -725,12 +740,12 @@ export class Intro extends Phaser.Scene {
     if (!alive()) return;
     thor.set('run');
     thor.row = 'right';
-    await this.ir(thor, { x: kenji.x - 52 }, 420);
+    await this.ir(thor, { x: kenji.x - 66 }, 420);
     if (!alive()) return;
     box2.close();
     thor.set('bark', true);
     this.sound.play('ladrido', { volume: 0.8 });
-    this.pop(thor.x, 250, '¡GUAU!', 0xffe080);
+    this.pop(thor.x + 8, this.cabeza(thor)[1] - 30, '¡GUAU!', 0xffe080);
     this.cameras.main.shake(160, 0.01);
     await wait(this, 250);
     // el gigante pega un brinco y se esconde detrás de Kenji
@@ -738,16 +753,22 @@ export class Intro extends Phaser.Scene {
     chip.blip(660, 0.3, 'sq50', 0.18, 1760);
     // ... y cae detrás de Kenji, que no lo tapa ni a la mitad
     this.tweens.add({ targets: goro, y: Y - 80, duration: 280, ease: 'Quad.out', yoyo: true });
-    await this.ir(goro, { x: kenji.x + 18 }, 560);
+    await this.ir(goro, { x: kenji.x + 22 }, 560);
     this.layer.moveBelow(goro, kenji);
+    // de frente, temblando detrás de Kenji (que no lo tapa ni a la mitad), llorando a chorros
+    goro.row = 'down';
     goro.set('sad', true);
-    this.reac(goro, 'lagrima_comica', 1600);
+    this.tweens.add({ targets: goro, x: goro.x + 2, duration: 50, yoyo: true, repeat: 30 });
+    this.reac(goro, 'lagrima_comica', 1900);
+    this.pop(goro.x + 30, this.cabeza(goro)[1] - 26, '¡BUAAA!', 0x9ad8ff, 1);
     thor.set('bark', true);
     this.sound.play('ladrido', { volume: 0.6 });
     for (const f of [ryu, tetsu]) this.reac(f, 'gota_nervios', 1500);
     await wait(this, 700);
     if (!alive()) return;
-    // Kenji, colorado
+    // Kenji, colorado, de frente a la cámara
+    kenji.row = 'down';
+    kenji.set('idle');
     this.reac(kenji, 'sonrojo', 1800);
     const box3 = this.dialog('kenji', 'enojo', true);
     await typewrite(this, box3.text, '¡N-NOS VEMOS EN LA PISTA!', 26, 330);
@@ -982,43 +1003,65 @@ export class Intro extends Phaser.Scene {
   }
 
   /** Tarjeta de presentación de un atleta. */
-  private card(m: (typeof FAMILIA)[number]) {
+  /**
+   * La tarjeta de presentación sobre quien se presenta, con su flechita apuntándole. Los demás quedan en penumbra
+   * mientras dura, para que el ojo vaya directo a quien toca.
+   */
+  private tarjetaSobre(f: Figura, otros: Figura[], color: number, llenar: (c: Phaser.GameObjects.Container, x0: number, y0: number) => void) {
+    const W = 228, H = 96;
+    const [hx, hy, r] = this.cabeza(f);
+    const cx = Phaser.Math.Clamp(hx, W / 2 + 10, 640 - W / 2 - 10), x0 = Math.round(cx - W / 2);
+    const y1 = Math.round(hy - r - 14), y0 = y1 - H;
     const c = this.add.container(0, 0);
     this.layer.add(c);
     const g = this.add.graphics();
-    g.fillStyle(0x08081a, 0.92).fillRect(20, 90, 230, 104);
-    g.fillStyle(m.color).fillRect(20, 90, 6, 104);
-    g.lineStyle(2, 0xf2c230).strokeRect(21, 91, 228, 102);
+    g.fillStyle(0x000000, 0.35).fillRect(x0 + 4, y0 + 4, W, H);
+    g.fillStyle(0x08081a, 0.94).fillRect(x0, y0, W, H);
+    g.fillStyle(color).fillRect(x0, y0, W, 4);
+    g.lineStyle(2, 0xf2c230).strokeRect(x0 + 1, y0 + 1, W - 2, H - 2);
+    // la flechita, del borde de abajo a la cabeza
+    const px = Phaser.Math.Clamp(hx, x0 + 14, x0 + W - 14);
+    g.fillStyle(0xf2c230).fillTriangle(px - 8, y1, px + 8, y1, hx, y1 + 10);
+    g.fillStyle(0x08081a).fillTriangle(px - 5, y1 - 1, px + 5, y1 - 1, hx, y1 + 6);
     c.add(g);
-    c.add(this.add.image(84, 142, `retratos:${m.id}`, 'grande_feliz').setScale(0.8));
-    c.add(txt(this, 140, 108, m.nombre, 'fuente_titulo', 1, 0));
-    c.add(txt(this, 140, 130, m.apodo, 'fuente_ui', 1, 0).setTint(0xffe080));
-    c.add(txt(this, 140, 150, 'TÉCNICA', 'fuente_ui', 1, 0).setTint(0x8a8ab0));
-    c.add(txt(this, 140, 164, m.tecnica, 'fuente_ui', 1, 0).setTint(0xff6a6a));
-    c.x = -260;
-    this.tweens.add({ targets: c, x: 0, duration: 220, ease: 'Back.out' });
-    return c;
+    llenar(c, x0, y0);
+    // aparece desde arriba, con rebote
+    c.setY(y0 - 30).setAlpha(0);
+    this.tweens.add({ targets: c, y: 0, alpha: 1, duration: 260, ease: 'Back.out' });
+    const sombra = otros.filter((o) => o !== f);
+    for (const o of sombra) o.setTint(0x6a6a88);
+    // un destello que barre a quien se presenta
+    const brillo = this.add2(this.add.rectangle(hx, f.y - f.celda * f.scaleY * 0.5, 6, f.celda * f.scaleY, 0xffffff, 0.5).setAngle(18));
+    this.tweens.add({ targets: brillo, x: hx + 40, alpha: 0, duration: 380, onComplete: () => brillo.destroy() });
+    return {
+      cerrar: () => new Promise<void>((res) => {
+        for (const o of sombra) o.clearTint();
+        this.tweens.add({ targets: c, alpha: 0, y: -12, duration: 160, onComplete: () => { c.destroy(); res(); } });
+      }),
+    };
   }
 
-  private thorCard() {
-    const c = this.add.container(0, 0);
-    this.layer.add(c);
-    const g = this.add.graphics();
-    g.fillStyle(0x08081a, 0.92).fillRect(390, 90, 230, 104);
-    g.fillStyle(0xc87a3a).fillRect(614, 90, 6, 104);
-    g.lineStyle(2, 0xf2c230).strokeRect(391, 91, 228, 102);
-    c.add(g);
-    const t = new Figura(this, 440, 178, 'thor', 'wag').setScale(2);
-    t.row = 'down_right';
-    c.add(t);
-    this.tick.push((dt) => { if (t.active) t.step(dt); });
-    c.add(txt(this, 486, 108, 'THOR', 'fuente_titulo', 1, 0));
-    c.add(txt(this, 486, 130, 'EL GUARDIÁN', 'fuente_ui', 1, 0).setTint(0xffe080));
-    c.add(txt(this, 486, 150, 'TÉCNICA', 'fuente_ui', 1, 0).setTint(0x8a8ab0));
-    c.add(txt(this, 486, 164, '¡GUAU GUAU!', 'fuente_ui', 1, 0).setTint(0xff6a6a));
-    c.x = 260;
-    this.tweens.add({ targets: c, x: 0, duration: 220, ease: 'Back.out' });
-    return c;
+  private card(m: (typeof FAMILIA)[number], f: Figura, otros: Figura[]) {
+    return this.tarjetaSobre(f, otros, m.color, (c, x0, top) => {
+      c.add(this.add.image(x0 + 42, top + 50, `retratos:${m.id}`, 'grande_feliz').setScale(0.7));
+      c.add(txt(this, x0 + 84, top + 16, m.nombre, 'fuente_titulo', 1, 0));
+      c.add(txt(this, x0 + 84, top + 38, m.apodo, 'fuente_ui', 1, 0).setTint(0xffe080));
+      c.add(txt(this, x0 + 84, top + 58, 'TÉCNICA', 'fuente_ui', 1, 0).setTint(0x8a8ab0));
+      c.add(txt(this, x0 + 84, top + 72, m.tecnica, 'fuente_ui', 1, 0).setTint(0xff6a6a));
+    });
+  }
+
+  private thorCard(f: Figura, otros: Figura[]) {
+    return this.tarjetaSobre(f, otros, 0xc87a3a, (c, x0, top) => {
+      const t = new Figura(this, x0 + 42, top + 86, 'thor', 'wag').setScale(2);
+      t.row = 'down_right';
+      c.add(t);
+      this.tick.push((dt) => { if (t.active) t.step(dt); });
+      c.add(txt(this, x0 + 84, top + 16, 'THOR', 'fuente_titulo', 1, 0));
+      c.add(txt(this, x0 + 84, top + 38, 'EL GUARDIÁN', 'fuente_ui', 1, 0).setTint(0xffe080));
+      c.add(txt(this, x0 + 84, top + 58, 'TÉCNICA', 'fuente_ui', 1, 0).setTint(0x8a8ab0));
+      c.add(txt(this, x0 + 84, top + 72, '¡GUAU GUAU!', 'fuente_ui', 1, 0).setTint(0xff6a6a));
+    });
   }
 
   private petals(color: number) {

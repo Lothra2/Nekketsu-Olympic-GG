@@ -97,7 +97,11 @@ export class CrossCountry extends EventScene implements World {
   actors: Actor[] = [];
   items: Item[] = [];
   floorTop = FT;
-  limites = { xmin: 12, xmax: 3828, depth: DEPTH };
+  /**
+   * El borde de abajo queda medio pixel adentro: el terreno cubre la profundidad de 0 a DEPTH sin incluir DEPTH, y
+   * pegado justo en DEPTH no había muros, huecos ni agua (se pasaba todo por el borde).
+   */
+  limites = { xmin: 12, xmax: 3828, depth: DEPTH - 0.5 };
   /** la del arte de PixelForja (0 mientras lo pinte derecho); INCLINA en el gris */
   inclinacion = 0;
   private L!: Layout;
@@ -183,7 +187,7 @@ export class CrossCountry extends EventScene implements World {
     this.ruedas = [];
     this.pelados = [];
     this.cabinas = [];
-    this.limites = { xmin: 12, xmax: L.largo - 12, depth: DEPTH };
+    this.limites = { xmin: 12, xmax: L.largo - 12, depth: DEPTH - 0.5 };
     this.cajas = [...L.plataformas, ...L.muros, ...L.solidos];
     this.meta = L.entidades.find((e) => e.tipo === 'meta')?.x ?? L.largo - 50;
     const salida = L.entidades.find((e) => e.tipo === 'salida')?.x ?? 40;
@@ -800,6 +804,9 @@ export class CrossCountry extends EventScene implements World {
     const pegada = delante(22);
     if (pegada && pegada.z <= base + 32 && a.y >= pegada.y && a.y < pegada.y + pegada.d && !acomodando) { if (a.grounded) it.jump = true; }
     if (Math.abs(a.y - destinoY) > 3) it.y = Math.sign(destinoY - a.y);
+    // una moto o un xích lô que viene de frente por su carril: se hace a un lado
+    const viene = this.vehiculos.find((m) => m.x - a.x > -10 && m.x - a.x < 170 && Math.abs(m.y - a.y) < 16);
+    if (viene && a.grounded) it.y = viene.y > DEPTH / 2 ? (a.y <= viene.y ? -1 : 1) : (a.y >= viene.y ? 1 : -1);
     // a los golpes con el rival que tenga al lado
     const rival = this.gente2.find((o) => o !== r && o.c.team !== r.c.team && o.a.canBeHit() && Math.abs(o.a.x - a.x) < 26 && Math.abs(o.a.y - a.y) < 10);
     if (rival && r.cool <= 0 && a.grounded) {
