@@ -13,7 +13,7 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 | 3 | C1 | Familia GG e Instituto Nekketsu | A | aprobado, en main | [pixel_forja#9](https://github.com/Lothra2/pixel_forja/pull/9) |
 | 4 | G1 fuentes | Acentos del vietnamita en las fuentes | Nada | aprobado, en main | [pixel_forja#10](https://github.com/Lothra2/pixel_forja/pull/10) |
 | 5 | I inicial | Kit a medida por configuración | A | aprobado, en main | [pixel_forja#11](https://github.com/Lothra2/pixel_forja/pull/11) |
-| 6 | E1 | Sistema de escenarios oblicuos + `saigon_hem` | A, I, layout de `saigon_hem` | en curso: ficha de arte aprobada, postales esperando a Rick (rama `claude/olimpico-lote-e1`) | |
+| 6 | E1 | Sistema de escenarios oblicuos + `saigon_hem` | A, I, layout de `saigon_hem` | entregado, falta la aprobación de Rick | [pixel_forja#14](https://github.com/Lothra2/pixel_forja/pull/14) |
 | 7 | F | Efectos (y audio por configuración) | Nada | aprobado, en main | [pixel_forja#12](https://github.com/Lothra2/pixel_forja/pull/12) |
 | 8 | G1, H1 | Resto de interfaz y audio de la rebanada vertical | Nada | pendiente | |
 | 9 | B2, C2, D2, E2 | Cross Country completo y equipos nacionales | E1 | pendiente | |
@@ -96,7 +96,17 @@ Se pidió para B1: el campo `cuerpo` (hurtbox sin implementos ni efectos), porqu
 - Cuando un atleta va encima de una caja o un muro, el juego lo dibuja delante de esa caja, para que no lo tape al pasar por arriba.
 - Las partículas con `fx` (`onda_charco`, `petalo_buganvilla`) ya usan el efecto del kit.
 - Todavía no usa `superficie.png`: el sonido al pisar sale del tipo de piso del layout (agua, madera o piedra), que da lo mismo en este tramo. Tampoco `piso_mojado`, porque no hay aguacero aún.
-- Pedido chico para E1: el muro alto se ve como una columna de ladrillo. Conviene que el arte muestre el portón abierto adelante (y de 92 a 130), porque es el camino para rodearlo y hoy no se nota.
+- Pedido chico para E1, hecho en el PR: el portón abierto delante del muro alto (y de 92 a 130), para que se note el camino para rodearlo.
+
+**Lote E1** (PR #14), revisado del lado del juego con la rama:
+- `scripts/escenarios.ts` ya usa solo la entrada estable `generarEscenario` de `src/engine/world/oblique`. Ya no importa `escena.ts`, `exportar.ts` ni `layout.ts`, y no filtra postales.
+- Si el layout está mal o falla una de las 9 pruebas, no escribe ese escenario, muestra los errores y sale con código 1.
+- Pasa los contornos de los equipos para la prueba de legibilidad. Los dos equipos usan `#1e1418`, el contorno del kit: se midió en los sprites.
+- `saigon_hem` sale en 1.7 s y pasa las 9 pruebas. En legibilidad, el contraste mediano es 5.4:1 y el peor 2.3:1, en x 3800.
+- El portón sale como objeto con `orden` 131, delante de todos. Se probó con los 4 atletas pasando por el hueco de abajo: el poste y la hoja tapan solo las piernas un instante, y se lee bien.
+- El Cross Country corre de punta a punta con el arte nuevo, sin errores.
+- `"escenarios"` en `kit.config.json` no se usa por ahora. El script aparte tarda menos de 2 s contra los 20 s del kit, falla por su cuenta y escribe el `index.json` que lee el juego.
+- El arte no se sube al juego hasta que E1 esté en `main`. Cuando entre: subir el submódulo y correr `npm run escenarios`.
 
 **Kit del juego por `kit.config.json`, con I y F en `main`:**
 - El puente `scripts/kit.ts` ya no existe. `npm run kit` corre `kit-a-medida` del submódulo con `kit.config.json` en la raíz del juego.
