@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { margen } from '../core/pantalla';
 import { Figura } from '../core/figura';
 import { chip, MARCHA, PELEA, SAIGON, TENSION } from '../core/music';
 import { txt, typewrite, wait, panel, flash, speedLines } from '../core/ui';
@@ -47,7 +48,8 @@ export class Intro extends Phaser.Scene {
     this.layer = this.add.container(0, 0);
     chip.play(TENSION, 1.5);
     void this.run();
-    const skip = txt(this, 632, 352, 'SALTAR »', 'fuente_ui', 1, 1).setAlpha(0.6).setDepth(9999);
+    // en la esquina de verdad, también en pantallas anchas
+    const skip = txt(this, 632 + margen(this), 352, 'SALTAR »', 'fuente_ui', 1, 1).setAlpha(0.6).setDepth(9999);
     skip.setInteractive().on('pointerdown', () => this.finish());
     this.input.on('pointerdown', (_p: Phaser.Input.Pointer, over: unknown[]) => { if (!over.length && this.time.now > 1500) this.finish(); });
   }
@@ -78,14 +80,15 @@ export class Intro extends Phaser.Scene {
     const cam = this.cameras.main;
     cam.panEffect.reset();
     cam.zoomEffect.reset();
-    cam.setZoom(1).setScroll(0, 0);
+    // en pantallas anchas, el cuadro de 640 centrado; el fondo de siempre
+    cam.setZoom(1).setScroll(-margen(this), 0).setBackgroundColor('#0b0b14');
     this.blinds();
   }
 
   /** Persianas retro: 12 franjas negras que se abren mostrando la toma nueva. */
   private blinds() {
     for (let i = 0; i < 12; i++) {
-      const r = this.add.rectangle(320, i * 30 + 15, 640, 30, 0x000000).setDepth(9800);
+      const r = this.add.rectangle(320, i * 30 + 15, 800, 30, 0x000000).setDepth(9800);
       this.tweens.add({ targets: r, scaleY: 0, duration: 260, delay: i * 18, ease: 'Quad.in', onComplete: () => r.destroy() });
     }
   }
@@ -277,7 +280,7 @@ export class Intro extends Phaser.Scene {
     this.add2(fireworks(this));
     await wait(this, 1100);
     if (!alive()) return;
-    const thor = this.fig('thor', -40, 338, 'run', 2);
+    const thor = this.fig('thor', -140, 338, 'run', 2);
     await this.ir(thor, { x: 560 }, 700);
     if (!alive()) return;
     thor.set('sit');
@@ -317,7 +320,7 @@ export class Intro extends Phaser.Scene {
     this.fx('polvo_caer_medio', g.x, 304, 2);
     await wait(this, 300);
     // Thor la ve, la recoge y la tira para arriba
-    const thor = this.fig('thor', 700, 318, 'run', 2);
+    const thor = this.fig('thor', 800, 318, 'run', 2);
     thor.left = true;
     await this.ir(thor, { x: gx + 34 }, 520);
     if (!alive()) return;
@@ -373,14 +376,14 @@ export class Intro extends Phaser.Scene {
     aura.destroy();
     for (const [i, id] of ['ryu', 'goro'].entries()) {
       const fromLeft = i === 0, tx = [210, 440][i];
-      const f = this.fig(id, fromLeft ? -40 : 680, 262, 'run', 2);
+      const f = this.fig(id, fromLeft ? -140 : 780, 262, 'run', 2);
       f.left = !fromLeft;
       this.tweens.add({ targets: f, x: tx, duration: 650, delay: i * 220, onComplete: () => { f.set('idle'); f.row = 'down'; } });
     }
     await wait(this, 1000);
     if (!alive()) return;
     // Tetsu llega tarde, a toda velocidad... y se tropieza
-    const tetsu = this.fig('tetsu', -40, 262, 'run', 2);
+    const tetsu = this.fig('tetsu', -140, 262, 'run', 2);
     await this.ir(tetsu, { x: 70 }, 260);
     tetsu.set('ko_bounce', true);
     this.sound.play('golpe', { volume: 0.5 });
@@ -410,13 +413,13 @@ export class Intro extends Phaser.Scene {
     const cap = this.add2(txt(this, 320, 22, 'SAIGÓN, VIETNAM', 'fuente_titulo', 1));
     cap.setAlpha(0);
     this.tweens.add({ targets: cap, alpha: 1, duration: 300 });
-    const thor = this.fig('thor', -40, 322, 'run', 2);
-    this.tweens.add({ targets: thor, x: 700, duration: 1300, onComplete: () => thor.destroy() });
+    const thor = this.fig('thor', -140, 322, 'run', 2);
+    this.tweens.add({ targets: thor, x: 800, duration: 1500, onComplete: () => thor.destroy() });
     chip.blip(520, 0.12, 'saw', 0.12, 300);
     this.sound.play('ladrido', { volume: 0.6 });
     await wait(this, 800);
     const Y = 316, spots = [190, 270, 350, 430];
-    const [rick, steph, sophie, alana] = FAMILIA.map((m) => this.fig(m.id, -60, Y, 'idle', 2));
+    const [rick, steph, sophie, alana] = FAMILIA.map((m) => this.fig(m.id, -160, Y, 'idle', 2));
     const todos = [rick, steph, sophie, alana];
     const tarjeta = async (i: number, ms = 1250) => {
       const card = this.card(FAMILIA[i], todos[i], todos);
@@ -457,7 +460,7 @@ export class Intro extends Phaser.Scene {
     if (!alive()) return;
 
     // Sophie: entra dando un salto y cae justo en su sitio
-    sophie.x = -30; sophie.y = Y;
+    sophie.x = -130; sophie.y = Y;
     await this.salto(sophie, spots[2], Y, 700, 110);
     this.fx('polvo_caer_medio', spots[2], Y, 2);
     sophie.row = 'down';
@@ -486,7 +489,7 @@ export class Intro extends Phaser.Scene {
     alana.left = false;
 
     // Thor vuelve corriendo y tiene su tarjeta
-    const thor2 = this.fig('thor', 700, 330, 'run', 2);
+    const thor2 = this.fig('thor', 800, 330, 'run', 2);
     thor2.left = true;
     await this.ir(thor2, { x: 515 }, 550);
     if (!alive()) return;
@@ -524,19 +527,19 @@ export class Intro extends Phaser.Scene {
     for (const [n, c] of cortes.entries()) {
       this.clear();
       const der = n % 2 === 0;
-      this.add2(this.add.rectangle(320, 180, 640, 360, 0x05050c));
+      this.add2(this.add.rectangle(320, 180, 800, 360, 0x05050c));
       // panel inclinado con el escenario adentro
       const poly = der
-        ? [{ x: 90, y: 0 }, { x: 640, y: 0 }, { x: 640, y: 360 }, { x: 0, y: 360 }]
-        : [{ x: 0, y: 0 }, { x: 550, y: 0 }, { x: 640, y: 360 }, { x: 0, y: 360 }];
+        ? [{ x: 90, y: 0 }, { x: 720, y: 0 }, { x: 720, y: 360 }, { x: 0, y: 360 }]
+        : [{ x: -80, y: 0 }, { x: 550, y: 0 }, { x: 640, y: 360 }, { x: -80, y: 360 }];
       const bg = this.add2(this.add.image(320, 180, c.bg).setScale(1.2));
       bg.setMask(this.mask(poly));
       this.tweens.add({ targets: bg, x: der ? 296 : 344, duration: 1700 });
       if (c.bg === 'bg_caracas') { const az = this.add2(this.add.image(320, 290, 'bg_azotea')); az.setMask(this.mask(poly)); }
       const tinte = this.add2(this.add.graphics());
       tinte.fillStyle(c.color, 0.16).fillPoints(poly, true);
-      const vel = this.fx('lineas_velocidad', 0, 0, 1);
-      vel?.setAlpha(0.35);
+      const vel = this.fx('lineas_velocidad', -80, 0, 1);
+      vel?.setAlpha(0.35).setScale(800 / 640, 1);
       // la palabra y el lugar
       const w = this.add2(txt(this, der ? 420 : 220, 70, c.palabra, 'fuente_titulo', c.palabra.length > 10 ? 2 : 3));
       const sc = w.scaleX;
@@ -553,7 +556,7 @@ export class Intro extends Phaser.Scene {
     }
     // las cinco a la vez
     this.clear();
-    this.add2(this.add.rectangle(320, 180, 640, 360, 0xffffff));
+    this.add2(this.add.rectangle(320, 180, 800, 360, 0xffffff));
     const poses: { id: string; pack: string; anim: string; agua?: boolean }[] = [
       { id: 'steph', pack: 'ngg_mov', anim: 'run' },
       { id: 'sophie', pack: 'atletismo', anim: 'sprint' },
@@ -587,10 +590,10 @@ export class Intro extends Phaser.Scene {
 
   /** Cross: Steph pasa volando con Rick detrás, y una moto que casi se los lleva. */
   private async corteCross(der: boolean) {
-    const dir = der ? 1 : -1, x0 = der ? -60 : 700, x1 = der ? 720 : -80;
+    const dir = der ? 1 : -1, x0 = der ? -160 : 800, x1 = der ? 840 : -200;
     const steph = this.fig('steph', x0, 318, 'run', 3); steph.left = !der;
     const rick = this.fig('rick', x0 - dir * 90, 324, 'run', 3); rick.left = !der;
-    const moto = this.add2(this.add.container(der ? 760 : -120, 300));
+    const moto = this.add2(this.add.container(der ? 860 : -220, 300));
     const body = this.add.graphics();
     body.fillStyle(0xc03030).fillRect(-27, -30, 54, 18).fillStyle(0x303038).fillCircle(-18, -9, 9).fillCircle(18, -9, 9).fillStyle(0xe8e8f0).fillRect(-9, -51, 15, 21);
     moto.add(body);
@@ -604,7 +607,7 @@ export class Intro extends Phaser.Scene {
     await wait(this, 520);
     chip.blip(523, 0.12, 'sq50', 0.12, 494);
     this.time.delayedCall(140, () => chip.blip(523, 0.12, 'sq50', 0.12, 494));
-    this.tweens.add({ targets: moto, x: der ? -140 : 780, duration: 700 });
+    this.tweens.add({ targets: moto, x: der ? -240 : 880, duration: 800 });
     this.pop(320, 200, '¡PI PI!', 0xff8080, 1);
     this.reac(rick, 'exclamacion', 600);
     await wait(this, 1000);
@@ -614,7 +617,7 @@ export class Intro extends Phaser.Scene {
   private async corteVallas(der: boolean) {
     const vx = 330;
     this.add2(this.add.image(vx, 338, 'valla').setOrigin(0.5, 1).setScale(3).setFlipX(!der));
-    const sophie = this.fig('sophie', der ? -50 : 690, 338, 'sprint', 3);
+    const sophie = this.fig('sophie', der ? -150 : 790, 338, 'sprint', 3);
     sophie.anim.prefer = 'atletismo';
     sophie.set('sprint', true);
     sophie.left = !der;
@@ -631,8 +634,8 @@ export class Intro extends Phaser.Scene {
   /** Natación: Alana se tira del poyete, se clava y sale nadando con su estela. */
   private async corteNatacion(der: boolean) {
     const agua = this.add2(this.add.graphics());
-    agua.fillStyle(0x1f7fb8, 0.75).fillRect(0, 300, 640, 60);
-    agua.fillStyle(0x9ad8f0).fillRect(0, 300, 640, 2);
+    agua.fillStyle(0x1f7fb8, 0.75).fillRect(-80, 300, 800, 60);
+    agua.fillStyle(0x9ad8f0).fillRect(-80, 300, 800, 2);
     const bx = der ? 70 : 570;
     const poyete = this.add2(this.add.graphics());
     poyete.fillStyle(0xe8e8f0).fillRect(bx - 30, 270, 60, 30).fillStyle(0x8a8a96).fillRect(bx - 30, 296, 60, 6);
@@ -653,7 +656,7 @@ export class Intro extends Phaser.Scene {
     alana.y = 326;
     const estela = this.fx('estela', alana.x - dir * 30, 306, 2.5, !der);
     this.tick.push(() => { if (estela?.active && alana.active) estela.setPosition(alana.x - dir * 30, 306); });
-    await this.ir(alana, { x: der ? 700 : -60 }, 1000);
+    await this.ir(alana, { x: der ? 800 : -160 }, 1100);
   }
 
   /** Jabalina: Rick corre, lanza, y la jabalina cruza el cielo hasta el récord. */
@@ -668,7 +671,7 @@ export class Intro extends Phaser.Scene {
     const j = this.add2(this.add.image(rick.x + dir * 20, 250, 'jabalina').setScale(3).setFlipX(!der).setAngle(der ? -30 : 30));
     chip.blip(440, 0.5, 'saw', 0.12, 1320);
     this.sound.play('esquiva', { volume: 0.5 });
-    const o = { t: 0 }, xa = j.x, xb = der ? 700 : -60;
+    const o = { t: 0 }, xa = j.x, xb = der ? 800 : -160;
     await new Promise<void>((res) => this.tweens.add({ targets: o, t: 1, duration: 760, onUpdate: () => {
       j.x = xa + (xb - xa) * o.t;
       j.y = 250 - Math.sin(o.t * Math.PI * 0.8) * 120 + o.t * 30;
@@ -687,7 +690,7 @@ export class Intro extends Phaser.Scene {
     const kx = der ? 430 : 210;
     const kenji = this.fig('kenji', kx, 330, 'taunt', 3);
     kenji.left = der;
-    const steph = this.fig('steph', der ? -50 : 690, 330, 'run', 3);
+    const steph = this.fig('steph', der ? -150 : 790, 330, 'run', 3);
     steph.left = !der;
     const dir = der ? 1 : -1;
     await this.ir(steph, { x: kx - dir * 70 }, 380);
@@ -730,7 +733,7 @@ export class Intro extends Phaser.Scene {
     if (!alive()) return;
     // se nubla, rayo, y llegan ellos
     chip.play(TENSION);
-    const sombra = this.add2(this.add.rectangle(320, 180, 640, 360, 0x0a0a20, 0));
+    const sombra = this.add2(this.add.rectangle(320, 180, 800, 360, 0x0a0a20, 0));
     this.tweens.add({ targets: sombra, fillAlpha: 0.5, duration: 400 });
     flash(this, 160, 0xd0c0ff, 0.8);
     chip.boom(0.7);
@@ -739,7 +742,7 @@ export class Intro extends Phaser.Scene {
     // Kenji adelante, el resto detrás en fila: Ryu, Goro (el gigante) y Tetsu
     const xs = [440, 506, 566, 622];
     const inst = INSTITUTO.map((id, i) => {
-      const f = this.fig(id, 700 + i * 30, Y, 'run', 2);
+      const f = this.fig(id, 800 + i * 30, Y, 'run', 2);
       f.left = true;
       f.setTintFill(0x05050c);
       this.tweens.add({ targets: f, x: xs[i], duration: 600, delay: i * 120, onComplete: () => f.set('idle') });
@@ -821,7 +824,7 @@ export class Intro extends Phaser.Scene {
     tiembla.stop();
     goro.row = 'right';
     kenji.row = 'right';
-    for (const [i, f] of inst.entries()) { f.left = false; f.set('run'); this.tweens.add({ targets: f, x: 760 + i * 20, duration: 520, delay: (3 - i) * 60 }); }
+    for (const [i, f] of inst.entries()) { f.left = false; f.set('run'); this.tweens.add({ targets: f, x: 860 + i * 20, duration: 600, delay: (3 - i) * 60 }); }
     chip.blip(880, 0.4, 'sq25', 0.12, 220);
     await wait(this, 600);
     box3.close();
@@ -847,7 +850,7 @@ export class Intro extends Phaser.Scene {
         g.fillStyle(i % 2 ? 0x1a3a9a : 0x2a5bd7).fillTriangle(i * 24 - (t % 48), 0, i * 24 + 24 - (t % 48), 0, i * 24 - 80 - (t % 48), 360);
       }
       // rojo a la derecha de la diagonal (330,0)-(250,360): fondo y franjas paralelas a la diagonal, sin huecos
-      g.fillStyle(0x9a1a2a).fillPoints([{ x: 330, y: 0 }, { x: 640, y: 0 }, { x: 640, y: 360 }, { x: 250, y: 360 }], true);
+      g.fillStyle(0x9a1a2a).fillPoints([{ x: 330, y: 0 }, { x: 720, y: 0 }, { x: 720, y: 360 }, { x: 250, y: 360 }], true);
       const off = (t * 2) % 28;
       for (let k = -1; k < 16; k++) {
         const x0 = 330 + k * 28 - off, l = Math.max(330, x0), r = x0 + 14;
@@ -897,14 +900,14 @@ export class Intro extends Phaser.Scene {
     let t = 0;
     this.tick.push((dt) => {
       t += dt;
-      for (const c of capas) { c.img.x -= c.v * dt; if (c.img.x < -c.img.displayWidth / 2) c.img.x += 640 + c.img.displayWidth; }
+      for (const c of capas) { c.img.x -= c.v * dt; if (c.img.x < -80 - c.img.displayWidth / 2) c.img.x += 800 + c.img.displayWidth; }
       jet.y = 170 + Math.sin(t * 2.6) * 4;
       caras.forEach((c, i) => c.setPosition(...mid(...JET.ventanas[i])));
       marca.setPosition(...mid(64, 31));
       estela.setPosition(...mid(84, 42));
       rayas.clear();
       for (let k = 0; k < 14; k++) {
-        const y = 30 + ((k * 53 + Math.floor(t * 40)) % 300), x = 640 - ((t * 900 + k * 137) % 760);
+        const y = 30 + ((k * 53 + Math.floor(t * 40)) % 300), x = 720 - ((t * 900 + k * 137) % 880);
         rayas.fillStyle(0xffffff, 0.5).fillRect(x, y, 40 + (k % 3) * 20, 1);
       }
     });
@@ -943,15 +946,17 @@ export class Intro extends Phaser.Scene {
     // la vista: centro y acercamiento, siempre sin salirse del mapa
     const view = { cx: PARADAS[0].at[0], cy: PARADAS[0].at[1], z: 2.6 };
     this.tick.push((dt) => {
-      world.setScale(view.z);
-      world.x = Phaser.Math.Clamp(320 - view.cx * view.z, 640 - 640 * view.z, 0);
-      world.y = Phaser.Math.Clamp(180 - view.cy * view.z, 360 - 360 * view.z, 0);
-      for (const n of nubes) { n.x -= 6 * dt; if (n.x < -70) n.x = 710; }
+      // el mapa siempre cubre la pantalla entera, también la ancha: el acercamiento mínimo lo da su ancho
+      const m = margen(this), z = Math.max(view.z, (640 + 2 * m) / 640);
+      world.setScale(z);
+      world.x = Phaser.Math.Clamp(320 - view.cx * z, 640 + m - 640 * z, -m);
+      world.y = Phaser.Math.Clamp(180 - view.cy * z, 360 - 360 * z, 0);
+      for (const n of nubes) { n.x -= 6 * dt; if (n.x < -150) n.x = 790; }
     });
     // arriba el título; abajo el pasaporte que se va llenando
     const barra = this.add2(this.add.graphics());
-    barra.fillStyle(0x08081a, 0.82).fillRect(0, 0, 640, 26).fillRect(0, 312, 640, 48);
-    barra.fillStyle(0xf2c230).fillRect(0, 26, 640, 1).fillRect(0, 311, 640, 1);
+    barra.fillStyle(0x08081a, 0.82).fillRect(-80, 0, 800, 26).fillRect(-80, 312, 800, 48);
+    barra.fillStyle(0xf2c230).fillRect(-80, 26, 800, 1).fillRect(-80, 311, 800, 1);
     this.add2(txt(this, 320, 14, 'LA GIRA NEKKETSU', 'fuente_titulo', 1));
     this.add2(txt(this, 14, 320, 'PASAPORTE', 'fuente_ui', 1, 0).setTint(0x8a8ab0));
     const pon = (x: number, y: number, rot = 0) => { avion.setPosition(x, y).setRotation(rot); sombra.setPosition(x + 3, y + 5).setRotation(rot); };
@@ -1116,7 +1121,7 @@ export class Intro extends Phaser.Scene {
 
   private petals(color: number) {
     const ps: Phaser.GameObjects.Image[] = [];
-    for (let i = 0; i < 40; i++) ps.push(this.add2(this.add.image(Math.random() * 640, Math.random() * 360, 'px').setTint(color).setScale(0.5 + Math.random() * 0.5)));
+    for (let i = 0; i < 40; i++) ps.push(this.add2(this.add.image(-80 + Math.random() * 800, Math.random() * 360, 'px').setTint(color).setScale(0.5 + Math.random() * 0.5)));
     this.tick.push((dt) => {
       for (const p of ps) {
         p.x -= (40 + (p.scale * 30)) * dt;

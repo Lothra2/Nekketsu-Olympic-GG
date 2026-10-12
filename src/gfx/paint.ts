@@ -30,18 +30,30 @@ export class Painter {
   readonly img: ImageData;
   readonly d: Uint8ClampedArray;
 
-  constructor(readonly w: number, readonly h: number) {
+  /** ancho real del lienzo: el de dibujo más el margen de cada lado */
+  readonly cw: number;
+
+  /**
+   * `w` x `h` es el cuadro donde se dibuja (x de 0 a w). Con `ox`, el lienzo tiene `ox` pixeles más a cada lado (x de
+   * -ox a w + ox): así un fondo pensado para 640 se extiende a los costados de las pantallas anchas sin mover nada.
+   */
+  constructor(readonly w: number, readonly h: number, readonly ox = 0) {
+    this.cw = w + 2 * ox;
     this.canvas = document.createElement('canvas');
-    this.canvas.width = w;
+    this.canvas.width = this.cw;
     this.canvas.height = h;
-    this.img = new ImageData(w, h);
+    this.img = new ImageData(this.cw, h);
     this.d = this.img.data;
   }
 
+  /** dónde empieza y termina lo que se puede pintar, con el margen */
+  get x0() { return -this.ox; }
+  get x1() { return this.w + this.ox; }
+
   px(x: number, y: number, c: RGB, a = 255) {
-    x = Math.round(x); y = Math.round(y);
-    if (x < 0 || y < 0 || x >= this.w || y >= this.h) return;
-    const i = (y * this.w + x) * 4;
+    x = Math.round(x) + this.ox; y = Math.round(y);
+    if (x < 0 || y < 0 || x >= this.cw || y >= this.h) return;
+    const i = (y * this.cw + x) * 4;
     if (a >= 255) { this.d[i] = c[0]; this.d[i + 1] = c[1]; this.d[i + 2] = c[2]; this.d[i + 3] = 255; return; }
     const k = a / 255, ka = this.d[i + 3] / 255;
     this.d[i] = c[0] * k + this.d[i] * (1 - k);
@@ -51,17 +63,17 @@ export class Painter {
   }
 
   get(x: number, y: number): RGB {
-    const i = (Math.round(y) * this.w + Math.round(x)) * 4;
+    const i = (Math.round(y) * this.cw + Math.round(x) + this.ox) * 4;
     return [this.d[i], this.d[i + 1], this.d[i + 2]];
   }
 
   rect(x: number, y: number, w: number, h: number, c: RGB, a = 255) {
     for (let yy = Math.max(0, Math.round(y)); yy < Math.min(this.h, Math.round(y + h)); yy++)
-      for (let xx = Math.max(0, Math.round(x)); xx < Math.min(this.w, Math.round(x + w)); xx++) this.px(xx, yy, c, a);
+      for (let xx = Math.max(this.x0, Math.round(x)); xx < Math.min(this.x1, Math.round(x + w)); xx++) this.px(xx, yy, c, a);
   }
 
   /** Degradé vertical por bandas con tramado ordenado entre colores vecinos. */
-  vgrad(y0: number, y1: number, cols: RGB[], x0 = 0, x1 = this.w) {
+  vgrad(y0: number, y1: number, cols: RGB[], x0 = this.x0, x1 = this.x1) {
     const n = cols.length - 1;
     for (let y = y0; y < y1; y++) {
       const t = ((y - y0) / Math.max(1, y1 - y0 - 1)) * n;
@@ -108,12 +120,13 @@ export class Painter {
     const r = rng(seed);
     const tops: number[] = [];
     const ph = [r() * 6, r() * 6, r() * 6, r() * 6];
-    for (let x = 0; x < this.w; x++) {
+    for (let x = this.x0; x < this.x1; x++) {
       const u = x / this.w;
       let hgt = shape ? shape(u) : 0.5 + 0.5 * Math.sin(u * Math.PI);
       hgt += 0.08 * Math.sin(u * 13 + ph[0]) + 0.05 * Math.sin(u * 29 + ph[1]) + 0.025 * Math.sin(u * 71 + ph[2]) + 0.012 * Math.sin(u * 151 + ph[3]);
       const top = Math.round(base - hgt * (base - peak));
-      tops.push(top);
+      // por x de dibujo (con el margen, también las x negativas)
+      tops[x] = top;
       for (let y = top; y < this.h; y++) {
         const k = (y - top) / 14;
         if (k < 1) this.dither(x, y, light, col, Math.min(1, k + 0.15));

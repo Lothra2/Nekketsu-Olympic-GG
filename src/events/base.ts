@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { MAX_W } from '../core/pantalla';
 import { Input, rotular } from '../core/input';
 import { chip, VICTORIA } from '../core/music';
 import { kit } from '../core/kit';
@@ -87,7 +88,8 @@ export abstract class EventScene extends Phaser.Scene {
       x.save(); x.scale(-1, 1); x.drawImage(src, -c.width, 0); x.restore();
       this.textures.addCanvas(k, c);
     }
-    return this.add.tileSprite(320, 180, 640, 360, k).setScrollFactor(0).setDepth(-10);
+    // de lado a lado de la pantalla, también en las anchas
+    return this.add.tileSprite(0, 0, MAX_W, 360, k).setOrigin(0).setScrollFactor(0).setDepth(-10);
   }
 
   /** Para que nadie se quede esperando: si la persona no llega, se cierra igual un rato después de los demás. */
@@ -121,8 +123,8 @@ export abstract class EventScene extends Phaser.Scene {
   /** Nombre de la prueba, lugar y la cuenta regresiva. */
   protected async previa(nombre: string, lugar: string, ayuda: string) {
     const band = this.uiAdd(this.add.graphics().setDepth(8400));
-    band.fillStyle(0x08081a, 0.75).fillRect(0, 100, 640, 92);
-    band.fillStyle(0xf2c230).fillRect(0, 100, 640, 2).fillRect(0, 190, 640, 2);
+    band.fillStyle(0x08081a, 0.75).fillRect(-80, 100, 800, 92);
+    band.fillStyle(0xf2c230).fillRect(-80, 100, 800, 2).fillRect(-80, 190, 800, 2);
     const t1 = this.uiAdd(txt(this, 320, 120, nombre, 'fuente_titulo', 2).setDepth(8500));
     const t2 = this.uiAdd(txt(this, 320, 150, lugar, 'fuente_ui', 2).setDepth(8500).setTint(0xffe080));
     const t3 = this.uiAdd(txt(this, 320, 178, rotular(ayuda, this.pad.fuente), 'fuente_ui', 1).setDepth(8500).setTint(0xc0c0e0));
@@ -196,8 +198,8 @@ export abstract class EventScene extends Phaser.Scene {
    */
   protected async entrenar(nombre: string, pasos: Paso[], y = 40) {
     const band = this.uiAdd(this.add.graphics().setDepth(8400));
-    band.fillStyle(0x08081a, 0.75).fillRect(0, 120, 640, 64);
-    band.fillStyle(0xf2c230).fillRect(0, 120, 640, 2).fillRect(0, 182, 640, 2);
+    band.fillStyle(0x08081a, 0.75).fillRect(-80, 120, 800, 64);
+    band.fillStyle(0xf2c230).fillRect(-80, 120, 800, 2).fillRect(-80, 182, 800, 2);
     const t1 = this.uiAdd(txt(this, 320, 140, 'ENTRENAMIENTO', 'fuente_titulo_plata', 2).setDepth(8500));
     const t2 = this.uiAdd(txt(this, 320, 166, `${nombre} · SIN RIVALES Y SIN APURO`, 'fuente_ui', 2).setDepth(8500).setTint(0xffe080));
     await new Promise<void>((r) => this.time.delayedCall(1600, r));

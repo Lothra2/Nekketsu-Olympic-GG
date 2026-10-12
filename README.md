@@ -44,6 +44,16 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
   - Cámara lenta en el K.O. final, victoria con fanfarria y "SE ACABÓ LA VAINA" si pierdes.
 - Música original sintetizada en el momento: Marcha Nekketsu, tema de pelea, tensión de la intro y fanfarria.
 
+## Pantalla
+
+El juego llena la pantalla en cualquier celular acostado, sin barras negras:
+- Está diseñado en un cuadro de 640 x 360 (16:9). En pantallas más alargadas (19.5:9, 20:9) se estira a los costados hasta 800 de ancho, sin deformar.
+- Lo importante (personajes, textos, menús) queda centrado. Los costados muestran más fondo, y en las carreras y la pelea, más mundo.
+- Los botones táctiles se pegan a los bordes de la pantalla.
+- En tablets, más cuadradas, queda en 16:9 con barras arriba y abajo.
+- Al tocar la primera pantalla en el celular pide pantalla completa y se acuesta solo, si el navegador lo permite.
+- Todo esto está en `src/core/pantalla.ts`.
+
 ## Controles
 
 | | Teclado | Mando | Táctil |
@@ -86,7 +96,9 @@ Con el servidor corriendo:
 node scripts/capturas.mjs http://localhost:5173/ capturas          # intro, título, selección y pelea
 node scripts/prueba-pelea.mjs http://localhost:5173/ capturas rick kenji   # combo, levantar, lanzar, técnica, chancleta
 node scripts/prueba-pelea-nueva.mjs http://localhost:5173/ capturas/pelea_nueva   # VS, guardia, agarre, rodillazos, pisotón, voladora, arepa, burla y racha
-node scripts/prueba-intro.mjs http://localhost:5173/ capturas/intro   # la intro cuadro a cuadro: reacciones, tarjetas y textos enteros y sin tapar
+node scripts/prueba-intro.mjs http://localhost:5173/ capturas/intro [844x390]   # la intro cuadro a cuadro: reacciones, tarjetas y textos enteros y sin tapar (también en pantalla ancha)
+node scripts/prueba-celular.mjs http://localhost:5173/ capturas/celular 844 390   # cada escena en un celular alargado: llena la pantalla, todo centrado
+node scripts/prueba-girar.mjs http://localhost:5173/   # parado pide girar; al girar (y al cambiar de pantalla) todo se acomoda
 node scripts/prueba-borde.mjs http://localhost:5173/   # pegada al borde de arriba o de abajo, los muros y los huecos siguen valiendo
 node scripts/prueba-kachinuki.mjs http://localhost:5173/ capturas/kachinuki   # el borde, el rescate de Thor, lo que cae del cielo y la azotea que se achica
 node scripts/prueba-pruebas.mjs http://localhost:5173/ capturas/pruebas  # vallas, natación, jabalina y medallero

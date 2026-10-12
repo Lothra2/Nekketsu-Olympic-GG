@@ -150,13 +150,18 @@ export class Input {
   highlight(btns: Control[]) { this.touch?.highlight(btns); }
 }
 
-/** Palanca a la izquierda y botones a la derecha, en coordenadas del juego (640 x 360). */
+/**
+ * Palanca a la izquierda y botones a la derecha, fijos a la pantalla. Están medidos para 640 de ancho; en las pantallas
+ * anchas los botones se corren hasta el borde derecho de verdad, donde caen los pulgares.
+ */
 class TouchPad {
   private stick: { id: number; ox: number; oy: number; x: number; y: number } | null = null;
   private btnDown = new Map<number, Btn>();
   private base: Phaser.GameObjects.Arc;
   private knob: Phaser.GameObjects.Arc;
-  private buttons: { btn: Btn; x: number; y: number; r: number; g: Phaser.GameObjects.Container }[] = [];
+  private buttons: { btn: Btn; x: number; y: number; r: number; x640: number; g: Phaser.GameObjects.Container }[] = [];
+  /** el ancho de la pantalla ahora */
+  private W = 640;
   private runBtn = false;
   private glow: Phaser.Tweens.Tween[] = [];
 
@@ -170,14 +175,19 @@ class TouchPad {
       { btn: 'kick', x: 586, y: 270, r: 22, label: 'B', color: 0x3c7ae8 },
       { btn: 'jump', x: 586, y: 326, r: 18, label: 'C', color: 0x3cc86a },
       { btn: 'special', x: 528, y: 246, r: 16, label: '★', color: 0xf2c230 },
-      { btn: 'start', x: 320, y: 20, r: 11, label: '‖', color: 0x888888 },
+      // la pausa en la esquina de arriba a la derecha: al centro tapaba el reloj
+      { btn: 'start', x: 624, y: 16, r: 11, label: '‖', color: 0x888888 },
     ];
     for (const d of defs) {
       const c = scene.add.container(d.x, d.y).setScrollFactor(0).setDepth(depth);
       c.add(scene.add.circle(0, 0, d.r, d.color, 0.35).setStrokeStyle(2, 0xffffff, 0.5));
       c.add(scene.add.text(0, 0, d.label, { fontFamily: 'monospace', fontSize: `${Math.round(d.r)}px`, color: '#ffffff' }).setOrigin(0.5).setAlpha(0.85));
-      this.buttons.push({ ...d, g: c });
+      this.buttons.push({ ...d, x640: d.x, g: c });
     }
+    this.acomodar();
+    const alCambiar = () => this.acomodar();
+    scene.scale.on(Phaser.Scale.Events.RESIZE, alCambiar);
+    scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => scene.scale.off(Phaser.Scale.Events.RESIZE, alCambiar));
     layer?.add([this.base, this.knob, ...this.buttons.map((b) => b.g)]);
     scene.input.on('pointerdown', (p: Phaser.Input.Pointer) => this.down(p));
     scene.input.on('pointermove', (p: Phaser.Input.Pointer) => this.move(p));
@@ -185,10 +195,20 @@ class TouchPad {
     scene.input.on('pointerupoutside', (p: Phaser.Input.Pointer) => this.up(p));
   }
 
+  /** Los botones de la derecha (y la pausa), al borde derecho de la pantalla. */
+  private acomodar() {
+    this.W = this.scene.scale.gameSize.width;
+    const dx = this.W - 640;
+    for (const b of this.buttons) {
+      b.x = b.x640 > 320 ? b.x640 + dx : b.x640;
+      b.g.setX(b.x);
+    }
+  }
+
   private down(p: Phaser.Input.Pointer) {
     const { x, y } = p;
     for (const b of this.buttons) if (Math.hypot(x - b.x, y - b.y) < b.r + 10) { this.btnDown.set(p.id, b.btn); b.g.setScale(0.9); return; }
-    if (x < 320 && !this.stick) {
+    if (x < this.W / 2 && !this.stick) {
       this.stick = { id: p.id, ox: x, oy: y, x, y };
       this.base.setPosition(x, y);
       this.knob.setPosition(x, y);

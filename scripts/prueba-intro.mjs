@@ -9,9 +9,11 @@ import { mkdirSync } from 'node:fs';
 
 const url = process.argv[2] ?? 'http://localhost:5173/';
 const out = process.argv[3] ?? 'capturas/intro';
+// el tamaño de la ventana: 1280x720 por defecto; 844x390 es un celular alargado acostado
+const [VW, VH] = (process.argv[4] ?? '1280x720').split('x').map(Number);
 mkdirSync(out, { recursive: true });
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader'] });
-const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+const page = await browser.newPage({ viewport: { width: VW, height: VH } });
 const logs = [];
 page.on('pageerror', (e) => logs.push(`pageerror: ${e.message}`));
 page.on('console', (m) => { if (m.type() === 'error') logs.push(m.text()); });
@@ -30,7 +32,9 @@ const revisar = () => page.evaluate(() => {
   const malos = [];
   const visible = (o) => o.visible !== false && (o.alpha ?? 1) > 0.5 && o.active;
   const caja = (o) => { const b = o.getBounds(); return { x0: b.x, y0: b.y, x1: b.x + b.width, y1: b.y + b.height }; };
-  const fuera = (b, m = 2) => b.x0 < -m || b.y0 < -m || b.x1 > 640 + m || b.y1 > 360 + m;
+  // lo visible: el cuadro de 640 más lo que sobra a cada lado en pantallas anchas
+  const lado = Math.max(0, Math.floor((window.game.scale.gameSize.width - 640) / 2));
+  const fuera = (b, m = 2) => b.x0 < -lado - m || b.y0 < -m || b.x1 > 640 + lado + m || b.y1 > 360 + m;
   const cruce = (a, b) => Math.max(0, Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0)) * Math.max(0, Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0));
   let reacs = 0;
   lista.forEach((o, i) => {
@@ -54,7 +58,7 @@ const revisar = () => page.evaluate(() => {
     } else if (o.type === 'BitmapText' && o.text) {
       const b = caja(o);
       // cortado por el borde (no el que espera afuera su entrada)
-      const asoma = b.x1 > 0 && b.x0 < 640 && b.y1 > 0 && b.y0 < 360;
+      const asoma = b.x1 > -lado && b.x0 < 640 + lado && b.y1 > 0 && b.y0 < 360;
       if (asoma && fuera(b, 4)) malos.push(`el texto "${o.text}" se sale de la pantalla`);
     }
   });

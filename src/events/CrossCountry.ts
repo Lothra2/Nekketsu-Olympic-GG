@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { MAX_W } from '../core/pantalla';
 import { Actor, HUECO, Item, NOTHING, type Intent, type World } from '../fight/actor';
 import { chip, PELEA } from '../core/music';
 import { ajustes, goma } from '../core/nivel';
@@ -607,7 +608,8 @@ export class CrossCountry extends EventScene implements World {
     }
     for (const c of this.cabinas) {
       c.u = (c.u + dt * 0.012) % 1;
-      c.g.setPosition(Math.round(-60 + c.u * 760), Math.round(70 - c.u * 50));
+      const cx = -60 + c.u * (MAX_W + 120);
+      c.g.setPosition(Math.round(cx), Math.round(74 - (cx + 20) * 56 / 720 - 4));
     }
   }
 
@@ -891,10 +893,10 @@ export class CrossCountry extends EventScene implements World {
   /** La lluvia que cae: el efecto `lluvia` del kit en mosaico sobre la pantalla (o rayitas si no está). */
   private ponerLluvia() {
     if (this.textures.exists('fx_lluvia')) {
-      this.lluvia = this.add.tileSprite(320, 180, 640, 360, 'fx_lluvia', 0).setScrollFactor(0).setDepth(7000).setAlpha(0.45);
+      this.lluvia = this.add.tileSprite(0, 0, MAX_W, 360, 'fx_lluvia', 0).setOrigin(0).setScrollFactor(0).setDepth(7000).setAlpha(0.45);
       return;
     }
-    this.add.particles(0, 0, 'px', { x: { min: 0, max: 700 }, y: -10, speedY: { min: 380, max: 460 }, speedX: -60, lifespan: 1000, quantity: 3, scaleY: 3, alpha: 0.4, tint: 0xc8e0ff }).setScrollFactor(0).setDepth(7000);
+    this.add.particles(0, 0, 'px', { x: { min: 0, max: MAX_W + 60 }, y: -10, speedY: { min: 380, max: 460 }, speedX: -60, lifespan: 1000, quantity: 3, scaleY: 3, alpha: 0.4, tint: 0xc8e0ff }).setScrollFactor(0).setDepth(7000);
   }
 
   /** La x de pantalla de un punto del mundo: con la vista inclinada, lo del fondo queda a la izquierda. */
@@ -939,7 +941,7 @@ export class CrossCountry extends EventScene implements World {
     const cielo: Record<string, [number, number]> = { manana: [0x8ab0d0, 0xd8e4ec], mediodia: [0x6aa8e0, 0xcfe6f6], tarde: [0x5a6070, 0x9aa0aa], atardecer: [0xd07a4a, 0xf2c890] };
     const [c0, c1] = cielo[L.hora] ?? cielo.manana;
     const sky = this.add.graphics().setScrollFactor(0).setDepth(-20);
-    sky.fillGradientStyle(c0, c0, c1, c1).fillRect(0, 0, 640, 360);
+    sky.fillGradientStyle(c0, c0, c1, c1).fillRect(0, 0, MAX_W, 360);
     // fachadas en bloques grises al fondo de la franja (en las azoteas, la ciudad queda abajo y lejos)
     const fondo = this.add.graphics().setDepth(-10);
     const bajos = L.id === 'saigon_azoteas';
@@ -1199,7 +1201,7 @@ export class CrossCountry extends EventScene implements World {
     if ((L as unknown as { vida?: string[] }).vida?.includes('metrocable')) {
       // el cable y las cabinas rojas que cruzan el valle
       const cable = this.add.graphics().setScrollFactor(0).setDepth(-19);
-      cable.lineStyle(1, 0x30303a, 0.8).lineBetween(-20, 74, 700, 18);
+      cable.lineStyle(1, 0x30303a, 0.8).lineBetween(-20, 74, MAX_W + 60, 74 - (MAX_W + 80) * 56 / 720);
       for (let i = 0; i < 3; i++) {
         const g = this.add.graphics().setScrollFactor(0).setDepth(-18);
         g.lineStyle(1, 0x30303a).lineBetween(0, -10, 0, 0);

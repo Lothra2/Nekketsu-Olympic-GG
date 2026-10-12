@@ -205,7 +205,8 @@ export class Fight extends Phaser.Scene implements World {
     this.camLock = false;
     this.add.image(320, 180, 'bg_caracas').setDepth(-10).setScrollFactor(0.45, 1);
     this.add.image(320, 280, 'bg_azotea').setDepth(-9);
-    this.neon('AREPERA LA CHAMA', 506, 132, 0xff4fa0);
+    // más abajo que el marcador, para que se vea entero en el 4 contra 4
+    this.neon('AREPERA LA CHAMA', 500, 160, 0xff4fa0);
     this.neon('CARACAS', 70, 150, 0x40e0ff);
     // Thor mira desde el fondo, lejos del borde
     const npc = azotea.entidades.find((e) => e.tipo === 'npc');
@@ -496,7 +497,7 @@ export class Fight extends Phaser.Scene implements World {
       const yo = this.player, el = this.actors.find((a) => a.team === 1)!;
       const objs: Phaser.GameObjects.GameObject[] = [];
       const add = <T extends Phaser.GameObjects.GameObject>(o: T) => { objs.push(this.uiAdd(o)); return o; };
-      add(this.add.rectangle(320, 180, 640, 360, 0x000000, 0.7).setDepth(8600));
+      add(this.add.rectangle(320, 180, 800, 360, 0x000000, 0.7).setDepth(8600));
       add(this.add.rectangle(160, 160, 320, 150, 0x1a3a9a, 0.95).setDepth(8601));
       add(this.add.rectangle(480, 160, 320, 150, 0x9a1a2a, 0.95).setDepth(8601));
       add(speedLines(this, 8602));
@@ -603,7 +604,7 @@ export class Fight extends Phaser.Scene implements World {
     this.pauseObjs = [];
     if (this.paused) {
       chip.music.gain.value = 0.15;
-      this.pauseObjs.push(this.uiAdd(this.add.rectangle(320, 180, 640, 360, 0x000000, 0.6).setDepth(9000)));
+      this.pauseObjs.push(this.uiAdd(this.add.rectangle(320, 180, 800, 360, 0x000000, 0.6).setDepth(9000)));
       this.pauseObjs.push(this.uiAdd(txt(this, 320, 150, '¡ÉPALE, PAUSA!', 'fuente_titulo', 2).setDepth(9001)));
       const seguir = this.uiAdd(txt(this, 270, 196, 'SEGUIR', 'fuente_ui', 2).setDepth(9001).setInteractive());
       const menu = this.uiAdd(txt(this, 370, 196, 'MENÚ', 'fuente_ui', 2).setDepth(9001).setInteractive().setTint(0x8a8aa8));
@@ -622,8 +623,8 @@ export class Fight extends Phaser.Scene implements World {
     if (aura) this.time.delayedCall(1700, () => this.tweens.add({ targets: aura, alpha: 0, duration: 250, onComplete: () => aura.destroy() }));
     if (a.id === 'alana') this.sfx('thor_rescate', 0.6);
     const side = a.team === 0 ? 1 : -1;
-    const dark = this.uiAdd(this.add.rectangle(320, 180, 640, 360, 0x000000, 0.65).setDepth(8600));
-    const band = this.uiAdd(this.add.rectangle(320, 150, 640, 110, a.team === 0 ? 0x1a3a9a : 0x9a1a2a, 0.95).setDepth(8601));
+    const dark = this.uiAdd(this.add.rectangle(320, 180, 800, 360, 0x000000, 0.65).setDepth(8600));
+    const band = this.uiAdd(this.add.rectangle(320, 150, 800, 110, a.team === 0 ? 0x1a3a9a : 0x9a1a2a, 0.95).setDepth(8601));
     const lines = this.uiAdd(speedLines(this, 8602));
     const por = this.uiAdd(this.add.image(320 - side * 400, 150, `retratos:${a.id}`, 'grande_enojo').setDepth(8603));
     this.tweens.add({ targets: por, x: 320 - side * 160, duration: 220, ease: 'Back.out' });

@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { MAX_W, ancho } from './pantalla';
 import { chip } from './music';
 
 export type Font = 'fuente_ui' | 'fuente_titulo' | 'fuente_titulo_plata';
@@ -41,7 +42,8 @@ export function panel(scene: Phaser.Scene, x: number, y: number, w: number, h: n
 
 /** Destello de pantalla completa. */
 export function flash(scene: Phaser.Scene, ms = 120, color = 0xffffff, alpha = 1) {
-  const r = scene.add.rectangle(320, 180, 640, 360, color, alpha).setDepth(9000).setScrollFactor(0);
+  // fijo a la pantalla, de lado a lado (también en las pantallas anchas)
+  const r = scene.add.rectangle(0, 0, MAX_W, 360, color, alpha).setOrigin(0).setDepth(9000).setScrollFactor(0);
   scene.tweens.add({ targets: r, alpha: 0, duration: ms, onComplete: () => r.destroy() });
 }
 
@@ -51,9 +53,11 @@ export function speedLines(scene: Phaser.Scene, depth = 8000, color = 0xffffff):
   const draw = () => {
     g.clear();
     for (let i = 0; i < 46; i++) {
-      const a = Math.random() * Math.PI * 2, r0 = 120 + Math.random() * 60, r1 = 420;
+      // centradas en la pantalla, que puede ser más ancha que 640
+      const cx = ancho(scene) / 2;
+      const a = Math.random() * Math.PI * 2, r0 = 120 + Math.random() * 60, r1 = 480;
       g.lineStyle(1 + Math.floor(Math.random() * 3), color, 0.5 + Math.random() * 0.4);
-      g.lineBetween(320 + Math.cos(a) * r0, 180 + Math.sin(a) * r0, 320 + Math.cos(a) * r1, 180 + Math.sin(a) * r1);
+      g.lineBetween(cx + Math.cos(a) * r0, 180 + Math.sin(a) * r0, cx + Math.cos(a) * r1, 180 + Math.sin(a) * r1);
     }
   };
   draw();
