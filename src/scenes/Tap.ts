@@ -11,6 +11,8 @@ export class Tap extends Phaser.Scene {
     const t = txt(this, 320, 180, 'TOCA PARA EMPEZAR', 'fuente_ui', 2);
     this.tweens.add({ targets: t, alpha: 0.2, duration: 500, yoyo: true, repeat: -1 });
     txt(this, 320, 330, 'NEKKETSU OLYMPIC GG · HECHO CON PIXELFORJA', 'fuente_ui', 1).setTint(0x6a6a8a);
+    // la versión, para saber qué build se está viendo (por ejemplo en Netlify)
+    txt(this, 320, 346, `VERSIÓN ${__VERSION__}`.toUpperCase(), 'fuente_ui', 1).setTint(0x3a3a52);
     const go = () => {
       const sm = this.sound as Phaser.Sound.WebAudioSoundManager;
       if (sm.context) {
@@ -20,9 +22,12 @@ export class Tap extends Phaser.Scene {
       chip.blip(988, 0.08, 'sq25', 0.2);
       // en el celular, pantalla completa de verdad (sin las barras del navegador) y acostado; si no se puede, sigue igual
       if (this.sys.game.device.input.touch && !this.scale.isFullscreen) {
-        try { this.scale.startFullscreen(); } catch { /* el navegador no deja */ }
-        const o = screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> };
-        o?.lock?.('landscape').catch(() => undefined);
+        // acostado solo se puede trancar ya en pantalla completa (antes el navegador lo rechaza)
+        this.scale.once(Phaser.Scale.Events.ENTER_FULLSCREEN, () => {
+          const o = screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> };
+          o?.lock?.('landscape').catch(() => undefined);
+        });
+        try { this.scale.startFullscreen(); } catch { /* el navegador no deja (iPhone): ver el manifiesto */ }
       }
       this.scene.start('Intro');
     };

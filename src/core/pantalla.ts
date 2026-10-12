@@ -56,11 +56,41 @@ export function instalarPantalla(game: Phaser.Game) {
     for (const s of game.scene.getScenes(true)) encuadrar(s);
   };
   if (game.scene.scenes.length) enganchar(); else game.events.once(Phaser.Core.Events.READY, enganchar);
-  // al girar el teléfono o cambiar la ventana (el navegador tarda un poco en dar el tamaño nuevo)
-  const luego = () => { ajustar(); setTimeout(ajustar, 250); };
+  // al girar el teléfono, entrar a pantalla completa o esconderse la barra del navegador: el tamaño nuevo llega
+  // tarde (y a veces sin otro aviso), así que se vuelve a medir un par de veces más
+  let reintentos: number[] = [];
+  const luego = () => {
+    ajustar();
+    reintentos.forEach((t) => clearTimeout(t));
+    reintentos = [250, 600, 1200].map((ms) => window.setTimeout(ajustar, ms));
+  };
   window.addEventListener('resize', luego);
   window.addEventListener('orientationchange', luego);
+  document.addEventListener('fullscreenchange', luego);
+  document.addEventListener('webkitfullscreenchange', luego);
+  window.visualViewport?.addEventListener('resize', luego);
+  if (new URLSearchParams(location.search).has('diag')) diagnostico(game);
   game.scale.on(Phaser.Scale.Events.RESIZE, () => { for (const s of game.scene.getScenes(true)) encuadrar(s); });
   // y cuando Phaser mismo nota que cambió la pantalla
   game.scale.on(Phaser.Scale.Events.RESIZE, () => { const W = anchoPara(game); if (W !== game.scale.gameSize.width) game.scale.setGameSize(W, BASE_H); });
+}
+
+/**
+ * Con ?diag en la dirección: un recuadro con las medidas reales (ventana, pantalla, lienzo y juego) y la versión,
+ * para ver en el teléfono de verdad por qué no llena la pantalla.
+ */
+function diagnostico(game: Phaser.Game) {
+  const d = document.createElement('div');
+  d.style.cssText = 'position:fixed;left:4px;top:4px;z-index:20;background:rgba(0,0,0,.75);color:#7f7;font:11px monospace;padding:4px 6px;pointer-events:none;white-space:pre';
+  document.body.appendChild(d);
+  setInterval(() => {
+    const c = game.canvas?.getBoundingClientRect(), p = (game.scale.parent as HTMLElement | undefined)?.getBoundingClientRect();
+    const v = window.visualViewport, r = (n?: number) => Math.round(n ?? 0);
+    d.textContent = [
+      `versión ${__VERSION__}`,
+      `ventana ${innerWidth}x${innerHeight}  visible ${r(v?.width)}x${r(v?.height)}  pantalla ${screen.width}x${screen.height}`,
+      `contenedor ${r(p?.width)}x${r(p?.height)}  lienzo ${r(c?.width)}x${r(c?.height)} en ${r(c?.x)},${r(c?.y)}`,
+      `juego ${game.scale.gameSize.width}x${game.scale.gameSize.height}  completa ${game.scale.isFullscreen ? 'sí' : 'no'}  ${screen.orientation?.type ?? ''}`,
+    ].join('\n');
+  }, 500);
 }

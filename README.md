@@ -52,6 +52,9 @@ El juego llena la pantalla en cualquier celular acostado, sin barras negras:
 - Los botones táctiles se pegan a los bordes de la pantalla.
 - En tablets, más cuadradas, queda en 16:9 con barras arriba y abajo.
 - Al tocar la primera pantalla en el celular pide pantalla completa y se acuesta solo, si el navegador lo permite.
+- En iPhone el navegador no deja pantalla completa. Para jugar sin barras: Compartir → Agregar a pantalla de inicio, y abrirlo desde el ícono. El manifiesto (`public/manifest.webmanifest`) lo abre acostado y sin barras, también en Android.
+- La pantalla de inicio muestra la versión (commit y fecha del build). Así se sabe qué build está publicado en Netlify.
+- Con `?diag` al final de la dirección sale un recuadro con las medidas reales de la ventana, el lienzo y el juego.
 - Todo esto está en `src/core/pantalla.ts`.
 
 ## Controles
