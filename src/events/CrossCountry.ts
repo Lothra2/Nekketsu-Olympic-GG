@@ -964,6 +964,7 @@ export class CrossCountry extends EventScene implements World {
     // la bandera en su asta
     for (const p of L.postes) if (p.tipo === 'asta_bandera' && this.textures.exists('flag_co')) this.add.image(p.x + 4, FT + p.y - Math.max(0, this.suelo(p.x, p.y, 999)) - p.alto + 10, 'flag_co').setOrigin(0, 0.5).setScale(0.9).setDepth(FT + p.y);
     this.adornos();
+    this.escaleras();
     // cajas: techo claro, frente oscuro, con su nombre
     // techo y frente por tipo, para leer el gris: ladrillo, zinc, la escalera eléctrica, la fruta
     const COLOR: Record<string, [number, number]> = {
@@ -980,6 +981,13 @@ export class CrossCountry extends EventScene implements World {
       const [techo, frente] = COLOR[c.tipo ?? ''] ?? (muro ? [0xb0a090, 0x807060] : [0xc8c8d0, 0x8a8a96]);
       box.fillStyle(techo).fillRect(c.x, FT + c.y - c.z, c.w, c.d);
       box.fillStyle(frente).fillRect(c.x, FT + c.y + c.d - c.z, c.w, c.z);
+      // la tapa también lleva las juntas en diagonal, como el piso
+      for (let x0 = c.x - c.d; x0 < c.x + c.w; x0 += 16) {
+        for (let k = 0; k < c.d; k += 2) {
+          const x = x0 + Math.floor((c.d - k) / 2);
+          if (x > c.x && x < c.x + c.w - 1) box.fillStyle(0x000000, 0.1).fillRect(x, FT + c.y - c.z + k, 1, 2);
+        }
+      }
       // la escalera eléctrica va al revés: flechitas hacia atrás en cada escalón
       if (c.tipo === 'escalera_electrica') for (let y = c.y + 6; y < c.y + c.d - 2; y += 14) box.fillStyle(0x30303a).fillTriangle(c.x + 3, FT + y - c.z, c.x + c.w - 4, FT + y - 4 - c.z, c.x + c.w - 4, FT + y + 4 - c.z);
       if (c.tipo === 'terraza' || c.tipo === 'muro_ladrillo') for (let y = FT + c.y + c.d - c.z + 6; y < FT + c.y + c.d; y += 8) box.fillStyle(0x7a3a22, 0.5).fillRect(c.x, y, c.w, 1);
@@ -1001,6 +1009,42 @@ export class CrossCountry extends EventScene implements World {
       // el nombre encima, una vez por grupo (los escalones seguidos llevan uno solo)
       const seguido = this.cajas.some((o) => o !== c && o.tipo === c.tipo && Math.abs(o.x + o.w - c.x) < 1 && o.y === c.y);
       if (!seguido) this.add.bitmapText(c.x + c.w / 2, FT + c.y - c.z - 6, 'fuente_ui', (c.tipo ?? '').toUpperCase().replace(/_/g, ' ')).setOrigin(0.5).setDepth(FT + c.y + c.d - 0.4).setTint(0xf0f0f8).setAlpha(0.8);
+    }
+  }
+
+  /**
+   * Las escaleras se leen inclinadas: cada tramo de escalones seguidos lleva su zanca (la viga del costado que sigue
+   * la pendiente) y las escaleras eléctricas, además, su pasamanos de vidrio con la baranda negra.
+   */
+  private escaleras() {
+    const tipos = ['escalon', 'escalones', 'escalera_pintada', 'escalera_electrica'];
+    const usados = new Set<Caja>();
+    for (const c of this.cajas) {
+      if (!tipos.includes(c.tipo ?? '') || usados.has(c)) continue;
+      // el tramo: los escalones del mismo tipo y la misma fila, uno pegado al otro
+      const tramo = [c];
+      usados.add(c);
+      for (let sig = c; ;) {
+        const n = this.cajas.find((o) => o.tipo === sig.tipo && o.y === sig.y && o.d === sig.d && Math.abs(o.x - (sig.x + sig.w)) < 1);
+        if (!n) break;
+        tramo.push(n); usados.add(n); sig = n;
+      }
+      if (tramo.length < 2) continue;
+      const a = tramo[0], b = tramo[tramo.length - 1];
+      const g = this.add.graphics().setDepth(FT + a.y + a.d - 0.3);
+      // la zanca al frente: una franja que une las narices de los escalones, de abajo hasta arriba
+      const yf = FT + a.y + a.d;
+      const x0 = a.x, y0 = yf - a.z + a.z / 2, x1 = b.x + b.w, y1 = yf - b.z;
+      g.fillStyle(0x2a2a34, 0.55).fillPoints([{ x: x0, y: yf }, { x: x0, y: y0 }, { x: x1, y: y1 }, { x: x1, y: y1 + 5 }, { x: x0 + 4, y: yf }], true);
+      if (c.tipo !== 'escalera_electrica') continue;
+      // el pasamanos: vidrio claro con la baranda negra arriba, a 18 de altura sobre los escalones, a los dos lados
+      for (const yy of [FT + a.y, yf]) {
+        const p0 = { x: a.x, y: yy - a.z + 6 }, p1 = { x: b.x + b.w + 6, y: yy - b.z };
+        const g2 = this.add.graphics().setDepth(yy === yf ? FT + a.y + a.d + 0.2 : FT + a.y - 0.2);
+        g2.fillStyle(0xc8e0f0, 0.35).fillPoints([p0, p1, { x: p1.x, y: p1.y - 18 }, { x: p0.x, y: p0.y - 18 }], true);
+        g2.lineStyle(3, 0x1e1e26).lineBetween(p0.x, p0.y - 18, p1.x, p1.y - 18);
+        g2.lineStyle(1, 0x6a6a78).lineBetween(p0.x, p0.y, p1.x, p1.y);
+      }
     }
   }
 
