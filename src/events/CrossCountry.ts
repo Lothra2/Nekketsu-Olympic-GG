@@ -80,7 +80,7 @@ interface Fruta { x0: number; x1: number; y0: number; y1: number; t: number; due
 interface Perro { x: number; y: number; z: number; x0: number; f: Figura; zz: Phaser.GameObjects.BitmapText; despierto: number; presa: Actor | null }
 
 /** Para pasar de un tramo al siguiente: los mismos cuatro y lo que llevan acumulado. */
-interface CrossData extends EventData { tramo?: number; cross?: { gente: Competidor[]; acum: Record<string, number> } }
+interface CrossData extends EventData { tramo?: number; suelto?: boolean; cross?: { gente: Competidor[]; acum: Record<string, number> } }
 
 /**
  * Cross Country Saigón, cinco tramos seguidos: el hẻm, el mercado Bến Thành, el río, las azoteas bajo el aguacero
@@ -94,6 +94,8 @@ export class CrossCountry extends EventScene implements World {
   limites = { xmin: 12, xmax: 3828, depth: DEPTH };
   private L!: Layout;
   private tramo = 0;
+  /** un tramo suelto (desde Pruebas sueltas): termina con su tabla, sin seguir al siguiente */
+  private suelto = false;
   private acum: Record<string, number> = {};
   private gente2: Corredor[] = [];
   private cajas: Caja[] = [];
@@ -132,6 +134,9 @@ export class CrossCountry extends EventScene implements World {
     this.acum = {};
     if (d.cross && !this.d.practica) { this.gente = d.cross.gente; this.acum = { ...d.cross.acum }; }
     this.L = this.tramos[this.tramo];
+    this.suelto = !!d.suelto && !this.d.practica;
+    // "otra vez" repite el mismo tramo suelto
+    if (this.suelto) Object.assign(this.d, { tramo: this.tramo, suelto: true });
     if (this.L.franja.atras !== FT || this.L.franja.adelante - this.L.franja.atras !== DEPTH) throw new Error(`${this.L.id}: la franja tiene que ser 200 a 330`);
   }
 
@@ -196,7 +201,7 @@ export class CrossCountry extends EventScene implements World {
     chip.play(PELEA);
     const p = prueba(this.scene.key);
     if (this.d.practica) { void this.entrenar(p.nombre, this.pasos(), 40); return; }
-    const titulo = this.tramo === 0 ? p.nombre : `TRAMO ${this.tramo + 1} DE ${this.tramos.length}`;
+    const titulo = this.suelto ? `${p.nombre} · TRAMO ${this.tramo + 1}` : this.tramo === 0 ? p.nombre : `TRAMO ${this.tramo + 1} DE ${this.tramos.length}`;
     void this.previa(titulo, `${L.nombre}, ${this.recorrido.ciudad}`, AYUDA[L.id] ?? '');
   }
 
@@ -900,7 +905,8 @@ export class CrossCountry extends EventScene implements World {
     g.lineStyle(1, 0xffffff, 0.6).lineBetween(120, 22, 520, 22);
     g.fillStyle(0xffffff).fillRect(519, 16, 2, 12);
     for (const h of this.heads) h.img.setPosition(120 + 400 * Phaser.Math.Clamp(h.r.a.x / this.meta, 0, 1), 22);
-    this.timeTxt.setText(((this.acum[this.gente2[0].c.id] ?? 0) + this.clock).toFixed(2));
+    // el tiempo sumado: al cerrar el tramo, el de este tramo ya está dentro del acumulado
+    this.timeTxt.setText(((this.acum[this.gente2[0].c.id] ?? 0) + (this.fase === 'fin' ? 0 : this.clock)).toFixed(2));
     g.fillStyle(0x000000, 0.6).fillRect(14, 12, 84, 10);
     g.fillStyle(me.hp > me.maxHp * 0.3 ? 0x40e080 : 0xff5040).fillRect(16, 14, 80 * (me.hp / me.maxHp), 6);
   }
@@ -915,8 +921,8 @@ export class CrossCountry extends EventScene implements World {
     for (const r of this.gente2) if (!r.done) { r.done = true; r.time = this.clock + (this.meta - r.a.x) / 120; }
     for (const r of this.gente2) this.acum[r.c.id] = (this.acum[r.c.id] ?? 0) + r.time;
     const orden = [...this.gente2].sort((p, q) => this.acum[p.c.id] - this.acum[q.c.id]);
-    if (this.tramo === this.tramos.length - 1) {
-      this.resultados(prueba(this.scene.key).nombre, orden.map((r) => ({ c: r.c, valor: `${this.acum[r.c.id].toFixed(2)} S` })));
+    if (this.suelto || this.tramo === this.tramos.length - 1) {
+      this.resultados(this.suelto ? `TRAMO ${this.tramo + 1} · ${this.L.nombre}` : prueba(this.scene.key).nombre, orden.map((r) => ({ c: r.c, valor: `${this.acum[r.c.id].toFixed(2)} S` })));
       return;
     }
     this.entreTramos(orden);

@@ -143,18 +143,18 @@
  "muros": [
   {
    "x": 600,
-   "y": 0,
+   "y": 36,
    "w": 40,
-   "d": 40,
+   "d": 16,
    "z": 64,
    "tipo": "porton_mercado",
-   "nota": "entrada del mercado: se pasa por el medio (y 40 a 90)"
+   "nota": "la fachada del mercado: tres puertas, una por pasillo (y 0 a 36, 52 a 78 y 94 a 130)"
   },
   {
    "x": 600,
-   "y": 90,
+   "y": 78,
    "w": 40,
-   "d": 40,
+   "d": 16,
    "z": 64,
    "tipo": "porton_mercado"
   },

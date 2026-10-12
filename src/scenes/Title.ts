@@ -17,11 +17,21 @@ const MENUS: Record<string, { id: string; label: string }[]> = {
     { id: 'intro', label: 'VER LA INTRO' },
   ],
   pruebas: [
-    { id: 'CrossCountry', label: 'CROSS COUNTRY' },
+    { id: '>cross', label: 'CROSS COUNTRY' },
     { id: 'Obstaculos', label: 'OBSTÁCULOS COMUNA 13' },
     { id: 'Vallas', label: 'VALLAS DEL CAFÉ' },
     { id: 'Natacion', label: 'NATACIÓN HẠ LONG' },
     { id: 'Jabalina', label: 'JABALINA LLANERA' },
+    { id: '<', label: 'ATRÁS' },
+  ],
+  // el Cross completo son cinco tramos; para una partida corta se puede correr uno solo
+  cross: [
+    { id: 'CrossCountry', label: 'CARRERA COMPLETA' },
+    { id: 'CrossCountry@0', label: '1 · EL HẺM' },
+    { id: 'CrossCountry@1', label: '2 · EL MERCADO' },
+    { id: 'CrossCountry@2', label: '3 · EL RÍO' },
+    { id: 'CrossCountry@3', label: '4 · LAS AZOTEAS' },
+    { id: 'CrossCountry@4', label: '5 · EL ESTADIO' },
     { id: '<', label: 'ATRÁS' },
   ],
   entrenar: [

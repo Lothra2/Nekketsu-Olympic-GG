@@ -16,7 +16,7 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
     4. Las azoteas bajo el aguacero: saltos entre edificios, charcos y techos de zinc que resbalan, y una viga para cruzar el hueco ancho.
     5. La recta final en el estadio, con vallas.
 
-    Los tramos 2 a 5 van en gris hasta que llegue su arte (lote E2). Con los rivales, a los golpes, como en el original.
+    Los tramos 2 a 5 van en gris hasta que llegue su arte (lote E2). Con los rivales, a los golpes, como en el original. En Pruebas sueltas también se puede correr un tramo solo, para una partida corta.
   - *Obstáculos Comuna 13*: la carrera de obstáculos del original, subiendo la Comuna 13 de Medellín desde la calle hasta el mirador.
     - Escaleras eléctricas que van al revés, o los escalones empinados del lado.
     - Muros, una viga sobre un hueco y tendederos.

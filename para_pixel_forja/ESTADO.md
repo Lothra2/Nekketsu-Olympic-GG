@@ -117,7 +117,7 @@ Reglas comunes, iguales a `saigon_hem`:
 
 Lo de cada tramo:
 - **`saigon_benthanh`** (largo 3840, `manana`):
-  - Entrada por el portón del medio (y 40 a 90) y dos filas de puestos altos (z 46) que arman tres pasillos: arriba y de 0 a 36, en el medio de 52 a 78 y abajo de 94 a 130.
+  - La fachada del mercado tiene tres puertas, una por pasillo. Dos filas de puestos altos (z 46) arman tres pasillos: arriba y de 0 a 36, en el medio de 52 a 78 y abajo de 94 a 130.
   - Las filas se cortan cada 300 px para cambiar de pasillo y terminan en x 3040. Queda un salón antes del portón de salida, que tiene el muro en el medio (y 40 a 90).
   - En los pasillos hay puestos de frutas, cajas, sacos y cubos de flores que se saltan, y lámparas colgantes (`bajo`).
   - Afuera, motos por el carril 4 solo desde x 3260. `x0`/`x1` en el vehículo dicen en qué calle andan.

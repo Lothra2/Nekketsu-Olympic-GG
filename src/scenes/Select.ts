@@ -111,7 +111,8 @@ export class Select extends Phaser.Scene {
         else this.fadeTo(sc, { jugador: id, practica: true });
         return;
       }
-      if (this.modo !== '1v1') { this.fadeTo(this.modo, { jugador: id }); return; }
+      // "CrossCountry@2": un tramo suelto del Cross
+      if (this.modo !== '1v1') { const [sc, t] = this.modo.split('@'); this.fadeTo(sc, t === undefined ? { jugador: id } : { jugador: id, tramo: Number(t), suelto: true }); return; }
       this.paso = 'rival';
       this.sel = 0;
       this.build();
