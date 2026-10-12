@@ -1,8 +1,3 @@
-Nekketsu Olympic GG
-
-Personajes, armas y sonidos generados con PixelForja.
-Fuentes: Silkscreen, de Jason Kottke. SIL Open Font License 1.1.
-
 Arte del personaje: piezas del proyecto LPC (Liberated Pixel Cup), recoloreadas y armadas con PixelForja.
 Fuente: Universal LPC Spritesheet Character Generator, https://github.com/LiberatedPixelCup/Universal-LPC-Spritesheet-Character-Generator
 Estas piezas exigen dar crédito a sus autores. Si las modificas y las compartes, respeta su licencia (CC-BY-SA o GPL comparten igual).
@@ -89,3 +84,8 @@ head/faces/male/neutral/idle.png: JaidynReiman,ElizaWy,Stephen Challener (Redshr
 hair/flat_top_straight/adult/idle.png: ElizaWy,bluecarrot16. CC0. https://opengameart.org/content/lpc-hair,https://github.com/ElizaWy/LPC/blob/main/Characters/Hair,https://opengameart.org/content/lpc-expanded-sit-run-jump-more
 eyes/eyebrows/thin/adult/idle.png: ElizaWy. OGA-BY 3.0. https://github.com/ElizaWy/LPC/tree/main/Characters/Hair,https://opengameart.org/content/lpc-expanded-sit-run-jump-more
 facial/glasses/shades/adult/idle.png: JaidynReiman,Thane Brimhall (pennomi),laetissima. CC-BY-SA 3.0,GPL 3.0. https://opengameart.org/content/lpc-base-character-expressions
+
+
+Fuentes: Silkscreen, de Jason Kottke. SIL Open Font License 1.1 (https://openfontlicense.org).
+
+Efectos y sonidos: dibujados y sintetizados con código por PixelForja. No usan piezas de nadie y no piden crédito.

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Figura } from '../core/figura';
 import { ajustes, goma } from '../core/nivel';
+import { efecto } from '../core/fx';
 import { chip, PELEA } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { Painter, hex } from '../gfx/paint';
@@ -178,13 +179,16 @@ export class Vallas extends EventScene {
     if (r.st === 'air') {
       r.vz -= 900 * dt;
       r.z += r.vz * dt;
-      if (r.z <= 0) { r.z = 0; r.vz = 0; r.st = 'run'; r.fig.set('sprint'); }
+      if (r.z <= 0) { r.z = 0; r.vz = 0; r.st = 'run'; r.fig.set('sprint'); efecto(this, 'polvo_caer_medio', r.x, TOP + r.y); }
     } else if (r.st === 'start') {
       r.fig.step(dt);
       if (r.fig.anim.done) { r.st = 'run'; r.fig.set('sprint'); }
     } else if (r.st === 'run') {
       const ev = r.fig.step(dt, dx);
-      if (r.c.human && ev.some((e) => e.tipo === 'paso')) this.sound.play(`paso_piedra_${Math.floor(Math.random() * 3)}`, { volume: 0.2 });
+      if (ev.some((e) => e.tipo === 'paso')) {
+        efecto(this, 'polvo_correr_medio', r.x, TOP + r.y);
+        if (r.c.human) this.sound.play(`paso_piedra_${Math.floor(Math.random() * 3)}`, { volume: 0.2 });
+      }
       if (r.v < 5) r.fig.set('idle');
       else if (r.fig.anim.name === 'idle') r.fig.set('sprint');
     } else r.fig.step(dt);
@@ -193,6 +197,7 @@ export class Vallas extends EventScene {
       if (h.down || h.lane !== r.lane || Math.abs(h.x - r.x) > 5) continue;
       h.down = true;
       h.img.setTexture('valla_caida').setOrigin(0.5, 1);
+      efecto(this, 'polvo_caer_chico', h.x, TOP + LANES[h.lane]);
       this.tweens.add({ targets: h.img, x: h.img.x + 10, duration: 200 });
       this.stumble(r);
       this.sound.play('romper', { volume: r.c.human ? 0.45 : 0.15 });
@@ -246,6 +251,7 @@ export class Vallas extends EventScene {
     const nl = Phaser.Math.Clamp(v.lane + Math.sign(v.lane - r.lane), 0, 3);
     if (!this.racers.some((o) => o !== v && o.lane === nl && Math.abs(o.x - v.x) < 16)) v.lane = nl;
     this.sound.play('golpe', { volume: 0.5 });
+    efecto(this, 'chispa_golpe_medio', (r.x + v.x) / 2, TOP + (r.y + v.y) / 2 - 24, { depth: 6000 });
     this.cameras.main.shake(90, 0.005);
     const t = txt(this, (r.x + v.x) / 2, TOP + (r.y + v.y) / 2 - 50, '¡CODAZO!', 'fuente_ui', 1).setDepth(6000).setTint(0xffe040);
     this.tweens.add({ targets: t, y: t.y - 14, alpha: 0, duration: 700, onComplete: () => t.destroy() });

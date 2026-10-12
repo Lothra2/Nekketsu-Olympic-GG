@@ -4,6 +4,7 @@ import { Brain } from '../fight/brain';
 import { DEPTH, FLOOR_TOP, XMAX, XMIN, type AttackDef } from '../fight/defs';
 import { Figura } from '../core/figura';
 import { ajustes } from '../core/nivel';
+import { efecto, talla } from '../core/fx';
 import { Input } from '../core/input';
 import { chip, PELEA, VICTORIA } from '../core/music';
 import { txt, flash, speedLines } from '../core/ui';
@@ -189,11 +190,20 @@ export class Fight extends Phaser.Scene implements World {
   shake(ms: number, k: number) { this.cameras.main.shake(ms, k); }
   sfx(name: string, vol = 0.5) { if (this.cache.audio.exists(name)) this.sound.play(name, { volume: vol }); }
   spark(x: number, y: number, z: number, big: boolean) {
-    this.sparks.explode(big ? 16 : 8, x, FLOOR_TOP + y - z);
+    // la chispa del kit en el punto del golpe; las partículas quedan de relleno
+    efecto(this, big ? 'chispa_golpe_pesado' : 'chispa_golpe_medio', x, FLOOR_TOP + y - z, { depth: 5002 });
+    this.sparks.explode(big ? 8 : 4, x, FLOOR_TOP + y - z);
     const ring = this.add.circle(x, FLOOR_TOP + y - z, 3, 0xffffff, 0).setStrokeStyle(2, 0xffffff).setDepth(5001);
     this.tweens.add({ targets: ring, scale: big ? 5 : 3, alpha: 0, duration: 160, onComplete: () => ring.destroy() });
   }
-  dust(x: number, y: number) { this.dusts.explode(7, x, FLOOR_TOP + y); }
+  dust(x: number, y: number) {
+    if (!efecto(this, 'polvo_caer_medio', x, FLOOR_TOP + y)) this.dusts.explode(7, x, FLOOR_TOP + y);
+  }
+  /** Al correr, una nubecita en cada paso; la persona además suena. */
+  paso(a: Actor) {
+    if (a.st === 'run') efecto(this, `polvo_correr_${talla(a.fig.celda)}`, a.x, FLOOR_TOP + a.y, { flip: a.left });
+    if (a.human) this.sfx(`paso_piedra_${Math.floor(Math.random() * 3)}`, 0.25);
+  }
   number(x: number, y: number, n: number) {
     const t = txt(this, x, FLOOR_TOP + y - 52, `${n}`, 'fuente_ui', 1).setTint(0xff6060).setDepth(6000);
     this.tweens.add({ targets: t, y: t.y - 16, alpha: 0, duration: 650, onComplete: () => t.destroy() });
@@ -419,6 +429,10 @@ export class Fight extends Phaser.Scene implements World {
 
   private cutIn(a: Actor) {
     this.cut = 1.0;
+    // el aura Nekketsu detrás de quien lanza la técnica
+    const aura = efecto(this, 'aura_nekketsu', a.x, FLOOR_TOP + a.y, { depth: FLOOR_TOP + a.y - 0.5 });
+    if (aura) this.time.delayedCall(1700, () => this.tweens.add({ targets: aura, alpha: 0, duration: 250, onComplete: () => aura.destroy() }));
+    if (a.id === 'alana') this.sfx('thor_rescate', 0.6);
     const side = a.team === 0 ? 1 : -1;
     const dark = this.uiAdd(this.add.rectangle(320, 180, 640, 360, 0x000000, 0.65).setDepth(8600));
     const band = this.uiAdd(this.add.rectangle(320, 150, 640, 110, a.team === 0 ? 0x1a3a9a : 0x9a1a2a, 0.95).setDepth(8601));

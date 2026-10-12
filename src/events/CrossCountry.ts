@@ -7,6 +7,7 @@ import { EventScene, prueba, type Competidor } from './base';
 import layoutJson from '../../data/stages/saigon_hem.layout.json';
 import type { Paso } from '../core/coach';
 import { hayArte, pintarEscenario, queueEscenario } from './escenario';
+import { efecto, talla } from '../core/fx';
 
 /** El formato de layout de PixelForja (PEDIDO 10.2), la parte que este tramo usa. */
 interface Caja { x: number; y: number; w: number; d: number; z: number; tipo?: string }
@@ -144,7 +145,7 @@ export class CrossCountry extends EventScene implements World {
   caida(a: Actor) {
     const r = this.gente2.find((g) => g.a === a);
     if (!r) return;
-    this.splash.explode(16, a.x, FT + a.y);
+    if (!efecto(this, 'chapuzon_grande', a.x, FT + a.y - 40, { depth: 5003 })) this.splash.explode(16, a.x, FT + a.y);
     this.sfx('esquiva', 0.4);
     if (a.human) this.letrero(a, '¡AL AGUA!', 0x9ad8ff);
     a.x = r.safe[0]; a.y = r.safe[1]; a.z = 0; a.vx = 0; a.vy = 0; a.vz = 0;
@@ -158,8 +159,33 @@ export class CrossCountry extends EventScene implements World {
   hitstop(s: number) { this.stop = Math.max(this.stop, s); }
   shake(ms: number, k: number) { this.cameras.main.shake(ms, k); }
   sfx(name: string, vol = 0.5) { if (this.cache.audio.exists(name)) this.sound.play(name, { volume: vol }); }
-  spark(x: number, y: number, z: number, big: boolean) { this.sparks.explode(big ? 16 : 8, x, FT + y - z); }
-  dust(x: number, y: number) { this.dusts.explode(7, x, FT + y); }
+  spark(x: number, y: number, z: number, big: boolean) {
+    efecto(this, big ? 'chispa_golpe_pesado' : 'chispa_golpe_medio', x, FT + y - z, { depth: 5002 });
+    this.sparks.explode(big ? 8 : 4, x, FT + y - z);
+  }
+  dust(x: number, y: number) {
+    // en el agua salpica; en seco, polvo
+    const enAgua = L.agua.some((w) => x >= w.x0 && x < w.x1);
+    if (!efecto(this, enAgua ? 'salpicadura_piso' : 'polvo_caer_medio', x, FT + y)) this.dusts.explode(7, x, FT + y);
+  }
+
+  /** Cada paso: nubecita o salpicadura, y el sonido del piso (piedra, madera o agua). */
+  paso(a: Actor) {
+    const piso = this.pisoBajo(a);
+    if (piso === 'agua') efecto(this, 'salpicadura_piso', a.x, FT + a.y, { flip: a.left });
+    else if (a.st === 'run') efecto(this, `polvo_correr_${talla(a.fig.celda)}`, a.x, FT + a.y - a.base, { flip: a.left, depth: a.fig.depth + 0.1 });
+    if (a.human) this.sfx(`paso_${piso}_${Math.floor(Math.random() * 3)}`, 0.28);
+  }
+
+  /** Qué hay bajo los pies, para el sonido: agua, madera (carro, cajas, mesas) o piedra. */
+  private pisoBajo(a: Actor): 'agua' | 'madera' | 'piedra' {
+    if (a.base > 0) {
+      const c = this.cajas.find((b) => a.x >= b.x && a.x < b.x + b.w && a.y >= b.y && a.y < b.y + b.d && Math.abs(b.z - a.base) < 1);
+      if (c && /carro|cajas|mesas|puesto/.test(c.tipo ?? '')) return 'madera';
+      return 'piedra';
+    }
+    return L.agua.some((w) => a.x >= w.x0 && a.x < w.x1) ? 'agua' : 'piedra';
+  }
   number(x: number, y: number, n: number) {
     const t = txt(this, x, FT + y - 52, `${n}`, 'fuente_ui', 1).setTint(0xff6060).setDepth(6000);
     this.tweens.add({ targets: t, y: t.y - 16, alpha: 0, duration: 650, onComplete: () => t.destroy() });

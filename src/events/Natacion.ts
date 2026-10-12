@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Figura } from '../core/figura';
 import { ajustes, goma } from '../core/nivel';
+import { efecto } from '../core/fx';
 import { chip, PELEA } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { Painter, hex } from '../gfx/paint';
@@ -21,6 +22,8 @@ const AGUA = 6;
 interface Swimmer {
   c: Competidor; fig: Figura; x: number; lane: number; v: number; boost: number; last: string;
   st: 'set' | 'dive' | 'swim' | 'done'; t: number; time: number; react: number; top: number; falso: boolean; jalon: number;
+  /** la estela detrás al nadar y las ondas al llegar (efectos del kit) */
+  estela?: Phaser.GameObjects.Sprite | null; ondas?: Phaser.GameObjects.Sprite | null;
 }
 
 /** Natación Hạ Long: 50 metros libres en una piscina flotante en la bahía. Salida en falso castiga. */
@@ -77,6 +80,12 @@ export class Natacion extends EventScene {
     for (const s of this.swimmers) this.heads.push({ img: this.uiAdd(this.add.image(0, 22, 'cabecitas', s.c.id).setDepth(8002)), s });
     this.uiAdd(txt(this, 66, 326, 'BRAZADA', 'fuente_ui', 1).setDepth(8001));
     chip.play(PELEA);
+    // el agua de la bahía de fondo, suavecito, mientras dure la prueba
+    if (this.cache.audio.exists('amb_agua')) {
+      const amb = this.sound.add('amb_agua', { loop: true, volume: 0.16 });
+      amb.play();
+      this.events.once('shutdown', () => amb.destroy());
+    }
     this.time.delayedCall(2200, () => { this.armed = true; });
     if (this.d.practica) void this.entrenar('NATACIÓN HẠ LONG', this.pasos());
     else void this.previa('NATACIÓN HẠ LONG', 'BAHÍA DE HẠ LONG, VIETNAM', '{SALTO} PARA LANZARTE · ALTERNA {PUÑO} Y {PATADA} · {ESPECIAL} DELFÍN');
@@ -157,7 +166,7 @@ export class Natacion extends EventScene {
       if (b > a) s.x += ((d[b] ?? 0) - (d[a] ?? 0)) * 1.6;
       if (ev.some((e) => e.tipo === 'impacto')) {
         s.v = 120;
-        this.splash.explode(s.c.human ? 26 : 12, s.x + 8, TOP + LANES[s.lane]);
+        if (!efecto(this, 'chapuzon_grande', s.x + 8, TOP + LANES[s.lane], { depth: TOP + LANES[s.lane] + 3 })) this.splash.explode(s.c.human ? 26 : 12, s.x + 8, TOP + LANES[s.lane]);
         this.sound.play('esquiva', { volume: s.c.human ? 0.5 : 0.15, rate: 0.6 });
       }
       if (s.fig.anim.frame >= 6) s.x += s.v * dt;
@@ -197,6 +206,7 @@ export class Natacion extends EventScene {
       s.time = this.clock;
       s.fig.set('tread_water', true);
       this.splash.explode(14, FINISH - 6, TOP + LANES[s.lane]);
+      s.ondas = efecto(this, 'ondas', s.x, TOP + LANES[s.lane], { depth: TOP + LANES[s.lane] + 1.5, alpha: 0.8 });
       const lugar = this.swimmers.filter((o) => o.st === 'done').length;
       const t = txt(this, s.x - 4, TOP + LANES[s.lane] - 34, `${lugar}°`, 'fuente_titulo', 1).setDepth(6000);
       this.tweens.add({ targets: t, y: t.y - 8, duration: 400, ease: 'Back.out' });
@@ -223,6 +233,9 @@ export class Natacion extends EventScene {
       // en el poyete y en el aire va por encima del agua; ya mojado se dibuja detrás de su capa de agua
       const wet = a.data.agua?.[a.frame] != null;
       s.fig.setPosition(Math.round(s.x), Math.round(surf + AGUA - el)).setDepth(wet ? surf : surf + 2);
+      // la estela del kit detrás de quien nada rápido
+      if (s.estela === undefined) s.estela = efecto(this, 'estela', s.x, surf, { depth: surf + 1.5 });
+      s.estela?.setPosition(Math.round(s.x - 14), surf).setVisible(s.st === 'swim' && s.v > 30);
     }
     const me = this.swimmers[0];
     const cam = this.cameras.main;

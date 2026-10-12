@@ -1,0 +1,174 @@
+{
+  "$schema": "tools/pixel_forja/docs/kit-a-medida.schema.json",
+  "juego": "Nekketsu Olympic GG",
+  "resolucion": [
+    640,
+    360
+  ],
+  "celda": 48,
+  "filas": [
+    "right",
+    "down_right",
+    "up_right",
+    "down",
+    "up"
+  ],
+  "datos_por_cuadro": [
+    "cajas",
+    "cuerpo",
+    "manos",
+    "cabeza",
+    "pies",
+    "carga",
+    "arma"
+  ],
+  "fichas": "data/fichas/",
+  "equipos": "data/equipos.json",
+  "packs": {
+    "ngg_mov": [
+      "idle",
+      "walk",
+      "run",
+      "jump_rise",
+      "jump_apex",
+      "jump_fall",
+      "land",
+      "hit",
+      "fall_getup",
+      "knockout",
+      "celebrate",
+      "sad",
+      "victory",
+      "taunt",
+      "dizzy",
+      "ko_bounce"
+    ],
+    "ngg_golpe": [
+      "jab",
+      "punch",
+      "low_kick",
+      "kick_martial",
+      "uppercut",
+      "run_punch",
+      "run_kick",
+      "air_kick",
+      "fight_hit",
+      "fight_block"
+    ],
+    "ngg_carga": [
+      "lift",
+      "carry_idle",
+      "carry_walk",
+      "carry_run",
+      "throw_overhead",
+      "carried",
+      "thrown_spin",
+      "land_flat",
+      "weapon_pick",
+      "weapon_swing",
+      "weapon_swing_heavy",
+      "weapon_throw"
+    ],
+    "atletismo": [
+      "idle",
+      "sprint_start",
+      "sprint",
+      "hurdles",
+      "long_jump",
+      "javelin",
+      "shot_put",
+      "celebrate",
+      "sad",
+      "hit"
+    ],
+    "natacion": [
+      "idle",
+      "dive",
+      "swim",
+      "swim_breast",
+      "swim_back",
+      "swim_fly",
+      "tread_water",
+      "swim_exit"
+    ]
+  },
+  "pruebas": {
+    "pelea": [
+      "ngg_mov",
+      "ngg_golpe",
+      "ngg_carga"
+    ],
+    "crosscountry": [
+      "ngg_mov",
+      "ngg_golpe",
+      "ngg_carga"
+    ],
+    "vallas": [
+      "atletismo"
+    ],
+    "natacion": [
+      "natacion"
+    ],
+    "jabalina": [
+      "atletismo"
+    ]
+  },
+  "objetos": true,
+  "animales": [
+    "thor"
+  ],
+  "ui": {
+    "fuentes": {
+      "idiomas": [
+        "es",
+        "en",
+        "vi"
+      ]
+    }
+  },
+  "fx": true,
+  "audio": {
+    "sfx": [
+      "golpe",
+      "critico",
+      "jugador_dolor",
+      "enemigo_dolor",
+      "enemigo_muere",
+      "esquiva",
+      "bloqueo",
+      "recoger",
+      "romper",
+      "elegir",
+      "click",
+      "descubrir",
+      "subir_nivel",
+      "oro_mucho",
+      "jefe_pisoton",
+      "ladrido",
+      "thor_rescate",
+      "paso_piedra_0",
+      "paso_piedra_1",
+      "paso_piedra_2",
+      "paso_agua_0",
+      "paso_agua_1",
+      "paso_agua_2",
+      "paso_madera_0",
+      "paso_madera_1",
+      "paso_madera_2",
+      "paso_pasto_0",
+      "paso_pasto_1",
+      "paso_pasto_2",
+      "paso_tierra_0",
+      "paso_tierra_1",
+      "paso_tierra_2",
+      "silbato",
+      "pistola"
+    ],
+    "ambientes": [
+      "agua"
+    ],
+    "musica": [
+      "marcha_nekketsu"
+    ]
+  }
+}

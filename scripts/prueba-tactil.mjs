@@ -11,7 +11,9 @@ const page = await ctx.newPage();
 const logs = [];
 page.on('pageerror', (e) => logs.push(e.message));
 await page.goto(url);
-await page.waitForTimeout(2500);
+// espera a que Boot termine de cargar el kit (con varias pruebas a la vez tarda más)
+await page.waitForFunction(() => window.game?.scene.isActive('Tap') || window.game?.scene.isActive('Intro') || window.game?.scene.isActive('Title'), null, { timeout: 60000 });
+await page.waitForTimeout(400);
 await page.touchscreen.tap(590, 410);
 await page.waitForTimeout(500);
 const cdp = await ctx.newCDPSession(page);

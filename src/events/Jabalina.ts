@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Figura } from '../core/figura';
 import { ajustes } from '../core/nivel';
+import { efecto } from '../core/fx';
 import { chip, PELEA } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { Painter, hex } from '../gfx/paint';
@@ -161,6 +162,8 @@ export class Jabalina extends EventScene {
       this.v += Phaser.Math.Clamp(target - this.v, -200 * dt, 240 * dt);
       const dx = this.v * dt;
       this.x += dx;
+      // una nubecita cada tanto en la carrerita
+      if (Math.floor(this.dist / 22) !== Math.floor((this.dist + dx) / 22)) efecto(this, 'polvo_correr_medio', this.x, TOP + RUN_Y);
       this.dist += dx;
       // carrerita con la jabalina al hombro: los primeros cuadros del lanzamiento, por distancia
       this.cur.fig.anim.pos = (this.dist / 7) % 3;
@@ -243,6 +246,7 @@ export class Jabalina extends EventScene {
     if (f.z <= 0 && f.vz < 0) {
       // clavada en el suelo
       f.img.setPosition(Math.round(f.x), TOP + RUN_Y - 4).setRotation(0.6);
+      efecto(this, 'polvo_caer_chico', f.x, TOP + RUN_Y);
       f.sombra.destroy();
       this.vuelo = null;
       this.sound.play('golpe', { volume: this.cur.c.human ? 0.4 : 0.15, rate: 0.7 });
@@ -265,7 +269,12 @@ export class Jabalina extends EventScene {
     const t = this.uiAdd(txt(this, 320, this.d.practica ? 200 : 130, s, 'fuente_titulo', 2).setDepth(8500).setTint(this.nulo ? 0xff6060 : 0xffffff));
     this.tweens.add({ targets: t, scale: { from: 4, to: 2 }, duration: 240, ease: 'Back.out' });
     if (this.nulo) { chip.blip(220, 0.3, 'sq50', 0.25, 110); l.fig.set('sad', true); }
-    else if (l.c.human && record) { flash(this, 100); chip.blip(1320, 0.2, 'sq25', 0.2, 1760); l.fig.set('celebrate', true); }
+    else if (l.c.human && record) {
+      flash(this, 100); chip.blip(1320, 0.2, 'sq25', 0.2, 1760); l.fig.set('celebrate', true);
+      // el brillo de récord sobre la jabalina clavada
+      const b = efecto(this, 'brillo_record', FOUL + m * PX_M, TOP + RUN_Y - 14, { depth: 6000 });
+      if (b) this.time.delayedCall(1600, () => b.destroy());
+    }
     else l.fig.set(m > 45 ? 'celebrate' : 'idle', true);
     l.fig.row = 'down_right';
     this.time.delayedCall(this.skip ? 900 : 1800, () => {

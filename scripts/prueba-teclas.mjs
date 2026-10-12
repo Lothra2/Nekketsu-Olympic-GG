@@ -8,7 +8,9 @@ const url = process.argv[2] ?? 'http://localhost:5173/';
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader'] });
 const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
 await page.goto(url);
-await page.waitForTimeout(2500);
+// espera a que Boot termine de cargar el kit (con varias pruebas a la vez tarda más)
+await page.waitForFunction(() => window.game?.scene.isActive('Tap') || window.game?.scene.isActive('Intro') || window.game?.scene.isActive('Title'), null, { timeout: 60000 });
+await page.waitForTimeout(400);
 await page.mouse.click(640, 360);
 await page.waitForTimeout(300);
 await page.evaluate(() => { const g = window.game; g.scene.getScenes(true).forEach((x) => g.scene.stop(x.scene.key)); g.scene.start('Title'); });

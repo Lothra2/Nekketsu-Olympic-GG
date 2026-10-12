@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { efecto, hayFx } from '../core/fx';
+import { kit } from '../core/kit';
 
 /**
  * El arte de un escenario oblicuo de PixelForja (pedido 10.3), en `public/assets/escenarios/<id>/`.
@@ -83,6 +85,8 @@ export function pintarEscenario(scene: Phaser.Scene, id: string, depthFrente: nu
     const g = scene.add.circle(l.x, l.y, l.radio, c, 0.18).setBlendMode(Phaser.BlendModes.ADD).setDepth(l.y < FT ? -18 : FT + (l.y - FT));
     return { l, g };
   });
+  // partículas: las que piden un efecto del kit lo usan; las demás son puntitos que suben o brillan
+  const conFx = ((scene.cache.json.get(k(id, 'particulas')) as { particulas: Particula[] }).particulas ?? []).filter((p) => p.fx && hayFx(p.fx)).map((p) => ({ p, t: Math.random() * p.cada }));
   const parts = ((scene.cache.json.get(k(id, 'particulas')) as { particulas: Particula[] }).particulas ?? []).filter((p) => !p.fx).map((p) => {
     const tint = (p.color ?? ['#ffffff']).map((s) => Phaser.Display.Color.HexStringToColor(s).color);
     const em = scene.add.particles(0, 0, 'px', {
@@ -123,6 +127,15 @@ export function pintarEscenario(scene: Phaser.Scene, id: string, depthFrente: nu
       for (const { l, g } of luces) {
         if (l.latido) g.setAlpha(0.12 + 0.1 * (0.5 + 0.5 * Math.sin(now * Math.PI * 2 * l.latido)));
         if (l.parpadeo) g.setVisible(Math.sin(now * 37 * l.parpadeo) > -0.7);
+      }
+      for (const q of conFx) {
+        q.t -= dt;
+        if (q.t > 0) continue;
+        q.t = q.p.cada;
+        if (q.p.x1 < camX - 40 || q.p.x0 > camX + W + 40) continue;
+        const x = Phaser.Math.Between(Math.max(q.p.x0, camX - 20), Math.min(q.p.x1, camX + W + 20)), y = Phaser.Math.Between(q.p.y0, q.p.y1);
+        const s = efecto(scene, q.p.fx!, x, y, { depth: y < FT ? -18 : y - 0.5, alpha: 0.85 });
+        if (s && kit().fx?.[q.p.fx!]?.loop) scene.tweens.add({ targets: s, alpha: 0, delay: 1200, duration: 400, onComplete: () => s.destroy() });
       }
       for (const q of parts) {
         q.t -= dt;

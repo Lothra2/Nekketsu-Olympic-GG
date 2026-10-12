@@ -13,7 +13,9 @@ const logs = [];
 page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') logs.push(`${m.type()}: ${m.text()}`); });
 page.on('pageerror', (e) => logs.push(`pageerror: ${e.message}`));
 await page.goto(url);
-await page.waitForTimeout(2500);
+// espera a que Boot termine de cargar el kit (con varias pruebas a la vez tarda más)
+await page.waitForFunction(() => window.game?.scene.isActive('Tap') || window.game?.scene.isActive('Intro') || window.game?.scene.isActive('Title'), null, { timeout: 60000 });
+await page.waitForTimeout(400);
 const shot = async (n) => page.screenshot({ path: `${out}/${n}.png` });
 await shot('00_tap');
 await page.mouse.click(640, 360);

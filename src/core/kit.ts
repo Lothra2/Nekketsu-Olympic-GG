@@ -49,8 +49,21 @@ export interface Manifest {
   animales: Record<string, Animal>;
   objetos: Record<string, Objeto>;
   cabecitas: { archivo: string; celda: number; orden: string[] };
-  ui: { fuentes: Record<string, { png: string; fnt: string; alto: number }> };
-  audio: Record<string, string>;
+  ui: { fuentes: Record<string, { png: string; fnt: string; alto_linea: number; base: number }> };
+  audio: Partial<Record<'sfx' | 'musica' | 'ambientes', Record<string, { archivo: string; duracion: number; bucle?: boolean }>>>;
+  fx?: Record<string, Fx>;
+  /** lo que el kit todavía no trae (llega con un lote futuro) */
+  pendiente?: string[];
+}
+
+/** Un efecto del catálogo de PixelForja (lote F): hoja de cuadros con su ancla. */
+export interface Fx {
+  archivo: string; w: number; h: number; cuadros: number; columnas: number; fps: number; loop: boolean;
+  /** el pixel del cuadro que va sobre el punto del personaje (mirando a la derecha) */
+  ancla: Pt;
+  se_pega_a: string; capa: 'frente' | 'detras'; grupo: string;
+  /** en los que no se animan solos (la bola del Tama-wari): el nombre de cada cuadro */
+  estados?: string[];
 }
 
 let manifest: Manifest | null = null;
@@ -93,8 +106,21 @@ export function queueKit(scene: Phaser.Scene) {
   const armas = Object.values(m.objetos)[0];
   if (armas) scene.load.atlas('armas', KIT + armas.atlas.replace('.json', '.png'), KIT + armas.atlas);
   scene.load.image('cabecitas', KIT + m.cabecitas.archivo);
-  for (const [n, f] of Object.entries(m.ui.fuentes)) scene.load.bitmapFont(n, KIT + f.png, KIT + f.fnt);
-  for (const [n, a] of Object.entries(m.audio)) scene.load.audio(n, KIT + a);
+  // solo las fuentes (el manifiesto también trae notas en esa sección)
+  for (const [n, f] of Object.entries(m.ui.fuentes)) if (typeof f === 'object' && f?.png) scene.load.bitmapFont(n, KIT + f.png, KIT + f.fnt);
+  // sonidos con su nombre; ambientes y música con prefijo para que no choquen
+  for (const [n, a] of Object.entries(m.audio.sfx ?? {})) scene.load.audio(n, KIT + a.archivo);
+  for (const [n, a] of Object.entries(m.audio.ambientes ?? {})) scene.load.audio(`amb_${n}`, KIT + a.archivo);
+  for (const [n, a] of Object.entries(m.audio.musica ?? {})) scene.load.audio(`mus_${n}`, KIT + a.archivo);
+  for (const [id, e] of Object.entries(m.fx ?? {})) scene.load.spritesheet(`fx_${id}`, KIT + e.archivo, { frameWidth: e.w, frameHeight: e.h });
+}
+
+/** Crea una animación por efecto (los de estados, como la bola del Tama-wari, no se animan solos). */
+export function makeFxAnims(scene: Phaser.Scene) {
+  for (const [id, e] of Object.entries(kit().fx ?? {})) {
+    if (!e.fps || e.estados || scene.anims.exists(`fx_${id}`)) continue;
+    scene.anims.create({ key: `fx_${id}`, frames: scene.anims.generateFrameNumbers(`fx_${id}`, { start: 0, end: e.cuadros - 1 }), frameRate: e.fps, repeat: e.loop ? -1 : 0 });
+  }
 }
 
 /** Recorta los retratos (40 y 96) y las cabecitas en cuadros con nombre. */

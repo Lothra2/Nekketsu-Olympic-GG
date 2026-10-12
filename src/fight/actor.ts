@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Figura } from '../core/figura';
 import { kit, type Box, type Objeto } from '../core/kit';
+import { efecto } from '../core/fx';
 import { ATTACKS, DEPTH, FLOOR_TOP, GRAVITY, HP, PESO_DMG, SPEED, XMAX, XMIN, type AttackDef } from './defs';
 
 /** Lo que un atleta quiere hacer en este cuadro (de la palanca o de la máquina). */
@@ -33,6 +34,8 @@ export interface World {
   bloquea?(x: number, y: number, z: number): boolean;
   /** se cayó por un hueco */
   caida?(a: Actor): void;
+  /** cada paso de la animación (para el polvo y el sonido según el piso); si no está, suena piedra para la persona */
+  paso?(a: Actor): void;
   /** multiplicador del daño de un golpe (el nivel de dificultad) */
   multDaño?(from: Actor | null, victim: Actor): number;
 }
@@ -74,6 +77,8 @@ export class Actor {
   /** técnica especial en curso (la maneja la escena) */
   specialData: Record<string, number> = {};
   stars: Phaser.GameObjects.Graphics;
+  /** las estrellas de mareo del kit, mientras dura el mareo (undefined: el kit no las trae) */
+  private estrellas: Phaser.GameObjects.Sprite | null | undefined = null;
   readonly nombre: string;
 
   constructor(readonly w: World, readonly id: string, readonly team: 0 | 1, x: number, y: number, readonly human = false) {
@@ -197,7 +202,9 @@ export class Actor {
   }
 
   private footsteps(ev: { tipo: string }[]) {
-    if (this.human && ev.some((e) => e.tipo === 'paso')) this.w.sfx(`paso_piedra_${Math.floor(Math.random() * 3)}`, 0.25);
+    if (!ev.some((e) => e.tipo === 'paso')) return;
+    if (this.w.paso) this.w.paso(this);
+    else if (this.human) this.w.sfx(`paso_piedra_${Math.floor(Math.random() * 3)}`, 0.25);
   }
 
   private jump(it: Intent) {
@@ -589,11 +596,14 @@ export class Actor {
     const g = this.stars;
     g.clear();
     const on = this.st === 'dizzy' || (this.st === 'ko' && this.t < 4) || (this.st === 'down' && this.hp < this.maxHp * 0.3);
-    if (!on) return;
+    if (!on) { this.estrellas?.destroy(); this.estrellas = null; return; }
     const a = this.fig.anim;
     const head = a.data.cabeza?.[this.fig.rowIndex]?.[a.frame] ?? [0, -38];
     const hx = this.x + this.dir * head[0], hy = this.ft + this.y - this.z + head[1] - 8;
     g.setDepth(this.ft + this.y + 1);
+    // las estrellas y pajaritos del kit (lote F); si no están, las de siempre
+    if (this.estrellas === undefined || this.estrellas === null) this.estrellas = efecto(this.w.sc, 'estrellas_mareo', hx, hy + 6) ?? undefined;
+    if (this.estrellas) { this.estrellas.setPosition(Math.round(hx), Math.round(hy + 6)).setDepth(this.ft + this.y + 1); return; }
     const tt = this.w.sc.time.now / 260;
     for (let i = 0; i < 3; i++) {
       const ang = tt + (i * Math.PI * 2) / 3;

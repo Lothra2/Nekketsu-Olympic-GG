@@ -6,7 +6,9 @@ const ctx = await browser.newContext({ viewport: { width: 1180, height: 820 }, h
 const page = await ctx.newPage();
 page.on('pageerror', (e) => console.log('pageerror', e.message));
 await page.goto('http://localhost:5173/');
-await page.waitForTimeout(2500);
+// espera a que Boot termine de cargar el kit (con varias pruebas a la vez tarda más)
+await page.waitForFunction(() => window.game?.scene.isActive('Tap') || window.game?.scene.isActive('Intro') || window.game?.scene.isActive('Title'), null, { timeout: 60000 });
+await page.waitForTimeout(400);
 await page.touchscreen.tap(590, 410);
 await page.waitForTimeout(800);
 await page.evaluate(() => { const g = window.game; g.scene.getScenes(true).forEach((s) => g.scene.stop(s.scene.key)); g.scene.start('Select', { modo: '4v4' }); });

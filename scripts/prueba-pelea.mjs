@@ -14,7 +14,9 @@ const logs = [];
 page.on('pageerror', (e) => logs.push(`pageerror: ${e.message}`));
 page.on('console', (m) => { if (m.type() === 'error') logs.push(m.text()); });
 await page.goto(url);
-await page.waitForTimeout(2500);
+// espera a que Boot termine de cargar el kit (con varias pruebas a la vez tarda más)
+await page.waitForFunction(() => window.game?.scene.isActive('Tap') || window.game?.scene.isActive('Intro') || window.game?.scene.isActive('Title'), null, { timeout: 60000 });
+await page.waitForTimeout(400);
 await page.mouse.click(640, 360);
 await page.waitForTimeout(400);
 await page.evaluate(([j, r]) => { const g = window.game; g.scene.getScenes(true).forEach((s) => g.scene.stop(s.scene.key)); g.scene.start('Fight', { modo: '1v1', jugador: j, rival: r }); }, [jugador, rival]);

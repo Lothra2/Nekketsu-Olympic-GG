@@ -1,0 +1,31 @@
+{
+  "familia_gg": {
+    "nombre": "Familia GG",
+    "pais": "venezuela",
+    "colores": [
+      "#2a5bd7",
+      "#f2c230"
+    ],
+    "atletas": [
+      "rick",
+      "steph",
+      "sophie",
+      "alana"
+    ],
+    "mascota": "thor"
+  },
+  "instituto_nekketsu": {
+    "nombre": "Instituto Nekketsu",
+    "pais": "japon",
+    "colores": [
+      "#353c58",
+      "#d42a2a"
+    ],
+    "atletas": [
+      "kenji",
+      "ryu",
+      "goro",
+      "tetsu"
+    ]
+  }
+}

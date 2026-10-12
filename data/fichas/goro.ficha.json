@@ -1,0 +1,184 @@
+{
+  "format": "pixelforja.ficha",
+  "version": 3,
+  "name": "Goro Iwata",
+  "body": {
+    "skeleton": "human",
+    "proportions": {
+      "preset": "chibi",
+      "height": 1.2,
+      "build": 1.38,
+      "legs": 1,
+      "arms": 1.08,
+      "head": 1,
+      "shoulders": 1.25,
+      "hips": 1.08
+    }
+  },
+  "palette": {
+    "skin": [
+      "#663f2f",
+      "#c89377",
+      "#e6b994",
+      "#fad6af"
+    ],
+    "hair": [
+      "#020104",
+      "#07050d",
+      "#1f1c26",
+      "#3d3a44"
+    ],
+    "eyes": "#2a1c14",
+    "top": [
+      "#030416",
+      "#1b203b",
+      "#353c58",
+      "#47536c"
+    ],
+    "bottom": [
+      "#030416",
+      "#1b203b",
+      "#353c58",
+      "#47536c"
+    ],
+    "socks": [
+      "#010204",
+      "#0c0d14",
+      "#25262e",
+      "#44454d"
+    ],
+    "shoes": [
+      "#050100",
+      "#1f0f0b",
+      "#3a2a22",
+      "#584a40"
+    ],
+    "accessory": [
+      "#6e4602",
+      "#de9d02",
+      "#f2c94c",
+      "#fee894"
+    ]
+  },
+  "outfit": {
+    "sleeves": "none",
+    "bottom": "pants",
+    "socks": "low",
+    "shoes": "tenis",
+    "jacket": "#353c58",
+    "jacketCut": "gakuran",
+    "armband": "#d42a2a",
+    "jacketClosed": true,
+    "jacketSleeves": "none"
+  },
+  "face": {
+    "eyes": "round",
+    "mouth": "line",
+    "blush": false,
+    "brows": true,
+    "glasses": null
+  },
+  "heads": {},
+  "avatar": {
+    "version": 1,
+    "look": "stardew",
+    "skin": "#e6b994",
+    "face": {
+      "dome": 1.12,
+      "forehead": 0.58,
+      "eyeNose": 0.6,
+      "noseMouth": 0.3,
+      "mouthChin": 0.52,
+      "cheek": 0.97,
+      "jaw": 0.84,
+      "chin": 2.6,
+      "eyeX": 0.42,
+      "ears": 0.18,
+      "mouth": 0.3
+    },
+    "hair": {
+      "style": "corto",
+      "color": "#1f1c26",
+      "params": {
+        "top": 0.22,
+        "side": 0.08,
+        "back": 0.1,
+        "recede": 0,
+        "length": 1,
+        "fringe": 0,
+        "part": 0,
+        "sweep": 0.3,
+        "curl": 0,
+        "tail": "none"
+      }
+    },
+    "eyes": {
+      "style": "brillo",
+      "color": "#2a1c14"
+    },
+    "brows": {
+      "style": "normal"
+    },
+    "nose": "normal",
+    "beard": {
+      "style": "ninguna",
+      "color": "#1f1c26",
+      "gray": 0
+    },
+    "glasses": {
+      "style": "ninguno",
+      "color": "#1e1e24"
+    },
+    "kit": "lpc",
+    "lpc": {
+      "head": "male_plump",
+      "hair": "buzzcut",
+      "brows": "thick",
+      "nose": "big",
+      "beard": null,
+      "mustache": null,
+      "glasses": null
+    },
+    "body": {
+      "age": "adulto",
+      "build": "robusto",
+      "shape": "recto"
+    }
+  },
+  "headMode": "avatar",
+  "physics": {
+    "hairLag": 1
+  },
+  "movementProfile": "premium",
+  "cell": 64,
+  "wardrobe": {
+    "variants": {
+      "atleta": {
+        "label": "Atleta",
+        "outfit": {
+          "jacket": null,
+          "print": null,
+          "sleeves": "none",
+          "bottom": "shorts",
+          "socks": "low",
+          "shoes": "tenis"
+        }
+      },
+      "banador": {
+        "label": "Bañador",
+        "outfit": {
+          "jacket": null,
+          "print": null,
+          "sleeves": "none",
+          "bottom": "shorts",
+          "socks": "none",
+          "shoes": "descalzo"
+        }
+      }
+    },
+    "packs": {
+      "atletismo": "atleta",
+      "natacion": "banador"
+    }
+  }
+}

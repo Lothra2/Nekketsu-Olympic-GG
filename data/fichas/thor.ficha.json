@@ -1,0 +1,43 @@
+{
+  "format": "pixelforja.ficha",
+  "version": 3,
+  "name": "Thor",
+  "body": {
+    "skeleton": "quadruped",
+    "species": "boxer",
+    "size": 1
+  },
+  "palette": {
+    "fur": [
+      "#541902",
+      "#984a23",
+      "#b5713a",
+      "#c68f56"
+    ],
+    "fur2": [
+      "#6d6a64",
+      "#c3beb6",
+      "#f0ece4",
+      "#fcf8f1"
+    ],
+    "dark": [
+      "#180501",
+      "#3b2013",
+      "#573e2b",
+      "#6a5541"
+    ],
+    "eyes": "#3a2414",
+    "collar": [
+      "#18006f",
+      "#312fb3",
+      "#225fd4",
+      "#2180e3"
+    ]
+  },
+  "markings": {
+    "chest": true,
+    "paws": true,
+    "mask": true
+  },
+  "movementProfile": "premium"
+}

@@ -69,7 +69,7 @@ Se pidió para B1: el campo `cuerpo` (hurtbox sin implementos ni efectos), porqu
 - Una carrerita de jabalina en bucle (`javelin_run`) con la jabalina al hombro. Hoy el juego reusa los primeros 3 cuadros de `javelin`.
 - Un salto de valla aislado (`hurdle_clear`) sin la valla dibujada: `hurdles` trae su propia valla y el juego dibuja las suyas, que se tumban si las tocas.
 
-**Lote F** (PR #12), aprobado. Falta el merge a `main`. Revisado del lado del juego: con la configuración real del juego (5 packs, vestuario por pack, Thor, armas, fuentes, `"fx": true` y 21 sonidos) el kit sale en 20 s con 56 efectos y el audio en `audio/sfx/`; `silbato`, `pistola` y `marcha_nekketsu` vuelven como aviso en `manifest.pendiente`. Los efectos se ven muy bien. Lo que trae:
+**Lote F** (PR #12), aprobado y en `main`. Revisado del lado del juego: con la configuración real del juego (5 packs, vestuario por pack, Thor, armas, fuentes, `"fx": true` y 21 sonidos) el kit sale en 20 s con 56 efectos y el audio en `audio/sfx/`; `silbato`, `pistola` y `marcha_nekketsu` vuelven como aviso en `manifest.pendiente`. Los efectos se ven muy bien. Lo que trae:
 - Efectos con `"fx": true` en `kit.config.json`: salen `fx/<id>.png` y `manifest.fx`, cada uno con `ancla`, `se_pega_a`, `capa`, `cuadros`, `fps` y `columnas`.
 - Qué efecto va con qué evento (`paso` con polvo, `impacto` con chispa en el `punto`, `dizzy` con estrellas) y cómo cargarlos en Phaser: `docs/EFECTOS.md`.
 - Audio por configuración, por ejemplo `"audio": { "sfx": ["golpe", "esquiva", "bloqueo", "paso_tierra_0"], "ambientes": ["agua"] }`. Salen WAV en `audio/sfx/` y `audio/ambiente/`, con `manifest.audio.<sección>.<nombre> = { archivo, duracion, bucle? }`. Con esto el juego deja de generar el audio en su puente.
@@ -94,8 +94,17 @@ Se pidió para B1: el campo `cuerpo` (hurtbox sin implementos ni efectos), porqu
 - Las motos de los carriles 2 y 4 usan los cuadros de `motos_fondo` de `vida.png`, y quedan iguales al arte. Los objetos del piso siguen del kit (D1).
 - En la calle inundada, el juego tapa los pies con una franja de agua a la altura del `nivel`.
 - Cuando un atleta va encima de una caja o un muro, el juego lo dibuja delante de esa caja, para que no lo tape al pasar por arriba.
-- Todavía no usa `superficie.png` (los sonidos al pisar), `piso_mojado` (no hay aguacero aún) ni las partículas con `fx` (`onda_charco`, `petalo_buganvilla`): llegan cuando el kit pase a `kit.config.json` con los efectos del lote F.
+- Las partículas con `fx` (`onda_charco`, `petalo_buganvilla`) ya usan el efecto del kit.
+- Todavía no usa `superficie.png`: el sonido al pisar sale del tipo de piso del layout (agua, madera o piedra), que da lo mismo en este tramo. Tampoco `piso_mojado`, porque no hay aguacero aún.
 - Pedido chico para E1: el muro alto se ve como una columna de ladrillo. Conviene que el arte muestre el portón abierto adelante (y de 92 a 130), porque es el camino para rodearlo y hoy no se nota.
+
+**Kit del juego por `kit.config.json`, con I y F en `main`:**
+- El puente `scripts/kit.ts` ya no existe. `npm run kit` corre `kit-a-medida` del submódulo con `kit.config.json` en la raíz del juego.
+- Las fichas y los equipos son del juego: `data/fichas/*.ficha.json` (las 8 de la Familia GG y el Instituto, más Thor, con vestuario `atleta` y `banador`) y `data/equipos.json`. Salieron de `docs/ejemplos/nekketsu/` de PixelForja.
+- Se comparó el arte de los personajes, objetos e interfaz con el del puente: los 54 PNG son iguales pixel a pixel.
+- Efectos en el juego: polvo al correr y al caer, chispa del golpe según el daño, estrellas de mareo, aura Nekketsu en el especial, chapuzón al clavarse y al caer al canal, estela y ondas en natación, salpicaduras en la calle inundada y brillo de récord en jabalina.
+- Audio del kit: los sonidos de pelea, pasos por tipo de piso (`paso_piedra`, `paso_agua`, `paso_madera`, 3 variantes cada uno), `thor_rescate` en el especial de Alana y el ambiente `agua` en natación.
+- Pedidos ya en el config y esperando a H1: `silbato`, `pistola` y `marcha_nekketsu`. El juego no se rompe si no están.
 
 ## Insumos que pone el juego
 
@@ -103,8 +112,8 @@ Lo que PixelForja lee de este repo y todavía no existe. Cada uno lo produce una
 
 | Insumo | Ruta | Lo necesita | Lo produce | Estado |
 |---|---|---|---|---|
-| Configuración del kit | `kit.config.json` | I, para generar el kit real | Juego F0 (versión inicial). El lote I puede arrancar antes con su propio ejemplo en `docs/ejemplos/nekketsu/` | pendiente |
-| Equipos | `data/teams.json` | I. El lote C no lo necesita: las tablas de equipos están en el pedido | Juego F0 | pendiente |
+| Configuración del kit | `kit.config.json` | I, para generar el kit real | Juego F0 | listo, con fichas en `data/fichas/` |
+| Equipos | `data/equipos.json` | I | Juego F0 | listo |
 | Layout del tramo 1 de Saigón | `data/stages/saigon_hem.layout.json` | E1 | Juego F3 (gris jugable) | listo, jugado en gris |
 | Layout de la azotea final | `data/stages/caracas_azotea.layout.json` | E3 | Juego F3 | pendiente |
 | Resto de layouts | `data/stages/*.layout.json` | E2 a E6 | Juego F6 a F11 | pendiente |

@@ -9,8 +9,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "kit": "tools/pixel_forja/node_modules/.bin/tsx scripts/kit.ts",
-    "kit:preparar": "git submodule update --init && cd tools/pixel_forja && npm ci",
+    "kit": "tools/pixel_forja/node_modules/.bin/tsx tools/pixel_forja/scripts/kit-a-medida.ts public/assets/kit --config kit.config.json",
     "escenarios": "tools/pixel_forja/node_modules/.bin/tsx scripts/escenarios.ts"
   },
   "dependencies": {

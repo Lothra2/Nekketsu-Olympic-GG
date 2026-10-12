@@ -43,12 +43,15 @@ npm run build        # dist/, listo para Netlify
 
 ## Regenerar el kit de PixelForja
 
-El kit ya viene en `public/assets/kit/` (se commitea a propósito). Para regenerarlo:
+El kit ya viene en `public/assets/kit/` (se commitea a propósito). Lo describe `kit.config.json` (el kit a medida de PixelForja): los packs de animaciones del juego, las fichas en `data/fichas/` (con la ropa de pista y el traje de baño), los equipos en `data/equipos.json`, las armas, Thor, las fuentes con vietnamita, los 56 efectos y los sonidos. Para regenerarlo:
 
 ```bash
-npm run kit:preparar   # submódulo tools/pixel_forja y sus dependencias
+git submodule update --init && (cd tools/pixel_forja && npm install)   # la primera vez
 npm run kit            # escribe public/assets/kit
+npm run escenarios     # escenarios oblicuos desde data/stages (cuando PixelForja los trae en main)
 ```
+
+Lo que PixelForja todavía no trae (por ejemplo `silbato` y `marcha_nekketsu`, del lote H) queda en `manifest.pendiente` y aparece solo al regenerar cuando llegue.
 
 ## Pruebas con capturas
 
