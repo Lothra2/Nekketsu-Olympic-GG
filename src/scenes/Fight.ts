@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { Actor, Item, NOTHING, type Intent, type World } from '../fight/actor';
+import { Actor, HUECO, Item, NOTHING, type Intent, type World } from '../fight/actor';
 import { Brain } from '../fight/brain';
 import { DEPTH, FLOOR_TOP, XMAX, XMIN, type AttackDef } from '../fight/defs';
 import { Figura } from '../core/figura';
@@ -11,6 +11,7 @@ import { txt, flash, speedLines } from '../core/ui';
 import { FAMILIA, INSTITUTO, INFO } from './Select';
 import type { Gira } from '../events/base';
 import { Coach, type Paso } from '../core/coach';
+import azotea from '../../data/stages/caracas_azotea.layout.json';
 
 /** acercamiento de la cámara en la pelea: más cerca en 1 contra 1 */
 const ZOOMS: Record<string, number> = { '1v1': 1.75, '4v4': 1.45 };
@@ -23,6 +24,15 @@ const TECNICA: Record<string, 'mach' | 'huracan' | 'chilena' | 'thor' | 'dragon'
 };
 
 interface FightData { modo: string; jugador: string; rival: string; gira?: boolean; practica?: boolean }
+
+/** El borde sin baranda: donde empieza el hueco del layout de la azotea. */
+const BORDE = azotea.huecos[0].x0;
+/** hasta dónde llega el borde cuando la azotea se achica */
+const BORDE_MIN = 420;
+/** cada cuánto cae algo pesado del cielo, y cuándo se empieza a achicar */
+const CADA_GRANDE = 30;
+const ACHICA = 90;
+const PESADOS = ['llanta', 'pote_basura', 'silla_plastica'];
 
 export class Fight extends Phaser.Scene implements World {
   actors: Actor[] = [];
@@ -56,6 +66,18 @@ export class Fight extends Phaser.Scene implements World {
   private camLock = false;
   private zoom = 1.45;
   private get camY() { return 360 - 180 / this.zoom; }
+  /** Kachinuki: el borde, el reloj, lo que cae del cielo y los que se cayeron */
+  limites?: { xmin: number; xmax: number; depth: number };
+  private borde = BORDE;
+  private reloj = 0;
+  private grandeT = CADA_GRANDE;
+  private achicando = false;
+  private derrumbe = 0;
+  private caidos = new Set<Actor>();
+  private rescates = 0;
+  private bordeG: Phaser.GameObjects.Graphics | null = null;
+  private relojTxt: Phaser.GameObjects.BitmapText | null = null;
+  private pesado: { it: Item; sombra: Phaser.GameObjects.Ellipse } | null = null;
 
   constructor() { super('Fight'); }
 
@@ -74,12 +96,58 @@ export class Fight extends Phaser.Scene implements World {
     this.endChoice = null;
     this.thorRun = null;
     this.dropT = 9;
+    this.borde = BORDE;
+    this.reloj = 0;
+    this.grandeT = CADA_GRANDE;
+    this.achicando = false;
+    this.derrumbe = 0;
+    this.caidos.clear();
+    this.rescates = ajustes().rescates;
+    this.pesado = null;
+    // entrenando no hay borde: el saco y tú no se caen
+    this.limites = this.data0.practica ? undefined : { xmin: XMIN, xmax: 700, depth: DEPTH };
   }
 
   get sc(): Phaser.Scene { return this; }
 
   /** Tu equipo pega más según el nivel. */
   multDaño(from: Actor | null) { return from?.team === 0 ? ajustes().daño : 1; }
+
+  /** Pasado el borde no hay piso: quien vuela hasta ahí se cae. */
+  suelo(x: number) { return this.limites && x >= this.borde ? HUECO : 0; }
+
+  /** Caminando no se sale de la azotea: solo te sacan a golpes (o saltando como loco). */
+  bloquea(x: number, _y: number, z: number) { return !!this.limites && x >= this.borde - 2 && z <= 0.5; }
+
+  /** Se cayó: Thor lo salva si le quedan rescates (solo a la persona); si no, queda fuera. */
+  caida(a: Actor) {
+    if (this.caidos.has(a) || !a.alive) return;
+    if (a.human && this.rescates > 0) {
+      this.rescates--;
+      a.x = this.borde - 70; a.z = 0; a.vx = 0; a.vy = 0; a.vz = 0;
+      a.hp = Math.max(1, Math.round(a.hp - a.maxHp * 0.15));
+      a.setSt('idle', 'idle');
+      a.invul = 1.6;
+      this.thorFan?.set('bark', true);
+      this.sfx('ladrido', 0.6);
+      flash(this, 120);
+      this.letrero(a, '¡THOR TE SALVÓ!', 0xffe080);
+      return;
+    }
+    this.caidos.add(a);
+    const fig = a.fig;
+    fig.setDepth(-7.9);
+    chip.blip(1320, 0.7, 'sq50', 0.14, 110);
+    this.tweens.add({ targets: fig, y: fig.y + 220, angle: a.left ? -200 : 200, duration: 900, ease: 'Quad.in', onComplete: () => fig.setVisible(false) });
+    this.letrero(a, '¡FUERA!', 0xff8080);
+    this.shake(160, 0.008);
+    a.fuera();
+  }
+
+  private letrero(a: Actor, s: string, color: number) {
+    const t = txt(this, Math.min(a.x, this.borde - 40), FLOOR_TOP + a.y - 64, s, 'fuente_titulo', 1).setTint(color).setDepth(6000);
+    this.tweens.add({ targets: t, y: t.y - 16, alpha: 0, delay: 500, duration: 600, onComplete: () => t.destroy() });
+  }
 
   create() {
     this.cameras.main.fadeIn(250);
@@ -95,9 +163,12 @@ export class Fight extends Phaser.Scene implements World {
     this.add.image(320, 280, 'bg_azotea').setDepth(-9);
     this.neon('AREPERA LA CHAMA', 506, 132, 0xff4fa0);
     this.neon('CARACAS', 70, 150, 0x40e0ff);
-    this.thorFan = new Figura(this, 606, FLOOR_TOP - 2, 'thor', 'sit').setDepth(FLOOR_TOP - 2);
-    this.thorFan.left = true;
+    // Thor mira desde el fondo, lejos del borde
+    const npc = azotea.entidades.find((e) => e.tipo === 'npc');
+    this.thorFan = new Figura(this, npc?.x ?? 40, FLOOR_TOP - 2, 'thor', 'sit').setDepth(FLOOR_TOP - 2);
     this.thorFan.row = 'down_right';
+    this.bordeG = this.data0.practica ? null : this.add.graphics().setDepth(-8);
+    this.dibujarBorde();
 
     this.sparks = this.add.particles(0, 0, 'px', { speed: { min: 60, max: 180 }, lifespan: 260, scale: { start: 0.9, end: 0 }, tint: [0xffffff, 0xffe040, 0xffa020], emitting: false }).setDepth(5000);
     this.dusts = this.add.particles(0, 0, 'px', { speedX: { min: -40, max: 40 }, speedY: { min: -30, max: -6 }, lifespan: 380, scale: { start: 0.8, end: 0 }, tint: 0xb0a8b8, alpha: { start: 0.7, end: 0 }, emitting: false }).setDepth(4999);
@@ -281,6 +352,7 @@ export class Fight extends Phaser.Scene implements World {
     if (playing) {
       this.dropT -= dt;
       if (this.dropT <= 0) { this.dropT = 9 + Math.random() * 5; this.skyDrop(); }
+      if (this.limites) this.kachinuki(dt);
       if (this.slow <= 0) this.checkEnd();
     }
     this.renderAll();
@@ -288,7 +360,8 @@ export class Fight extends Phaser.Scene implements World {
   }
 
   private renderAll() {
-    for (const a of this.actors) a.render();
+    // los que se cayeron de la azotea ya no se dibujan donde estaban: van cayendo solos
+    for (const a of this.actors) if (!this.caidos.has(a)) a.render();
     for (const i of this.items) i.render();
     this.follow();
     // lo que no es marcador no lo dibuja la cámara del marcador
@@ -533,10 +606,94 @@ export class Fight extends Phaser.Scene implements World {
 
   // ------------------------------------------------------------------ escenario
 
+  /** Las reglas de la final: el reloj, lo pesado que cae cada 30 s y la azotea que se achica a los 90 s. */
+  private kachinuki(dt: number) {
+    this.reloj += dt;
+    const m = Math.floor(this.reloj / 60), sg = Math.floor(this.reloj % 60);
+    this.relojTxt?.setText(`${m}:${String(sg).padStart(2, '0')}`).setTint(this.reloj > ACHICA - 10 && !this.achicando && Math.floor(this.reloj * 3) % 2 ? 0xff6060 : 0xffffff);
+    this.grandeT -= dt;
+    if (this.grandeT <= 0 && !this.pesado) { this.grandeT = CADA_GRANDE; this.caePesado(); }
+    if (this.pesado) this.tickPesado();
+    if (!this.achicando && this.reloj >= ACHICA) {
+      this.achicando = true;
+      void this.banner('¡LA AZOTEA SE ACHICA!', 'fuente_titulo', 2, 1200);
+      this.shake(600, 0.006);
+      chip.blip(110, 1.2, 'saw', 0.18, 55);
+    }
+    if (this.achicando && this.borde > BORDE_MIN) {
+      this.borde = Math.max(BORDE_MIN, this.borde - 5 * dt);
+      this.derrumbe -= dt;
+      if (this.derrumbe <= 0) {
+        this.derrumbe = 0.35;
+        efecto(this, 'polvo_caer_grande', this.borde + 4, FLOOR_TOP + Math.random() * DEPTH, { depth: FLOOR_TOP + DEPTH });
+        if (Math.random() < 0.4) this.sfx('romper', 0.15);
+      }
+      this.dibujarBorde();
+      // quien quedó del otro lado del borde, se va con el pedazo que se cae
+      for (const a of this.actors) if (a.alive && !this.caidos.has(a) && a.st !== 'lifted' && a.x > this.borde + 6) { a.z = -61; this.caida(a); }
+    }
+  }
+
+  /** Algo pesado que cae del cielo: primero la sombra que crece y titila, después el golpe. */
+  private caePesado() {
+    const objetivo = Math.random() < 0.6 ? this.player : this.actors.filter((a) => a.alive)[Math.floor(Math.random() * this.actors.length)] ?? this.player;
+    const x = Phaser.Math.Clamp(objetivo.x + Phaser.Math.Between(-30, 30), XMIN + 30, this.borde - 30);
+    const y = Phaser.Math.Clamp(objetivo.y + Phaser.Math.Between(-10, 10), 8, DEPTH - 8);
+    // la sombra crece y un aro rojo titila: ahí va a caer
+    const sombra = this.add.ellipse(x, FLOOR_TOP + y, 12, 5, 0x000000, 0.55).setDepth(FLOOR_TOP + y - 1);
+    const aro = this.add.ellipse(x, FLOOR_TOP + y, 44, 16).setStrokeStyle(2, 0xff4040).setDepth(FLOOR_TOP + y - 0.9);
+    sombra.once('destroy', () => aro.destroy());
+    this.tweens.add({ targets: sombra, scaleX: 3.6, scaleY: 3.6, duration: 1500 });
+    this.tweens.add({ targets: aro, alpha: 0.15, duration: 130, yoyo: true, repeat: -1 });
+    chip.blip(1760, 1.4, 'sq25', 0.1, 440);
+    const aviso = this.uiAdd(txt(this, 320, 70, '¡CUIDADO ARRIBA!', 'fuente_ui', 2).setDepth(8100).setTint(0xff6060));
+    this.tweens.add({ targets: aviso, alpha: 0.2, duration: 160, yoyo: true, repeat: 4, onComplete: () => aviso.destroy() });
+    this.time.delayedCall(800, () => {
+      if (this.phase !== 'play') { sombra.destroy(); return; }
+      const it = new Item(this, PESADOS[Math.floor(Math.random() * PESADOS.length)], x, y, 420);
+      it.vz = -120;
+      this.items.push(it);
+      this.pesado = { it, sombra };
+    });
+  }
+
+  /** Cuando lo pesado toca el piso: tumba a quien esté debajo, del equipo que sea. */
+  private tickPesado() {
+    const p = this.pesado!;
+    if (p.it.z > 6) return;
+    this.pesado = null;
+    p.sombra.destroy();
+    this.shake(260, 0.016);
+    this.sfx('jefe_pisoton', 0.6);
+    efecto(this, 'polvo_caer_grande', p.it.x, FLOOR_TOP + p.it.y, { depth: FLOOR_TOP + p.it.y + 1 });
+    for (const a of this.actors) {
+      if (!a.alive || !a.canBeHit() || Math.abs(a.x - p.it.x) > 24 || Math.abs(a.y - p.it.y) > 12) continue;
+      a.takeHit(null, { dmg: 14, kd: true, push: 90, launch: 180 }, a.x < p.it.x ? -1 : 1);
+      this.spark(a.x, a.y, 30, true);
+    }
+  }
+
+  /** El vacío después del borde, con la franja de peligro y el letrero. */
+  private dibujarBorde() {
+    const g = this.bordeG;
+    if (!g) return;
+    const b = Math.round(this.borde);
+    g.clear();
+    g.fillStyle(0x07070f).fillRect(b, FLOOR_TOP - 6, 640 - b + 40, 360 - FLOOR_TOP + 6);
+    // las luces de la ciudad allá abajo
+    for (let i = 0; i < 40; i++) {
+      const x = b + 6 + ((i * 53) % Math.max(10, 640 - b)), y = FLOOR_TOP + 20 + ((i * 37) % 90);
+      if (x < 640) g.fillStyle(i % 3 ? 0xf2c230 : 0x6ad0ff, 0.6).fillRect(x, y, 2, 2);
+    }
+    // el filo con rayas amarillas y negras
+    for (let y = FLOOR_TOP - 6; y < FLOOR_TOP + DEPTH + 10; y += 6) g.fillStyle(Math.floor(y / 6) % 2 ? 0xf2c230 : 0x101010).fillRect(b - 3, y, 3, 6);
+    g.fillStyle(0x5a5a68).fillRect(b - 6, FLOOR_TOP + DEPTH + 4, 6, 40);
+  }
+
   private skyDrop() {
     if (this.items.filter((i) => i.st === 'floor').length >= 5) return;
     const kind = ARMAS_PISO[Math.floor(Math.random() * ARMAS_PISO.length)];
-    const it = new Item(this, kind, XMIN + 40 + Math.random() * (XMAX - XMIN - 80), 8 + Math.random() * (DEPTH - 16), 300);
+    const it = new Item(this, kind, XMIN + 40 + Math.random() * (Math.min(XMAX, this.borde) - XMIN - 80), 8 + Math.random() * (DEPTH - 16), 300);
     it.vz = -60;
     this.items.push(it);
     chip.blip(1400, 0.5, 'sq12', 0.06, 300);
@@ -551,6 +708,10 @@ export class Fight extends Phaser.Scene implements World {
   // ------------------------------------------------------------------ marcador
 
   private buildHud() {
+    if (this.limites) {
+      this.relojTxt = this.uiAdd(txt(this, 320, 12, '0:00', 'fuente_ui', 2).setDepth(8001));
+      this.hudObjs.push(this.relojTxt);
+    } else this.relojTxt = null;
     const teams = [0, 1].map((tm) => this.actors.filter((a) => a.team === tm));
     teams.forEach((list, tm) => {
       const right = tm === 1;

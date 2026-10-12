@@ -24,7 +24,7 @@ if (validar) args.splice(vi, 1);
 const solo = args;
 const api = join(forja, 'src', 'engine', 'world', 'oblique', 'index.ts');
 if (!existsSync(api)) throw new Error(`Esta copia de PixelForja no tiene escenarios oblicuos todavía (lote E1): ${forja}`);
-const { generarEscenario } = await import(pathToFileURL(api).href);
+const { generarEscenario, validateLayout } = await import(pathToFileURL(api).href);
 
 // los dos equipos usan el contorno del kit; la prueba de legibilidad mide contra ese color
 const CONTORNOS = ['#1e1418'];
@@ -39,7 +39,18 @@ for (const f of readdirSync(stages).filter((n) => n.endsWith('.layout.json'))) {
   if (solo.length ? !solo.includes(id) : !validar && !index[id]) continue;
   const L = JSON.parse(readFileSync(join(stages, f), 'utf8'));
   const t0 = Date.now();
-  const r = generarEscenario(L, { contornos: CONTORNOS });
+  let r;
+  try {
+    r = generarEscenario(L, { contornos: CONTORNOS });
+  } catch (e) {
+    // un país cuyo estilo PixelForja todavía no pinta: se revisa la geometría y el arte espera su lote
+    const v = validateLayout(L);
+    for (const a of v.avisos) console.log(`  aviso ${id}: ${a}`);
+    if (v.errores.length) { fallas++; console.error(`  ${id}: NO SALE\n${v.errores.map((x: string) => `    ${x}`).join('\n')}`); continue; }
+    console.log(`  ${id}: la geometría valida; el arte espera (${(e as Error).message})`);
+    if (!validar) fallas++;
+    continue;
+  }
   for (const a of r.avisos) console.log(`  aviso ${id}: ${a}`);
   if (!r.ok) {
     fallas++;

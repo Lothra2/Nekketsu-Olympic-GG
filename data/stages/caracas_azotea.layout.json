@@ -1,0 +1,125 @@
+{
+ "id": "caracas_azotea",
+ "pais": "venezuela",
+ "prueba": "kachinuki",
+ "nombre": "AZOTEA DE PARQUE CENTRAL",
+ "largo": 640,
+ "franja": {
+  "atras": 246,
+  "adelante": 344
+ },
+ "hora": "noche",
+ "clima": [
+  "despejado"
+ ],
+ "paralaje": {
+  "cielo": "auto",
+  "lejos": "avila_noche",
+  "cerca": "torres_parque_central"
+ },
+ "piso": [
+  {
+   "x0": 0,
+   "x1": 640,
+   "tipo": "baldosa",
+   "nombre": "azotea"
+  }
+ ],
+ "huecos": [
+  {
+   "x0": 618,
+   "x1": 640,
+   "y0": 0,
+   "y1": 98,
+   "caida": "vacio",
+   "nombre": "borde sin baranda",
+   "nota": "quien sale volando por aquí queda fuera. A los 90 s el borde avanza hasta x 420: la azotea se achica"
+  }
+ ],
+ "plataformas": [],
+ "muros": [],
+ "escaleras": [],
+ "postes": [
+  {
+   "x": 120,
+   "y": 2,
+   "alto": 120,
+   "tipo": "antena"
+  },
+  {
+   "x": 460,
+   "y": 2,
+   "alto": 96,
+   "tipo": "antena"
+  }
+ ],
+ "agua": [],
+ "bajo": [],
+ "solidos": [],
+ "carriles": [
+  {
+   "y": 20
+  },
+  {
+   "y": 42
+  },
+  {
+   "y": 64
+  },
+  {
+   "y": 86
+  }
+ ],
+ "entidades": [
+  {
+   "tipo": "npc",
+   "npc": "thor",
+   "x": 40,
+   "y": 2,
+   "nota": "Thor mira la pelea sentado al fondo"
+  },
+  {
+   "tipo": "objeto",
+   "objeto": "chancleta",
+   "x": 260,
+   "y": 40
+  },
+  {
+   "tipo": "objeto",
+   "objeto": "tubo",
+   "x": 380,
+   "y": 70
+  },
+  {
+   "tipo": "objeto",
+   "objeto": "pote_basura",
+   "x": 300,
+   "y": 20
+  },
+  {
+   "tipo": "objeto",
+   "objeto": "silla_plastica",
+   "x": 420,
+   "y": 60
+  }
+ ],
+ "ranuras_deco": [
+  {
+   "x0": 0,
+   "x1": 640,
+   "capa": "lejos",
+   "tema": "avila_de_noche"
+  },
+  {
+   "x0": 380,
+   "x1": 640,
+   "capa": "cerca",
+   "tema": "letreros_neon"
+  }
+ ],
+ "vida": [
+  "letreros_neon",
+  "luces_ciudad",
+  "avion_lejos"
+ ]
+}

@@ -27,20 +27,22 @@ export interface Ajustes {
   sinNulo: boolean;
   /** natación: tirarse antes del ¡YA! no castiga */
   sinFalso: boolean;
+  /** Kachinuki: cuántas veces Thor te salva si te caes de la azotea */
+  rescates: number;
 }
 
 export const NIVELES: Record<Nivel, Ajustes> = {
   paseo: {
     nombre: 'PASEO', desc: 'LA MÁQUINA VA SUAVE Y TÚ AGUANTAS MÁS. PARA EMPEZAR',
-    cpuVel: 0.74, cpuAgresion: 0.4, vida: 2, daño: 1.5, ayuda: 1, tropiezo: 0.75, sinNulo: true, sinFalso: true,
+    cpuVel: 0.74, cpuAgresion: 0.4, vida: 2, daño: 1.5, ayuda: 1, tropiezo: 0.75, sinNulo: true, sinFalso: true, rescates: 99,
   },
   normal: {
     nombre: 'NORMAL', desc: 'PAREJO, CON UNA AYUDITA SI TE QUEDAS ATRÁS',
-    cpuVel: 0.9, cpuAgresion: 0.75, vida: 1.25, daño: 1.15, ayuda: 0.6, tropiezo: 0.45, sinNulo: false, sinFalso: false,
+    cpuVel: 0.9, cpuAgresion: 0.75, vida: 1.25, daño: 1.15, ayuda: 0.6, tropiezo: 0.45, sinNulo: false, sinFalso: false, rescates: 1,
   },
   nekketsu: {
     nombre: 'NEKKETSU', desc: 'SIN AYUDA. COMO EN LA NES',
-    cpuVel: 1, cpuAgresion: 1, vida: 1, daño: 1, ayuda: 0, tropiezo: 0.35, sinNulo: false, sinFalso: false,
+    cpuVel: 1, cpuAgresion: 1, vida: 1, daño: 1, ayuda: 0, tropiezo: 0.35, sinNulo: false, sinFalso: false, rescates: 0,
   },
 };
 

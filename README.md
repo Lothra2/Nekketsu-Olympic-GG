@@ -20,7 +20,11 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
   - *Vallas del Café* (Eje Cafetero): alterna puño y patada para correr, salta las vallas, codazo con ★. Si tocas una valla, se cae y te frena.
   - *Natación Hạ Long* (bahía de Hạ Long): sales con salto, si te tiras antes del ¡YA! te quedas un segundo. Alterna puño y patada para nadar, ★ es la patada de delfín.
   - *Jabalina Llanera* (Llanos de Apure): carrerita alternando botones, mantén salto para el ángulo y suelta para lanzar. Si pisas la raya es nulo. Dos intentos.
-- **Pelea callejera** en una azotea de Caracas de noche, en 1 contra 1 o 4 contra 4: Familia GG contra el Instituto Nekketsu.
+- **Kachinuki Caracas**, la pelea final en una azotea de Parque Central de noche, en 1 contra 1 o 4 contra 4: Familia GG contra el Instituto Nekketsu.
+  - Un borde sin baranda: caminando no te sales, pero si te tumban o te lanzan por ahí, quedas fuera.
+  - Cada 30 s cae algo pesado del cielo. Antes aparece su sombra con un aro rojo.
+  - A los 1:30 la azotea se achica: el borde avanza hasta la mitad.
+  - Thor te salva si te caes: siempre en Paseo, una vez en Normal y nunca en Nekketsu.
   - Golpes con combos, patadas, patada voladora corriendo, salto con patada.
   - Levantar al rival caído, caminar con él y lanzarlo contra los demás.
   - Armas del piso: chancleta (vuelve girando), tubo, silla plástica, pote, coco, paraguas, escoba. Caen más del cielo.
@@ -69,6 +73,7 @@ Con el servidor corriendo:
 ```bash
 node scripts/capturas.mjs http://localhost:5173/ capturas          # intro, título, selección y pelea
 node scripts/prueba-pelea.mjs http://localhost:5173/ capturas rick kenji   # combo, levantar, lanzar, técnica, chancleta
+node scripts/prueba-kachinuki.mjs http://localhost:5173/ capturas/kachinuki   # el borde, el rescate de Thor, lo que cae del cielo y la azotea que se achica
 node scripts/prueba-pruebas.mjs http://localhost:5173/ capturas/pruebas  # vallas, natación, jabalina y medallero
 node scripts/prueba-entrenamiento.mjs http://localhost:5173/ capturas/entrenamiento  # completa los 4 entrenamientos
 node scripts/prueba-cross.mjs http://localhost:5173/ capturas/cross     # los cinco tramos con piloto automático, de punta a punta

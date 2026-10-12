@@ -149,6 +149,14 @@ Para las fichas de arte de E2:
   - Jacintos flotando y frutas regadas en el piso. Pueden ir en `vida` o como efecto.
   - Una brazada de Cross, para nadar en el río sin salir del pack de pelea. Hoy el juego tapa medio cuerpo con agua.
 
+**Layout de `caracas_azotea`, listo para E3.** Es la azotea del Kachinuki, ya con sus reglas en el juego:
+- Largo 640. La franja va de 246 a 344 (98 de fondo), que es la que usa la pelea desde el principio. Es de noche, con El Ávila de fondo.
+- El borde sin baranda es el hueco `vacio` de x 618 a 640. Caminando nadie se sale. Quien sale volando o lanzado por ahí queda fuera.
+- A los 90 s la azotea se achica: el borde avanza hasta x 420. El juego pinta el vacío, la franja amarilla y negra del filo y el polvo con `polvo_caer_grande`. Si el arte trae un filo que se desmorona, mejor.
+- Cada 30 s cae algo pesado (llanta, pote, silla) con su sombra de aviso. Para el arte, se puede pensar en un efecto de "algo que cae" o en una sombra propia.
+- Thor mira sentado al fondo, en x 40 (`npc`).
+- `npm run escenarios -- --validar`: la geometría valida. El arte espera el estilo `venezuela`, que PixelForja todavía no pinta.
+
 **G1 resto y H1** (PR #13), esperando la revisión de Rick. Cuando entre a `main`, el juego pide en `kit.config.json`:
 - `ui.logo` y `ui.interfaz`: logo animado, diálogo 9-slice, paneles por equipo, barras, banners, controles táctiles, minimapa y números.
 - El audio de H1: `silbato`, `pistola`, `marcha_nekketsu` y el resto. Con eso `manifest.pendiente` queda vacío.
@@ -172,7 +180,7 @@ Lo que PixelForja lee de este repo y todavía no existe. Cada uno lo produce una
 | Configuración del kit | `kit.config.json` | I, para generar el kit real | Juego F0 | listo, con fichas en `data/fichas/` |
 | Equipos | `data/equipos.json` | I | Juego F0 | listo |
 | Layout del tramo 1 de Saigón | `data/stages/saigon_hem.layout.json` | E1 | Juego F3 (gris jugable) | listo, jugado en gris |
-| Layout de la azotea final | `data/stages/caracas_azotea.layout.json` | E3 | Juego F3 | pendiente |
+| Layout de la azotea final | `data/stages/caracas_azotea.layout.json` | E3 | Juego F7 | listo, jugado en gris |
 | Layouts del Cross Country completo | `data/stages/saigon_benthanh`, `saigon_rio`, `saigon_azoteas`, `saigon_estadio` (`.layout.json`) | E2 | Juego F6 | listos, jugados en gris |
 | Resto de layouts | `data/stages/*.layout.json` | E3 a E6 | Juego F7 a F11 | pendiente |
 | Textos | `data/dialogs/*.json` | G1 | Juego F5 | pendiente |

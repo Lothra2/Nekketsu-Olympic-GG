@@ -399,6 +399,13 @@ export class Actor {
     this.w.onKO(this);
   }
 
+  /** Fuera de combate sin pasar por el piso: se cayó de la azotea. */
+  fuera() {
+    this.hp = 0;
+    this.dropAll();
+    this.ko();
+  }
+
   private downTick(_dt: number) {
     if (this.hp <= 0) { this.ko(); return; }
     if (this.t > 0.95) {
