@@ -12,12 +12,16 @@ export interface Competidor { id: string; team: 0 | 1; human: boolean }
 /** Estado de la Olimpiada Express (vive en el registro de Phaser). */
 export interface Gira { jugador: string; idx: number; puntos: [number, number]; resultados: { prueba: string; podio: string[] }[] }
 export const PRUEBAS_GIRA = [
+  { scene: 'CrossCountry', nombre: 'CROSS COUNTRY', lugar: 'HẺM DE SAIGÓN, VIETNAM' },
   { scene: 'Vallas', nombre: 'VALLAS DEL CAFÉ', lugar: 'EJE CAFETERO, COLOMBIA' },
   { scene: 'Natacion', nombre: 'NATACIÓN HẠ LONG', lugar: 'BAHÍA DE HẠ LONG, VIETNAM' },
   { scene: 'Jabalina', nombre: 'JABALINA LLANERA', lugar: 'LLANOS DE APURE, VENEZUELA' },
   { scene: 'Fight', nombre: 'KACHINUKI FINAL', lugar: 'AZOTEA DE CARACAS, VENEZUELA' },
 ];
 export const PUNTOS = [10, 6, 4, 2];
+
+/** Los datos de una prueba de la gira por su escena. */
+export const prueba = (scene: string) => PRUEBAS_GIRA.find((p) => p.scene === scene)!;
 
 /** Los 4 de una prueba individual: tú, un compañero de la familia y dos del Instituto. */
 export function lineup(jugador: string): Competidor[] {

@@ -15,12 +15,14 @@ const MENUS: Record<string, { id: string; label: string }[]> = {
     { id: 'intro', label: 'VER LA INTRO' },
   ],
   pruebas: [
+    { id: 'CrossCountry', label: 'CROSS COUNTRY' },
     { id: 'Vallas', label: 'VALLAS DEL CAFÉ' },
     { id: 'Natacion', label: 'NATACIÓN HẠ LONG' },
     { id: 'Jabalina', label: 'JABALINA LLANERA' },
     { id: '<', label: 'ATRÁS' },
   ],
   entrenar: [
+    { id: 'practica:CrossCountry', label: 'CROSS COUNTRY' },
     { id: 'practica:Vallas', label: 'VALLAS' },
     { id: 'practica:Natacion', label: 'NATACIÓN' },
     { id: 'practica:Jabalina', label: 'JABALINA' },

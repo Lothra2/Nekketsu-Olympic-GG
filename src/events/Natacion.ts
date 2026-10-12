@@ -3,7 +3,7 @@ import { Figura } from '../core/figura';
 import { chip, PELEA } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { Painter, hex } from '../gfx/paint';
-import { EventScene, PRUEBAS_GIRA, type Competidor } from './base';
+import { EventScene, prueba, type Competidor } from './base';
 import type { Paso } from '../core/coach';
 
 const WORLD = 1460;
@@ -255,7 +255,7 @@ export class Natacion extends EventScene {
     if (this.porTiempo(this.swimmers.map((s) => s.st === 'done'), me.st === 'done', this.clock)) {
       for (const s of this.swimmers) if (s.st !== 'done') { s.st = 'done'; s.time = this.clock + (FINISH - s.x) / 100; }
       const orden = [...this.swimmers].sort((a, b) => a.time - b.time).map((s) => ({ c: s.c, valor: `${s.time.toFixed(2)} S` }));
-      this.resultados(PRUEBAS_GIRA[1].nombre, orden);
+      this.resultados(prueba('Natacion').nombre, orden);
     }
   }
 }

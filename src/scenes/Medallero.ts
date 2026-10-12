@@ -7,7 +7,7 @@ import { PRUEBAS_GIRA, type Gira } from '../events/base';
 import { FAMILIA, INSTITUTO } from './Select';
 import { fireworks } from './logo';
 
-const BANDERA: Record<string, string> = { Vallas: 'flag_co', Natacion: 'flag_vn', Jabalina: 'flag_ve', Fight: 'flag_ve' };
+const BANDERA: Record<string, string> = { CrossCountry: 'flag_vn', Vallas: 'flag_co', Natacion: 'flag_vn', Jabalina: 'flag_ve', Fight: 'flag_ve' };
 
 /**
  * Entre prueba y prueba de la Olimpiada Express: el marcador por equipos, lo que va de gira y la que viene.
@@ -52,7 +52,7 @@ export class Medallero extends Phaser.Scene {
     // las pruebas: hechas con su oro, la que viene parpadeando
     panel(this, 60, 118, 520, 150);
     PRUEBAS_GIRA.forEach((p, i) => {
-      const y = 140 + i * 34;
+      const y = 134 + i * 28;
       const hecha = g.resultados[i];
       const viene = i === g.idx;
       this.add.image(88, y, BANDERA[p.scene]).setScale(0.75);

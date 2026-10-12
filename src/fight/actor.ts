@@ -22,7 +22,21 @@ export interface World {
   onKO(a: Actor): void;
   onHit(attacker: Actor | null, victim: Actor, dmg: number, kd: boolean): void;
   special(a: Actor): void;
+  // Lo de abajo es para escenarios con relieve (cross country). La azotea no lo usa.
+  /** fila de pantalla donde empieza el piso (si no, la de la azotea) */
+  floorTop?: number;
+  /** límites del mundo (si no, los de la azotea) */
+  limites?: { xmin: number; xmax: number; depth: number };
+  /** altura del piso bajo (x, y) para quien está a la altura z: 0 el suelo, el techo de una caja, o HUECO */
+  suelo?(x: number, y: number, z: number): number;
+  /** si un cuerpo a la altura z no cabe en (x, y): pared o caja más alta de lo que se sube de un paso */
+  bloquea?(x: number, y: number, z: number): boolean;
+  /** se cayó por un hueco */
+  caida?(a: Actor): void;
 }
+
+/** Lo que devuelve `suelo` donde no hay piso. */
+export const HUECO = -1000;
 
 export type St =
   | 'idle' | 'walk' | 'run' | 'jump' | 'attack' | 'hurt' | 'fall' | 'down' | 'getup' | 'dizzy'
@@ -76,7 +90,11 @@ export class Actor {
   get dir() { return this.left ? -1 : 1; }
   get alive() { return this.st !== 'ko'; }
   get controllable() { return ACTIVE.includes(this.st); }
-  get grounded() { return this.z <= 0.01; }
+  get grounded() { return this.z <= this.base + 0.01; }
+  /** fila de pantalla del fondo de la franja */
+  get ft() { return this.w.floorTop ?? FLOOR_TOP; }
+  /** altura del piso bajo los pies */
+  get base() { return this.w.suelo ? this.w.suelo(this.x, this.y, this.z) : 0; }
 
   play(name: string, restart = false, speed = 1) { this.fig.set(name, restart, speed); }
   setSt(st: St, anim?: string, restart = true) {
@@ -133,8 +151,18 @@ export class Actor {
 
   private clamp() {
     if (this.st === 'lifted') return;
-    this.x = Phaser.Math.Clamp(this.x, XMIN, XMAX);
-    this.y = Phaser.Math.Clamp(this.y, 0, DEPTH);
+    const l = this.w.limites;
+    this.x = Phaser.Math.Clamp(this.x, l?.xmin ?? XMIN, l?.xmax ?? XMAX);
+    this.y = Phaser.Math.Clamp(this.y, 0, l?.depth ?? DEPTH);
+  }
+
+  /** Mueve en x y en y por separado, sin meterse en paredes ni cajas altas. */
+  private desplazar(dx: number, dy: number) {
+    const w = this.w;
+    // en el aire no pierde el impulso: si sube lo suficiente, pasa por encima
+    const quieto = this.grounded && this.vz <= 0;
+    if (!w.bloquea || !w.bloquea(this.x + dx, this.y, this.z)) this.x += dx; else if (quieto) this.vx = 0;
+    if (!w.bloquea || !w.bloquea(this.x, this.y + dy, this.z)) this.y += dy; else if (quieto) this.vy = 0;
   }
 
   private move(dt: number, it: Intent) {
@@ -146,8 +174,11 @@ export class Actor {
     const running = it.run && it.x !== 0;
     const sx = running ? SPEED.runX : SPEED.walkX, sy = running ? SPEED.runY : SPEED.walkY;
     const dx = it.x * sx * dt, dy = it.y * sy * dt;
-    this.x += dx;
-    this.y += dy;
+    this.desplazar(dx, dy);
+    // un escalón chico se sube solo; si se acaba el piso, se cae
+    const base = this.base;
+    if (this.z < base) this.z = base;
+    else if (this.z > base + 0.5) { this.st = 'jump'; this.t = 0; this.vz = 0; this.vx = running ? it.x * SPEED.runX : it.x * SPEED.walkX; this.vy = 0; this.play('jump_fall'); return; }
     const dist = Math.hypot(dx, dy * 1.4);
     if (it.x || it.y) {
       this.st = running ? 'run' : 'walk';
@@ -184,17 +215,18 @@ export class Actor {
   }
 
   private land() {
-    this.z = 0; this.vz = 0; this.vx = 0; this.vy = 0;
+    this.z = this.base; this.vz = 0; this.vx = 0; this.vy = 0;
     this.w.dust(this.x, this.y);
     this.setSt('idle', 'land');
   }
 
   private physics(dt: number) {
-    this.x += this.vx * dt;
-    this.y += this.vy * dt;
+    this.desplazar(this.vx * dt, this.vy * dt);
     this.vz -= GRAVITY * dt;
     this.z += this.vz * dt;
-    if (this.z < 0) this.z = 0;
+    const base = this.base;
+    if (base <= HUECO / 2) { if (this.z < -60) this.w.caida?.(this); return; }
+    if (this.z < base) this.z = base;
   }
 
   // ------------------------------------------------------------------ ataques
@@ -244,7 +276,7 @@ export class Actor {
   private attacking(dt: number, it: Intent) {
     const airborne = !this.grounded || this.fig.anim.name === 'air_kick';
     if (airborne) this.physics(dt);
-    else { this.x += this.vx * dt; this.vx *= Math.pow(0.02, dt); }
+    else { this.desplazar(this.vx * dt, 0); this.vx *= Math.pow(0.02, dt); }
     if (it.punch && this.fig.anim.name !== 'weapon_throw') this.queued = 'punch';
     if (it.kick) this.queued = 'kick';
     const ev = this.fig.step(dt);
@@ -319,7 +351,7 @@ export class Actor {
   }
 
   private hurtTick(dt: number) {
-    this.x += this.vx * dt;
+    this.desplazar(this.vx * dt, 0);
     this.vx *= Math.pow(0.01, dt);
     this.fig.step(dt);
     if (this.t > 0.32) this.setSt('idle', 'idle');
@@ -338,7 +370,7 @@ export class Actor {
         this.w.sfx(this.fig.celda > 48 ? 'jefe_pisoton' : 'golpe', 0.35);
         if (this.fig.celda > 48) this.w.shake(180, 0.01);
       } else {
-        this.z = 0; this.vz = 0; this.vx = 0;
+        this.z = this.base; this.vz = 0; this.vx = 0;
         this.st = 'down';
         this.t = 0;
         this.play('ko_bounce');
@@ -420,8 +452,7 @@ export class Actor {
     const running = it.run && it.x !== 0;
     const k = SPEED.carry;
     const dx = it.x * (running ? SPEED.runX : SPEED.walkX) * k * dt, dy = it.y * SPEED.walkY * k * dt;
-    this.x += dx;
-    this.y += dy;
+    this.desplazar(dx, dy);
     if (it.x || it.y) { this.play(running ? 'carry_run' : 'carry_walk'); this.footsteps(this.fig.step(dt, Math.hypot(dx, dy * 1.4))); }
     else { this.play('carry_idle'); this.fig.step(dt); }
   }
@@ -472,7 +503,7 @@ export class Actor {
   private thrownTick(dt: number) {
     this.physics(dt);
     this.fig.step(dt);
-    if (this.x <= XMIN || this.x >= XMAX) this.vx = -this.vx * 0.5;
+    if (this.x <= (this.w.limites?.xmin ?? XMIN) || this.x >= (this.w.limites?.xmax ?? XMAX)) this.vx = -this.vx * 0.5;
     for (const v of this.w.actors) {
       if (v === this || v === this.thrower || v.team === this.thrower?.team || !v.canBeHit()) continue;
       if (Math.abs(v.y - this.y) > 14 || Math.abs(v.x - this.x) > 20 || this.z > 46) continue;
@@ -487,7 +518,7 @@ export class Actor {
       this.w.dust(this.x, this.y);
       this.w.shake(200, 0.012);
       this.w.sfx(this.fig.celda > 48 ? 'jefe_pisoton' : 'critico', 0.5);
-      this.z = 0; this.vz = 0; this.vx = 0;
+      this.z = this.base; this.vz = 0; this.vx = 0;
       this.st = 'down';
       this.t = 0;
       this.play('land_flat', true);
@@ -536,13 +567,14 @@ export class Actor {
 
   render() {
     const elev = this.fig.anim.data.elevacion?.[this.fig.anim.frame] ?? 0;
-    this.fig.setPosition(Math.round(this.x), Math.round(FLOOR_TOP + this.y - this.z - elev));
+    this.fig.setPosition(Math.round(this.x), Math.round(this.ft + this.y - this.z - elev));
     const sortY = this.st === 'lifted' && this.carrier ? this.carrier.y + 0.5 : this.y;
-    this.fig.setDepth(FLOOR_TOP + sortY);
-    this.shadow.setPosition(Math.round(this.x), Math.round(FLOOR_TOP + this.y));
-    const s = Math.max(0.4, 1 - (this.z + elev) / 140);
-    this.shadow.setScale(s).setDepth(FLOOR_TOP - 1);
-    this.shadow.setVisible(this.st !== 'lifted');
+    this.fig.setDepth(this.ft + sortY);
+    const piso = this.base;
+    this.shadow.setPosition(Math.round(this.x), Math.round(this.ft + this.y - Math.max(0, piso)));
+    const s = Math.max(0.4, 1 - (this.z - Math.max(0, piso) + elev) / 140);
+    this.shadow.setScale(s).setDepth(this.ft - 1);
+    this.shadow.setVisible(this.st !== 'lifted' && piso > HUECO / 2);
     if (this.st === 'ko') this.fig.setAlpha(Math.floor(this.t * 6) % 2 === 0 || this.t > 2 ? 0.85 : 0.4);
     else this.fig.setAlpha(this.invul > 0 && Math.floor(this.t * 16) % 2 ? 0.55 : 1);
     this.drawStars();
@@ -555,8 +587,8 @@ export class Actor {
     if (!on) return;
     const a = this.fig.anim;
     const head = a.data.cabeza?.[this.fig.rowIndex]?.[a.frame] ?? [0, -38];
-    const hx = this.x + this.dir * head[0], hy = FLOOR_TOP + this.y - this.z + head[1] - 8;
-    g.setDepth(FLOOR_TOP + this.y + 1);
+    const hx = this.x + this.dir * head[0], hy = this.ft + this.y - this.z + head[1] - 8;
+    g.setDepth(this.ft + this.y + 1);
     const tt = this.w.sc.time.now / 260;
     for (let i = 0; i < 3; i++) {
       const ang = tt + (i * Math.PI * 2) / 3;
@@ -588,12 +620,14 @@ export class Item {
   returned = false;
   hit = new Set<Actor>();
 
+  get ft() { return this.w.floorTop ?? FLOOR_TOP; }
+
   constructor(readonly w: World, readonly kind: string, x: number, y: number, z = 0) {
     this.def = kit().objetos[kind];
     this.x = x; this.y = y; this.z = z;
-    this.sprite = w.sc.add.image(x, FLOOR_TOP + y, 'armas', `${kind}_quieto_0`);
+    this.sprite = w.sc.add.image(x, this.ft + y, 'armas', `${kind}_quieto_0`);
     this.sprite.setOrigin(0.5, 22 / 24);
-    this.shadow = w.sc.add.ellipse(x, FLOOR_TOP + y, 14, 4, 0x000000, 0.3);
+    this.shadow = w.sc.add.ellipse(x, this.ft + y, 14, 4, 0x000000, 0.3);
     if (z > 0) this.st = 'falling';
   }
 
@@ -623,7 +657,8 @@ export class Item {
       this.x += this.vx * dt;
       this.vz -= g * dt;
       this.z += this.vz * dt;
-      if (this.x < XMIN || this.x > XMAX) { this.vx = -this.vx * 0.6; this.x = Phaser.Math.Clamp(this.x, XMIN, XMAX); }
+      const xmin = this.w.limites?.xmin ?? XMIN, xmax = this.w.limites?.xmax ?? XMAX;
+      if (this.x < xmin || this.x > xmax) { this.vx = -this.vx * 0.6; this.x = Phaser.Math.Clamp(this.x, xmin, xmax); }
       // la chancleta vuelve girando, como toda chancleta de mamá
       if (this.st === 'flying' && this.kind.startsWith('chancleta') && !this.returned && this.t > 0.42) { this.returned = true; this.vx = -this.vx * 0.9; this.vz = 70; }
       if (this.st === 'flying' && this.thrower) {
@@ -641,13 +676,16 @@ export class Item {
           if (!this.kind.startsWith('chancleta')) { this.vx = -this.vx * 0.3; this.vz = 80; }
         }
       }
-      if (this.z <= 0 && this.vz < 0) {
-        this.z = 0;
+      // en un hueco los objetos se pierden; si no, caen al piso o encima de una caja
+      const piso = this.w.suelo ? this.w.suelo(this.x, this.y, this.z) : 0;
+      if (piso <= HUECO / 2 && this.z < -30) { this.st = 'floor'; this.vz = 0; this.vx = 0; this.thrower = null; this.x = -9999; }
+      else if (piso > HUECO / 2 && this.z <= piso && this.vz < 0) {
+        this.z = piso;
         if (Math.abs(this.vz) > 140) { this.vz = -this.vz * 0.35; this.vx *= 0.5; this.w.sfx(this.def.peso === 'pesado' ? 'romper' : 'golpe', 0.25); }
         else { this.vz = 0; this.vx = 0; this.st = 'floor'; this.thrower = null; }
       }
     }
-    this.y = Phaser.Math.Clamp(this.y, 0, DEPTH);
+    this.y = Phaser.Math.Clamp(this.y, 0, this.w.limites?.depth ?? DEPTH);
   }
 
   render() {
@@ -661,8 +699,8 @@ export class Item {
       const [ax, ay, ang, behind] = arma ?? [hand[0], hand[1], 300, 0];
       const k = ((Math.round(ang / 22.5) % 16) + 16) % 16;
       s.setFrame(`${this.kind}_mano_${k}`).setOrigin(0.5, 0.5).setFlipX(o.left);
-      s.setPosition(Math.round(o.x + o.dir * ax), Math.round(FLOOR_TOP + o.y - o.z - elev + ay));
-      s.setDepth(FLOOR_TOP + o.y + (behind ? -0.2 : 0.2));
+      s.setPosition(Math.round(o.x + o.dir * ax), Math.round(this.ft + o.y - o.z - elev + ay));
+      s.setDepth(this.ft + o.y + (behind ? -0.2 : 0.2));
       this.shadow.setVisible(false);
       if (o.st === 'ko' || o.st === 'down') s.setVisible(false);
       return;
@@ -671,9 +709,9 @@ export class Item {
       const p = this.owner.cargaPoint();
       const o = this.owner;
       s.setFrame(`${this.kind}_quieto_0`).setOrigin(0.5, 22 / 24).setFlipX(false);
-      if (p) s.setPosition(Math.round(p[0]), Math.round(FLOOR_TOP + o.y - p[1]));
-      else s.setPosition(Math.round(o.x + o.dir * 12), Math.round(FLOOR_TOP + o.y));
-      s.setDepth(FLOOR_TOP + o.y + 0.4);
+      if (p) s.setPosition(Math.round(p[0]), Math.round(this.ft + o.y - p[1]));
+      else s.setPosition(Math.round(o.x + o.dir * 12), Math.round(this.ft + o.y));
+      s.setDepth(this.ft + o.y + 0.4);
       this.shadow.setVisible(false);
       return;
     }
@@ -681,9 +719,9 @@ export class Item {
     if (spinning) s.setFrame(`${this.kind}_girando_${Math.floor(this.t * 16) % 8}`).setOrigin(0.5, 0.5);
     else s.setFrame(`${this.kind}_quieto_0`).setOrigin(0.5, 22 / 24);
     s.setFlipX(false);
-    s.setPosition(Math.round(this.x), Math.round(FLOOR_TOP + this.y - this.z - (spinning ? 6 : 0)));
-    s.setDepth(FLOOR_TOP + this.y);
-    this.shadow.setVisible(true).setPosition(Math.round(this.x), Math.round(FLOOR_TOP + this.y)).setDepth(FLOOR_TOP - 1).setScale(Math.max(0.4, 1 - this.z / 200));
+    s.setPosition(Math.round(this.x), Math.round(this.ft + this.y - this.z - (spinning ? 6 : 0)));
+    s.setDepth(this.ft + this.y);
+    this.shadow.setVisible(true).setPosition(Math.round(this.x), Math.round(this.ft + this.y)).setDepth(this.ft - 1).setScale(Math.max(0.4, 1 - this.z / 200));
   }
 
   destroy() { this.sprite.destroy(); this.shadow.destroy(); }

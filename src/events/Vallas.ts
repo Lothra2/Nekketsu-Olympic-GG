@@ -3,7 +3,7 @@ import { Figura } from '../core/figura';
 import { chip, PELEA } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { Painter, hex } from '../gfx/paint';
-import { EventScene, PRUEBAS_GIRA, type Competidor } from './base';
+import { EventScene, prueba, type Competidor } from './base';
 import type { Paso } from '../core/coach';
 
 const WORLD = 1720;
@@ -306,7 +306,7 @@ export class Vallas extends EventScene {
     if (this.porTiempo(this.racers.map((r) => r.st === 'done'), me.st === 'done', this.clock)) {
       for (const r of this.racers) if (r.st !== 'done') { r.st = 'done'; r.time = this.clock + (FINISH - r.x) / 120; }
       const orden = [...this.racers].sort((a, b) => a.time - b.time).map((r) => ({ c: r.c, valor: `${r.time.toFixed(2)} S` }));
-      this.resultados(PRUEBAS_GIRA[0].nombre, orden);
+      this.resultados(prueba('Vallas').nombre, orden);
     }
   }
 }

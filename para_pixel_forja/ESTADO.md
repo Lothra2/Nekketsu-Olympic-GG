@@ -13,7 +13,7 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 | 3 | C1 | Familia GG e Instituto Nekketsu | A | aprobado, en main | [pixel_forja#9](https://github.com/Lothra2/pixel_forja/pull/9) |
 | 4 | G1 fuentes | Acentos del vietnamita en las fuentes | Nada | aprobado, en main | [pixel_forja#10](https://github.com/Lothra2/pixel_forja/pull/10) |
 | 5 | I inicial | Kit a medida por configuración | A | aprobado, en main | [pixel_forja#11](https://github.com/Lothra2/pixel_forja/pull/11) |
-| 6 | E1 | Sistema de escenarios oblicuos + `saigon_hem` | A, I, layout de `saigon_hem` | pendiente | |
+| 6 | E1 | Sistema de escenarios oblicuos + `saigon_hem` | A, I, layout de `saigon_hem` | pendiente, ya se puede empezar (el layout está listo y jugado en gris) | |
 | 7 | F | Efectos (y audio por configuración) | Nada | aprobado, falta merge a main | [pixel_forja#12](https://github.com/Lothra2/pixel_forja/pull/12) |
 | 8 | G1, H1 | Resto de interfaz y audio de la rebanada vertical | Nada | pendiente | |
 | 9 | B2, C2, D2, E2 | Cross Country completo y equipos nacionales | E1 | pendiente | |
@@ -77,6 +77,16 @@ Se pidió para B1: el campo `cuerpo` (hurtbox sin implementos ni efectos), porqu
 - Los efectos miran a la derecha: para la izquierda, `flipX` y espejar el ancla. La lluvia y el calor van con opacidad baja. La bola del Tama-wari trae un cuadro por estado de daño y el juego elige cuál.
 - Del lado del juego: cuando F esté en `main`, el kit pasa del puente `scripts/kit.ts` a `kit.config.json` con `kit-a-medida`, con efectos y audio incluidos, y el juego cambia `ui.fuentes.*.alto` por `alto_linea` y lee el audio por sección.
 
+**Layout de `saigon_hem`, listo para E1.** Está en `data/stages/saigon_hem.layout.json` y el juego ya lo juega en gris (Cross Country, tramo 1, también en el entrenamiento). Las reglas con las que se diseñó, para que el arte no cambie la jugabilidad:
+- Franja de 130 de fondo (filas 200 a 330), largo 3840, salida en 40 y meta en 3790.
+- Un salto sube 36 como máximo. Un escalón de hasta 6 se sube caminando. Corriendo, un salto avanza unos 85; caminando, unos 50.
+- Canal 1 (x 1200 a 1258): hueco de y 0 a 100, con un puentecito adelante (y 100 a 130). Canal 2 (x 3020 a 3076): toda la franja, se salta corriendo.
+- Muro bajo (z 28, toda la franja): se salta. Muro alto (z 52, y 0 a 92): se rodea por el portón de abajo (y 92 a 130) o se trepa por las cajas (z 18 y 36).
+- Calle inundada (x 2400 a 2900): frena y la corriente empuja hacia atrás. Toldo (z 56) sobre la acera de x 300 a 420: el que salta debajo se golpea.
+- Motos por los carriles 2 y 4, desde la derecha.
+- Campos que agregó el juego y que el validador debe aceptar: `nombre` en el layout y en los huecos y el agua, `nota` en el muro alto, `tipo` en muros y sólidos, y `y0`/`y1` en `bajo` (el toldo cubre solo la acera).
+- Lo que el juego todavía no usa y queda para el arte: `postes`, `ranuras_deco`, `vida` y el clima `aguacero`.
+
 ## Insumos que pone el juego
 
 Lo que PixelForja lee de este repo y todavía no existe. Cada uno lo produce una fase del juego.
@@ -85,7 +95,7 @@ Lo que PixelForja lee de este repo y todavía no existe. Cada uno lo produce una
 |---|---|---|---|---|
 | Configuración del kit | `kit.config.json` | I, para generar el kit real | Juego F0 (versión inicial). El lote I puede arrancar antes con su propio ejemplo en `docs/ejemplos/nekketsu/` | pendiente |
 | Equipos | `data/teams.json` | I. El lote C no lo necesita: las tablas de equipos están en el pedido | Juego F0 | pendiente |
-| Layout del tramo 1 de Saigón | `data/stages/saigon_hem.layout.json` | E1 | Juego F3 (gris jugable) | pendiente |
+| Layout del tramo 1 de Saigón | `data/stages/saigon_hem.layout.json` | E1 | Juego F3 (gris jugable) | listo, jugado en gris |
 | Layout de la azotea final | `data/stages/caracas_azotea.layout.json` | E3 | Juego F3 | pendiente |
 | Resto de layouts | `data/stages/*.layout.json` | E2 a E6 | Juego F6 a F11 | pendiente |
 | Textos | `data/dialogs/*.json` | G1 | Juego F5 | pendiente |

@@ -3,7 +3,7 @@ import { Figura } from '../core/figura';
 import { chip, PELEA } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { Painter, hex } from '../gfx/paint';
-import { EventScene, PRUEBAS_GIRA, type Competidor } from './base';
+import { EventScene, prueba, type Competidor } from './base';
 import type { Paso } from '../core/coach';
 
 const WORLD = 1560;
@@ -282,7 +282,7 @@ export class Jabalina extends EventScene {
     this.fase = 'fin';
     const orden = [...this.gente2].sort((a, b) => b.best - a.best).map((l) => ({ c: l.c, valor: l.best > 0 ? `${l.best.toFixed(2)} M` : 'NULO' }));
     this.camX = RUN0 + 100;
-    this.resultados(PRUEBAS_GIRA[2].nombre, orden);
+    this.resultados(prueba('Jabalina').nombre, orden);
   }
 
   private camera(dt: number) {

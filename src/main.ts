@@ -9,6 +9,7 @@ import { Medallero } from './scenes/Medallero';
 import { Vallas } from './events/Vallas';
 import { Natacion } from './events/Natacion';
 import { Jabalina } from './events/Jabalina';
+import { CrossCountry } from './events/CrossCountry';
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,
@@ -20,7 +21,7 @@ const game = new Phaser.Game({
   roundPixels: true,
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
   input: { gamepad: true, activePointers: 4 },
-  scene: [Boot, Tap, Intro, Title, Select, Fight, Medallero, Vallas, Natacion, Jabalina],
+  scene: [Boot, Tap, Intro, Title, Select, Fight, Medallero, Vallas, Natacion, Jabalina, CrossCountry],
 });
 
 (window as unknown as { game: Phaser.Game }).game = game;

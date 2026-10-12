@@ -1,0 +1,67 @@
+{
+  "id": "saigon_hem",
+  "pais": "vietnam",
+  "prueba": "crosscountry",
+  "tramo": 1,
+  "nombre": "HẺM DE SAIGÓN",
+  "largo": 3840,
+  "franja": { "atras": 200, "adelante": 330 },
+  "hora": "manana",
+  "clima": ["despejado", "aguacero"],
+  "paralaje": { "cielo": "auto", "lejos": "saigon_skyline", "cerca": "hem" },
+
+  "piso": [
+    { "x0": 0, "x1": 3840, "tipo": "asfalto" },
+    { "x0": 0, "x1": 3840, "y0": 0, "y1": 24, "tipo": "acera" }
+  ],
+  "huecos": [
+    { "x0": 1200, "x1": 1258, "y0": 0, "y1": 100, "caida": "agua", "nombre": "canal con puentecito adelante" },
+    { "x0": 3020, "x1": 3076, "y0": 0, "y1": 130, "caida": "agua", "nombre": "canal ancho" }
+  ],
+  "plataformas": [
+    { "x": 800, "y": 20, "w": 96, "d": 30, "z": 24, "tipo": "carro", "subible": true },
+    { "x": 1000, "y": 74, "w": 40, "d": 24, "z": 30, "tipo": "puesto_banhmi", "subible": true },
+    { "x": 1600, "y": 44, "w": 40, "d": 40, "z": 18, "tipo": "cajas", "subible": true },
+    { "x": 1640, "y": 44, "w": 40, "d": 40, "z": 36, "tipo": "cajas", "subible": true },
+    { "x": 2100, "y": 84, "w": 64, "d": 26, "z": 22, "tipo": "moto_estacionada", "subible": true },
+    { "x": 3300, "y": 30, "w": 48, "d": 30, "z": 20, "tipo": "mesas_plasticas", "subible": true },
+    { "x": 3348, "y": 30, "w": 48, "d": 30, "z": 34, "tipo": "mesas_plasticas", "subible": true }
+  ],
+  "muros": [
+    { "x": 1400, "y": 0, "w": 18, "d": 130, "z": 28, "trepable": false, "tipo": "muro_bajo" },
+    { "x": 1700, "y": 0, "w": 24, "d": 92, "z": 52, "trepable": false, "tipo": "muro_alto", "nota": "portón abierto adelante (y 92 a 130); las cajas son el atajo por encima" }
+  ],
+  "escaleras": [],
+  "postes": [
+    { "x": 640, "y": 4, "alto": 160, "tipo": "poste_luz" },
+    { "x": 1920, "y": 4, "alto": 160, "tipo": "poste_luz" },
+    { "x": 3200, "y": 4, "alto": 160, "tipo": "poste_luz" }
+  ],
+  "agua": [{ "x0": 2400, "x1": 2900, "nivel": 8, "corriente": -10, "nombre": "calle inundada" }],
+  "bajo": [{ "x0": 300, "x1": 420, "y0": 0, "y1": 40, "z": 56, "tipo": "toldo" }],
+  "solidos": [
+    { "x": 560, "y": 0, "w": 30, "d": 18, "z": 40, "tipo": "tanque_agua" },
+    { "x": 2600, "y": 0, "w": 36, "d": 22, "z": 44, "tipo": "kiosco" }
+  ],
+  "carriles": [{ "y": 20 }, { "y": 50 }, { "y": 80 }, { "y": 110 }],
+
+  "entidades": [
+    { "tipo": "salida", "x": 40 },
+    { "tipo": "meta", "x": 3790 },
+    { "tipo": "objeto", "objeto": "silla_plastica", "x": 520, "y": 64 },
+    { "tipo": "objeto", "objeto": "chancleta", "x": 700, "y": 104 },
+    { "tipo": "objeto", "objeto": "coco", "x": 1100, "y": 40 },
+    { "tipo": "objeto", "objeto": "paraguas", "x": 1880, "y": 96 },
+    { "tipo": "objeto", "objeto": "escoba", "x": 2300, "y": 30 },
+    { "tipo": "objeto", "objeto": "pote_basura", "x": 3150, "y": 70 },
+    { "tipo": "vehiculo", "vehiculo": "moto", "carril": 2, "cada": 4.5, "desde": "derecha" },
+    { "tipo": "vehiculo", "vehiculo": "moto", "carril": 4, "cada": 6.5, "desde": "derecha" }
+  ],
+
+  "ranuras_deco": [
+    { "x0": 0, "x1": 3840, "capa": "cerca", "tema": "hem_casa_tubo" },
+    { "x0": 900, "x1": 1100, "capa": "cerca", "tema": "puesto_comida" },
+    { "x0": 2400, "x1": 2900, "capa": "cerca", "tema": "fachadas_inundadas" }
+  ],
+  "vida": ["motos_fondo", "ropa_tendida", "palomas", "cables_viento"]
+}

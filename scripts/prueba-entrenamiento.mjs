@@ -44,6 +44,13 @@ async function entrenar(scene, d, jugar, limite = 60) {
   console.log(scene, fin === 99 ? 'completo' : `se quedó en el paso ${fin + 1}`);
 }
 
+if (!solo.length || solo.includes('cross')) {
+  // en el cross country la persona va con el piloto automático del juego: sabe saltar canales y rodear muros
+  await entrenar('CrossCountry', { jugador: 'alana', practica: true }, async (i) => {
+    await page.evaluate(() => { const s = window.game.scene.getScene('CrossCountry'); s.gente2[0].a.human = false; });
+    await page.waitForTimeout(200);
+  }, 90);
+}
 if (!solo.length || solo.includes('vallas')) {
   await page.keyboard.down('ArrowRight');
   await entrenar('Vallas', { jugador: 'sophie', practica: true }, async (i) => {
