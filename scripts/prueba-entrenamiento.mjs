@@ -53,6 +53,12 @@ if (!solo.length || solo.includes('cross')) {
     await page.waitForTimeout(200);
   }, 90);
 }
+if (!solo.length || solo.includes('obstaculos')) {
+  await entrenar('Obstaculos', { jugador: 'sophie', practica: true }, async () => {
+    await page.evaluate(() => { const s = window.game.scene.getScene('Obstaculos'); s.gente2[0].a.human = false; });
+    await page.waitForTimeout(200);
+  }, 90);
+}
 if (!solo.length || solo.includes('vallas')) {
   await page.keyboard.down('ArrowRight');
   await entrenar('Vallas', { jugador: 'sophie', practica: true }, async (i) => {

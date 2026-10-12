@@ -82,7 +82,7 @@ if (!solo.length || solo.includes('gira')) {
   await page.evaluate(() => { window.game.registry.set('gira', { jugador: 'steph', idx: 2, puntos: [26, 18], resultados: [{ prueba: 'VALLAS', podio: ['steph', 'kenji', 'rick', 'goro'] }, { prueba: 'NATACION', podio: ['ryu', 'steph', 'sophie', 'tetsu'] }] }); });
   await start('Medallero', {});
   await page.waitForTimeout(1200); await shot('gira_1_medallero_medio');
-  await page.evaluate(() => { window.game.registry.set('gira', { jugador: 'steph', idx: 4, puntos: [62, 38], resultados: [] }); });
+  await page.evaluate(() => { window.game.registry.set('gira', { jugador: 'steph', idx: 5, puntos: [62, 38], resultados: [] }); });
   await start('Medallero', {});
   await page.waitForTimeout(1500); await shot('gira_2_final');
 }

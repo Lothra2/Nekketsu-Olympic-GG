@@ -1,0 +1,507 @@
+{
+ "id": "medellin_c13",
+ "pais": "colombia",
+ "prueba": "obstaculos",
+ "nombre": "COMUNA 13",
+ "largo": 3200,
+ "franja": {
+  "atras": 200,
+  "adelante": 330
+ },
+ "hora": "manana",
+ "clima": [
+  "despejado"
+ ],
+ "paralaje": {
+  "cielo": "auto",
+  "lejos": "medellin_metrocable",
+  "cerca": "c13_casas_ladrillo"
+ },
+ "piso": [
+  {
+   "x0": 0,
+   "x1": 3200,
+   "tipo": "acera"
+  },
+  {
+   "x0": 0,
+   "x1": 400,
+   "tipo": "asfalto",
+   "nombre": "la calle de abajo"
+  }
+ ],
+ "huecos": [
+  {
+   "x0": 1500,
+   "x1": 1560,
+   "y0": 0,
+   "y1": 60,
+   "caida": "vacio",
+   "nombre": "hueco entre casas"
+  },
+  {
+   "x0": 1500,
+   "x1": 1560,
+   "y0": 74,
+   "y1": 130,
+   "caida": "vacio",
+   "nombre": "hueco entre casas (la viga cruza en y 60 a 74)"
+  }
+ ],
+ "plataformas": [
+  {
+   "x": 400,
+   "y": 0,
+   "w": 14,
+   "d": 130,
+   "z": 6,
+   "tipo": "escalon"
+  },
+  {
+   "x": 414,
+   "y": 0,
+   "w": 14,
+   "d": 130,
+   "z": 12,
+   "tipo": "escalon"
+  },
+  {
+   "x": 428,
+   "y": 0,
+   "w": 14,
+   "d": 130,
+   "z": 18,
+   "tipo": "escalon"
+  },
+  {
+   "x": 442,
+   "y": 0,
+   "w": 14,
+   "d": 130,
+   "z": 24,
+   "tipo": "escalon"
+  },
+  {
+   "x": 456,
+   "y": 0,
+   "w": 444,
+   "d": 130,
+   "z": 24,
+   "tipo": "terraza",
+   "nombre": "terraza 1"
+  },
+  {
+   "x": 760,
+   "y": 0,
+   "w": 16,
+   "d": 130,
+   "z": 54,
+   "tipo": "muro_ladrillo"
+  },
+  {
+   "x": 900,
+   "y": 0,
+   "w": 14,
+   "d": 60,
+   "z": 30,
+   "tipo": "escalera_electrica",
+   "nota": "al revés: empuja para atrás"
+  },
+  {
+   "x": 914,
+   "y": 0,
+   "w": 14,
+   "d": 60,
+   "z": 36,
+   "tipo": "escalera_electrica"
+  },
+  {
+   "x": 928,
+   "y": 0,
+   "w": 14,
+   "d": 60,
+   "z": 42,
+   "tipo": "escalera_electrica"
+  },
+  {
+   "x": 942,
+   "y": 0,
+   "w": 14,
+   "d": 60,
+   "z": 48,
+   "tipo": "escalera_electrica"
+  },
+  {
+   "x": 956,
+   "y": 0,
+   "w": 14,
+   "d": 60,
+   "z": 54,
+   "tipo": "escalera_electrica"
+  },
+  {
+   "x": 970,
+   "y": 0,
+   "w": 14,
+   "d": 60,
+   "z": 60,
+   "tipo": "escalera_electrica"
+  },
+  {
+   "x": 984,
+   "y": 0,
+   "w": 14,
+   "d": 60,
+   "z": 66,
+   "tipo": "escalera_electrica"
+  },
+  {
+   "x": 998,
+   "y": 0,
+   "w": 14,
+   "d": 60,
+   "z": 72,
+   "tipo": "escalera_electrica"
+  },
+  {
+   "x": 900,
+   "y": 60,
+   "w": 28,
+   "d": 70,
+   "z": 36,
+   "tipo": "escalones"
+  },
+  {
+   "x": 928,
+   "y": 60,
+   "w": 28,
+   "d": 70,
+   "z": 48,
+   "tipo": "escalones"
+  },
+  {
+   "x": 956,
+   "y": 60,
+   "w": 28,
+   "d": 70,
+   "z": 60,
+   "tipo": "escalones"
+  },
+  {
+   "x": 984,
+   "y": 60,
+   "w": 28,
+   "d": 70,
+   "z": 72,
+   "tipo": "escalones"
+  },
+  {
+   "x": 1012,
+   "y": 0,
+   "w": 488,
+   "d": 130,
+   "z": 72,
+   "tipo": "terraza",
+   "nombre": "terraza 2"
+  },
+  {
+   "x": 1300,
+   "y": 0,
+   "w": 200,
+   "d": 130,
+   "z": 72,
+   "tipo": "techo_lata"
+  },
+  {
+   "x": 1500,
+   "y": 60,
+   "w": 60,
+   "d": 14,
+   "z": 72,
+   "tipo": "viga"
+  },
+  {
+   "x": 1560,
+   "y": 0,
+   "w": 340,
+   "d": 130,
+   "z": 72,
+   "tipo": "terraza",
+   "nombre": "terraza 3"
+  },
+  {
+   "x": 1900,
+   "y": 0,
+   "w": 500,
+   "d": 130,
+   "z": 100,
+   "tipo": "terraza",
+   "nombre": "terraza 4"
+  },
+  {
+   "x": 2060,
+   "y": 20,
+   "w": 30,
+   "d": 24,
+   "z": 118,
+   "tipo": "aire_acondicionado"
+  },
+  {
+   "x": 2300,
+   "y": 86,
+   "w": 30,
+   "d": 24,
+   "z": 118,
+   "tipo": "aire_acondicionado"
+  },
+  {
+   "x": 2400,
+   "y": 70,
+   "w": 14,
+   "d": 60,
+   "z": 106,
+   "tipo": "escalera_electrica"
+  },
+  {
+   "x": 2414,
+   "y": 70,
+   "w": 14,
+   "d": 60,
+   "z": 112,
+   "tipo": "escalera_electrica"
+  },
+  {
+   "x": 2428,
+   "y": 70,
+   "w": 14,
+   "d": 60,
+   "z": 118,
+   "tipo": "escalera_electrica"
+  },
+  {
+   "x": 2442,
+   "y": 70,
+   "w": 14,
+   "d": 60,
+   "z": 124,
+   "tipo": "escalera_electrica"
+  },
+  {
+   "x": 2456,
+   "y": 70,
+   "w": 14,
+   "d": 60,
+   "z": 130,
+   "tipo": "escalera_electrica"
+  },
+  {
+   "x": 2470,
+   "y": 70,
+   "w": 14,
+   "d": 60,
+   "z": 136,
+   "tipo": "escalera_electrica"
+  },
+  {
+   "x": 2484,
+   "y": 70,
+   "w": 14,
+   "d": 60,
+   "z": 142,
+   "tipo": "escalera_electrica"
+  },
+  {
+   "x": 2498,
+   "y": 70,
+   "w": 14,
+   "d": 60,
+   "z": 148,
+   "tipo": "escalera_electrica"
+  },
+  {
+   "x": 2400,
+   "y": 0,
+   "w": 28,
+   "d": 70,
+   "z": 112,
+   "tipo": "escalones"
+  },
+  {
+   "x": 2428,
+   "y": 0,
+   "w": 28,
+   "d": 70,
+   "z": 124,
+   "tipo": "escalones"
+  },
+  {
+   "x": 2456,
+   "y": 0,
+   "w": 28,
+   "d": 70,
+   "z": 136,
+   "tipo": "escalones"
+  },
+  {
+   "x": 2484,
+   "y": 0,
+   "w": 28,
+   "d": 70,
+   "z": 148,
+   "tipo": "escalones"
+  },
+  {
+   "x": 2512,
+   "y": 0,
+   "w": 688,
+   "d": 130,
+   "z": 148,
+   "tipo": "terraza",
+   "nombre": "el mirador"
+  },
+  {
+   "x": 2800,
+   "y": 0,
+   "w": 40,
+   "d": 30,
+   "z": 164,
+   "tipo": "materas"
+  },
+  {
+   "x": 3000,
+   "y": 94,
+   "w": 40,
+   "d": 36,
+   "z": 164,
+   "tipo": "materas"
+  }
+ ],
+ "muros": [],
+ "escaleras": [],
+ "postes": [
+  {
+   "x": 300,
+   "y": 4,
+   "alto": 150,
+   "tipo": "poste_luz"
+  },
+  {
+   "x": 1700,
+   "y": 4,
+   "alto": 110,
+   "tipo": "poste_luz"
+  },
+  {
+   "x": 2700,
+   "y": 4,
+   "alto": 90,
+   "tipo": "antena"
+  }
+ ],
+ "agua": [],
+ "bajo": [
+  {
+   "x0": 560,
+   "x1": 680,
+   "y0": 0,
+   "y1": 130,
+   "z": 70,
+   "tipo": "tendedero"
+  },
+  {
+   "x0": 1640,
+   "x1": 1780,
+   "y0": 0,
+   "y1": 80,
+   "z": 118,
+   "tipo": "tendedero"
+  }
+ ],
+ "solidos": [],
+ "carriles": [
+  {
+   "y": 20
+  },
+  {
+   "y": 50
+  },
+  {
+   "y": 80
+  },
+  {
+   "y": 110
+  }
+ ],
+ "entidades": [
+  {
+   "tipo": "salida",
+   "x": 40
+  },
+  {
+   "tipo": "meta",
+   "x": 3150
+  },
+  {
+   "tipo": "animal",
+   "animal": "perro_callejero",
+   "x": 250,
+   "y": 70,
+   "nota": "duerme; si lo pisas, despierta y te tumba"
+  },
+  {
+   "tipo": "animal",
+   "animal": "perro_callejero",
+   "x": 1200,
+   "y": 40
+  },
+  {
+   "tipo": "animal",
+   "animal": "perro_callejero",
+   "x": 2200,
+   "y": 100
+  },
+  {
+   "tipo": "objeto",
+   "objeto": "cono",
+   "x": 600,
+   "y": 100
+  },
+  {
+   "tipo": "objeto",
+   "objeto": "balon_goma",
+   "x": 1700,
+   "y": 30
+  },
+  {
+   "tipo": "objeto",
+   "objeto": "chancleta_amarilla",
+   "x": 2600,
+   "y": 60
+  }
+ ],
+ "ranuras_deco": [
+  {
+   "x0": 0,
+   "x1": 3200,
+   "capa": "cerca",
+   "tema": "casas_ladrillo_apiladas"
+  },
+  {
+   "x0": 0,
+   "x1": 3200,
+   "capa": "lejos",
+   "tema": "metrocable"
+  },
+  {
+   "x0": 2512,
+   "x1": 3200,
+   "capa": "cerca",
+   "tema": "grafitis_mirador"
+  }
+ ],
+ "vida": [
+  "metrocable",
+  "musicos_callejeros",
+  "perros"
+ ]
+}

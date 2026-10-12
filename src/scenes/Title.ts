@@ -18,6 +18,7 @@ const MENUS: Record<string, { id: string; label: string }[]> = {
   ],
   pruebas: [
     { id: 'CrossCountry', label: 'CROSS COUNTRY' },
+    { id: 'Obstaculos', label: 'OBSTÁCULOS COMUNA 13' },
     { id: 'Vallas', label: 'VALLAS DEL CAFÉ' },
     { id: 'Natacion', label: 'NATACIÓN HẠ LONG' },
     { id: 'Jabalina', label: 'JABALINA LLANERA' },
@@ -25,6 +26,7 @@ const MENUS: Record<string, { id: string; label: string }[]> = {
   ],
   entrenar: [
     { id: 'practica:CrossCountry', label: 'CROSS COUNTRY' },
+    { id: 'practica:Obstaculos', label: 'OBSTÁCULOS' },
     { id: 'practica:Vallas', label: 'VALLAS' },
     { id: 'practica:Natacion', label: 'NATACIÓN' },
     { id: 'practica:Jabalina', label: 'JABALINA' },

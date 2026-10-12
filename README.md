@@ -17,6 +17,12 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
     5. La recta final en el estadio, con vallas.
 
     Los tramos 2 a 5 van en gris hasta que llegue su arte (lote E2). Con los rivales, a los golpes, como en el original.
+  - *Obstáculos Comuna 13*: la carrera de obstáculos del original, subiendo la Comuna 13 de Medellín desde la calle hasta el mirador.
+    - Escaleras eléctricas que van al revés, o los escalones empinados del lado.
+    - Muros, una viga sobre un hueco y tendederos.
+    - Perros dormidos que se despiertan si los pisas.
+    - Saltar justo antes de un obstáculo da impulso.
+    - Va en gris hasta el lote E3.
   - *Vallas del Café* (Eje Cafetero): alterna puño y patada para correr, salta las vallas, codazo con ★. Si tocas una valla, se cae y te frena.
   - *Natación Hạ Long* (bahía de Hạ Long): sales con salto, si te tiras antes del ¡YA! te quedas un segundo. Alterna puño y patada para nadar, ★ es la patada de delfín.
   - *Jabalina Llanera* (Llanos de Apure): carrerita alternando botones, mantén salto para el ángulo y suelta para lanzar. Si pisas la raya es nulo. Dos intentos.

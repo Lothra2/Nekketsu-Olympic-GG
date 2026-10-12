@@ -157,6 +157,17 @@ Para las fichas de arte de E2:
 - Thor mira sentado al fondo, en x 40 (`npc`).
 - `npm run escenarios -- --validar`: la geometría valida. El arte espera el estilo `venezuela`, que PixelForja todavía no pinta.
 
+**Layout de `medellin_c13`, listo para E3.** Es la prueba de Obstáculos, ya jugable en gris: los cuatro en piloto automático llegan al mirador en unos 22 s sin trabarse.
+- Largo 3200, misma franja que el Cross (200 a 330). Se sube en terrazas desde la calle (z 0) hasta el mirador (z 148): la "subida vertical" del pedido es altura.
+- Escalones de 6 que se suben caminando (`escalon`) y escalones de 12 que se saltan (`escalones`).
+- Dos escaleras eléctricas (`escalera_electrica`, 8 escalones de 6) que van al revés. El juego empuja para atrás a quien va encima. El arte puede mostrar el techo naranja y las flechas.
+- La viga (`viga`) cruza un hueco `vacio` de 60, apoyada en una franja de piso (y 60 a 74), igual que en `saigon_azoteas`. También hay un muro de ladrillo, techos de zinc (`techo_lata`), aires acondicionados y materas.
+- Tendederos en `bajo`: quien salta debajo se da en la cabeza.
+- Perros dormidos: entidades `animal` con `animal: "perro_callejero"`. El juego hoy usa a Thor oscurecido y echado. Para B3 o C2 sirve un perro de la calle con `lie`, `bark` y `run`.
+- La mecánica del original: saltar justo antes de un obstáculo da impulso.
+- `npm run escenarios -- --validar`: la geometría valida. El arte espera el estilo `colombia_ladrillo`.
+- Para B2: `ladder`, `climb_wall` y `balance_walk` vendrían bien para trepar el muro y cruzar la viga. Hoy se salta.
+
 **G1 resto y H1** (PR #13), esperando la revisión de Rick. Cuando entre a `main`, el juego pide en `kit.config.json`:
 - `ui.logo` y `ui.interfaz`: logo animado, diálogo 9-slice, paneles por equipo, barras, banners, controles táctiles, minimapa y números.
 - El audio de H1: `silbato`, `pistola`, `marcha_nekketsu` y el resto. Con eso `manifest.pendiente` queda vacío.
@@ -181,6 +192,7 @@ Lo que PixelForja lee de este repo y todavía no existe. Cada uno lo produce una
 | Equipos | `data/equipos.json` | I | Juego F0 | listo |
 | Layout del tramo 1 de Saigón | `data/stages/saigon_hem.layout.json` | E1 | Juego F3 (gris jugable) | listo, jugado en gris |
 | Layout de la azotea final | `data/stages/caracas_azotea.layout.json` | E3 | Juego F7 | listo, jugado en gris |
+| Layout de la Comuna 13 | `data/stages/medellin_c13.layout.json` | E3 | Juego F7 | listo, jugado en gris |
 | Layouts del Cross Country completo | `data/stages/saigon_benthanh`, `saigon_rio`, `saigon_azoteas`, `saigon_estadio` (`.layout.json`) | E2 | Juego F6 | listos, jugados en gris |
 | Resto de layouts | `data/stages/*.layout.json` | E3 a E6 | Juego F7 a F11 | pendiente |
 | Textos | `data/dialogs/*.json` | G1 | Juego F5 | pendiente |

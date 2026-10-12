@@ -13,6 +13,7 @@ export interface Competidor { id: string; team: 0 | 1; human: boolean }
 export interface Gira { jugador: string; idx: number; puntos: [number, number]; resultados: { prueba: string; podio: string[] }[] }
 export const PRUEBAS_GIRA = [
   { scene: 'CrossCountry', nombre: 'CROSS COUNTRY', lugar: 'SAIGÓN, VIETNAM' },
+  { scene: 'Obstaculos', nombre: 'OBSTÁCULOS COMUNA 13', lugar: 'MEDELLÍN, COLOMBIA' },
   { scene: 'Vallas', nombre: 'VALLAS DEL CAFÉ', lugar: 'EJE CAFETERO, COLOMBIA' },
   { scene: 'Natacion', nombre: 'NATACIÓN HẠ LONG', lugar: 'BAHÍA DE HẠ LONG, VIETNAM' },
   { scene: 'Jabalina', nombre: 'JABALINA LLANERA', lugar: 'LLANOS DE APURE, VENEZUELA' },

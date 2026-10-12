@@ -13,12 +13,13 @@ import type { Paso } from '../core/coach';
 import { hayArte, pintarEscenario, queueEscenario } from './escenario';
 import { efecto, talla } from '../core/fx';
 import { kit } from '../core/kit';
+import { Figura } from '../core/figura';
 
 /** El formato de layout de PixelForja (PEDIDO 10.2), la parte que el Cross Country usa. */
 interface Caja { x: number; y: number; w: number; d: number; z: number; tipo?: string }
 interface Agua { x0: number; x1: number; y0?: number; y1?: number; nivel: number; corriente?: number; nombre?: string }
 interface Entidad {
-  tipo: string; x?: number; y?: number; x0?: number; x1?: number; objeto?: string; vehiculo?: string; carril?: number; cada?: number;
+  tipo: string; x?: number; y?: number; x0?: number; x1?: number; objeto?: string; vehiculo?: string; animal?: string; carril?: number; cada?: number;
   w?: number; d?: number; z?: number; velocidad?: number; espera?: number;
 }
 interface Layout {
@@ -35,6 +36,10 @@ interface Layout {
 
 /** Los cinco tramos, en orden: del hẻm a la meta en el estadio. */
 const TRAMOS = [hem, benthanh, rio, azoteas, estadio] as unknown as Layout[];
+
+/** Cómo es un recorrido: sus tramos, la ciudad, y si saltar justo antes de un obstáculo da impulso. */
+export interface Recorrido { tramos: Layout[]; ciudad: string; impulso?: boolean }
+export type { Layout };
 /** Lo que se dice antes de cada tramo. */
 const AYUDA: Record<string, string> = {
   saigon_hem: 'MANTÉN {MOVER} ADELANTE PARA CORRER · {SALTO} SALTA CANALES Y MUROS · A LOS GOLPES SI HACE FALTA',
@@ -42,7 +47,10 @@ const AYUDA: Record<string, string> = {
   saigon_rio: 'EL FERRY ES SEGURO PERO HAY QUE ESPERARLO · NADANDO VAS DIRECTO: OJO CON LOS JACINTOS',
   saigon_azoteas: '{SALTO} CORRIENDO ENTRE EDIFICIOS · CON LLUVIA SE RESBALA · LA VIGA CRUZA EL HUECO ANCHO',
   saigon_estadio: '¡LA RECTA FINAL! {SALTO} LAS VALLAS Y A LA META',
+  medellin_c13: 'SUBE HASTA EL MIRADOR · {SALTO} JUSTO ANTES DE UN OBSTÁCULO DA IMPULSO · NO PISES AL PERRO',
 };
+/** la escalera eléctrica va al revés: empuja para atrás a quien va encima */
+const ESCALERA = 50;
 // todos los tramos comparten la franja: la cámara y el marcador no cambian de uno a otro
 const FT = 200;
 const DEPTH = 130;
@@ -68,6 +76,8 @@ interface Vehiculo { x: number; y: number; v: number; g: Phaser.GameObjects.Cont
 interface Ferry extends Caja { x0: number; x1: number; v: number; espera: number; quieto: number; dir: 1 | -1; g: Phaser.GameObjects.Container }
 interface Jacinto { x: number; y: number; g: Phaser.GameObjects.Graphics; tocados: Set<Actor> }
 interface Fruta { x0: number; x1: number; y0: number; y1: number; t: number; dueño: Actor; g: Phaser.GameObjects.Graphics }
+/** Un perro de la calle que duerme en el camino: si lo pisas, despierta, te tumba y te persigue un poco. */
+interface Perro { x: number; y: number; z: number; x0: number; f: Figura; zz: Phaser.GameObjects.BitmapText; despierto: number; presa: Actor | null }
 
 /** Para pasar de un tramo al siguiente: los mismos cuatro y lo que llevan acumulado. */
 interface CrossData extends EventData { tramo?: number; cross?: { gente: Competidor[]; acum: Record<string, number> } }
@@ -98,6 +108,7 @@ export class CrossCountry extends EventScene implements World {
   private frutas: Fruta[] = [];
   private derrame = new Map<Caja, number>();
   private lluvia: Phaser.GameObjects.TileSprite | null = null;
+  private perros: Perro[] = [];
   private meta = 3790;
   private clock = 0;
   private holdRun = 0;
@@ -110,15 +121,17 @@ export class CrossCountry extends EventScene implements World {
   private dusts!: Phaser.GameObjects.Particles.ParticleEmitter;
   private splash!: Phaser.GameObjects.Particles.ParticleEmitter;
 
-  constructor() { super('CrossCountry'); }
+  constructor(key = 'CrossCountry', private recorrido: Recorrido = { tramos: TRAMOS, ciudad: 'SAIGÓN' }) { super(key); }
+
+  private get tramos() { return this.recorrido.tramos; }
 
   init(d: CrossData) {
     super.init(d);
     // el entrenamiento es siempre el hẻm; `tramo` sirve también para probar uno suelto
-    this.tramo = this.d.practica ? 0 : Phaser.Math.Clamp(d.tramo ?? 0, 0, TRAMOS.length - 1);
+    this.tramo = this.d.practica ? 0 : Phaser.Math.Clamp(d.tramo ?? 0, 0, this.tramos.length - 1);
     this.acum = {};
     if (d.cross && !this.d.practica) { this.gente = d.cross.gente; this.acum = { ...d.cross.acum }; }
-    this.L = TRAMOS[this.tramo];
+    this.L = this.tramos[this.tramo];
     if (this.L.franja.atras !== FT || this.L.franja.adelante - this.L.franja.atras !== DEPTH) throw new Error(`${this.L.id}: la franja tiene que ser 200 a 330`);
   }
 
@@ -146,6 +159,7 @@ export class CrossCountry extends EventScene implements World {
     this.stop = 0;
     this.entre = null;
     this.lluvia = null;
+    this.perros = [];
     this.limites = { xmin: 12, xmax: L.largo - 12, depth: DEPTH };
     this.cajas = [...L.plataformas, ...L.muros, ...L.solidos];
     this.meta = L.entidades.find((e) => e.tipo === 'meta')?.x ?? L.largo - 50;
@@ -162,6 +176,7 @@ export class CrossCountry extends EventScene implements World {
     for (const e of L.entidades) if (e.tipo === 'objeto' && e.objeto && this.hayObjeto(e.objeto)) this.items.push(new Item(this, e.objeto, e.x ?? 0, e.y ?? 60));
     // el primer clima de la lista es el de hoy; los demás son los que el escenario puede tener otro día
     if (L.clima[0] === 'aguacero') this.ponerLluvia();
+    this.armarPerros();
 
     this.gente.forEach((c, i) => {
       const y = L.carriles[i % L.carriles.length].y;
@@ -174,14 +189,15 @@ export class CrossCountry extends EventScene implements World {
     this.cameras.main.centerOn(salida + 200, 360 - 180 / ZOOM);
     this.hud = this.uiAdd(this.add.graphics().setDepth(8000));
     this.timeTxt = this.uiAdd(txt(this, 626, 14, '0.00', 'fuente_ui', 2, 1).setDepth(8001));
-    if (!this.d.practica) this.uiAdd(txt(this, 626, 32, `TRAMO ${this.tramo + 1}/${TRAMOS.length}`, 'fuente_ui', 1, 1).setDepth(8001).setTint(0xffe080));
+    const varios = this.tramos.length > 1;
+    if (!this.d.practica && varios) this.uiAdd(txt(this, 626, 32, `TRAMO ${this.tramo + 1}/${this.tramos.length}`, 'fuente_ui', 1, 1).setDepth(8001).setTint(0xffe080));
     for (const r of this.gente2) this.heads.push({ img: this.uiAdd(this.add.image(0, 22, 'cabecitas', r.c.id).setDepth(8002)), r });
-    if (!this.arte) this.uiAdd(txt(this, 14, 326, `TRAMO ${this.tramo + 1} · ESCENARIO EN GRIS`, 'fuente_ui', 1, 0).setDepth(8001).setTint(0x8a8ab0));
+    if (!this.arte) this.uiAdd(txt(this, 14, 326, varios ? `TRAMO ${this.tramo + 1} · ESCENARIO EN GRIS` : 'ESCENARIO EN GRIS', 'fuente_ui', 1, 0).setDepth(8001).setTint(0x8a8ab0));
     chip.play(PELEA);
-    const p = prueba('CrossCountry');
+    const p = prueba(this.scene.key);
     if (this.d.practica) { void this.entrenar(p.nombre, this.pasos(), 40); return; }
-    const titulo = this.tramo === 0 ? p.nombre : `TRAMO ${this.tramo + 1} DE ${TRAMOS.length}`;
-    void this.previa(titulo, `${L.nombre}, SAIGÓN`, AYUDA[L.id] ?? '');
+    const titulo = this.tramo === 0 ? p.nombre : `TRAMO ${this.tramo + 1} DE ${this.tramos.length}`;
+    void this.previa(titulo, `${L.nombre}, ${this.recorrido.ciudad}`, AYUDA[L.id] ?? '');
   }
 
   /** Solo los objetos que el kit ya trae (D1); los que pida un layout y no estén esperan a su lote. */
@@ -191,6 +207,15 @@ export class CrossCountry extends EventScene implements World {
   private pasos(): Paso[] {
     const r = () => this.gente2[0];
     const ir = (x: number, y: number) => () => { const a = r().a; a.x = x; a.y = y; a.z = 0; a.setSt('idle', 'idle'); r().safe = [x, y]; this.cameras.main.centerOn(x + 80, 360 - 180 / ZOOM); flash(this, 120); };
+    if (this.L.id === 'medellin_c13') return [
+      { texto: 'MANTÉN {MOVER} ADELANTE\nY ARRANCAS A CORRER', botones: ['stick'], listo: () => r().a.st === 'run' },
+      { texto: 'UN PERRO DORMIDO: NO LO PISES,\nSÁLTALO CON {SALTO}', botones: ['stick', 'jump'], antes: ir(150, 70), listo: () => r().a.x > 290 && r().a.grounded },
+      { texto: 'ESCALONES: SE SUBEN SOLOS\nCAMINANDO, HASTA LA TERRAZA', botones: ['stick'], antes: ir(360, 60), listo: () => r().a.x > 470 && r().a.base >= 24 },
+      { texto: 'LA ESCALERA ELÉCTRICA VA AL REVÉS:\nCORRE FUERTE, O SUBE SALTANDO AL LADO', botones: ['stick', 'jump'], antes: ir(840, 30), listo: () => r().a.x > 1020 && r().a.base >= 72 },
+      { texto: 'EL HUECO: CRUZA POR LA VIGA\nO SÁLTALO CORRIENDO', botones: ['stick', 'jump'], antes: ir(1430, 67), listo: () => r().a.x > 1570 && r().a.grounded },
+      { texto: 'EL MURO: {SALTO} JUSTO ANTES\nDE LLEGAR. ¡DA IMPULSO!', botones: ['jump'], antes: ir(1820, 64), listo: () => r().a.base >= 100 },
+      { texto: '¡ESO! AHORA SUBE\nHASTA EL MIRADOR', botones: ['stick', 'jump'], listo: () => r().done },
+    ];
     return [
       { texto: 'MANTÉN {MOVER} ADELANTE\nY ARRANCAS A CORRER', botones: ['stick'], listo: () => r().a.st === 'run' },
       { texto: 'UN CANAL: CORRE Y TOCA {SALTO}\nJUSTO ANTES DEL BORDE', botones: ['stick', 'jump'], antes: ir(1080, 40), listo: () => r().a.x > 1266 && r().a.grounded },
@@ -331,6 +356,7 @@ export class CrossCountry extends EventScene implements World {
     for (const i of this.items) i.update(dt);
     if (juego && !this.d.practica) { this.trafico(dt); this.rio(dt); }
     this.fruta(dt);
+    this.perrosTick(dt);
     this.coach?.tick(dt);
     this.render();
     if (juego) this.checkEnd();
@@ -361,6 +387,19 @@ export class CrossCountry extends EventScene implements World {
     if (r.aire && a.grounded && a.st !== 'fall' && L.clima[0] === 'aguacero' && Math.abs(a.x - prevX) > 1.5) {
       const zinc = this.pisoEn(a.x, a.y) === 'metal' && a.base === 0;
       if (Math.random() < (zinc ? 0.25 : 0.1)) this.resbalar(r, zinc ? '¡EL ZINC MOJADO RESBALA!' : '¡RESBALÓN!');
+    }
+    // la escalera eléctrica al revés empuja para atrás a quien va encima
+    if (a.grounded && a.base > 0 && this.cajas.some((c) => c.tipo === 'escalera_electrica' && a.x >= c.x && a.x < c.x + c.w && a.y >= c.y && a.y < c.y + c.d && Math.abs(c.z - a.base) < 1)) a.x -= ESCALERA * dt;
+    // el impulso: saltar justo antes de un obstáculo lleva más lejos
+    if (this.recorrido.impulso && !r.aire && !a.grounded && a.st === 'jump' && a.vz > 150) {
+      const dir = a.left ? -1 : 1;
+      const obst = this.cajas.some((c) => c.z > a.base + PASO && a.y >= c.y && a.y < c.y + c.d && (dir > 0 ? c.x - a.x : a.x - (c.x + c.w)) > 6 && (dir > 0 ? c.x - a.x : a.x - (c.x + c.w)) < 34);
+      if (obst && Math.abs(a.vx) > 50) {
+        a.vx *= 1.35;
+        a.vz *= 1.08;
+        this.fx(a);
+        if (a.human) { this.letrero(a, '¡IMPULSO!', 0xffe040); chip.blip(1320, 0.12, 'sq25', 0.14, 1760); }
+      }
     }
     // frutas: quien cae encima de un puesto de frutas las tumba al pasillo
     if (r.aire && a.grounded && a.base > 0) {
@@ -433,6 +472,54 @@ export class CrossCountry extends EventScene implements World {
       }
     }
     this.frutas = this.frutas.filter((f) => { if (f.t <= 0) { f.g.destroy(); return false; } return true; });
+  }
+
+  /** El brillito del impulso a los pies. */
+  private fx(a: Actor) { efecto(this, 'brillo_record', a.x, FT + a.y - a.z - 10, { depth: a.fig.depth + 0.2 }); }
+
+  // ------------------------------------------------------------------ comuna: perros dormidos
+
+  private armarPerros() {
+    for (const e of this.L.entidades) {
+      if (e.tipo !== 'animal' || !String(e.animal ?? '').startsWith('perro')) continue;
+      const x = e.x ?? 0, y = e.y ?? 60;
+      const z = Math.max(0, this.suelo(x, y, 999));
+      // un perro de la calle: Thor más oscuro, echado
+      const f = new Figura(this, x, FT + y - z, 'thor', 'lie').setTint(0x8a7a6a);
+      f.row = 'down_right';
+      const zz = txt(this, x + 10, FT + y - z - 30, 'Z z', 'fuente_ui', 1).setTint(0xc8d8ff);
+      this.tweens.add({ targets: zz, y: zz.y - 6, alpha: 0.3, duration: 900, yoyo: true, repeat: -1 });
+      this.perros.push({ x, y, z, x0: x, f, zz, despierto: 0, presa: null });
+    }
+  }
+
+  /** Quien pisa a un perro dormido lo despierta: ladra, lo tumba y lo persigue un ratito. */
+  private perrosTick(dt: number) {
+    for (const p of this.perros) {
+      if (p.despierto > 0) {
+        p.despierto -= dt;
+        const q = p.presa;
+        if (q && p.despierto > 0.6) { p.x += Math.sign(q.x - p.x) * Math.min(150 * dt, Math.abs(q.x - p.x)); p.f.left = q.x < p.x; }
+        else { p.x += Math.sign(p.x0 - p.x) * Math.min(90 * dt, Math.abs(p.x0 - p.x)); p.f.left = p.x0 < p.x; }
+        p.f.set(Math.abs(p.x - p.x0) > 2 || (q && p.despierto > 0.6) ? 'run' : 'idle');
+        if (p.despierto <= 0) { p.f.set('lie'); p.f.row = 'down_right'; p.zz.setVisible(true); p.presa = null; }
+      } else {
+        for (const r of this.gente2) {
+          const a = r.a;
+          if (!a.grounded || Math.abs(a.base - p.z) > 2 || Math.abs(a.x - p.x) > 14 || Math.abs(a.y - p.y) > 8 || !a.canBeHit()) continue;
+          p.despierto = 2.2;
+          p.presa = a;
+          p.zz.setVisible(false);
+          p.f.set('bark', true);
+          this.sfx('ladrido', a.human ? 0.7 : 0.25);
+          a.knockdown(a.left ? -1 : 1, 60, 110);
+          if (a.human) this.letrero(a, '¡GUAU! ¡DESPERTASTE AL PERRO!', 0xffa060);
+          break;
+        }
+      }
+      p.f.step(dt);
+      p.f.setPosition(Math.round(p.x), FT + p.y - p.z).setDepth(FT + p.y + 0.2);
+    }
   }
 
   // ------------------------------------------------------------------ río: ferry y jacintos
@@ -746,16 +833,26 @@ export class CrossCountry extends EventScene implements World {
       this.rotulo(b.x0, FT + b.y0 - b.z - 8, `${(b.tipo ?? 'TOLDO').toUpperCase().replace(/_/g, ' ')} · NO SALTES ABAJO`);
     }
     // cajas: techo claro, frente oscuro, con su nombre
+    // techo y frente por tipo, para leer el gris: ladrillo, zinc, la escalera eléctrica, la fruta
+    const COLOR: Record<string, [number, number]> = {
+      puesto_frutas: [0xe0b060, 0x9a6a30], terraza: [0xc89a7a, 0x9a5a3a], muro_ladrillo: [0xb8704a, 0x8a4a2a],
+      techo_lata: [0xa8b4c4, 0x6a7888], escalera_electrica: [0xd0d4dc, 0xd06a2a], escalones: [0xd8c8a8, 0xa89878], escalon: [0xd8c8a8, 0xa89878],
+      viga: [0x7a7a8a, 0x4a4a58], muelle: [0xa87a4a, 0x6a4a2a],
+    };
     for (const c of this.cajas) {
       if (c === this.ferry) continue;
       const box = this.add.graphics().setDepth(FT + c.y + c.d - 0.5);
       const muro = L.muros.includes(c);
-      const fruta = c.tipo === 'puesto_frutas';
-      box.fillStyle(fruta ? 0xe0b060 : muro ? 0xb0a090 : 0xc8c8d0).fillRect(c.x, FT + c.y - c.z, c.w, c.d);
-      box.fillStyle(fruta ? 0x9a6a30 : muro ? 0x807060 : 0x8a8a96).fillRect(c.x, FT + c.y + c.d - c.z, c.w, c.z);
+      const [techo, frente] = COLOR[c.tipo ?? ''] ?? (muro ? [0xb0a090, 0x807060] : [0xc8c8d0, 0x8a8a96]);
+      box.fillStyle(techo).fillRect(c.x, FT + c.y - c.z, c.w, c.d);
+      box.fillStyle(frente).fillRect(c.x, FT + c.y + c.d - c.z, c.w, c.z);
+      // la escalera eléctrica va al revés: flechitas hacia atrás en cada escalón
+      if (c.tipo === 'escalera_electrica') for (let y = c.y + 6; y < c.y + c.d - 2; y += 14) box.fillStyle(0x30303a).fillTriangle(c.x + 3, FT + y - c.z, c.x + c.w - 4, FT + y - 4 - c.z, c.x + c.w - 4, FT + y + 4 - c.z);
+      if (c.tipo === 'terraza' || c.tipo === 'muro_ladrillo') for (let y = FT + c.y + c.d - c.z + 6; y < FT + c.y + c.d; y += 8) box.fillStyle(0x7a3a22, 0.5).fillRect(c.x, y, c.w, 1);
       box.lineStyle(1, 0x303038, 0.8).strokeRect(c.x + 0.5, FT + c.y - c.z + 0.5, c.w - 1, c.d + c.z - 1);
-      // el nombre encima de la caja, chiquito, para leer el gris
-      this.add.bitmapText(c.x + c.w / 2, FT + c.y - c.z - 6, 'fuente_ui', (c.tipo ?? '').toUpperCase().replace(/_/g, ' ')).setOrigin(0.5).setDepth(FT + c.y + c.d - 0.4).setTint(0xf0f0f8).setAlpha(0.8);
+      // el nombre encima, una vez por grupo (los escalones seguidos llevan uno solo)
+      const seguido = this.cajas.some((o) => o !== c && o.tipo === c.tipo && Math.abs(o.x + o.w - c.x) < 1 && o.y === c.y);
+      if (!seguido) this.add.bitmapText(c.x + c.w / 2, FT + c.y - c.z - 6, 'fuente_ui', (c.tipo ?? '').toUpperCase().replace(/_/g, ' ')).setOrigin(0.5).setDepth(FT + c.y + c.d - 0.4).setTint(0xf0f0f8).setAlpha(0.8);
     }
   }
 
@@ -818,8 +915,8 @@ export class CrossCountry extends EventScene implements World {
     for (const r of this.gente2) if (!r.done) { r.done = true; r.time = this.clock + (this.meta - r.a.x) / 120; }
     for (const r of this.gente2) this.acum[r.c.id] = (this.acum[r.c.id] ?? 0) + r.time;
     const orden = [...this.gente2].sort((p, q) => this.acum[p.c.id] - this.acum[q.c.id]);
-    if (this.tramo === TRAMOS.length - 1) {
-      this.resultados(prueba('CrossCountry').nombre, orden.map((r) => ({ c: r.c, valor: `${this.acum[r.c.id].toFixed(2)} S` })));
+    if (this.tramo === this.tramos.length - 1) {
+      this.resultados(prueba(this.scene.key).nombre, orden.map((r) => ({ c: r.c, valor: `${this.acum[r.c.id].toFixed(2)} S` })));
       return;
     }
     this.entreTramos(orden);
@@ -833,7 +930,7 @@ export class CrossCountry extends EventScene implements World {
     const g = this.uiAdd(this.add.graphics().setDepth(8400));
     g.fillStyle(0x08081a, 0.9).fillRect(140, 60, 360, 220);
     g.lineStyle(2, 0xf2c230).strokeRect(141, 61, 358, 218);
-    this.uiAdd(txt(this, 320, 80, `TRAMO ${this.tramo + 1} DE ${TRAMOS.length} · ${this.L.nombre}`, 'fuente_ui', 1).setDepth(8500).setTint(0xffe080));
+    this.uiAdd(txt(this, 320, 80, `TRAMO ${this.tramo + 1} DE ${this.tramos.length} · ${this.L.nombre}`, 'fuente_ui', 1).setDepth(8500).setTint(0xffe080));
     this.uiAdd(txt(this, 320, 98, 'ASÍ VA LA CARRERA', 'fuente_titulo', 1).setDepth(8500));
     orden.forEach((r, i) => {
       const y = 128 + i * 32;
@@ -843,7 +940,7 @@ export class CrossCountry extends EventScene implements World {
       this.uiAdd(txt(this, 480, y - 4, `${this.acum[r.c.id].toFixed(2)} S`, 'fuente_ui', 2, 1).setDepth(8500));
       this.uiAdd(txt(this, 480, y + 9, `ESTE TRAMO ${r.time.toFixed(2)}`, 'fuente_ui', 1, 1).setDepth(8500).setTint(0x9a9ac0));
     });
-    this.uiAdd(txt(this, 320, 266, `SIGUE: ${TRAMOS[this.tramo + 1].nombre}`, 'fuente_ui', 1).setDepth(8500).setTint(0x8ae08a));
+    this.uiAdd(txt(this, 320, 266, `SIGUE: ${this.tramos[this.tramo + 1].nombre}`, 'fuente_ui', 1).setDepth(8500).setTint(0x8ae08a));
     const data: CrossData = { ...this.d, tramo: this.tramo + 1, cross: { gente: this.gente, acum: this.acum } };
     this.entre = { t: 4.2, go: () => { this.cameras.main.fadeOut(250); this.cameras.main.once('camerafadeoutcomplete', () => this.scene.restart(data)); } };
   }

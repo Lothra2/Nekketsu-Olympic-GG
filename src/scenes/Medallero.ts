@@ -7,7 +7,7 @@ import { PRUEBAS_GIRA, type Gira } from '../events/base';
 import { FAMILIA, INSTITUTO } from './Select';
 import { fireworks } from './logo';
 
-const BANDERA: Record<string, string> = { CrossCountry: 'flag_vn', Vallas: 'flag_co', Natacion: 'flag_vn', Jabalina: 'flag_ve', Fight: 'flag_ve' };
+const BANDERA: Record<string, string> = { CrossCountry: 'flag_vn', Obstaculos: 'flag_co', Vallas: 'flag_co', Natacion: 'flag_vn', Jabalina: 'flag_ve', Fight: 'flag_ve' };
 
 /**
  * Entre prueba y prueba de la Olimpiada Express: el marcador por equipos, lo que va de gira y la que viene.
@@ -50,9 +50,11 @@ export class Medallero extends Phaser.Scene {
     FAMILIA.forEach((id, i) => this.add.image(84 + i * 14, 92, 'cabecitas', id));
     INSTITUTO.forEach((id, i) => this.add.image(514 + i * 14, 92, 'cabecitas', id));
     // las pruebas: hechas con su oro, la que viene parpadeando
-    panel(this, 60, 118, 520, 150);
+    // la lista de pruebas: el panel crece con las que haya, y cada una lleva su nombre y su lugar
+    const fila = 27;
+    panel(this, 60, 114, 520, PRUEBAS_GIRA.length * fila + 12);
     PRUEBAS_GIRA.forEach((p, i) => {
-      const y = 134 + i * 28;
+      const y = 130 + i * fila;
       const hecha = g.resultados[i];
       const viene = i === g.idx;
       this.add.image(88, y, BANDERA[p.scene]).setScale(0.75);
@@ -70,8 +72,8 @@ export class Medallero extends Phaser.Scene {
     });
     const p = PRUEBAS_GIRA[g.idx];
     const msg = g.idx === 0 ? '¡ARRANCA LA GIRA! 10 · 6 · 4 · 2 PUNTOS POR PUESTO' : g.idx === PRUEBAS_GIRA.length - 1 ? 'LA FINAL VALE 20 PUNTOS PARA EL EQUIPO QUE GANE' : `PRÓXIMA: ${p.nombre}`;
-    txt(this, 320, 284, msg, 'fuente_ui', 1).setTint(0xffe080);
-    const go = txt(this, 320, 306, 'PRESIONA START', 'fuente_ui', 2);
+    txt(this, 320, 136 + PRUEBAS_GIRA.length * fila, msg, 'fuente_ui', 1).setTint(0xffe080);
+    const go = txt(this, 320, 158 + PRUEBAS_GIRA.length * fila, 'PRESIONA START', 'fuente_ui', 2);
     this.tweens.add({ targets: go, alpha: 0.2, duration: 450, yoyo: true, repeat: -1 });
     // la familia y el jugador, animados abajo
     const f = new Figura(this, 40, 340, g.jugador, 'idle').setScale(1.2);
