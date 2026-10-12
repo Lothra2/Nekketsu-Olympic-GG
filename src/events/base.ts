@@ -3,9 +3,10 @@ import { Input } from '../core/input';
 import { chip, VICTORIA } from '../core/music';
 import { kit } from '../core/kit';
 import { txt, flash } from '../core/ui';
+import { Coach, type Paso } from '../core/coach';
 import { FAMILIA, INSTITUTO } from '../scenes/Select';
 
-export interface EventData { jugador: string; gira?: boolean }
+export interface EventData { jugador: string; gira?: boolean; practica?: boolean }
 export interface Competidor { id: string; team: 0 | 1; human: boolean }
 
 /** Estado de la Olimpiada Express (vive en el registro de Phaser). */
@@ -42,11 +43,14 @@ export abstract class EventScene extends Phaser.Scene {
   protected d!: EventData;
   protected gente: Competidor[] = [];
   protected fase: 'previa' | 'juego' | 'fin' = 'previa';
+  protected coach: Coach | null = null;
   private endChoice: ((p: ReturnType<Input['read']>) => void) | null = null;
 
   init(d: EventData) {
-    this.d = { jugador: d.jugador ?? 'rick', gira: !!d.gira };
-    this.gente = lineup(this.d.jugador);
+    this.d = { jugador: d.jugador ?? 'rick', gira: !!d.gira, practica: !!d.practica };
+    // en el entrenamiento estás solo: nadie te apura
+    this.gente = this.d.practica ? [{ id: this.d.jugador, team: 0, human: true }] : lineup(this.d.jugador);
+    this.coach = null;
     this.fase = 'previa';
     this.endChoice = null;
     this.ultimo = -1;
@@ -156,24 +160,61 @@ export abstract class EventScene extends Phaser.Scene {
       gira.resultados.push({ prueba: titulo, podio: orden.map((o) => o.c.id) });
       this.registry.set('gira', gira);
     }
-    const opts = this.d.gira ? ['SIGUIENTE'] : ['OTRA VEZ', 'MENÚ'];
+    if (this.d.gira) this.menuFinal(['SIGUIENTE'], 262, () => this.siguiente());
+    else this.menuFinal(['OTRA VEZ', 'MENÚ'], 262, (i) => { if (i === 0) this.scene.restart(this.d); else this.alMenu(); });
+  }
+
+  /** Opciones al final, en fila: con flechas y botón, o tocándolas. */
+  protected menuFinal(opts: string[], y: number, pick: (i: number) => void) {
     let sel = 0;
-    const items = opts.map((o, i) => this.uiAdd(txt(this, opts.length === 1 ? 320 : 260 + i * 120, 262, o, 'fuente_ui', 2).setDepth(8500).setInteractive()));
+    const w = opts.length === 3 ? 196 : 120;
+    const items = opts.map((o, i) => this.uiAdd(txt(this, 320 + (i - (opts.length - 1) / 2) * w, y, o, 'fuente_ui', 2).setDepth(8500).setInteractive()));
     const draw = () => items.forEach((t, i) => t.setTint(i === sel ? 0xffe040 : 0x8a8aa8));
     draw();
-    const pick = (i: number) => {
-      if (this.d.gira) { this.siguiente(); return; }
-      if (i === 0) this.scene.restart(this.d); else { chip.stop(0.2); this.scene.start('Title'); }
-    };
-    items.forEach((t, i) => t.on('pointerdown', () => pick(i)));
-    let lock = 0.6, lx = 0;
+    let lock = 0.6, lx = 0, gone = false;
+    const go = (i: number) => { if (gone) return; gone = true; chip.blip(1320, 0.1, 'sq25', 0.2, 1760); pick(i); };
+    items.forEach((t, i) => t.on('pointerdown', () => go(i)));
     this.endChoice = (p) => {
       lock -= 1 / 60;
       if (lock > 0) return;
-      if (p.x !== 0 && p.x !== lx) { sel = (sel + 1) % opts.length; draw(); chip.blip(660, 0.04); }
+      if (p.x !== 0 && p.x !== lx) { sel = (sel + p.x + opts.length) % opts.length; draw(); chip.blip(660, 0.04); }
       lx = p.x;
-      if (p.pressed.punch || p.pressed.start || p.pressed.kick) pick(sel);
+      if (p.pressed.punch || p.pressed.start || p.pressed.kick) go(sel);
     };
+  }
+
+  protected alMenu() { chip.stop(0.2); this.scene.start('Title'); }
+
+  /**
+   * Entrenamiento: sin cuenta regresiva ni rivales. Un cartel arriba va diciendo qué hacer y espera.
+   * Al terminar: jugar de verdad, repetir o volver al menú.
+   */
+  protected async entrenar(nombre: string, pasos: Paso[], y = 40) {
+    const band = this.uiAdd(this.add.graphics().setDepth(8400));
+    band.fillStyle(0x08081a, 0.75).fillRect(0, 120, 640, 64);
+    band.fillStyle(0xf2c230).fillRect(0, 120, 640, 2).fillRect(0, 182, 640, 2);
+    const t1 = this.uiAdd(txt(this, 320, 140, 'ENTRENAMIENTO', 'fuente_titulo_plata', 2).setDepth(8500));
+    const t2 = this.uiAdd(txt(this, 320, 166, `${nombre} · SIN RIVALES Y SIN APURO`, 'fuente_ui', 2).setDepth(8500).setTint(0xffe080));
+    await new Promise<void>((r) => this.time.delayedCall(1600, r));
+    band.destroy(); t1.destroy(); t2.destroy();
+    this.fase = 'juego';
+    this.coach = new Coach(this, this.ui, this.pad, pasos, () => this.finPractica(), y);
+  }
+
+  private finPractica() {
+    this.fase = 'fin';
+    chip.play(VICTORIA);
+    flash(this, 150);
+    const g = this.uiAdd(this.add.graphics().setDepth(8400));
+    g.fillStyle(0x08081a, 0.88).fillRect(30, 110, 580, 120);
+    g.lineStyle(2, 0xf2c230).strokeRect(31, 111, 578, 118);
+    this.uiAdd(txt(this, 320, 138, '¡YA SABES JUGAR!', 'fuente_titulo', 2).setDepth(8500));
+    this.uiAdd(txt(this, 320, 166, '¿TE ANIMAS CONTRA LOS RIVALES?', 'fuente_ui', 2).setDepth(8500).setTint(0xffe080));
+    this.menuFinal(['JUGAR DE VERDAD', 'OTRA VEZ', 'MENÚ'], 204, (i) => {
+      if (i === 0) this.scene.restart({ jugador: this.d.jugador });
+      else if (i === 1) this.scene.restart(this.d);
+      else this.alMenu();
+    });
   }
 
   /** Pasa a la siguiente prueba de la Olimpiada (por el medallero). */

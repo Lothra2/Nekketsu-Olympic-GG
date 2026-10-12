@@ -4,6 +4,7 @@ import { chip, PELEA } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { Painter, hex } from '../gfx/paint';
 import { EventScene, PRUEBAS_GIRA, type Competidor } from './base';
+import type { Paso } from '../core/coach';
 
 const WORLD = 1460;
 const TOP = 226;
@@ -60,7 +61,8 @@ export class Natacion extends EventScene {
       tint: [0xffffff, 0xc8ecff, 0x9ad8f0], emitting: false,
     }).setDepth(900);
 
-    this.gente.forEach((c, i) => {
+    this.gente.forEach((c, k) => {
+      const i = this.d.practica ? 1 : k;
       const fig = new Figura(this, BLOCK, 0, c.id, 'idle');
       fig.anim.prefer = 'natacion';
       fig.set('dive', true);
@@ -75,7 +77,18 @@ export class Natacion extends EventScene {
     this.uiAdd(txt(this, 66, 326, 'BRAZADA', 'fuente_ui', 1).setDepth(8001));
     chip.play(PELEA);
     this.time.delayedCall(2200, () => { this.armed = true; });
-    void this.previa('NATACIÓN HẠ LONG', 'BAHÍA DE HẠ LONG, VIETNAM', 'SALTO PARA LANZARTE · ALTERNA PUÑO Y PATADA · ★ PATADA DE DELFÍN');
+    if (this.d.practica) void this.entrenar('NATACIÓN HẠ LONG', this.pasos());
+    else void this.previa('NATACIÓN HẠ LONG', 'BAHÍA DE HẠ LONG, VIETNAM', 'SALTO PARA LANZARTE · ALTERNA PUÑO Y PATADA · ESTRELLA: PATADA DE DELFÍN');
+  }
+
+  private pasos(): Paso[] {
+    const me = () => this.swimmers[0];
+    return [
+      { texto: 'TOCA C PARA TIRARTE AL AGUA\nEN LA CARRERA, ESPERA EL ¡YA!', teclas: 'L O ESPACIO', botones: ['jump'], listo: () => me().st === 'swim' },
+      { texto: 'ALTERNA A Y B PARA NADAR\nMIENTRAS MÁS RÁPIDO, MEJOR', teclas: 'J Y K, UNA Y OTRA', botones: ['punch', 'kick'], listo: () => me().boost > 45 },
+      { texto: 'TOCA LA ESTRELLA: DELFÍN\nCUANDO LA BARRA VERDE ESTÉ LLENA', teclas: 'U', botones: ['special'], listo: () => me().jalon > 0 },
+      { texto: 'SIGUE NADANDO\nHASTA TOCAR LA PARED', teclas: 'J Y K, UNA Y OTRA', botones: ['punch', 'kick'], listo: () => me().st === 'done' },
+    ];
   }
 
   private makeTextures() {
@@ -119,6 +132,7 @@ export class Natacion extends EventScene {
       this.time.delayedCall(1800, () => t.destroy());
     }
     if (this.fase === 'juego') this.clock += dt;
+    this.coach?.tick(dt);
     for (const s of this.swimmers) this.swimmer(s, dt, p);
     this.render();
     if (this.fase === 'juego') this.checkEnd();
@@ -229,6 +243,15 @@ export class Natacion extends EventScene {
 
   private checkEnd() {
     const me = this.swimmers[0];
+    if (this.d.practica) {
+      if (me.st === 'done' && this.coach && !this.coach.done && !this.coach.ultimo) {
+        me.st = 'swim'; me.x = START + 30; me.fig.set('swim', true);
+        const t = this.uiAdd(txt(this, 320, 200, '¡OTRO LARGO!', 'fuente_titulo', 1).setDepth(8500));
+        this.time.delayedCall(1000, () => t.destroy());
+        for (const o of this.children.list) if ((o as Phaser.GameObjects.BitmapText).text === '1°') o.destroy();
+      }
+      return;
+    }
     if (this.porTiempo(this.swimmers.map((s) => s.st === 'done'), me.st === 'done', this.clock)) {
       for (const s of this.swimmers) if (s.st !== 'done') { s.st = 'done'; s.time = this.clock + (FINISH - s.x) / 100; }
       const orden = [...this.swimmers].sort((a, b) => a.time - b.time).map((s) => ({ c: s.c, valor: `${s.time.toFixed(2)} S` }));

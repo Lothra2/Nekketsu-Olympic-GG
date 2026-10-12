@@ -4,6 +4,7 @@ import { chip, PELEA } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { Painter, hex } from '../gfx/paint';
 import { EventScene, PRUEBAS_GIRA, type Competidor } from './base';
+import type { Paso } from '../core/coach';
 
 const WORLD = 1720;
 const TOP = 228;
@@ -23,6 +24,9 @@ interface Hurdle { x: number; lane: number; down: boolean; img: Phaser.GameObjec
 /** Vallas del Café: 4 carriles, 9 vallas, codazos permitidos. */
 export class Vallas extends EventScene {
   private racers: Racer[] = [];
+  /** entrenamiento: vallas pasadas sin tumbar y cambios de carril */
+  private saltadas = 0;
+  private cambios = 0;
   private hurdles: Hurdle[] = [];
   private clock = 0;
   private hud!: Phaser.GameObjects.Graphics;
@@ -33,6 +37,8 @@ export class Vallas extends EventScene {
 
   create() {
     this.racers = [];
+    this.saltadas = 0;
+    this.cambios = 0;
     this.hurdles = [];
     this.clock = 0;
     this.setup(ZOOM, WORLD);
@@ -44,7 +50,9 @@ export class Vallas extends EventScene {
       const img = this.add.image(x, TOP + y, 'valla').setOrigin(0.5, 1).setDepth(TOP + y - 0.5);
       this.hurdles.push({ x, lane, down: false, img });
     }
-    this.gente.forEach((c, i) => {
+    this.gente.forEach((c, k) => {
+      // entrenando vas solo por el carril 2: así puedes cambiar hacia arriba y hacia abajo
+      const i = this.d.practica ? 1 : k;
       const fig = new Figura(this, START, TOP + LANES[i], c.id, 'idle');
       fig.anim.prefer = 'atletismo';
       fig.set('sprint_start', true);
@@ -58,7 +66,20 @@ export class Vallas extends EventScene {
     this.timeTxt = this.uiAdd(txt(this, 626, 14, '0.00', 'fuente_ui', 2, 1).setDepth(8001));
     this.racers.forEach((r) => this.uiAdd(this.add.image(0, 22, 'cabecitas', r.c.id).setDepth(8002).setData('r', r)));
     chip.play(PELEA);
-    void this.previa('VALLAS DEL CAFÉ', 'EJE CAFETERO, COLOMBIA', 'ALTERNA PUÑO Y PATADA PARA CORRER · SALTO PARA LAS VALLAS · ★ CODAZO');
+    if (this.d.practica) void this.entrenar('VALLAS DEL CAFÉ', this.pasos());
+    else void this.previa('VALLAS DEL CAFÉ', 'EJE CAFETERO, COLOMBIA', 'ALTERNA PUÑO Y PATADA PARA CORRER · SALTO PARA LAS VALLAS · ESTRELLA: CODAZO');
+  }
+
+  private pasos(): Paso[] {
+    const me = () => this.racers[0];
+    let base = 0;
+    return [
+      { texto: 'ALTERNA A Y B RÁPIDO\nPARA CORRER', teclas: 'J Y K, UNA Y OTRA', botones: ['punch', 'kick'], listo: () => me().boost > 45 },
+      { texto: 'TOCA C JUSTO ANTES\nDE LA VALLA PARA SALTARLA', teclas: 'L O ESPACIO', botones: ['jump'], listo: () => this.saltadas >= 1 },
+      { texto: '¡ESO! SALTA 3 VALLAS MÁS\nSIN TUMBARLAS', teclas: 'J Y K PARA CORRER · L PARA SALTAR', botones: ['punch', 'kick', 'jump'], antes: () => { base = this.saltadas; }, listo: () => this.saltadas - base >= 3 },
+      { texto: 'MUEVE LA PALANCA ARRIBA O ABAJO\nPARA CAMBIAR DE CARRIL', teclas: 'FLECHA ARRIBA O ABAJO', botones: ['stick'], listo: () => this.cambios >= 1 },
+      { texto: 'LLEGA A LA META\nLA ESTRELLA ES EL CODAZO', teclas: 'U ES EL CODAZO', botones: ['punch', 'kick', 'special'], listo: () => me().st === 'done' },
+    ];
   }
 
   private makeTextures() {
@@ -92,6 +113,7 @@ export class Vallas extends EventScene {
     const p = this.pad.read();
     if (this.endTick(p)) { this.animIdle(dt); this.filterUi(); return; }
     if (this.fase === 'juego') this.clock += dt;
+    this.coach?.tick(dt);
     for (const r of this.racers) this.racer(r, dt, p);
     this.render();
     if (this.fase === 'juego') this.checkEnd();
@@ -125,7 +147,7 @@ export class Vallas extends EventScene {
       r.boost = Math.max(0, r.boost - 42 * dt);
       target = (p.x > 0 || r.boost > 0 ? 70 : 0) + r.boost;
       if (p.pressed.jump && r.st !== 'air') this.jump(r);
-      if (p.y !== 0 && Math.abs(r.y - LANES[r.lane]) < 2) { const nl = Phaser.Math.Clamp(r.lane + p.y, 0, 3); if (!this.racers.some((o) => o !== r && o.lane === nl && Math.abs(o.x - r.x) < 14)) r.lane = nl; }
+      if (p.y !== 0 && Math.abs(r.y - LANES[r.lane]) < 2) { const nl = Phaser.Math.Clamp(r.lane + p.y, 0, 3); if (nl !== r.lane && !this.racers.some((o) => o !== r && o.lane === nl && Math.abs(o.x - r.x) < 14)) { r.lane = nl; this.cambios++; } }
       if (p.pressed.special) this.codazo(r);
     } else {
       target = r.top + Math.sin(r.t * 2 + r.react * 20) * 10;
@@ -138,6 +160,8 @@ export class Vallas extends EventScene {
     if (r.st === 'stumble') { target *= 0.3; if (r.t > 0.4) { r.st = 'run'; r.fig.set('sprint'); } }
     r.v += Phaser.Math.Clamp(target - r.v, -260 * dt, 230 * dt);
     const dx = r.v * dt;
+    // una valla de tu carril que quedó atrás sin caerse: saltada
+    if (r.c.human) for (const h of this.hurdles) if (h.lane === r.lane && !h.down && h.x > r.x && h.x <= r.x + dx) this.saltadas++;
     r.x += dx;
     r.y += Phaser.Math.Clamp(LANES[r.lane] - r.y, -60 * dt, 60 * dt);
     if (r.st === 'air') {
@@ -229,6 +253,16 @@ export class Vallas extends EventScene {
 
   private checkEnd() {
     const me = this.racers[0];
+    if (this.d.practica) {
+      // si llegas antes de terminar los pasos, otra vuelta con las vallas paradas
+      if (me.st === 'done' && this.coach && !this.coach.done && !this.coach.ultimo) {
+        me.st = 'run'; me.x = START; me.fig.set('sprint');
+        for (const h of this.hurdles) { h.down = false; h.img.setTexture('valla').setPosition(h.x, h.img.y); }
+        const t = this.uiAdd(txt(this, 320, 200, '¡OTRA VUELTA!', 'fuente_titulo', 1).setDepth(8500));
+        this.time.delayedCall(1000, () => t.destroy());
+      }
+      return;
+    }
     if (this.porTiempo(this.racers.map((r) => r.st === 'done'), me.st === 'done', this.clock)) {
       for (const r of this.racers) if (r.st !== 'done') { r.st = 'done'; r.time = this.clock + (FINISH - r.x) / 120; }
       const orden = [...this.racers].sort((a, b) => a.time - b.time).map((r) => ({ c: r.c, valor: `${r.time.toFixed(2)} S` }));

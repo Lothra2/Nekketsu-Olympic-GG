@@ -3,6 +3,8 @@ import Phaser from 'phaser';
 /** Botones del juego. Iguales en teclado, mando y táctil. */
 export type Btn = 'punch' | 'kick' | 'jump' | 'special' | 'start' | 'back';
 const BTNS: Btn[] = ['punch', 'kick', 'jump', 'special', 'start', 'back'];
+/** Lo que el entrenamiento puede señalar en pantalla: un botón o la palanca. */
+export type Control = Btn | 'stick';
 
 export interface Pad {
   x: number;
@@ -103,6 +105,12 @@ export class Input {
   }
 
   setTouchVisible(v: boolean) { this.touch?.setVisible(v); }
+
+  /** Hay controles táctiles en pantalla. */
+  get hasTouch() { return !!this.touch; }
+
+  /** Hace latir los botones táctiles indicados (el entrenamiento los señala). Lista vacía: ninguno. */
+  highlight(btns: Control[]) { this.touch?.highlight(btns); }
 }
 
 /** Palanca a la izquierda y botones a la derecha, en coordenadas del juego (640 x 360). */
@@ -113,8 +121,9 @@ class TouchPad {
   private knob: Phaser.GameObjects.Arc;
   private buttons: { btn: Btn; x: number; y: number; r: number; g: Phaser.GameObjects.Container }[] = [];
   private runBtn = false;
+  private glow: Phaser.Tweens.Tween[] = [];
 
-  constructor(scene: Phaser.Scene, layer?: Phaser.GameObjects.Layer) {
+  constructor(private scene: Phaser.Scene, layer?: Phaser.GameObjects.Layer) {
     scene.input.addPointer(3);
     const depth = 10000;
     this.base = scene.add.circle(78, 286, 38, 0xffffff, 0.08).setStrokeStyle(2, 0xffffff, 0.35).setScrollFactor(0).setDepth(depth);
@@ -180,6 +189,18 @@ class TouchPad {
       if (Math.abs(dy) > 10) y = Math.sign(dy);
     }
     return { x, y, held, run: this.runBtn };
+  }
+
+  highlight(btns: Control[]) {
+    for (const t of this.glow) t.remove();
+    this.glow = [];
+    for (const b of this.buttons) {
+      b.g.setAlpha(1);
+      if (!btns.includes(b.btn)) continue;
+      this.glow.push(this.scene.tweens.add({ targets: b.g, alpha: 0.35, duration: 280, yoyo: true, repeat: -1 }));
+    }
+    // la palanca también, si el paso es moverse
+    this.base.setStrokeStyle(2, btns.includes('stick') ? 0xf2c230 : 0xffffff, 0.5);
   }
 
   setVisible(v: boolean) {

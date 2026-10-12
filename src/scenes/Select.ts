@@ -105,6 +105,12 @@ export class Select extends Phaser.Scene {
         this.fadeTo('Medallero');
         return;
       }
+      if (this.modo.startsWith('practica:')) {
+        const sc = this.modo.slice(9);
+        if (sc === 'Fight') this.fadeTo('Fight', { modo: '1v1', jugador: id, rival: 'goro', practica: true });
+        else this.fadeTo(sc, { jugador: id, practica: true });
+        return;
+      }
       if (this.modo !== '1v1') { this.fadeTo(this.modo, { jugador: id }); return; }
       this.paso = 'rival';
       this.sel = 0;

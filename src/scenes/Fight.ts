@@ -8,6 +8,7 @@ import { chip, PELEA, VICTORIA } from '../core/music';
 import { txt, flash, speedLines } from '../core/ui';
 import { FAMILIA, INSTITUTO, INFO } from './Select';
 import type { Gira } from '../events/base';
+import { Coach, type Paso } from '../core/coach';
 
 /** acercamiento de la cámara en la pelea: más cerca en 1 contra 1 */
 const ZOOMS: Record<string, number> = { '1v1': 1.75, '4v4': 1.45 };
@@ -19,7 +20,7 @@ const TECNICA: Record<string, 'mach' | 'huracan' | 'chilena' | 'thor' | 'dragon'
   rick: 'mach', steph: 'huracan', sophie: 'chilena', alana: 'thor', kenji: 'dragon', ryu: 'huracan', goro: 'tackle', tetsu: 'mach',
 };
 
-interface FightData { modo: string; jugador: string; rival: string; gira?: boolean }
+interface FightData { modo: string; jugador: string; rival: string; gira?: boolean; practica?: boolean }
 
 export class Fight extends Phaser.Scene implements World {
   actors: Actor[] = [];
@@ -41,6 +42,9 @@ export class Fight extends Phaser.Scene implements World {
   private slow = 0;
   private data0!: FightData;
   private endChoice: ((p: ReturnType<Input['read']>) => void) | null = null;
+  private coach: Coach | null = null;
+  /** entrenamiento: con qué animación pegó la persona cada golpe */
+  private golpes: string[] = [];
   private thorFan: Figura | null = null;
   private thorRun: { f: Figura; owner: Actor; hit: Set<Actor>; dir: number } | null = null;
   private specials = new Map<Actor, { kind: string; n: number; t: number }>();
@@ -54,7 +58,9 @@ export class Fight extends Phaser.Scene implements World {
   constructor() { super('Fight'); }
 
   init(d: FightData) {
-    this.data0 = { modo: d.modo ?? '1v1', jugador: d.jugador ?? 'rick', rival: d.rival ?? 'kenji', gira: !!d.gira };
+    this.data0 = { modo: d.modo ?? '1v1', jugador: d.jugador ?? 'rick', rival: d.rival ?? 'kenji', gira: !!d.gira, practica: !!d.practica };
+    this.coach = null;
+    this.golpes = [];
     this.actors = [];
     this.items = [];
     this.brains.clear();
@@ -99,9 +105,10 @@ export class Fight extends Phaser.Scene implements World {
       if (i === 0) this.player = a; else this.brains.set(a, new Brain(a, 0.9));
     });
     ellos.forEach((id, i) => {
-      const a = new Actor(this, id, 1, 550 - (i % 2) * 40, 20 + i * 22);
+      const a = new Actor(this, id, 1, this.data0.practica ? 230 : 550 - (i % 2) * 40, 20 + i * 22);
       this.actors.push(a);
-      this.brains.set(a, new Brain(a, modo === '4v4' ? 0.85 : 1));
+      // entrenando, el rival es un saco: no se mueve ni pega
+      if (!this.data0.practica) this.brains.set(a, new Brain(a, modo === '4v4' ? 0.85 : 1));
     });
     const n = modo === '4v4' ? 6 : 4;
     for (let i = 0; i < n; i++) this.items.push(new Item(this, ARMAS_PISO[i], 200 + Math.random() * 240, 10 + Math.random() * (DEPTH - 20)));
@@ -112,7 +119,61 @@ export class Fight extends Phaser.Scene implements World {
     this.buildHud();
     this.registry.set('marchaSonando', false);
     chip.play(PELEA);
-    void this.roundIntro();
+    if (this.data0.practica) void this.entrenar(); else void this.roundIntro();
+  }
+
+  // ------------------------------------------------------------------ entrenamiento
+
+  private async entrenar() {
+    this.dropT = 1e9;
+    await this.banner('ENTRENAMIENTO', 'fuente_titulo_plata', 2, 1100);
+    this.phase = 'play';
+    this.coach = new Coach(this, this.ui, this.pad, this.pasos(), () => this.finPractica(), 58);
+  }
+
+  private pasos(): Paso[] {
+    const yo = this.player;
+    const saco = this.actors.find((a) => a.team === 1)!;
+    const chancla = () => this.items.find((i) => i.kind === 'chancleta');
+    let x0 = 0, y0 = 0, n0 = 0;
+    const desde = () => this.golpes.slice(n0);
+    const marca = () => { n0 = this.golpes.length; };
+    return [
+      { texto: 'MUÉVETE CON LA PALANCA\nY ACÉRCATE AL RIVAL', teclas: 'FLECHAS O WASD', botones: ['stick'], antes: () => { x0 = yo.x; y0 = yo.y; }, listo: () => Math.hypot(yo.x - x0, yo.y - y0) > 50 },
+      { texto: 'A ES PUÑO: PÉGALE\n3 VECES SEGUIDAS', teclas: 'J', botones: ['punch'], antes: marca, listo: () => desde().length >= 3 },
+      { texto: 'B ES PATADA:\nPÉGALE UNA PATADA', teclas: 'K', botones: ['kick'], antes: marca, listo: () => desde().some((g) => g.includes('kick')) },
+      { texto: 'C ES SALTO: SALTA Y EN EL AIRE\nTOCA B, ¡PATADA VOLADORA!', teclas: 'L Y LUEGO K', botones: ['jump', 'kick'], antes: marca, listo: () => desde().some((g) => g === 'air_kick') },
+      { texto: 'EMPUJA LA PALANCA HASTA EL BORDE\nPARA CORRER', teclas: 'DOS VECES ADELANTE, O SHIFT', botones: ['stick'], listo: () => yo.st === 'run' },
+      {
+        texto: 'ESTÁ EN EL PISO: PÁRATE AL LADO\nY TOCA A PARA LEVANTARLO', teclas: 'J', botones: ['punch'],
+        cada: () => { if (['idle', 'walk', 'dizzy', 'hurt'].includes(saco.st)) saco.knockdown(yo.x < saco.x ? 1 : -1, 10, 60); },
+        listo: () => yo.carrying === saco,
+      },
+      { texto: '¡ARRIBA! CAMINA SI QUIERES\nY TOCA A PARA LANZARLO', teclas: 'J', botones: ['punch'], listo: () => saco.st === 'thrown' },
+      {
+        texto: 'RECOGE LA CHANCLETA:\nPÁRATE ENCIMA Y TOCA A', teclas: 'J', botones: ['punch', 'stick'],
+        antes: () => { const c = chancla(); if (c && c.st !== 'hand') { c.st = 'floor'; c.x = yo.x + yo.dir * 30; c.y = yo.y; c.z = 0; } },
+        listo: () => yo.weapon?.kind === 'chancleta',
+      },
+      { texto: 'B LA LANZA\n¡Y VUELVE GIRANDO!', teclas: 'K', botones: ['kick'], listo: () => chancla()?.st === 'flying' && chancla()?.thrower === yo },
+      { texto: 'TU BARRA NEKKETSU ESTÁ LLENA:\nTOCA LA ESTRELLA: TU TÉCNICA', teclas: 'U', botones: ['special'], antes: () => { yo.meter = 100; }, listo: () => this.specials.has(yo) || yo.st === 'special' },
+    ];
+  }
+
+  private finPractica() {
+    this.phase = 'end';
+    chip.play(VICTORIA);
+    flash(this, 150);
+    const g = this.uiAdd(this.add.graphics().setDepth(8400));
+    g.fillStyle(0x08081a, 0.88).fillRect(30, 100, 580, 120);
+    g.lineStyle(2, 0xf2c230).strokeRect(31, 101, 578, 118);
+    this.uiAdd(txt(this, 320, 128, '¡YA SABES PELEAR!', 'fuente_titulo', 2).setDepth(8500));
+    this.uiAdd(txt(this, 320, 156, '¿TE ANIMAS CONTRA KENJI?', 'fuente_ui', 2).setDepth(8500).setTint(0xffe080));
+    this.endMenu(['JUGAR DE VERDAD', 'OTRA VEZ', 'MENÚ'], undefined, (i) => {
+      if (i === 0) this.scene.restart({ modo: '1v1', jugador: this.data0.jugador, rival: 'kenji' });
+      else if (i === 1) this.scene.restart(this.data0);
+      else this.toMenu();
+    }, 196);
   }
 
   // ------------------------------------------------------------------ World
@@ -130,7 +191,8 @@ export class Fight extends Phaser.Scene implements World {
     const t = txt(this, x, FLOOR_TOP + y - 52, `${n}`, 'fuente_ui', 1).setTint(0xff6060).setDepth(6000);
     this.tweens.add({ targets: t, y: t.y - 16, alpha: 0, duration: 650, onComplete: () => t.destroy() });
   }
-  onHit(_from: Actor | null, v: Actor, _dmg: number, kd: boolean) {
+  onHit(from: Actor | null, v: Actor, _dmg: number, kd: boolean) {
+    if (from === this.player && this.data0.practica) this.golpes.push(from.fig.anim.name);
     this.sfx(kd ? 'critico' : 'golpe', kd ? 0.55 : 0.45);
     this.sfx(v.team === 0 ? 'jugador_dolor' : 'enemigo_dolor', 0.25);
     this.hitstop(kd ? 0.09 : 0.05);
@@ -194,6 +256,11 @@ export class Fight extends Phaser.Scene implements World {
     if (this.thorFan?.anim.done) this.thorFan.set('sit');
     for (const a of this.actors) if (a.meter >= 100 && !this.fullMeter.has(a) && a.team === 0 && a.human) { this.fullMeter.add(a); this.sfx('subir_nivel', 0.4); }
 
+    if (this.data0.practica) {
+      // nadie se cansa entrenando
+      for (const a of this.actors) if (a.hp < a.maxHp * 0.5) a.hp = a.maxHp;
+      this.coach?.tick(dt);
+    }
     if (playing) {
       this.dropT -= dt;
       if (this.dropT <= 0) { this.dropT = 9 + Math.random() * 5; this.skyDrop(); }
@@ -229,7 +296,7 @@ export class Fight extends Phaser.Scene implements World {
   }
 
   private checkEnd() {
-    if (this.phase !== 'play' || this.slow > 0) return;
+    if (this.phase !== 'play' || this.slow > 0 || this.data0.practica) return;
     const nos = this.actors.filter((a) => a.team === 0 && a.alive);
     const ellos = this.actors.filter((a) => a.team === 1 && a.alive);
     if (!ellos.length) this.victory();
@@ -299,18 +366,19 @@ export class Fight extends Phaser.Scene implements World {
     });
   }
 
-  private endMenu(opts: string[], onPick?: () => void, solo?: () => void) {
+  private endMenu(opts: string[], onPick?: () => void, solo?: (i: number) => void, y = 196) {
     let sel = 0;
-    const items = opts.map((o, i) => this.uiAdd(txt(this, opts.length === 1 ? 320 : 250 + i * 140, 196, o, 'fuente_ui', 2).setDepth(8500).setInteractive()));
+    const w = opts.length === 3 ? 196 : 140;
+    const items = opts.map((o, i) => this.uiAdd(txt(this, 320 + (i - (opts.length - 1) / 2) * w, y, o, 'fuente_ui', 2).setDepth(8500).setInteractive()));
     const draw = () => items.forEach((t, i) => t.setTint(i === sel ? 0xffe040 : 0x8a8aa8));
     draw();
-    const pick = (i: number) => { onPick?.(); if (solo) solo(); else if (i === 0) this.scene.restart(this.data0); else this.toMenu(); };
+    const pick = (i: number) => { onPick?.(); if (solo) solo(i); else if (i === 0) this.scene.restart(this.data0); else this.toMenu(); };
     items.forEach((t, i) => t.on('pointerdown', () => pick(i)));
     let lock = 0.4;
     this.endChoice = (p) => {
       lock -= 1 / 60;
       if (lock > 0) return;
-      if (p.x !== 0 && p.x !== (this.data.get('lx') ?? 0)) { sel = (sel + 1) % opts.length; draw(); chip.blip(660, 0.04); }
+      if (p.x !== 0 && p.x !== (this.data.get('lx') ?? 0)) { sel = (sel + p.x + opts.length) % opts.length; draw(); chip.blip(660, 0.04); }
       this.data.set('lx', p.x);
       if (p.pressed.punch || p.pressed.start) pick(sel);
       if (p.pressed.back && !solo) this.toMenu();

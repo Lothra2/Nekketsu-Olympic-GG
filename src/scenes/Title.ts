@@ -8,6 +8,7 @@ import { buildLogo, fireworks } from './logo';
 /** Menú en dos niveles para que quepa entre los dos equipos sin tapar a nadie. */
 const MENUS: Record<string, { id: string; label: string }[]> = {
   raiz: [
+    { id: '>entrenar', label: 'ENTRENAMIENTO' },
     { id: 'gira', label: 'OLIMPIADA EXPRESS' },
     { id: '>pruebas', label: 'PRUEBAS SUELTAS' },
     { id: '>peleas', label: 'PELEA CALLEJERA' },
@@ -17,6 +18,13 @@ const MENUS: Record<string, { id: string; label: string }[]> = {
     { id: 'Vallas', label: 'VALLAS DEL CAFÉ' },
     { id: 'Natacion', label: 'NATACIÓN HẠ LONG' },
     { id: 'Jabalina', label: 'JABALINA LLANERA' },
+    { id: '<', label: 'ATRÁS' },
+  ],
+  entrenar: [
+    { id: 'practica:Vallas', label: 'VALLAS' },
+    { id: 'practica:Natacion', label: 'NATACIÓN' },
+    { id: 'practica:Jabalina', label: 'JABALINA' },
+    { id: 'practica:Fight', label: 'PELEA' },
     { id: '<', label: 'ATRÁS' },
   ],
   peleas: [
@@ -48,7 +56,7 @@ export class Title extends Phaser.Scene {
     this.add.image(320, 180, 'bg_caracas');
     this.add.image(320, 280, 'bg_azotea');
     const logo = this.add.container(0, 0);
-    void buildLogo(this, logo, false, -34);
+    void buildLogo(this, logo, false, -46);
     fireworks(this).setDepth(-1);
 
     const fam = ['rick', 'steph', 'sophie', 'alana'];
@@ -84,11 +92,13 @@ export class Title extends Phaser.Scene {
     this.menu.removeAll(true);
     const g = this.add.graphics();
     const n = this.opciones.length;
-    g.fillStyle(0x08081a, 0.78).fillRect(206, 244, 228, n * 21 + 10);
-    g.lineStyle(1, 0xf2c230, 0.8).strokeRect(206.5, 244.5, 227, n * 21 + 9);
+    // el cuadro crece hacia arriba, sin tapar la línea de teclas de abajo
+    const top = 338 - (n * 21 + 10);
+    g.fillStyle(0x08081a, 0.78).fillRect(206, top, 228, n * 21 + 10);
+    g.lineStyle(1, 0xf2c230, 0.8).strokeRect(206.5, top + 0.5, 227, n * 21 + 9);
     this.menu.add(g);
     this.items = this.opciones.map((o, i) => {
-      const t = txt(this, 320, 259 + i * 21, o.label, 'fuente_ui', 2);
+      const t = txt(this, 320, top + 15 + i * 21, o.label, 'fuente_ui', 2);
       t.setInteractive().on('pointerdown', () => { if (this.started) { this.sel = i; this.choose(); } });
       this.menu.add(t);
       return t;

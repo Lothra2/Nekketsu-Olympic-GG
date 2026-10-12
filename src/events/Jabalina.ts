@@ -4,6 +4,7 @@ import { chip, PELEA } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { Painter, hex } from '../gfx/paint';
 import { EventScene, PRUEBAS_GIRA, type Competidor } from './base';
+import type { Paso } from '../core/coach';
 
 const WORLD = 1560;
 const TOP = 226;
@@ -66,7 +67,7 @@ export class Jabalina extends EventScene {
     this.add.image(0, TOP - 6, 'campo').setOrigin(0, 0).setDepth(-5);
     for (let m = 10; m * PX_M + FOUL < WORLD - 20; m += 10) this.add.bitmapText(FOUL + m * PX_M, TOP + 112, 'fuente_ui', `${m}`).setOrigin(0.5).setDepth(-4).setTint(0xf4f0e8);
     // el orden: primero los de la máquina, de último tú (así sabes la marca a batir)
-    const orden = [this.gente[1], this.gente[2], this.gente[3], this.gente[0]];
+    const orden = this.d.practica ? [this.gente[0]] : [this.gente[1], this.gente[2], this.gente[3], this.gente[0]];
     orden.forEach((c, i) => {
       const fig = new Figura(this, 0, 0, c.id, 'idle');
       fig.anim.prefer = 'atletismo';
@@ -79,7 +80,19 @@ export class Jabalina extends EventScene {
     this.hud = this.uiAdd(this.add.graphics().setDepth(8000));
     chip.play(PELEA);
     this.cameras.main.centerOn(this.camX, 360 - 180 / ZOOM);
-    void this.previa('JABALINA LLANERA', 'LLANOS DE APURE, VENEZUELA', 'ALTERNA PUÑO Y PATADA PARA CORRER · MANTÉN SALTO Y SUELTA PARA LANZAR');
+    if (this.d.practica) void this.entrenar('JABALINA LLANERA', this.pasos(), 100);
+    else void this.previa('JABALINA LLANERA', 'LLANOS DE APURE, VENEZUELA', 'ALTERNA PUÑO Y PATADA PARA CORRER · MANTÉN SALTO Y SUELTA PARA LANZAR');
+  }
+
+  private pasos(): Paso[] {
+    const validos = () => this.gente2[0].marcas.filter((m) => m > 0).length;
+    let base = 0;
+    return [
+      { texto: 'ALTERNA A Y B PARA\nAGARRAR VELOCIDAD', teclas: 'J Y K, UNA Y OTRA', botones: ['punch', 'kick'], listo: () => this.boost > 50 },
+      { texto: 'MANTÉN C APRETADO: LA FLECHA\nAMARILLA DE ABAJO SUBE Y BAJA', teclas: 'MANTÉN L', botones: ['jump'], listo: () => this.holding && this.angT > 0.2 },
+      { texto: 'SUELTA C PARA LANZAR\nANTES DE LA RAYA BLANCA', teclas: 'SUELTA L', botones: ['punch', 'kick', 'jump'], antes: () => { base = validos(); }, listo: () => validos() > base },
+      { texto: 'EL TRUCO: MUCHA VELOCIDAD Y\nSOLTAR CERCA DE 45°. ¡PASA LOS 40 M!', teclas: 'J Y K, LUEGO MANTÉN Y SUELTA L', botones: ['punch', 'kick', 'jump'], listo: () => this.gente2[0].best > 40 },
+    ];
   }
 
   private makeTextures() {
@@ -112,6 +125,7 @@ export class Jabalina extends EventScene {
     if (this.endTick(p)) { for (const l of this.gente2) l.fig.step(dt); this.filterUi(); return; }
     for (const l of this.gente2) if (l !== this.cur || this.st === 'espera') l.fig.step(dt);
     if (this.fase === 'juego') this.tick(dt, p);
+    this.coach?.tick(dt);
     this.camera(dt);
     this.drawHud();
     this.filterUi();
@@ -177,7 +191,7 @@ export class Jabalina extends EventScene {
     this.cpuSuelta = FOUL - 14 - Math.random() * 30 + (Math.random() < 0.08 ? 40 : 0);
     this.cpuAng = 36 + Math.random() * 12;
     this.camX = RUN0 + 100;
-    const intento = `INTENTO ${this.ronda + 1} DE ${INTENTOS}`;
+    const intento = this.d.practica ? `INTENTO ${this.ronda + 1}` : `INTENTO ${this.ronda + 1} DE ${INTENTOS}`;
     const t = this.uiAdd(txt(this, 320, 84, `${this.nombre(this.cur.c.id)} · ${intento}`, 'fuente_ui', 2).setDepth(8500).setTint(this.cur.c.human ? 0xffe040 : this.cur.c.team === 0 ? 0x9ac8ff : 0xffa0a0));
     this.time.delayedCall(1300, () => t.destroy());
     this.st = 'carrera';
@@ -240,10 +254,12 @@ export class Jabalina extends EventScene {
     this.st = 'marca';
     const l = this.cur;
     l.marcas.push(m);
+    // entrenando se tira las veces que haga falta: el tablero muestra las dos últimas
+    if (this.d.practica && l.marcas.length > INTENTOS) l.marcas.shift();
     const record = m > l.best && m > 0;
     l.best = Math.max(l.best, m);
     const s = this.nulo ? '¡NULO!' : `${m.toFixed(2)} M`;
-    const t = this.uiAdd(txt(this, 320, 130, s, 'fuente_titulo', 2).setDepth(8500).setTint(this.nulo ? 0xff6060 : 0xffffff));
+    const t = this.uiAdd(txt(this, 320, this.d.practica ? 200 : 130, s, 'fuente_titulo', 2).setDepth(8500).setTint(this.nulo ? 0xff6060 : 0xffffff));
     this.tweens.add({ targets: t, scale: { from: 4, to: 2 }, duration: 240, ease: 'Back.out' });
     if (this.nulo) { chip.blip(220, 0.3, 'sq50', 0.25, 110); l.fig.set('sad', true); }
     else if (l.c.human && record) { flash(this, 100); chip.blip(1320, 0.2, 'sq25', 0.2, 1760); l.fig.set('celebrate', true); }
@@ -256,7 +272,7 @@ export class Jabalina extends EventScene {
       l.fig.setPosition(18 + i * 13, TOP + WAIT_Y[i % 3]).setDepth(TOP + WAIT_Y[i % 3]);
       this.turno++;
       if (this.turno >= this.gente2.length) { this.turno = 0; this.ronda++; }
-      if (this.ronda >= INTENTOS) this.final();
+      if (this.ronda >= INTENTOS && !this.d.practica) this.final();
       else this.st = 'espera';
     });
   }
