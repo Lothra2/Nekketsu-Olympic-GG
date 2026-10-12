@@ -34,6 +34,8 @@ export class Intro extends Phaser.Scene {
   private input2!: Input;
   private layer!: Phaser.GameObjects.Container;
   private tick: ((dt: number) => void)[] = [];
+  /** la forma del panel del montaje en curso: lo que se pone adentro se recorta con ella */
+  private mascaraPanel: Phaser.Display.Masks.GeometryMask | null = null;
   /** las reacciones que van sobre la cabeza: siempre encima de todo */
   private marcas: Phaser.GameObjects.GameObject[] = [];
   /** máscaras de los paneles inclinados del montaje (no se dibujan; se borran con la toma) */
@@ -73,6 +75,7 @@ export class Intro extends Phaser.Scene {
   /** Borra la toma anterior. */
   private clear() {
     this.layer.removeAll(true);
+    this.mascaraPanel = null;
     this.tick = [];
     this.marcas = [];
     for (const m of this.masks) m.destroy();
@@ -95,6 +98,9 @@ export class Intro extends Phaser.Scene {
 
   private add2<T extends Phaser.GameObjects.GameObject>(o: T): T {
     this.layer.add(o);
+    // dentro de un panel del montaje, los personajes, los objetos y los efectos no se salen del panel
+    // (las palabras y las onomatopeyas sí pueden romper el borde, como en un cómic)
+    if (this.mascaraPanel && (o instanceof Phaser.GameObjects.Sprite || o instanceof Phaser.GameObjects.Image || o instanceof Phaser.GameObjects.Container)) o.setMask(this.mascaraPanel);
     return o;
   }
 
@@ -529,17 +535,22 @@ export class Intro extends Phaser.Scene {
       const der = n % 2 === 0;
       this.add2(this.add.rectangle(320, 180, 800, 360, 0x05050c));
       // panel inclinado con el escenario adentro
+      // el filo inclinado pegado al borde de lo que se ve, también en pantallas anchas
+      const m = margen(this), izq = -m, der2 = 640 + m;
       const poly = der
-        ? [{ x: 90, y: 0 }, { x: 720, y: 0 }, { x: 720, y: 360 }, { x: 0, y: 360 }]
-        : [{ x: -80, y: 0 }, { x: 550, y: 0 }, { x: 640, y: 360 }, { x: -80, y: 360 }];
-      const bg = this.add2(this.add.image(320, 180, c.bg).setScale(1.2));
-      bg.setMask(this.mask(poly));
+        ? [{ x: izq + 90, y: 0 }, { x: der2 + 2, y: 0 }, { x: der2 + 2, y: 360 }, { x: izq, y: 360 }]
+        : [{ x: izq - 2, y: 0 }, { x: der2 - 90, y: 0 }, { x: der2, y: 360 }, { x: izq - 2, y: 360 }];
+      this.mascaraPanel = this.mask(poly);
+      const bg = this.add2(this.add.image(320, 180, c.bg).setScale(Math.max(1.2, (640 + 2 * m + 64) / 640)));
       this.tweens.add({ targets: bg, x: der ? 296 : 344, duration: 1700 });
-      if (c.bg === 'bg_caracas') { const az = this.add2(this.add.image(320, 290, 'bg_azotea')); az.setMask(this.mask(poly)); }
+      if (c.bg === 'bg_caracas') this.add2(this.add.image(320, 290, 'bg_azotea'));
       const tinte = this.add2(this.add.graphics());
       tinte.fillStyle(c.color, 0.16).fillPoints(poly, true);
       const vel = this.fx('lineas_velocidad', -80, 0, 1);
       vel?.setAlpha(0.35).setScale(800 / 640, 1);
+      // la palabra, el lugar y el filo blanco van por encima del borde del panel
+      const mascara = this.mascaraPanel;
+      this.mascaraPanel = null;
       // la palabra y el lugar
       const w = this.add2(txt(this, der ? 420 : 220, 70, c.palabra, 'fuente_titulo', c.palabra.length > 10 ? 2 : 3));
       const sc = w.scaleX;
@@ -549,8 +560,9 @@ export class Intro extends Phaser.Scene {
       this.tweens.add({ targets: l, alpha: 1, delay: 250, duration: 200 });
       // el borde blanco del corte
       const filo = this.add2(this.add.graphics());
-      filo.fillStyle(0xffffff).fillPoints(der ? [{ x: 84, y: 0 }, { x: 94, y: 0 }, { x: 4, y: 360 }, { x: -6, y: 360 }] : [{ x: 546, y: 0 }, { x: 556, y: 0 }, { x: 646, y: 360 }, { x: 636, y: 360 }], true);
+      filo.fillStyle(0xffffff).fillPoints(der ? [{ x: izq + 84, y: 0 }, { x: izq + 94, y: 0 }, { x: izq + 4, y: 360 }, { x: izq - 6, y: 360 }] : [{ x: der2 - 94, y: 0 }, { x: der2 - 84, y: 0 }, { x: der2 + 6, y: 360 }, { x: der2 - 4, y: 360 }], true);
       flash(this, 90);
+      this.mascaraPanel = mascara;
       await c.escena(der);
       if (!alive()) return;
     }
@@ -564,16 +576,18 @@ export class Intro extends Phaser.Scene {
       { id: 'rick', pack: 'atletismo', anim: 'javelin' },
       { id: 'thor', pack: '', anim: 'bark' },
     ];
+    // los cinco paneles se reparten en todo el ancho de la pantalla (también la ancha)
+    const m = margen(this), k = (640 + 2 * m) / 640;
     for (const [i, c] of cortes.entries()) {
-      const x0 = -36 + i * 136;
-      const poly = [{ x: x0 + 40, y: 0 }, { x: x0 + 172, y: 0 }, { x: x0 + 132, y: 360 }, { x: x0, y: 360 }];
-      const bg = this.add2(this.add.image(x0 + 86, 180, c.bg));
-      bg.setMask(this.mask(poly));
+      const x0 = -m + (-36 + i * 136) * k;
+      const poly = [{ x: x0 + 40 * k, y: 0 }, { x: x0 + 172 * k, y: 0 }, { x: x0 + 132 * k, y: 360 }, { x: x0, y: 360 }];
+      this.mascaraPanel = this.mask(poly);
+      this.add2(this.add.image(x0 + 86 * k, 180, c.bg));
       const tinte = this.add2(this.add.graphics());
       tinte.fillStyle(c.color, 0.22).fillPoints(poly, true);
       const p = poses[i];
-      if (p.agua) { const a = this.add2(this.add.graphics()); a.fillStyle(0x1f7fb8, 0.85).fillPoints([{ x: x0 + 13, y: 296 }, { x: x0 + 145, y: 296 }, { x: x0 + 132, y: 360 }, { x: x0, y: 360 }], true); a.fillStyle(0x9ad8f0).fillRect(x0 + 13, 296, 132, 2); }
-      const f = this.fig(p.id, x0 + 76, p.agua ? 318 : 322, 'idle', 2.5);
+      if (p.agua) { const a = this.add2(this.add.graphics()); a.fillStyle(0x1f7fb8, 0.85).fillPoints([{ x: x0 + 13 * k, y: 296 }, { x: x0 + 145 * k, y: 296 }, { x: x0 + 132 * k, y: 360 }, { x: x0, y: 360 }], true); a.fillStyle(0x9ad8f0).fillRect(x0 + 13 * k, 296, 132 * k, 2); }
+      const f = this.fig(p.id, x0 + 76 * k, p.agua ? 318 : 322, 'idle', 2.5);
       if (p.pack) f.anim.prefer = p.pack;
       f.set(p.anim, true);
       f.row = p.id === 'thor' ? 'down_right' : 'right';
@@ -581,6 +595,7 @@ export class Intro extends Phaser.Scene {
       f.setAlpha(0);
       this.tweens.add({ targets: f, alpha: 1, duration: 120, delay: i * 100, onStart: () => chip.blip(520 + i * 130, 0.08, 'sq25', 0.16) });
     }
+    this.mascaraPanel = null;
     await wait(this, 560);
     const go = this.add2(txt(this, 320, 100, '¡A COMPETIR!', 'fuente_titulo', 4));
     go.setScale(12);

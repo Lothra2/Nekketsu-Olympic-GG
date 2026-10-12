@@ -205,9 +205,9 @@ export class Fight extends Phaser.Scene implements World {
     this.camLock = false;
     this.add.image(320, 180, 'bg_caracas').setDepth(-10).setScrollFactor(0.45, 1);
     this.add.image(320, 280, 'bg_azotea').setDepth(-9);
-    // más abajo que el marcador, para que se vea entero en el 4 contra 4
-    this.neon('AREPERA LA CHAMA', 500, 160, 0xff4fa0);
-    this.neon('CARACAS', 70, 150, 0x40e0ff);
+    // en los edificios, más abajo que el marcador: se ven enteros con cualquier acercamiento
+    this.neon('AREPERA LA CHAMA', 470, 194, 0xff4fa0);
+    this.neon('CARACAS', 160, 190, 0x40e0ff);
     // Thor mira desde el fondo, lejos del borde
     const npc = azotea.entidades.find((e) => e.tipo === 'npc');
     this.thorFan = new Figura(this, npc?.x ?? 40, FLOOR_TOP - 2, 'thor', 'sit').setDepth(FLOOR_TOP - 2);

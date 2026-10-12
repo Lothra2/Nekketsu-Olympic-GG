@@ -232,14 +232,15 @@ function avionArriba(): HTMLCanvasElement {
 
 /** Cielo de atardecer para la toma del jet, con sol y bandas de nubes lejanas. */
 function cieloVuelo(): HTMLCanvasElement {
-  const p = new Painter(W, H);
+  // con 80 px más a cada lado, para las pantallas anchas (ver core/pantalla)
+  const p = new Painter(W, H, 80);
   p.vgrad(0, H, [C('#2a1a5a'), C('#6a2a7a'), C('#c84a6a'), C('#f08a4a'), C('#f8c86a')]);
   p.circle(470, 250, 46, C('#ffe8a0'));
   p.circle(470, 250, 40, C('#fff4c8'));
   const r = rng(12);
   for (let i = 0; i < 9; i++) {
     const y = 200 + i * 18, col = i % 2 ? C('#e87a6a') : C('#d86a7a');
-    for (let x = 0; x < W; x += 1) if (Math.sin(x / (30 + i * 7) + i) > 0.2 + r() * 0.05) p.px(x, y + Math.round(Math.sin(x / 11 + i) * 2), col);
+    for (let x = p.x0; x < p.x1; x += 1) if (Math.sin(x / (30 + i * 7) + i) > 0.2 + r() * 0.05) p.px(x, y + Math.round(Math.sin(x / 11 + i) * 2), col);
   }
   return p.done();
 }
