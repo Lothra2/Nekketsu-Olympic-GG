@@ -9,8 +9,8 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 | Orden | Lote | Qué | Depende de | Estado | PR |
 |---|---|---|---|---|---|
 | 1 | A | Datos por cuadro, filas, atlas, retratos, vestuario por pack | Nada | aprobado, en main | [pixel_forja#7](https://github.com/Lothra2/pixel_forja/pull/7) |
-| 2 | B1 + D1 | Levantar y lanzar, agarres, armas del piso | A | entregado, falta aprobación de Rick y merge a main | [pixel_forja#8](https://github.com/Lothra2/pixel_forja/pull/8) |
-| 3 | C1 | Familia GG e Instituto Nekketsu | A | pendiente | |
+| 2 | B1 + D1 | Levantar y lanzar, agarres, armas del piso | A | aprobado, en main | [pixel_forja#8](https://github.com/Lothra2/pixel_forja/pull/8) |
+| 3 | C1 | Familia GG e Instituto Nekketsu | A | entregado, falta aprobación de Rick y merge a main | [pixel_forja#9](https://github.com/Lothra2/pixel_forja/pull/9) |
 | 4 | G1 fuentes | Acentos del vietnamita en las fuentes | Nada | pendiente | |
 | 5 | I inicial | Kit a medida por configuración | A | pendiente | |
 | 6 | E1 | Sistema de escenarios oblicuos + `saigon_hem` | A, I, layout de `saigon_hem` | pendiente | |
@@ -42,6 +42,13 @@ Se pidió para B1: el campo `cuerpo` (hurtbox sin implementos ni efectos), porqu
 - Trae 26 animaciones en el pack `calle` (no va por defecto: `--deportes calle`), 19 armas del piso con `--objetos`, y los datos `cuerpo`, `carga` y `arma`.
 - El arma no viene dibujada en el sprite: el juego la compone con `arma` y el atlas de objetos.
 - `thrown_spin` es una bolita sin arco: la parábola la mueve el juego.
+
+**Lote C1** (PR #9), revisado del lado del juego con los tableros y GIFs:
+- Las 8 fichas y Thor están en `docs/ejemplos/nekketsu/fichas/` de PixelForja. Sophie en verde, Alana en fucsia, Steph en el rosado de su preset, Rick en azul. Alana trae además el vestuario "Mickey".
+- Instituto Nekketsu: gakuran azul marino muy oscuro con brazalete rojo. Kenji robusto, Ryu alto y flaco, Tetsu bajo y flaco, Goro gigante en celda 64.
+- El manifiesto trae `celda` y `pivote` por atleta, `numero` en la Familia GG y la mascota en `animales`.
+- A 48 el "GG" del pecho no cabe completo: va en el HUD y en la selección de equipo.
+- Pendiente de arte para un lote siguiente (no bloquea): las caras del Instituto se ven muy dulces para ser los rivales. Conviene una expresión base más "malandra" (cejas fruncidas, media sonrisa) en Kenji, Ryu y Goro.
 
 ## Insumos que pone el juego
 
