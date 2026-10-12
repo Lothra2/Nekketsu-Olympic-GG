@@ -10,8 +10,8 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 |---|---|---|---|---|---|
 | 1 | A | Datos por cuadro, filas, atlas, retratos, vestuario por pack | Nada | aprobado, en main | [pixel_forja#7](https://github.com/Lothra2/pixel_forja/pull/7) |
 | 2 | B1 + D1 | Levantar y lanzar, agarres, armas del piso | A | aprobado, en main | [pixel_forja#8](https://github.com/Lothra2/pixel_forja/pull/8) |
-| 3 | C1 | Familia GG e Instituto Nekketsu | A | entregado, falta aprobación de Rick y merge a main | [pixel_forja#9](https://github.com/Lothra2/pixel_forja/pull/9) |
-| 4 | G1 fuentes | Acentos del vietnamita en las fuentes | Nada | pendiente | |
+| 3 | C1 | Familia GG e Instituto Nekketsu | A | aprobado, en main | [pixel_forja#9](https://github.com/Lothra2/pixel_forja/pull/9) |
+| 4 | G1 fuentes | Acentos del vietnamita en las fuentes | Nada | entregado, falta aprobación de Rick y merge a main | [pixel_forja#10](https://github.com/Lothra2/pixel_forja/pull/10) |
 | 5 | I inicial | Kit a medida por configuración | A | pendiente | |
 | 6 | E1 | Sistema de escenarios oblicuos + `saigon_hem` | A, I, layout de `saigon_hem` | pendiente | |
 | 7 | F | Efectos | Nada | pendiente | |
@@ -49,6 +49,11 @@ Se pidió para B1: el campo `cuerpo` (hurtbox sin implementos ni efectos), porqu
 - El manifiesto trae `celda` y `pivote` por atleta, `numero` en la Familia GG y la mascota en `animales`.
 - A 48 el "GG" del pecho no cabe completo: va en el HUD y en la selección de equipo.
 - Pendiente de arte para un lote siguiente (no bloquea): las caras del Instituto se ven muy dulces para ser los rivales. Conviene una expresión base más "malandra" (cejas fruncidas, media sonrisa) en Kenji, Ryu y Goro.
+
+**Lote G1 fuentes** (PR #10), revisado con el tablero:
+- Las tres fuentes escriben las 146 letras del vietnamita. Se leen bien a x2 y x3, que es como las usa el juego.
+- Silkscreen solo tiene mayúsculas: todo el texto del juego sale en mayúsculas. Va con el tono retro.
+- Ajuste pedido: en ấ, ầ, ẩ el tono a la derecha del circunflejo agranda la letra y deja un hueco ("CẦU" se lee casi "CÂ U"). Que el tono se meta sobre las filas de marcas vacías de la letra siguiente, sin agrandar la letra, y que solo agrande si la siguiente también lleva marca.
 
 ## Insumos que pone el juego
 

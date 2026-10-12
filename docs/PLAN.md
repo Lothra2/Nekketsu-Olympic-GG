@@ -760,7 +760,9 @@ Música 60 %, efectos 100 %, público 40 % de fondo y 90 % en los picos. La mús
 - Opción global "mantener en vez de machacar".
 - Remapeo, dificultad Fácil, Normal y Nekketsu, indicadores con forma además de color, interruptor de temblor y destellos.
 - Español e inglés. Los personajes sueltan palabras en vietnamita y modismos de cada país.
-- Las fuentes traen todos los acentos del vietnamita (ă, â, ê, ô, ơ, ư, đ y los 5 tonos), así "Rồng Sài Gòn" y "Đá cầu" se escriben bien. Hoy el motor no los tiene: está en el pedido.
+- Las fuentes traen todos los acentos del vietnamita (ă, â, ê, ô, ơ, ư, đ y los 5 tonos), así "Rồng Sài Gòn" y "Đá cầu" se escriben bien. Silkscreen solo tiene mayúsculas, así que todo el texto sale en mayúsculas, como en los juegos de NES.
+- En textos de varias líneas con vietnamita, `fuente_ui` va con alto de línea 13 (no 11): ắ, ằ, ẳ, ẵ, ặ, ẫ, ễ y ỗ suben 2 pixeles sobre la línea.
+- Las fuentes se cargan con `this.load.bitmapFont` desde las rutas de `manifest.ui.fuentes`. `fuente_ui` se tiñe con `setTint` y escala solo por enteros.
 
 ---
 
