@@ -14,7 +14,7 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 | 4 | G1 fuentes | Acentos del vietnamita en las fuentes | Nada | aprobado, en main | [pixel_forja#10](https://github.com/Lothra2/pixel_forja/pull/10) |
 | 5 | I inicial | Kit a medida por configuración | A | aprobado, en main | [pixel_forja#11](https://github.com/Lothra2/pixel_forja/pull/11) |
 | 6 | E1 | Sistema de escenarios oblicuos + `saigon_hem` | A, I, layout de `saigon_hem` | pendiente | |
-| 7 | F | Efectos (y audio por configuración) | Nada | entregado, falta aprobación de Rick | [pixel_forja#12](https://github.com/Lothra2/pixel_forja/issues/12) |
+| 7 | F | Efectos (y audio por configuración) | Nada | aprobado, falta merge a main | [pixel_forja#12](https://github.com/Lothra2/pixel_forja/pull/12) |
 | 8 | G1, H1 | Resto de interfaz y audio de la rebanada vertical | Nada | pendiente | |
 | 9 | B2, C2, D2, E2 | Cross Country completo y equipos nacionales | E1 | pendiente | |
 | 10 | B3, E3 | Obstáculos, Tama-wari, Kachinuki | E1 | pendiente | |
@@ -69,7 +69,7 @@ Se pidió para B1: el campo `cuerpo` (hurtbox sin implementos ni efectos), porqu
 - Una carrerita de jabalina en bucle (`javelin_run`) con la jabalina al hombro. Hoy el juego reusa los primeros 3 cuadros de `javelin`.
 - Un salto de valla aislado (`hurdle_clear`) sin la valla dibujada: `hurdles` trae su propia valla y el juego dibuja las suyas, que se tumban si las tocas.
 
-**Lote F** (pixel_forja#12), entregado. Falta la aprobación de Rick y el merge a `main`. Lo que trae:
+**Lote F** (PR #12), aprobado. Falta el merge a `main`. Revisado del lado del juego: con la configuración real del juego (5 packs, vestuario por pack, Thor, armas, fuentes, `"fx": true` y 21 sonidos) el kit sale en 20 s con 56 efectos y el audio en `audio/sfx/`; `silbato`, `pistola` y `marcha_nekketsu` vuelven como aviso en `manifest.pendiente`. Los efectos se ven muy bien. Lo que trae:
 - Efectos con `"fx": true` en `kit.config.json`: salen `fx/<id>.png` y `manifest.fx`, cada uno con `ancla`, `se_pega_a`, `capa`, `cuadros`, `fps` y `columnas`.
 - Qué efecto va con qué evento (`paso` con polvo, `impacto` con chispa en el `punto`, `dizzy` con estrellas) y cómo cargarlos en Phaser: `docs/EFECTOS.md`.
 - Audio por configuración, por ejemplo `"audio": { "sfx": ["golpe", "esquiva", "bloqueo", "paso_tierra_0"], "ambientes": ["agua"] }`. Salen WAV en `audio/sfx/` y `audio/ambiente/`, con `manifest.audio.<sección>.<nombre> = { archivo, duracion, bucle? }`. Con esto el juego deja de generar el audio en su puente.
