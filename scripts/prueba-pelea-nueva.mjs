@@ -133,7 +133,8 @@ check(s.r === 'taunt' && ['laugh', 'point', 'taunt'].includes(s.ranim), 'la máq
 // golpes seguidos: contador y onomatopeyas
 await pon(300, 318);
 for (let i = 0; i < 3; i++) { await key('j'); await page.waitForTimeout(200); }
-await page.waitForTimeout(100);
+// los golpes encolados terminan de salir (el contador no se borra solo)
+await page.waitForTimeout(900);
 await page.screenshot({ path: `${out}/09_racha.png` });
 const racha = await ev(() => window.game.scene.getScene('Fight').racha.n);
 check(racha >= 2, 'el contador de golpes cuenta la racha', `${racha}`);
