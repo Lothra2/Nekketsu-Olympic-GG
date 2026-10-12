@@ -26,11 +26,28 @@ export async function buildLogo(scene: Phaser.Scene, layer: Phaser.GameObjects.C
   const gg = txt(scene, 320, 212 + y0, 'GG', 'fuente_titulo', 7);
   layer.add([nek, oly, gg]);
 
-  const shine = scene.add.rectangle(-60, 150 + y0, 18, 260, 0xffffff, 0.35).setAngle(18).setBlendMode(Phaser.BlendModes.ADD);
-  layer.add(shine);
-  const sweep = () => scene.tweens.add({ targets: shine, x: 700, duration: 900, ease: 'Sine.inOut', onComplete: () => { shine.x = -60; } });
-  const sweepEv = scene.time.addEvent({ delay: 3200, loop: true, callback: sweep });
-  shine.once('destroy', () => sweepEv.remove());
+  // brillo que cruza las letras por dentro: una franja recortada con la forma de cada palabra (no pasa por encima)
+  const glints: { band: Phaser.GameObjects.Graphics; t: Phaser.GameObjects.BitmapText }[] = [];
+  for (const t of [nek, oly, gg]) {
+    const src = scene.make.bitmapText({ x: t.x, y: t.y, font: t.font, text: t.text }, false).setScale(t.scaleX).setOrigin(0.5, 0.5);
+    const band = scene.add.graphics().setBlendMode(Phaser.BlendModes.ADD).setVisible(false);
+    const h = t.height + 20;
+    band.fillStyle(0xffffff, 0.75).fillPoints([{ x: 0, y: -h / 2 }, { x: 10, y: -h / 2 }, { x: -2, y: h / 2 }, { x: -12, y: h / 2 }], true);
+    band.fillStyle(0xfff0b0, 0.45).fillPoints([{ x: 14, y: -h / 2 }, { x: 18, y: -h / 2 }, { x: 6, y: h / 2 }, { x: 2, y: h / 2 }], true);
+    band.setMask(new Phaser.Display.Masks.BitmapMask(scene, src));
+    layer.add(band);
+    glints.push({ band, t });
+    t.once('destroy', () => { band.destroy(); src.destroy(); });
+  }
+  const glint = () => glints.forEach(({ band, t }, i) => {
+    if (!t.active) return;
+    const w = t.width / 2 + 24;
+    band.setPosition(t.x - w, t.y).setVisible(true);
+    scene.tweens.add({ targets: band, x: t.x + w, delay: i * 140, duration: 520, ease: 'Sine.inOut', onComplete: () => band.setVisible(false) });
+  });
+  const sweepEv = scene.time.addEvent({ delay: 3400, loop: true, callback: glint });
+  gg.once('destroy', () => sweepEv.remove());
+  const sweep = glint;
 
   if (!animate) { rays.setAlpha(1); sweep(); return; }
 

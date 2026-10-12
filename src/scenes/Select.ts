@@ -4,6 +4,7 @@ import { Input } from '../core/input';
 import { chip } from '../core/music';
 import { kit } from '../core/kit';
 import { txt } from '../core/ui';
+import type { Gira } from '../events/base';
 
 export const FAMILIA = ['rick', 'steph', 'sophie', 'alana'];
 export const INSTITUTO = ['kenji', 'ryu', 'goro', 'tetsu'];
@@ -98,6 +99,13 @@ export class Select extends Phaser.Scene {
     if (this.paso === 'jugador') {
       this.jugador = id;
       if (this.modo === '4v4') { this.go({ modo: '4v4', jugador: id, rival: 'kenji' }); return; }
+      if (this.modo === 'gira') {
+        const gira: Gira = { jugador: id, idx: 0, puntos: [0, 0], resultados: [] };
+        this.registry.set('gira', gira);
+        this.fadeTo('Medallero');
+        return;
+      }
+      if (this.modo !== '1v1') { this.fadeTo(this.modo, { jugador: id }); return; }
       this.paso = 'rival';
       this.sel = 0;
       this.build();
@@ -107,8 +115,12 @@ export class Select extends Phaser.Scene {
   }
 
   private go(d: { modo: string; jugador: string; rival: string }) {
+    this.fadeTo('Fight', d);
+  }
+
+  private fadeTo(scene: string, d?: object) {
     this.cameras.main.fadeOut(250);
-    this.cameras.main.once('camerafadeoutcomplete', () => this.scene.start('Fight', d));
+    this.cameras.main.once('camerafadeoutcomplete', () => { if (scene !== 'Title') chip.stop(0.3); this.scene.start(scene, d); });
   }
 
   update(_t: number, dms: number) {

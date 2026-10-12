@@ -242,3 +242,19 @@ export const TENSION: Song = {
     { wave: 'drums', steps: join('k . . . t . . .', 'k . . . t . k .', 'k . . . t . . .', 'k . t . t . r r'), vol: 0.3 },
   ],
 };
+
+/** Saigón Chạy: alegre, pentatónica, para la presentación de la Familia GG. */
+const saigonLead = join(
+  'E5 G5 A5 - G5 E5 D5 -', 'C5 D5 E5 G5 E5 - . .', 'A5 - G5 E5 G5 - A5 C6', 'A5 - G5 - E5 - . .',
+  'E5 G5 A5 - G5 E5 D5 -', 'C5 D5 E5 G5 A5 - G5 -', 'E5 D5 C5 D5 E5 - G5 -', 'C5 - - - . . . .',
+);
+const saigonChords = ['C', 'Am', 'F', 'G', 'C', 'Am', 'F', 'C'];
+export const SAIGON: Song = {
+  bpm: 140, perBeat: 2, loop: true,
+  tracks: [
+    { wave: 'sq25', steps: saigonLead, vol: 0.18 },
+    { wave: 'sq12', steps: saigonChords.flatMap((c) => { const [r, t, f] = CH[c]; return [`${r}4`, `${t}4`, `${f}4`, `${t}4`, `${r}4`, `${t}4`, `${f}4`, `${t}4`]; }), vol: 0.06 },
+    { wave: 'tri', steps: saigonChords.flatMap((c) => { const [r, , f] = CH[c]; return [`${r}2`, '.', `${r}3`, '.', `${f}2`, '.', `${r}3`, '.']; }), vol: 0.3 },
+    { wave: 'drums', steps: saigonChords.flatMap((_, i) => bar(i % 4 === 3 ? 'k h s h k s r r' : 'k h s h k k s h')), vol: 0.24 },
+  ],
+};

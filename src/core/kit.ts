@@ -18,6 +18,8 @@ export interface AnimData {
   avance?: number;
   desplazamiento?: number[];
   elevacion?: number[];
+  /** fila de la superficie del agua en la celda, por cuadro (natación) */
+  agua?: (number | null)[];
   cuerpo?: (Box | null)[][];
   cajas?: (Box | null)[][];
   manos?: [Pt, Pt][][];
@@ -62,21 +64,22 @@ export const setKit = (m: Manifest) => { manifest = m; };
 export const texKey = (id: string, pack: string) => `${id}:${pack}`;
 export const frameName = (anim: string, row: Row, i: number) => `${anim}_${row}_${i}`;
 
-/** En qué pack está cada animación de un atleta. */
+/** En qué pack está cada animación de un atleta (el primero que la trae). */
 const packOf = new Map<string, Map<string, string>>();
-export function findAnim(id: string, anim: string): { pack: string; data: AnimData } | null {
+export function findAnim(id: string, anim: string, prefer?: string): { pack: string; data: AnimData } | null {
+  const at = kit().atletas[id];
+  if (prefer && at?.packs[prefer]?.anims[anim]) return { pack: prefer, data: at.packs[prefer].anims[anim] };
   let m = packOf.get(id);
   if (!m) {
     m = new Map();
-    const at = kit().atletas[id];
-    if (at) { for (const [p, pd] of Object.entries(at.packs)) for (const n of Object.keys(pd.anims)) m.set(n, p); }
+    if (at) { for (const [p, pd] of Object.entries(at.packs)) for (const n of Object.keys(pd.anims)) if (!m.has(n)) m.set(n, p); }
     else for (const n of Object.keys(kit().animales[id].anims)) m.set(n, 'animal');
     packOf.set(id, m);
   }
   const pack = m.get(anim);
   if (!pack) return null;
   if (pack === 'animal') return { pack, data: kit().animales[id].anims[anim] };
-  return { pack, data: kit().atletas[id].packs[pack].anims[anim] };
+  return { pack, data: at.packs[pack].anims[anim] };
 }
 
 /** Pone en la cola de carga todo el kit. Se llama con el manifiesto ya cargado. */

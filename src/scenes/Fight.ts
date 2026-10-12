@@ -7,6 +7,7 @@ import { Input } from '../core/input';
 import { chip, PELEA, VICTORIA } from '../core/music';
 import { txt, flash, speedLines } from '../core/ui';
 import { FAMILIA, INSTITUTO, INFO } from './Select';
+import type { Gira } from '../events/base';
 
 /** acercamiento de la cámara en la pelea: más cerca en 1 contra 1 */
 const ZOOMS: Record<string, number> = { '1v1': 1.75, '4v4': 1.45 };
@@ -18,7 +19,7 @@ const TECNICA: Record<string, 'mach' | 'huracan' | 'chilena' | 'thor' | 'dragon'
   rick: 'mach', steph: 'huracan', sophie: 'chilena', alana: 'thor', kenji: 'dragon', ryu: 'huracan', goro: 'tackle', tetsu: 'mach',
 };
 
-interface FightData { modo: string; jugador: string; rival: string }
+interface FightData { modo: string; jugador: string; rival: string; gira?: boolean }
 
 export class Fight extends Phaser.Scene implements World {
   actors: Actor[] = [];
@@ -53,7 +54,7 @@ export class Fight extends Phaser.Scene implements World {
   constructor() { super('Fight'); }
 
   init(d: FightData) {
-    this.data0 = { modo: d.modo ?? '1v1', jugador: d.jugador ?? 'rick', rival: d.rival ?? 'kenji' };
+    this.data0 = { modo: d.modo ?? '1v1', jugador: d.jugador ?? 'rick', rival: d.rival ?? 'kenji', gira: !!d.gira };
     this.actors = [];
     this.items = [];
     this.brains.clear();
@@ -262,6 +263,7 @@ export class Fight extends Phaser.Scene implements World {
     this.time.delayedCall(400, () => {
       const t = this.uiAdd(txt(this, 320, 120, '¡GANASTE, CAMPEÓN!', 'fuente_titulo', 2).setDepth(8500));
       this.tweens.add({ targets: t, scale: { from: 4, to: 2 }, duration: 260, ease: 'Back.out' });
+      if (this.data0.gira) { this.cierraGira(0); return; }
       this.endMenu(['OTRA VEZ', 'MENÚ']);
     });
   }
@@ -273,18 +275,36 @@ export class Fight extends Phaser.Scene implements World {
     for (const a of this.actors) if (a.team === 1 && a.alive) { a.fig.row = 'down'; a.setSt('win', 'victory'); }
     const t = this.uiAdd(txt(this, 320, 110, 'SE ACABÓ LA VAINA', 'fuente_titulo_plata', 2).setDepth(8500));
     this.tweens.add({ targets: t, scale: { from: 4, to: 2 }, duration: 260, ease: 'Back.out' });
+    if (this.data0.gira) { this.cierraGira(1); return; }
     let n = 9;
     const c = this.uiAdd(txt(this, 320, 150, '¿OTRA PARTIDITA? 9', 'fuente_ui', 2).setDepth(8500));
     const ev = this.time.addEvent({ delay: 1000, loop: true, callback: () => { n--; c.setText(`¿OTRA PARTIDITA? ${n}`); chip.blip(440, 0.06); if (n <= 0) { ev.remove(); this.toMenu(); } } });
     this.endMenu(['SÍ, DALE', 'MENÚ'], () => ev.remove());
   }
 
-  private endMenu(opts: string[], onPick?: () => void) {
+  /** La final de la Olimpiada: 20 puntos al equipo que gane y al medallero. */
+  private cierraGira(team: 0 | 1) {
+    const gira = this.registry.get('gira') as Gira | undefined;
+    if (gira) {
+      gira.puntos[team] += 20;
+      const vivos = this.actors.filter((a) => a.team === team).sort((a, b) => Number(b.alive) - Number(a.alive));
+      gira.resultados.push({ prueba: 'KACHINUKI FINAL', podio: vivos.map((a) => a.id) });
+      this.registry.set('gira', gira);
+    }
+    this.uiAdd(txt(this, 320, 152, `+20 PTS ${team === 0 ? 'FAMILIA GG' : 'INSTITUTO'}`, 'fuente_ui', 2).setDepth(8500).setTint(0x8ae08a));
+    this.endMenu(['SIGUIENTE'], undefined, () => {
+      if (gira) { gira.idx++; this.registry.set('gira', gira); }
+      chip.stop(0.2);
+      this.scene.start('Medallero');
+    });
+  }
+
+  private endMenu(opts: string[], onPick?: () => void, solo?: () => void) {
     let sel = 0;
-    const items = opts.map((o, i) => this.uiAdd(txt(this, 250 + i * 140, 196, o, 'fuente_ui', 2).setDepth(8500).setInteractive()));
+    const items = opts.map((o, i) => this.uiAdd(txt(this, opts.length === 1 ? 320 : 250 + i * 140, 196, o, 'fuente_ui', 2).setDepth(8500).setInteractive()));
     const draw = () => items.forEach((t, i) => t.setTint(i === sel ? 0xffe040 : 0x8a8aa8));
     draw();
-    const pick = (i: number) => { onPick?.(); if (i === 0) this.scene.restart(this.data0); else this.toMenu(); };
+    const pick = (i: number) => { onPick?.(); if (solo) solo(); else if (i === 0) this.scene.restart(this.data0); else this.toMenu(); };
     items.forEach((t, i) => t.on('pointerdown', () => pick(i)));
     let lock = 0.4;
     this.endChoice = (p) => {
@@ -293,7 +313,7 @@ export class Fight extends Phaser.Scene implements World {
       if (p.x !== 0 && p.x !== (this.data.get('lx') ?? 0)) { sel = (sel + 1) % opts.length; draw(); chip.blip(660, 0.04); }
       this.data.set('lx', p.x);
       if (p.pressed.punch || p.pressed.start) pick(sel);
-      if (p.pressed.back) this.toMenu();
+      if (p.pressed.back && !solo) this.toMenu();
       for (const a of this.actors) a.update(1 / 60, NOTHING);
       this.thorFan?.step(1 / 60);
     };

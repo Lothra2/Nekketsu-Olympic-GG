@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { Figura } from '../core/figura';
-import { chip, MARCHA, TENSION } from '../core/music';
+import { chip, MARCHA, SAIGON, TENSION } from '../core/music';
 import { txt, typewrite, wait, panel, flash, speedLines } from '../core/ui';
 import { Input } from '../core/input';
 import { buildLogo, fireworks } from './logo';
@@ -56,6 +56,15 @@ export class Intro extends Phaser.Scene {
     this.layer.removeAll(true);
     this.tick = [];
     this.cameras.main.setScroll(0, 0);
+    this.blinds();
+  }
+
+  /** Persianas retro: 12 franjas negras que se abren mostrando la toma nueva. */
+  private blinds() {
+    for (let i = 0; i < 12; i++) {
+      const r = this.add.rectangle(320, i * 30 + 15, 640, 30, 0x000000).setDepth(9800);
+      this.tweens.add({ targets: r, scaleY: 0, duration: 260, delay: i * 18, ease: 'Quad.in', onComplete: () => r.destroy() });
+    }
   }
 
   private add2<T extends Phaser.GameObjects.GameObject>(o: T): T {
@@ -164,7 +173,7 @@ export class Intro extends Phaser.Scene {
 
     // 4. Saigón: la Familia GG
     this.clear();
-    chip.play(TENSION);
+    chip.play(SAIGON);
     this.add2(this.add.image(320, 180, 'bg_saigon'));
     const cap = this.add2(txt(this, 320, 22, 'SAIGÓN, VIETNAM', 'fuente_titulo', 1));
     cap.setAlpha(0);
@@ -190,7 +199,20 @@ export class Intro extends Phaser.Scene {
       f.set('idle');
       if (!alive()) return;
     }
+    // Thor vuelve corriendo y tiene su tarjeta
+    const thor2 = this.fig('thor', 700, 330, 'run', 2);
+    thor2.left = true;
+    await new Promise<void>((res) => this.tweens.add({ targets: thor2, x: 520, duration: 600, onComplete: () => res() }));
+    if (!alive()) return;
+    thor2.set('wag');
+    thor2.row = 'down_right';
+    const tc = this.thorCard();
+    this.sound.play('ladrido', { volume: 0.6 });
+    await wait(this, 1500);
+    tc.destroy();
+    if (!alive()) return;
     for (const f of figs) f.set('victory', true);
+    thor2.set('celebrate', true);
     const fam = this.add2(txt(this, 320, 60, 'FAMILIA GG', 'fuente_titulo', 3));
     const sub = this.add2(txt(this, 320, 92, 'DE CARACAS A SAIGÓN', 'fuente_ui', 2));
     sub.setTint(0xffe080);
@@ -231,18 +253,30 @@ export class Intro extends Phaser.Scene {
     const vsBg = () => {
       g.clear();
       const t = this.time.now / 40;
+      // azul a la izquierda
       for (let i = -20; i < 40; i++) {
         g.fillStyle(i % 2 ? 0x1a3a9a : 0x2a5bd7).fillTriangle(i * 24 - (t % 48), 0, i * 24 + 24 - (t % 48), 0, i * 24 - 80 - (t % 48), 360);
       }
-      g.fillStyle(0x0a0a14).fillTriangle(330, 0, 640, 0, 640, 360);
-      g.fillStyle(0x0a0a14).fillTriangle(330, 0, 640, 360, 250, 360);
-      for (let i = 0; i < 30; i++) g.fillStyle(i % 2 ? 0x9a1a2a : 0xd0303a).fillRect(340 + i * 14 - ((t * 2) % 28), 0, 7, 360);
-      g.fillStyle(0xffffff).fillTriangle(326, 0, 336, 0, 256, 360).fillTriangle(336, 0, 256, 360, 246, 360);
+      // rojo a la derecha de la diagonal (330,0)-(250,360): fondo y franjas paralelas a la diagonal, sin huecos
+      g.fillStyle(0x9a1a2a).fillPoints([{ x: 330, y: 0 }, { x: 640, y: 0 }, { x: 640, y: 360 }, { x: 250, y: 360 }], true);
+      const off = (t * 2) % 28;
+      for (let k = -1; k < 16; k++) {
+        const x0 = 330 + k * 28 - off, l = Math.max(330, x0), r = x0 + 14;
+        if (r <= 330) continue;
+        g.fillStyle(0xd0303a).fillPoints([{ x: l, y: 0 }, { x: r, y: 0 }, { x: r - 80, y: 360 }, { x: l - 80, y: 360 }], true);
+      }
+      g.fillStyle(0xffffff).fillPoints([{ x: 324, y: 0 }, { x: 336, y: 0 }, { x: 256, y: 360 }, { x: 244, y: 360 }], true);
     };
     this.tick.push(vsBg);
     vsBg();
-    FAMILIA.forEach((m, i) => { const f = this.fig(m.id, 52 + i * 62, 300 - (i % 2) * 18, 'idle', 2); f.row = 'down_right'; });
-    INSTITUTO.forEach((id, i) => { const f = this.fig(id, 400 + i * 62, 300 - (i % 2) * 18, 'idle', 2); f.row = 'down_right'; f.left = true; });
+    FAMILIA.forEach((m, i) => {
+      const f = this.fig(m.id, 52 + i * 62, 300 - (i % 2) * 18, 'idle', 2); f.row = 'down_right';
+      this.add2(txt(this, f.x, f.y + 12, m.nombre, 'fuente_ui', 1)).setTint(0xffe080);
+    });
+    INSTITUTO.forEach((id, i) => {
+      const f = this.fig(id, 400 + i * 62, 300 - (i % 2) * 18, 'idle', 2); f.row = 'down_right'; f.left = true;
+      this.add2(txt(this, f.x, f.y + 12, id.toUpperCase(), 'fuente_ui', 1)).setTint(0xffd0d0);
+    });
     const vs = this.add2(txt(this, 320, 110, 'VS', 'fuente_titulo', 6));
     vs.setScale(14);
     this.tweens.add({ targets: vs, scale: 6, duration: 240, ease: 'Quad.in', onComplete: () => { chip.boom(0.6); this.cameras.main.shake(200, 0.012); flash(this, 160); } });
@@ -315,6 +349,27 @@ export class Intro extends Phaser.Scene {
     c.add(txt(this, 140, 150, 'TÉCNICA', 'fuente_ui', 1, 0).setTint(0x8a8ab0));
     c.add(txt(this, 140, 164, m.tecnica, 'fuente_ui', 1, 0).setTint(0xff6a6a));
     c.x = -260;
+    this.tweens.add({ targets: c, x: 0, duration: 220, ease: 'Back.out' });
+    return c;
+  }
+
+  private thorCard() {
+    const c = this.add.container(0, 0);
+    this.layer.add(c);
+    const g = this.add.graphics();
+    g.fillStyle(0x08081a, 0.92).fillRect(390, 90, 230, 104);
+    g.fillStyle(0xc87a3a).fillRect(614, 90, 6, 104);
+    g.lineStyle(2, 0xf2c230).strokeRect(391, 91, 228, 102);
+    c.add(g);
+    const t = new Figura(this, 440, 178, 'thor', 'wag').setScale(2);
+    t.row = 'down_right';
+    c.add(t);
+    this.tick.push((dt) => { if (t.active) t.step(dt); });
+    c.add(txt(this, 486, 108, 'THOR', 'fuente_titulo', 1, 0));
+    c.add(txt(this, 486, 130, 'EL GUARDIÁN', 'fuente_ui', 1, 0).setTint(0xffe080));
+    c.add(txt(this, 486, 150, 'TÉCNICA', 'fuente_ui', 1, 0).setTint(0x8a8ab0));
+    c.add(txt(this, 486, 164, '¡GUAU GUAU!', 'fuente_ui', 1, 0).setTint(0xff6a6a));
+    c.x = 260;
     this.tweens.add({ targets: c, x: 0, duration: 220, ease: 'Back.out' });
     return c;
   }

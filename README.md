@@ -5,6 +5,11 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
 ## Qué se puede jugar hoy
 
 - **Intro épica** de unos 50 segundos: Kenji en la azotea de Japón, la ruta de la gira, la Familia GG en Saigón, los rivales en silueta en Bogotá, Maracaibo y Caracas, el VS, el puñetazo a la cámara y el logo con la Marcha Nekketsu.
+- **Olimpiada Express**: Familia GG contra el Instituto en 4 pruebas seguidas con medallero por equipos (10, 6, 4 y 2 puntos por puesto) y una final a pelea que vale 20. Termina con podio y fuegos artificiales.
+- **Pruebas sueltas**:
+  - *Vallas del Café* (Eje Cafetero): alterna puño y patada para correr, salta las vallas, codazo con ★. Si tocas una valla, se cae y te frena.
+  - *Natación Hạ Long* (bahía de Hạ Long): sales con salto, si te tiras antes del ¡YA! te quedas un segundo. Alterna puño y patada para nadar, ★ es la patada de delfín.
+  - *Jabalina Llanera* (Llanos de Apure): carrerita alternando botones, mantén salto para el ángulo y suelta para lanzar. Si pisas la raya es nulo. Dos intentos.
 - **Pelea callejera** en una azotea de Caracas de noche, en 1 contra 1 o 4 contra 4: Familia GG contra el Instituto Nekketsu.
   - Golpes con combos, patadas, patada voladora corriendo, salto con patada.
   - Levantar al rival caído, caminar con él y lanzarlo contra los demás.
@@ -49,6 +54,7 @@ Con el servidor corriendo:
 ```bash
 node scripts/capturas.mjs http://localhost:5173/ capturas          # intro, título, selección y pelea
 node scripts/prueba-pelea.mjs http://localhost:5173/ capturas rick kenji   # combo, levantar, lanzar, técnica, chancleta
+node scripts/prueba-pruebas.mjs http://localhost:5173/ capturas/pruebas  # vallas, natación, jabalina y medallero
 node scripts/tablet.mjs capturas                                   # tablet con controles táctiles
 ```
 

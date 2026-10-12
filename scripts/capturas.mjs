@@ -28,8 +28,12 @@ await page.waitForTimeout(2000);
 await shot('titulo');
 await key('Enter');
 await page.waitForTimeout(500);
-await key('ArrowDown'); await page.waitForTimeout(250);
 await shot('menu');
+// PELEA CALLEJERA > 4 CONTRA 4
+await key('ArrowDown'); await page.waitForTimeout(250); await key('ArrowDown'); await page.waitForTimeout(250);
+await key('Enter'); await page.waitForTimeout(300);
+await key('ArrowDown'); await page.waitForTimeout(250);
+await shot('menu_peleas');
 await key('Enter');
 await page.waitForTimeout(800);
 await key('ArrowRight'); await page.waitForTimeout(150); await key('ArrowRight'); await page.waitForTimeout(150); await key('ArrowRight');

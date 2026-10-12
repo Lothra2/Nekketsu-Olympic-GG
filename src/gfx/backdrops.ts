@@ -262,6 +262,75 @@ function caracasAzotea(): HTMLCanvasElement {
   return p.done();
 }
 
+
+/** Eje Cafetero: valle de Cocora con neblina, palmas de cera y cafetales. */
+function cocora(): HTMLCanvasElement {
+  const p = new Painter(W, H);
+  p.vgrad(0, 200, [C('#7ab0d8'), C('#a6cce4'), C('#cfe2ea'), C('#e8eee8')]);
+  p.ridge(170, 40, 201, C('#6e9a8a'), C('#9cbcb0'), (u) => 0.5 + 0.4 * Math.sin(u * 5 + 1));
+  for (let y = 120; y < 175; y++) for (let x = 0; x < W; x++) if ((x * 7 + y * 13) % 5 === 0) p.px(x, y, C('#e8eee8'), 120);
+  p.ridge(205, 90, 202, C('#3e7a4a'), C('#5e9a5e'), (u) => 0.45 + 0.35 * Math.sin(u * 3.3 + 2));
+  p.ridge(232, 150, 203, C('#2e6a3a'), C('#4e8a4a'), (u) => 0.5 + 0.3 * Math.sin(u * 6.1));
+  // cafetales: hileras de matas
+  const r = rng(31);
+  for (let i = 0; i < 380; i++) { const x = r() * W, y = 190 + r() * 45; p.circle(x, y, 2, r() < 0.5 ? C('#1e5a2a') : C('#2a6a32')); if (r() < 0.2) p.px(x + 1, y - 1, C('#c8202a')); }
+  // palmas de cera altísimas
+  for (const [x, top] of [[60, 40], [150, 70], [255, 30], [420, 55], [520, 25], [600, 80]] as [number, number][]) {
+    for (let y = top; y < 236; y++) { p.px(x, y, C('#d8d4c8')); p.px(x + 1, y, C('#a8a49a')); }
+    for (let a = 0; a < 9; a++) { const ang = Math.PI * (0.95 + (a / 8) * 1.1); for (let k = 0; k < 12; k++) p.px(x + Math.cos(ang) * k, top + Math.sin(ang) * k * 0.6 + k * k * 0.04, C('#3a6a3a')); }
+  }
+  for (let y = 60; y < 120; y++) for (let x = 0; x < W; x++) if ((x * 3 + y * 11) % 9 === 0) p.px(x, y, C('#ffffff'), 70);
+  return p.done();
+}
+
+/** Bahía de Hạ Long: islotes de piedra caliza, juncos de velas rojas y mar quieto. */
+function halong(): HTMLCanvasElement {
+  const p = new Painter(W, H);
+  p.vgrad(0, 190, [C('#9cc4e0'), C('#c4dcea'), C('#f2e2cc'), C('#f8d8b8')]);
+  const r = rng(41);
+  const karst = (cx: number, base: number, w: number, h: number, col: RGB, light: RGB) => {
+    for (let x = -w; x <= w; x++) {
+      const u = x / w;
+      const top = base - h * Math.pow(Math.max(0, 1 - u * u), 0.35) * (0.9 + 0.1 * Math.sin(x * 0.7 + cx));
+      for (let y = Math.round(top); y < base; y++) p.px(cx + x, y, (x < -w * 0.3 && y < top + 10) ? light : col);
+    }
+  };
+  for (let i = 0; i < 9; i++) karst(20 + r() * 600, 190, 14 + r() * 18, 40 + r() * 50, C('#9aaab0'), C('#b8c4c8'));
+  for (let i = 0; i < 6; i++) karst(r() * 640, 196, 18 + r() * 24, 70 + r() * 70, C('#4a6a5a'), C('#6a8a6a'));
+  p.vgrad(196, 360, [C('#4a8aa0'), C('#2a6a8a'), C('#1a4a6a')]);
+  for (let i = 0; i < 260; i++) p.rect(r() * W, 198 + r() * 160, 2 + r() * 6, 1, r() < 0.3 ? C('#cfe8f0') : C('#6aaac0'));
+  // juncos con velas rojas
+  for (const [x, y] of [[110, 200], [470, 204], [330, 198]] as [number, number][]) {
+    p.rect(x - 14, y, 30, 4, C('#4a2a1a'));
+    p.rect(x - 10, y + 4, 22, 2, C('#3a1a10'));
+    for (const [sx, sh] of [[-6, 22], [4, 26], [12, 18]] as [number, number][]) {
+      p.rect(x + sx, y - sh, 1, sh, C('#3a2010'));
+      for (let k = 0; k < sh - 2; k++) p.rect(x + sx + 1, y - sh + k, 7 - Math.floor(k / 6), 1, k % 4 === 0 ? C('#8a2a1a') : C('#b8402a'));
+    }
+  }
+  return p.done();
+}
+
+/** Llanos de Apure al atardecer: sabana, morichales y un caney. */
+function llanos(): HTMLCanvasElement {
+  const p = new Painter(W, H);
+  p.vgrad(0, 210, [C('#3a2a6a'), C('#8a3a7a'), C('#e2604a'), C('#ffa848'), C('#ffd88a')]);
+  p.circle(470, 196, 26, C('#fff0b0'));
+  p.vgrad(206, 360, [C('#a8a040'), C('#7a8a30'), C('#5a7a2a'), C('#3e6a22')]);
+  const r = rng(51);
+  for (let i = 0; i < 900; i++) { const x = r() * W, y = 208 + r() * 150; p.px(x, y, r() < 0.5 ? C('#c8b850') : C('#4a6a20')); }
+  // morichales: palmas de abanico
+  for (const [x, top] of [[40, 120], [90, 140], [560, 110], [610, 132], [300, 150]] as [number, number][]) {
+    for (let y = top; y < 212; y++) { p.px(x, y, C('#3a2a1a')); p.px(x + 1, y, C('#2a1a12')); }
+    for (let a = 0; a < 16; a++) { const ang = Math.PI * (1 + (a / 15)); for (let k = 0; k < 16; k++) p.px(x + Math.cos(ang) * k, top + Math.sin(ang) * k * 0.7, C('#2a3a1a')); }
+  }
+  // caney
+  p.rect(200, 192, 34, 16, C('#6a4a2a'));
+  for (let k = 0; k < 10; k++) p.rect(196 + k, 184 + k, 42 - 2 * k, 1, C('#a08040'));
+  p.rect(212, 198, 8, 10, C('#2a1a10'));
+  return p.done();
+}
+
 /** Registra todos los fondos como texturas. */
 export function makeBackdrops(scene: Phaser.Scene) {
   const add = (k: string, c: HTMLCanvasElement) => { if (!scene.textures.exists(k)) scene.textures.addCanvas(k, c); };
@@ -272,6 +341,9 @@ export function makeBackdrops(scene: Phaser.Scene) {
   add('bg_maracaibo', maracaibo());
   add('bg_caracas', caracasCielo());
   add('bg_azotea', caracasAzotea());
+  add('bg_cocora', cocora());
+  add('bg_halong', halong());
+  add('bg_llanos', llanos());
   // banderas sueltas
   for (const k of ['jp', 'vn', 'co', 've'] as const) {
     const p = new Painter(38, 26);

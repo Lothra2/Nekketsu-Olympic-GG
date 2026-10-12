@@ -5,11 +5,26 @@ import { chip, MARCHA } from '../core/music';
 import { txt } from '../core/ui';
 import { buildLogo, fireworks } from './logo';
 
-const OPCIONES = [
-  { id: '1v1', label: 'PELEA 1 CONTRA 1' },
-  { id: '4v4', label: 'PELEA 4 CONTRA 4' },
-  { id: 'intro', label: 'VER LA INTRO' },
-];
+/** Menú en dos niveles para que quepa entre los dos equipos sin tapar a nadie. */
+const MENUS: Record<string, { id: string; label: string }[]> = {
+  raiz: [
+    { id: 'gira', label: 'OLIMPIADA EXPRESS' },
+    { id: '>pruebas', label: 'PRUEBAS SUELTAS' },
+    { id: '>peleas', label: 'PELEA CALLEJERA' },
+    { id: 'intro', label: 'VER LA INTRO' },
+  ],
+  pruebas: [
+    { id: 'Vallas', label: 'VALLAS DEL CAFÉ' },
+    { id: 'Natacion', label: 'NATACIÓN HẠ LONG' },
+    { id: 'Jabalina', label: 'JABALINA LLANERA' },
+    { id: '<', label: 'ATRÁS' },
+  ],
+  peleas: [
+    { id: '1v1', label: '1 CONTRA 1' },
+    { id: '4v4', label: '4 CONTRA 4' },
+    { id: '<', label: 'ATRÁS' },
+  ],
+};
 
 export class Title extends Phaser.Scene {
   private pad!: Input;
@@ -20,6 +35,8 @@ export class Title extends Phaser.Scene {
   private started = false;
   private press!: Phaser.GameObjects.BitmapText;
   private menu!: Phaser.GameObjects.Container;
+  private nivel = 'raiz';
+  private get opciones() { return MENUS[this.nivel]; }
 
   constructor() { super('Title'); }
 
@@ -46,7 +63,7 @@ export class Title extends Phaser.Scene {
       f.left = true;
       this.figs.push(f);
     });
-    const thor = new Figura(this, 210, 330, 'thor', 'wag').setScale(1.5);
+    const thor = new Figura(this, 34, 334, 'thor', 'wag').setScale(1.5);
     thor.row = 'down_right';
     this.figs.push(thor);
 
@@ -55,16 +72,29 @@ export class Title extends Phaser.Scene {
     this.tweens.add({ targets: this.press, alpha: 0.15, duration: 450, yoyo: true, repeat: -1 });
 
     this.menu = this.add.container(0, 0).setVisible(false);
-    this.items = OPCIONES.map((o, i) => {
-      const t = txt(this, 320, 262 + i * 22, o.label, 'fuente_ui', 2);
+    this.nivel = 'raiz';
+    this.sel = 0;
+    this.buildMenu();
+    txt(this, 320, 352, 'FLECHAS MOVER · J PUÑO · K PATADA · L SALTO · U ESPECIAL', 'fuente_ui', 1).setTint(0x8a8ab0);
+    this.input.on('pointerdown', () => { if (!this.started) this.openMenu(); });
+    this.refresh();
+  }
+
+  private buildMenu() {
+    this.menu.removeAll(true);
+    const g = this.add.graphics();
+    const n = this.opciones.length;
+    g.fillStyle(0x08081a, 0.78).fillRect(206, 244, 228, n * 21 + 10);
+    g.lineStyle(1, 0xf2c230, 0.8).strokeRect(206.5, 244.5, 227, n * 21 + 9);
+    this.menu.add(g);
+    this.items = this.opciones.map((o, i) => {
+      const t = txt(this, 320, 259 + i * 21, o.label, 'fuente_ui', 2);
       t.setInteractive().on('pointerdown', () => { if (this.started) { this.sel = i; this.choose(); } });
       this.menu.add(t);
       return t;
     });
     this.cursor = txt(this, 0, 0, '»', 'fuente_ui', 2).setTint(0xf2c230);
     this.menu.add(this.cursor);
-    txt(this, 320, 352, 'FLECHAS MOVER · J PUÑO · K PATADA · L SALTO · U ESPECIAL', 'fuente_ui', 1).setTint(0x8a8ab0);
-    this.input.on('pointerdown', () => { if (!this.started) this.openMenu(); });
     this.refresh();
   }
 
@@ -82,9 +112,11 @@ export class Title extends Phaser.Scene {
   }
 
   private choose() {
-    const o = OPCIONES[this.sel];
+    const o = this.opciones[this.sel];
     chip.blip(1320, 0.1, 'sq25', 0.2, 1760);
     this.sound.play('elegir', { volume: 0.5 });
+    if (o.id.startsWith('>')) { this.nivel = o.id.slice(1); this.sel = 0; this.buildMenu(); return; }
+    if (o.id === '<') { this.atras(); return; }
     if (o.id === 'intro') { this.registry.set('marchaSonando', false); chip.stop(0.2); this.scene.start('Intro'); return; }
     this.cameras.main.fadeOut(200);
     this.cameras.main.once('camerafadeoutcomplete', () => this.scene.start('Select', { modo: o.id }));
@@ -99,12 +131,20 @@ export class Title extends Phaser.Scene {
       return;
     }
     if (p.y !== 0 && this.time.now > (this.data.get('next') ?? 0)) {
-      this.sel = (this.sel + p.y + OPCIONES.length) % OPCIONES.length;
+      this.sel = (this.sel + p.y + this.opciones.length) % this.opciones.length;
       this.data.set('next', this.time.now + 180);
       chip.blip(660, 0.04, 'sq25', 0.15);
       this.refresh();
     }
     if (p.y === 0) this.data.set('next', 0);
     if (p.pressed.start || p.pressed.punch || p.pressed.kick) this.choose();
+    if (p.pressed.back && this.nivel !== 'raiz') this.atras();
+  }
+
+  private atras() {
+    const de = this.nivel;
+    this.nivel = 'raiz';
+    this.sel = MENUS.raiz.findIndex((o) => o.id === `>${de}`);
+    this.buildMenu();
   }
 }

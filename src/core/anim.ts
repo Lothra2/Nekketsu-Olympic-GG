@@ -12,6 +12,8 @@ export class AnimPlayer {
   pos = 0;
   done = false;
   speed = 1;
+  /** pack preferido (por ejemplo natacion: el idle en traje de baño) */
+  prefer?: string;
   /** recién empezada: los eventos del cuadro 0 todavía no salieron */
   private fresh = true;
 
@@ -22,13 +24,13 @@ export class AnimPlayer {
   }
 
   has(name: string): boolean {
-    return !!findAnim(this.id, name);
+    return !!findAnim(this.id, name, this.prefer);
   }
 
   /** Cambia de animación. Si ya está sonando y `restart` es falso, no la reinicia. */
   play(name: string, restart = false, speed = 1): boolean {
     if (this.name === name && !restart) { this.speed = speed; return true; }
-    const f = findAnim(this.id, name);
+    const f = findAnim(this.id, name, this.prefer);
     if (!f) return false;
     this.name = name;
     this.pack = f.pack;

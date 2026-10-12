@@ -11,8 +11,8 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 | 1 | A | Datos por cuadro, filas, atlas, retratos, vestuario por pack | Nada | aprobado, en main | [pixel_forja#7](https://github.com/Lothra2/pixel_forja/pull/7) |
 | 2 | B1 + D1 | Levantar y lanzar, agarres, armas del piso | A | aprobado, en main | [pixel_forja#8](https://github.com/Lothra2/pixel_forja/pull/8) |
 | 3 | C1 | Familia GG e Instituto Nekketsu | A | aprobado, en main | [pixel_forja#9](https://github.com/Lothra2/pixel_forja/pull/9) |
-| 4 | G1 fuentes | Acentos del vietnamita en las fuentes | Nada | entregado, falta aprobación de Rick y merge a main | [pixel_forja#10](https://github.com/Lothra2/pixel_forja/pull/10) |
-| 5 | I inicial | Kit a medida por configuración | A | pendiente | |
+| 4 | G1 fuentes | Acentos del vietnamita en las fuentes | Nada | aprobado, en main | [pixel_forja#10](https://github.com/Lothra2/pixel_forja/pull/10) |
+| 5 | I inicial | Kit a medida por configuración | A | entregado, falta aprobación de Rick | [pixel_forja#11](https://github.com/Lothra2/pixel_forja/pull/11) |
 | 6 | E1 | Sistema de escenarios oblicuos + `saigon_hem` | A, I, layout de `saigon_hem` | pendiente | |
 | 7 | F | Efectos | Nada | pendiente | |
 | 8 | G1, H1 | Resto de interfaz y audio de la rebanada vertical | Nada | pendiente | |
@@ -54,6 +54,18 @@ Se pidió para B1: el campo `cuerpo` (hurtbox sin implementos ni efectos), porqu
 - Las tres fuentes escriben las 146 letras del vietnamita. Se leen bien a x2 y x3, que es como las usa el juego.
 - Silkscreen solo tiene mayúsculas: todo el texto del juego sale en mayúsculas. Va con el tono retro.
 - Ajuste pedido: en ấ, ầ, ẩ el tono a la derecha del circunflejo agranda la letra y deja un hueco ("CẦU" se lee casi "CÂ U"). Que el tono se meta sobre las filas de marcas vacías de la letra siguiente, sin agrandar la letra, y que solo agrande si la siguiente también lleva marca.
+
+**Lote I inicial** (PR #11), entregado. Falta la aprobación de Rick y el merge a `main`. Lo que trae:
+- Kit a medida: `npx tsx tools/pixel_forja/scripts/kit-a-medida.ts public/assets/kit --config kit.config.json`. Para arrancar se copian los ejemplos de `kit.config.json` y `equipos.json`.
+- El manifiesto trae `equipos`, `equipo` por atleta, `pruebas`, y `pendiente` con lo que todavía no está hecho de lotes futuros.
+- `swim_punch`, `dunked` y `swim_turn` no existen todavía: si el config los pide, el kit da error. No pedirlos hasta su lote.
+- Se revisa en `visor.html`.
+- Mientras no esté en `main`, el juego sigue con su puente `scripts/kit.ts` (packs propios `ngg_mov`, `ngg_golpe`, `ngg_carga`, más `atletismo` y `natacion` con vestuario de pista y bañador). Al entrar I a `main`, ese puente se reemplaza por `kit.config.json`.
+- E1 no puede arrancar hasta que el juego ponga `data/stages/saigon_hem.layout.json`. Mientras tanto PixelForja sigue con F.
+
+**Del lado del juego, con lo que ya está en main:** vallas, natación y jabalina usan los packs `atletismo` y `natacion` del motor. Se aprovechan `agua` (la superficie en la fila 40 se alinea con el carril), `desplazamiento` y `elevacion` del clavado, la `suelta` de la jabalina y la jabalina dibujada en el sprite hasta ese cuadro. Funciona bien. Para lotes siguientes sería útil:
+- Una carrerita de jabalina en bucle (`javelin_run`) con la jabalina al hombro. Hoy el juego reusa los primeros 3 cuadros de `javelin`.
+- Un salto de valla aislado (`hurdle_clear`) sin la valla dibujada: `hurdles` trae su propia valla y el juego dibuja las suyas, que se tumban si las tocas.
 
 ## Insumos que pone el juego
 

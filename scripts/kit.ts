@@ -25,8 +25,29 @@ const PACKS: Record<string, string[]> = {
   ngg_mov: ['idle', 'walk', 'run', 'jump_rise', 'jump_apex', 'jump_fall', 'land', 'hit', 'fall_getup', 'knockout', 'celebrate', 'sad', 'victory', 'taunt', 'dizzy', 'ko_bounce'],
   ngg_golpe: ['jab', 'punch', 'low_kick', 'kick_martial', 'uppercut', 'run_punch', 'run_kick', 'air_kick', 'fight_hit', 'fight_block'],
   ngg_carga: ['lift', 'carry_idle', 'carry_walk', 'carry_run', 'throw_overhead', 'carried', 'thrown_spin', 'land_flat', 'weapon_pick', 'weapon_swing', 'weapon_swing_heavy', 'weapon_throw'],
+  // los del motor, con ropa de pista y traje de baño (variantes de vestuario)
+  atletismo: ['idle', 'sprint_start', 'sprint', 'hurdles', 'long_jump', 'javelin', 'shot_put', 'celebrate', 'sad', 'hit'],
+  natacion: ['idle', 'dive', 'swim', 'swim_breast', 'swim_back', 'swim_fly', 'tread_water', 'swim_exit'],
 };
 for (const [k, v] of Object.entries(PACKS)) (SPORT_PACKS as Record<string, readonly string[]>)[k] = v;
+
+/** Ropa por prueba: atleta (camiseta sin mangas y short) y traje de baño, cada uno con el color de su ficha. */
+const sinChaqueta = { jacket: null, jacketCut: undefined, jacketClosed: undefined, jacketSleeves: undefined, print: null, chestText: undefined, armband: undefined };
+function vestir(f: HumanFicha): HumanFicha {
+  const prev = f.wardrobe ?? { variants: {} };
+  return {
+    ...f,
+    wardrobe: {
+      ...prev,
+      variants: {
+        ...prev.variants,
+        atleta: { label: 'Atleta', outfit: { ...sinChaqueta, sleeves: 'none', bottom: 'shorts', socks: 'low', shoes: 'tenis' } },
+        banador: { label: 'Bañador', outfit: { ...sinChaqueta, sleeves: 'none', bottom: 'shorts', socks: 'none', shoes: 'descalzo' } },
+      },
+      packs: { ...(prev.packs ?? {}), atletismo: 'atleta', natacion: 'banador' },
+    },
+  } as HumanFicha;
+}
 
 const SONIDOS: SfxName[] = ['golpe', 'critico', 'jugador_dolor', 'enemigo_dolor', 'enemigo_muere', 'esquiva', 'bloqueo', 'recoger', 'romper', 'elegir', 'click', 'descubrir', 'subir_nivel', 'oro_mucho', 'jefe_pisoton', 'ladrido', 'paso_piedra_0', 'paso_piedra_1', 'paso_piedra_2'];
 
@@ -39,7 +60,7 @@ for (const n of readdirSync(fichasDir).filter((x) => x.endsWith('.ficha.json')))
   const f = migrateFicha(JSON.parse(readFileSync(join(fichasDir, n), 'utf8')));
   const errs = validateFicha(f);
   if (errs.length) throw new Error(`${n}: ${errs.join(', ')}`);
-  if (isHuman(f)) athletes[id] = { ...f, movementProfile: 'premium' };
+  if (isHuman(f)) athletes[id] = vestir({ ...f, movementProfile: 'premium' });
   else animales[id] = { ...f, movementProfile: 'premium' };
 }
 
