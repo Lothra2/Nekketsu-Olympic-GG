@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { Figura } from '../core/figura';
+import { ajustes } from '../core/nivel';
 import { chip, PELEA } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { Painter, hex } from '../gfx/paint';
@@ -151,8 +152,10 @@ export class Jabalina extends EventScene {
           // sube de 10 a 60 grados y baja otra vez, por si te pasas
           this.ang = 10 + 50 * Math.abs(Math.sin(this.angT * 1.6));
         } else if (this.holding) this.lanza();
+        // en el nivel suave no hay nulo: al llegar a la raya lanza solo
+        if (ajustes().sinNulo && this.x > FOUL - 8 && this.st === 'carrera') { if (!this.holding) this.ang = 40; this.lanza(); }
       } else {
-        target = this.cur.top * 2.6;
+        target = this.cur.top * 2.6 * ajustes().cpuVel;
         if (this.x >= this.cpuSuelta) { this.ang = this.cpuAng; this.lanza(); }
       }
       this.v += Phaser.Math.Clamp(target - this.v, -200 * dt, 240 * dt);
@@ -214,7 +217,7 @@ export class Jabalina extends EventScene {
   }
 
   private suelta([px, py]: [number, number]) {
-    if (this.x > FOUL) this.nulo = true;
+    if (this.x > FOUL && !(this.cur.c.human && ajustes().sinNulo)) this.nulo = true;
     const fuerza = 120 + this.vLanza * 2.1;
     const a = Phaser.Math.DegToRad(this.nulo && this.ang === 0 ? 20 : this.ang);
     const x = this.x + px, z = -py;

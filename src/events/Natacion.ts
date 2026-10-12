@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { Figura } from '../core/figura';
+import { ajustes, goma } from '../core/nivel';
 import { chip, PELEA } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { Painter, hex } from '../gfx/paint';
@@ -125,7 +126,7 @@ export class Natacion extends EventScene {
     if (this.endTick(p)) { for (const s of this.swimmers) s.fig.step(dt); this.render(); this.filterUi(); return; }
     // salida en falso: tirarse antes del ¡YA!
     const me = this.swimmers[0];
-    if (this.fase === 'previa' && this.armed && !me.falso && (p.pressed.jump || p.pressed.punch || p.pressed.kick)) {
+    if (this.fase === 'previa' && this.armed && !me.falso && !ajustes().sinFalso && (p.pressed.jump || p.pressed.punch || p.pressed.kick)) {
       me.falso = true;
       chip.blip(220, 0.3, 'sq50', 0.25, 110);
       const t = this.uiAdd(txt(this, 320, 210, '¡SALIDA EN FALSO! · TE QUEDAS UN SEGUNDO', 'fuente_ui', 2).setDepth(8600).setTint(0xff6060));
@@ -179,8 +180,8 @@ export class Natacion extends EventScene {
       target = 18 + s.boost * 1.02;
       if (p.pressed.special && s.jalon <= 0) this.delfin(s);
     } else {
-      target = s.top + Math.sin(s.t * 1.7 + s.react * 30) * 8;
-      if (s.jalon <= 0 && Math.random() < 0.25 * dt) this.delfin(s);
+      target = (s.top + Math.sin(s.t * 1.7 + s.react * 30) * 8) * ajustes().cpuVel * goma(s.x - this.swimmers[0].x);
+      if (s.jalon <= 0 && Math.random() < 0.25 * ajustes().cpuAgresion * dt) this.delfin(s);
     }
     if (s.jalon > 2.2) target += 70;
     s.v += Phaser.Math.Clamp(target - s.v, -120 * dt, 140 * dt);

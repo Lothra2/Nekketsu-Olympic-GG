@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Actor, HUECO, Item, NOTHING, type Intent, type World } from '../fight/actor';
 import { chip, PELEA } from '../core/music';
+import { ajustes, goma } from '../core/nivel';
 import { txt, flash } from '../core/ui';
 import { EventScene, prueba, type Competidor } from './base';
 import layoutJson from '../../data/stages/saigon_hem.layout.json';
@@ -58,6 +59,9 @@ export class CrossCountry extends EventScene implements World {
 
   get sc(): Phaser.Scene { return this; }
 
+  /** Tu equipo pega más según el nivel. */
+  multDaño(from: Actor | null) { return from?.team === 0 ? ajustes().daño : 1; }
+
   create() {
     this.actors = [];
     this.items = [];
@@ -81,6 +85,7 @@ export class CrossCountry extends EventScene implements World {
     this.gente.forEach((c, i) => {
       const y = L.carriles[i % L.carriles.length].y;
       const a = new Actor(this, c.id, c.team, salida, y, c.human);
+      if (c.team === 0) a.maxHp = a.hp = Math.round(a.maxHp * ajustes().vida);
       a.left = false;
       this.actors.push(a);
       this.gente2.push({ c, a, done: false, time: 0, safe: [salida, y], koT: 0, carril: y, duda: 0, cool: 1, rodeo: -1, rodeoY: 0 });
@@ -180,6 +185,8 @@ export class CrossCountry extends EventScene implements World {
       if (juego && !r.done) it = a.human
         ? { x: p.x, y: p.y, run: p.run || this.holdRun > 0.22, punch: p.pressed.punch, kick: p.pressed.kick, jump: p.pressed.jump, special: false }
         : this.cerebro(r, dt);
+      // la máquina corre según el nivel, y con la goma si va muy adelante o muy atrás
+      if (!a.human) a.vel = ajustes().cpuVel * goma(a.x - this.gente2[0].a.x);
       a.update(dt, it);
       this.terreno(r, prevX, dt);
     }
@@ -285,7 +292,7 @@ export class CrossCountry extends EventScene implements World {
     // a los golpes con el rival que tenga al lado
     const rival = this.gente2.find((o) => o !== r && o.c.team !== r.c.team && o.a.canBeHit() && Math.abs(o.a.x - a.x) < 26 && Math.abs(o.a.y - a.y) < 10);
     if (rival && r.cool <= 0 && a.grounded) {
-      r.cool = 0.5 + Math.random() * 0.9;
+      r.cool = (0.5 + Math.random() * 0.9) / ajustes().cpuAgresion;
       a.left = rival.a.x < a.x;
       if (Math.random() < 0.6) return { ...NOTHING, x: Math.sign(rival.a.x - a.x), punch: Math.random() < 0.55, kick: Math.random() >= 0.55 };
     }

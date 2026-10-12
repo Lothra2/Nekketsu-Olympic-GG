@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { Figura } from '../core/figura';
+import { ajustes, goma } from '../core/nivel';
 import { chip, PELEA } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { Painter, hex } from '../gfx/paint';
@@ -160,12 +161,12 @@ export class Vallas extends EventScene {
       if (p.pressed.special) this.codazo(r);
     } else {
       const me = this.racers[0];
-      target = r.sombra ? me.v + Phaser.Math.Clamp((me.x - 4 - r.x) * 3, -60, 60) : r.top + Math.sin(r.t * 2 + r.react * 20) * 10;
+      target = r.sombra ? me.v + Phaser.Math.Clamp((me.x - 4 - r.x) * 3, -60, 60) : (r.top + Math.sin(r.t * 2 + r.react * 20) * 10) * ajustes().cpuVel * goma(r.x - me.x);
       const next = this.hurdles.find((h) => h.lane === r.lane && !h.down && h.x > r.x);
       if (next && r.st !== 'air' && next.x - r.x < 26 + r.v * 0.05 && Math.random() < 0.92) this.jump(r);
       else if (next && r.st !== 'air' && next.x - r.x < 12) this.jump(r);
       const h = this.racers.find((o) => o !== r && o.c.team !== r.c.team && Math.abs(o.lane - r.lane) === 1 && Math.abs(o.x - r.x) < 22);
-      if (h && !r.sombra && r.cool <= 0 && Math.random() < 0.6 * dt) this.codazo(r);
+      if (h && !r.sombra && r.cool <= 0 && Math.random() < 0.6 * ajustes().cpuAgresion * dt) this.codazo(r);
     }
     if (r.st === 'stumble') { target *= 0.3; if (r.t > 0.4) { r.st = 'run'; r.fig.set('sprint'); } }
     r.v += Phaser.Math.Clamp(target - r.v, -260 * dt, 230 * dt);
@@ -213,7 +214,8 @@ export class Vallas extends EventScene {
     r.st = 'stumble';
     r.t = 0;
     r.z = 0; r.vz = 0;
-    r.v *= 0.35;
+    // tumbar una valla frena; en los niveles fáciles, a la persona menos
+    r.v *= r.c.human ? ajustes().tropiezo : 0.35;
     r.boost *= 0.4;
     r.fig.set('hit', true);
   }

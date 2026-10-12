@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Figura } from '../core/figura';
 import { Input, rotular } from '../core/input';
+import { ajustes, nivel, setNivel, ORDEN } from '../core/nivel';
 import { chip, MARCHA } from '../core/music';
 import { txt } from '../core/ui';
 import { buildLogo, fireworks } from './logo';
@@ -12,6 +13,7 @@ const MENUS: Record<string, { id: string; label: string }[]> = {
     { id: 'gira', label: 'OLIMPIADA EXPRESS' },
     { id: '>pruebas', label: 'PRUEBAS SUELTAS' },
     { id: '>peleas', label: 'PELEA CALLEJERA' },
+    { id: 'nivel', label: 'NIVEL' },
     { id: 'intro', label: 'VER LA INTRO' },
   ],
   pruebas: [
@@ -46,6 +48,9 @@ export class Title extends Phaser.Scene {
   private press!: Phaser.GameObjects.BitmapText;
   private menu!: Phaser.GameObjects.Container;
   private nivel = 'raiz';
+  private ayuda!: Phaser.GameObjects.BitmapText;
+  private ayudaEv?: Phaser.Time.TimerEvent;
+  private get lineaControles() { return rotular('{MOVER}: MOVER · {PUÑO}: PUÑO · {PATADA}: PATADA · {SALTO}: SALTO · {ESPECIAL}: TÉCNICA', this.pad.fuente); }
   private get opciones() { return MENUS[this.nivel]; }
 
   constructor() { super('Title'); }
@@ -85,7 +90,7 @@ export class Title extends Phaser.Scene {
     this.nivel = 'raiz';
     this.sel = 0;
     this.buildMenu();
-    txt(this, 320, 352, rotular('{MOVER}: MOVER · {PUÑO}: PUÑO · {PATADA}: PATADA · {SALTO}: SALTO · {ESPECIAL}: TÉCNICA', this.pad.fuente), 'fuente_ui', 1).setTint(0x8a8ab0);
+    this.ayuda = txt(this, 320, 352, rotular('{MOVER}: MOVER · {PUÑO}: PUÑO · {PATADA}: PATADA · {SALTO}: SALTO · {ESPECIAL}: TÉCNICA', this.pad.fuente), 'fuente_ui', 1).setTint(0x8a8ab0);
     this.input.on('pointerdown', () => { if (!this.started) this.openMenu(); });
     this.refresh();
   }
@@ -100,7 +105,7 @@ export class Title extends Phaser.Scene {
     g.lineStyle(1, 0xf2c230, 0.8).strokeRect(206.5, top + 0.5, 227, n * 21 + 9);
     this.menu.add(g);
     this.items = this.opciones.map((o, i) => {
-      const t = txt(this, 320, top + 15 + i * 21, o.label, 'fuente_ui', 2);
+      const t = txt(this, 320, top + 15 + i * 21, o.id === 'nivel' ? `NIVEL: ${ajustes().nombre}` : o.label, 'fuente_ui', 2);
       t.setInteractive().on('pointerdown', () => { if (this.started) { this.sel = i; this.choose(); } });
       this.menu.add(t);
       return t;
@@ -129,6 +134,15 @@ export class Title extends Phaser.Scene {
     this.sound.play('elegir', { volume: 0.5 });
     if (o.id.startsWith('>')) { this.nivel = o.id.slice(1); this.sel = 0; this.buildMenu(); return; }
     if (o.id === '<') { this.atras(); return; }
+    if (o.id === 'nivel') {
+      // cambia al siguiente nivel y dice de qué se trata
+      setNivel(ORDEN[(ORDEN.indexOf(nivel()) + 1) % ORDEN.length]);
+      this.buildMenu();
+      this.ayuda.setText(ajustes().desc).setTint(0xffe080);
+      this.ayudaEv?.remove();
+      this.ayudaEv = this.time.delayedCall(3200, () => this.ayuda.setText(this.lineaControles).setTint(0x8a8ab0));
+      return;
+    }
     if (o.id === 'intro') { this.registry.set('marchaSonando', false); chip.stop(0.2); this.scene.start('Intro'); return; }
     this.cameras.main.fadeOut(200);
     this.cameras.main.once('camerafadeoutcomplete', () => this.scene.start('Select', { modo: o.id }));

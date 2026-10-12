@@ -3,6 +3,7 @@ import { Actor, Item, NOTHING, type Intent, type World } from '../fight/actor';
 import { Brain } from '../fight/brain';
 import { DEPTH, FLOOR_TOP, XMAX, XMIN, type AttackDef } from '../fight/defs';
 import { Figura } from '../core/figura';
+import { ajustes } from '../core/nivel';
 import { Input } from '../core/input';
 import { chip, PELEA, VICTORIA } from '../core/music';
 import { txt, flash, speedLines } from '../core/ui';
@@ -76,6 +77,9 @@ export class Fight extends Phaser.Scene implements World {
 
   get sc(): Phaser.Scene { return this; }
 
+  /** Tu equipo pega más según el nivel. */
+  multDaño(from: Actor | null) { return from?.team === 0 ? ajustes().daño : 1; }
+
   create() {
     this.cameras.main.fadeIn(250);
     // el mundo se ve de cerca y sigue la acción; el marcador va en su propia capa, sin acercar
@@ -103,13 +107,15 @@ export class Fight extends Phaser.Scene implements World {
     nuestros.forEach((id, i) => {
       const a = new Actor(this, id, 0, 90 + (i % 2) * 40, 20 + i * 22, i === 0);
       this.actors.push(a);
+      // tu equipo aguanta más según el nivel
+      a.maxHp = a.hp = Math.round(a.maxHp * ajustes().vida);
       if (i === 0) this.player = a; else this.brains.set(a, new Brain(a, 0.9));
     });
     ellos.forEach((id, i) => {
       const a = new Actor(this, id, 1, this.data0.practica ? 230 : 550 - (i % 2) * 40, 20 + i * 22);
       this.actors.push(a);
       // entrenando, el rival es un saco: no se mueve ni pega
-      if (!this.data0.practica) this.brains.set(a, new Brain(a, modo === '4v4' ? 0.85 : 1));
+      if (!this.data0.practica) this.brains.set(a, new Brain(a, (modo === '4v4' ? 0.85 : 1) * ajustes().cpuAgresion));
     });
     const n = modo === '4v4' ? 6 : 4;
     for (let i = 0; i < n; i++) this.items.push(new Item(this, ARMAS_PISO[i], 200 + Math.random() * 240, 10 + Math.random() * (DEPTH - 20)));

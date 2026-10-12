@@ -33,6 +33,8 @@ export interface World {
   bloquea?(x: number, y: number, z: number): boolean;
   /** se cayó por un hueco */
   caida?(a: Actor): void;
+  /** multiplicador del daño de un golpe (el nivel de dificultad) */
+  multDaño?(from: Actor | null, victim: Actor): number;
 }
 
 /** Lo que devuelve `suelo` donde no hay piso. */
@@ -52,7 +54,9 @@ export class Actor {
   st: St = 'idle';
   t = 0;
   hp: number;
-  readonly maxHp: number;
+  maxHp: number;
+  /** velocidad propia (el nivel de dificultad la baja o la sube para la máquina) */
+  vel = 1;
   meter = 0;
   combo = 0;
   comboT = 0;
@@ -172,13 +176,13 @@ export class Actor {
     if (it.kick) { if (this.weapon) this.throwWeapon(); else this.kickAttack(); return; }
     if (it.x) this.left = it.x < 0;
     const running = it.run && it.x !== 0;
-    const sx = running ? SPEED.runX : SPEED.walkX, sy = running ? SPEED.runY : SPEED.walkY;
+    const sx = (running ? SPEED.runX : SPEED.walkX) * this.vel, sy = (running ? SPEED.runY : SPEED.walkY) * this.vel;
     const dx = it.x * sx * dt, dy = it.y * sy * dt;
     this.desplazar(dx, dy);
     // un escalón chico se sube solo; si se acaba el piso, se cae
     const base = this.base;
     if (this.z < base) this.z = base;
-    else if (this.z > base + 0.5) { this.st = 'jump'; this.t = 0; this.vz = 0; this.vx = running ? it.x * SPEED.runX : it.x * SPEED.walkX; this.vy = 0; this.play('jump_fall'); return; }
+    else if (this.z > base + 0.5) { this.st = 'jump'; this.t = 0; this.vz = 0; this.vx = (running ? it.x * SPEED.runX : it.x * SPEED.walkX) * Math.max(1, this.vel); this.vy = 0; this.play('jump_fall'); return; }
     const dist = Math.hypot(dx, dy * 1.4);
     if (it.x || it.y) {
       this.st = running ? 'run' : 'walk';
@@ -189,7 +193,7 @@ export class Actor {
       this.play('idle');
       this.fig.step(dt);
     }
-    this.vx = running ? it.x * SPEED.runX : 0;
+    this.vx = running ? it.x * SPEED.runX * this.vel : 0;
   }
 
   private footsteps(ev: { tipo: string }[]) {
@@ -200,7 +204,8 @@ export class Actor {
     this.st = 'jump';
     this.t = 0;
     this.vz = 255;
-    this.vx = it.x * (it.run ? SPEED.runX : SPEED.walkX * 1.25);
+    // el salto siempre llega igual de lejos: el nivel solo frena en el piso
+    this.vx = it.x * (it.run ? SPEED.runX : SPEED.walkX * 1.25) * Math.max(1, this.vel);
     this.vy = it.y * SPEED.walkY;
     this.play('jump_rise', true);
     this.w.sfx('esquiva', 0.25);
@@ -324,7 +329,7 @@ export class Actor {
     const now = this.w.sc.time.now;
     this.hitTimes = this.hitTimes.filter((t) => now - t < 1400);
     this.hitTimes.push(now);
-    const dmg = def.dmg * (this.team === 0 && !this.human ? 0.85 : 1);
+    const dmg = def.dmg * (this.team === 0 && !this.human ? 0.85 : 1) * (this.w.multDaño?.(from, this) ?? 1);
     this.hp = Math.max(0, this.hp - dmg);
     this.meter = Math.min(100, this.meter + 7);
     if (from) from.meter = Math.min(100, from.meter + 6);
