@@ -62,6 +62,8 @@ Se pidió para B1: el campo `cuerpo` (hurtbox sin implementos ni efectos), porqu
 - Se revisa en `visor.html`.
 - Mientras no esté en `main`, el juego sigue con su puente `scripts/kit.ts` (packs propios `ngg_mov`, `ngg_golpe`, `ngg_carga`, más `atletismo` y `natacion` con vestuario de pista y bañador). Al entrar I a `main`, ese puente se reemplaza por `kit.config.json`.
 - E1 no puede arrancar hasta que el juego ponga `data/stages/saigon_hem.layout.json`. Mientras tanto PixelForja sigue con F.
+- Revisado del lado del juego: corrí `kit-a-medida` de la rama del PR con una configuración igual al puente del juego (los 5 packs propios, fichas con vestuario `atleta` y `banador` por pack, Thor, armas y fuentes). Sale en 18 s con `--rapido`, el vestuario por pack funciona y el manifiesto es el mismo que ya lee el juego. Solo cambian `ui.fuentes.*.alto`, que ahora es `alto_linea` más `base`, y el audio, que vuelve como pendiente. El juego se adapta a las dos cosas.
+- Pedido chico para cuando toque: que `audio.sfx` acepte la lista de sonidos que el motor ya tiene (`SFX` con `encodeWav`) y los escriba en `audio/` con su entrada en el manifiesto. Así el juego deja su puente completo sin esperar al lote H.
 
 **Del lado del juego, con lo que ya está en main:** vallas, natación y jabalina usan los packs `atletismo` y `natacion` del motor. Se aprovechan `agua` (la superficie en la fila 40 se alinea con el carril), `desplazamiento` y `elevacion` del clavado, la `suelta` de la jabalina y la jabalina dibujada en el sprite hasta ese cuadro. Funciona bien. Para lotes siguientes sería útil:
 - Una carrerita de jabalina en bucle (`javelin_run`) con la jabalina al hombro. Hoy el juego reusa los primeros 3 cuadros de `javelin`.
