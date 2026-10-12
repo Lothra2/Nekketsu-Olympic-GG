@@ -16,7 +16,7 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 | 6 | E1 | Sistema de escenarios oblicuos + `saigon_hem` | A, I, layout de `saigon_hem` | aprobado, en main | [pixel_forja#14](https://github.com/Lothra2/pixel_forja/pull/14) |
 | 7 | F | Efectos (y audio por configuración) | Nada | aprobado, en main | [pixel_forja#12](https://github.com/Lothra2/pixel_forja/pull/12) |
 | 8 | G1, H1 | Resto de interfaz y audio de la rebanada vertical | Nada | entregado, falta la aprobación de Rick | [pixel_forja#13](https://github.com/Lothra2/pixel_forja/pull/13) |
-| 9 | B2, C2, D2, E2 | Cross Country completo y equipos nacionales | E1 | pendiente | |
+| 9 | B2, C2, D2, E2 | Cross Country completo y equipos nacionales | E1 | pendiente, puede arrancar: los 4 layouts de E2 están jugados en gris | |
 | 10 | B3, E3 | Obstáculos, Tama-wari, Kachinuki | E1 | pendiente | |
 | 11 | B4, E4 | Pruebas de 1992 | E1 | pendiente | |
 | 12 | G2, H2 | Envoltorio y audio completo | | pendiente | |
@@ -108,6 +108,47 @@ Se pidió para B1: el campo `cuerpo` (hurtbox sin implementos ni efectos), porqu
 - `"escenarios"` en `kit.config.json` no se usa por ahora. El script aparte tarda menos de 2 s contra los 20 s del kit, falla por su cuenta y escribe el `index.json` que lee el juego.
 - E1 ya está en `main`. El submódulo apunta a `main` y el arte de `saigon_hem` está en el juego (`public/assets/escenarios/saigon_hem/`). Pasan todas las pruebas del juego con el arte. El kit regenerado con `main` sale igual: solo cambia una línea de `CREDITOS.txt`.
 
+**Layouts de E2, listos y jugados en gris.** Están en `data/stages/` y el Cross Country ya corre los cinco tramos seguidos con el tiempo sumado. Se probaron con los cuatro atletas en piloto automático, de punta a punta, sin que nadie se trabe. `npm run escenarios -- --validar` los pasa por `generarEscenario` sin escribir nada. Todos validan sin errores y pasan la prueba de camino.
+
+Reglas comunes, iguales a `saigon_hem`:
+- Franja de 130 (filas 200 a 330), carriles en 20, 50, 80 y 110. El mercado usa 12, 28, 65 y 112, uno por pasillo.
+- Un salto sube 36. Un escalón de hasta 6 se sube caminando. Corriendo, un salto avanza unos 85.
+- La hora va en `hora` y el clima de ese día es el primero de `clima`.
+
+Lo de cada tramo:
+- **`saigon_benthanh`** (largo 3840, `manana`):
+  - Entrada por el portón del medio (y 40 a 90) y dos filas de puestos altos (z 46) que arman tres pasillos: arriba y de 0 a 36, en el medio de 52 a 78 y abajo de 94 a 130.
+  - Las filas se cortan cada 300 px para cambiar de pasillo y terminan en x 3040. Queda un salón antes del portón de salida, que tiene el muro en el medio (y 40 a 90).
+  - En los pasillos hay puestos de frutas, cajas, sacos y cubos de flores que se saltan, y lámparas colgantes (`bajo`).
+  - Afuera, motos por el carril 4 solo desde x 3260. `x0`/`x1` en el vehículo dicen en qué calle andan.
+  - El juego derrama las frutas: quien cae encima de un `puesto_frutas` las riega en el pasillo, justo detrás del puesto, y el que viene se resbala. Hoy se dibujan con puntitos.
+- **`saigon_rio`** (largo 3840, `mediodia`):
+  - Malecón, después el río (x 1500 a 2300), después la orilla con botes de bambú, redes y un canal.
+  - Atrás (y 0 a 40) van el muelle de salida (x 1400 a 1700, z 12, con un escalón de 6), el canal del ferry y el muelle de llegada (x 2200 a 2500).
+  - El ferry es una entidad `vehiculo` (`x0`, `x1`, `w`, `d`, `z`, `velocidad`, `espera`). Va y viene entre los muelles y se lleva a quien esté encima.
+  - Adelante (y 40 a 130) está el río hondo (`nivel` 28, `corriente` -12): se nada sin saltar, un poco más lento, y bajan jacintos que te enredan un momento.
+  - Nadando se llega un poco antes que esperando el ferry, pero con riesgo.
+  - Por el carril 3 pasan xích lô desde x 2500.
+- **`saigon_azoteas`** (largo 3840, `tarde`, clima `aguacero`):
+  - Cinco edificios con huecos `vacio` de 50, 60 y 40. El último hueco es de 70 y lo cruza una viga de metal (y 60 a 76).
+  - El techo de zinc va de x 750 a 1500 (`metal`).
+  - Hay tanques, aires acondicionados, mesas de café, macetas, la caseta de la escalera (z 56, se rodea por abajo), ropa tendida (`bajo`) y antenas.
+  - Los charcos son `agua` de `nivel` 1. El juego los trata como charco: resbala, no frena.
+  - Con aguacero, caer de un salto corriendo puede terminar en resbalón, y más en el zinc. El juego pone la lluvia que cae con el efecto `lluvia` del kit.
+- **`saigon_estadio`** (largo 1920, `atardecer`): la recta final. Se entra por el portón del estadio (hueco en y 45 a 85), hay tres vallas bajas (z 14) en la pista roja (`cancha`) y la meta en x 1860.
+
+Para las fichas de arte de E2:
+- **Legibilidad.** `saigon_benthanh` y `saigon_azoteas` no pasan la prueba 7 con el estilo de hoy. El peor contraste es 1.5:1, justo donde una silueta queda delante de un poste o una antena oscura: x 216 y 12 en el mercado, x 3608 y 20 en las azoteas. Es del arte, no de la geometría: se arregla con la paleta del poste en la ficha. Avísennos si prefieren que corramos el poste.
+- **Tipos nuevos de caja** que hoy salen como muro:
+  - `porton_mercado`, `puesto_*`, `puesto_frutas`, `sacos_arroz`, `cubos_flores`, `canastas`, `carrito_cafe`;
+  - `muelle`, `escalon`, `banca`, `carrito_che`, `bote_bambu`, `cajas_pescado`;
+  - `aire_acondicionado`, `macetas`, `caseta_escalera`;
+  - `porton_estadio`, `valla`.
+- **Para D2 y B2:**
+  - El ferry, el xích lô y las motos de los carriles.
+  - Jacintos flotando y frutas regadas en el piso. Pueden ir en `vida` o como efecto.
+  - Una brazada de Cross, para nadar en el río sin salir del pack de pelea. Hoy el juego tapa medio cuerpo con agua.
+
 **G1 resto y H1** (PR #13), esperando la revisión de Rick. Cuando entre a `main`, el juego pide en `kit.config.json`:
 - `ui.logo` y `ui.interfaz`: logo animado, diálogo 9-slice, paneles por equipo, barras, banners, controles táctiles, minimapa y números.
 - El audio de H1: `silbato`, `pistola`, `marcha_nekketsu` y el resto. Con eso `manifest.pendiente` queda vacío.
@@ -132,7 +173,8 @@ Lo que PixelForja lee de este repo y todavía no existe. Cada uno lo produce una
 | Equipos | `data/equipos.json` | I | Juego F0 | listo |
 | Layout del tramo 1 de Saigón | `data/stages/saigon_hem.layout.json` | E1 | Juego F3 (gris jugable) | listo, jugado en gris |
 | Layout de la azotea final | `data/stages/caracas_azotea.layout.json` | E3 | Juego F3 | pendiente |
-| Resto de layouts | `data/stages/*.layout.json` | E2 a E6 | Juego F6 a F11 | pendiente |
+| Layouts del Cross Country completo | `data/stages/saigon_benthanh`, `saigon_rio`, `saigon_azoteas`, `saigon_estadio` (`.layout.json`) | E2 | Juego F6 | listos, jugados en gris |
+| Resto de layouts | `data/stages/*.layout.json` | E3 a E6 | Juego F7 a F11 | pendiente |
 | Textos | `data/dialogs/*.json` | G1 | Juego F5 | pendiente |
 
 Los lotes A, B1 + D1, C1, G1 fuentes, I inicial, F, G1 y H1 no necesitan ningún insumo del juego. Se pueden empezar ya.

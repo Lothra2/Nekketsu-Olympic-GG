@@ -1,0 +1,330 @@
+{
+ "pais": "vietnam",
+ "prueba": "crosscountry",
+ "franja": {
+  "atras": 200,
+  "adelante": 330
+ },
+ "id": "saigon_rio",
+ "tramo": 3,
+ "nombre": "RÍO SAIGÓN",
+ "largo": 3840,
+ "hora": "mediodia",
+ "clima": [
+  "despejado"
+ ],
+ "paralaje": {
+  "cielo": "auto",
+  "lejos": "saigon_landmark81",
+  "cerca": "rio"
+ },
+ "piso": [
+  {
+   "x0": 0,
+   "x1": 3840,
+   "tipo": "baldosa"
+  },
+  {
+   "x0": 0,
+   "x1": 1400,
+   "y0": 0,
+   "y1": 24,
+   "tipo": "acera"
+  },
+  {
+   "x0": 1400,
+   "x1": 1500,
+   "y0": 40,
+   "y1": 130,
+   "tipo": "tierra",
+   "nombre": "orilla"
+  },
+  {
+   "x0": 1500,
+   "x1": 2300,
+   "tipo": "agua",
+   "nombre": "río"
+  },
+  {
+   "x0": 1400,
+   "x1": 1700,
+   "y0": 0,
+   "y1": 40,
+   "tipo": "madera",
+   "nombre": "muelle"
+  },
+  {
+   "x0": 2200,
+   "x1": 2500,
+   "y0": 0,
+   "y1": 40,
+   "tipo": "madera",
+   "nombre": "muelle"
+  },
+  {
+   "x0": 2300,
+   "x1": 2400,
+   "y0": 40,
+   "y1": 130,
+   "tipo": "tierra",
+   "nombre": "orilla"
+  }
+ ],
+ "huecos": [
+  {
+   "x0": 3200,
+   "x1": 3256,
+   "y0": 0,
+   "y1": 130,
+   "caida": "agua",
+   "nombre": "canal"
+  }
+ ],
+ "plataformas": [
+  {
+   "x": 500,
+   "y": 0,
+   "w": 60,
+   "d": 16,
+   "z": 12,
+   "tipo": "banca",
+   "subible": true
+  },
+  {
+   "x": 800,
+   "y": 60,
+   "w": 50,
+   "d": 28,
+   "z": 26,
+   "tipo": "carrito_che",
+   "subible": true
+  },
+  {
+   "x": 1100,
+   "y": 0,
+   "w": 60,
+   "d": 16,
+   "z": 12,
+   "tipo": "banca",
+   "subible": true
+  },
+  {
+   "x": 1384,
+   "y": 0,
+   "w": 16,
+   "d": 40,
+   "z": 6,
+   "tipo": "escalon"
+  },
+  {
+   "x": 1400,
+   "y": 0,
+   "w": 300,
+   "d": 40,
+   "z": 12,
+   "tipo": "muelle",
+   "subible": true,
+   "nota": "muelle del ferry; el ferry sale de x 1700"
+  },
+  {
+   "x": 2200,
+   "y": 0,
+   "w": 300,
+   "d": 40,
+   "z": 12,
+   "tipo": "muelle",
+   "subible": true,
+   "nota": "muelle de llegada del ferry"
+  },
+  {
+   "x": 2500,
+   "y": 0,
+   "w": 16,
+   "d": 40,
+   "z": 6,
+   "tipo": "escalon"
+  },
+  {
+   "x": 2640,
+   "y": 70,
+   "w": 40,
+   "d": 30,
+   "z": 16,
+   "tipo": "bote_bambu",
+   "subible": true
+  },
+  {
+   "x": 2700,
+   "y": 20,
+   "w": 40,
+   "d": 30,
+   "z": 16,
+   "tipo": "bote_bambu",
+   "subible": true
+  },
+  {
+   "x": 3460,
+   "y": 20,
+   "w": 50,
+   "d": 40,
+   "z": 20,
+   "tipo": "cajas_pescado",
+   "subible": true
+  }
+ ],
+ "muros": [],
+ "escaleras": [],
+ "postes": [
+  {
+   "x": 300,
+   "y": 4,
+   "alto": 150,
+   "tipo": "farol_rio"
+  },
+  {
+   "x": 1300,
+   "y": 4,
+   "alto": 150,
+   "tipo": "farol_rio"
+  },
+  {
+   "x": 2620,
+   "y": 4,
+   "alto": 150,
+   "tipo": "farol_rio"
+  },
+  {
+   "x": 3500,
+   "y": 4,
+   "alto": 150,
+   "tipo": "farol_rio"
+  }
+ ],
+ "agua": [
+  {
+   "x0": 1500,
+   "x1": 2300,
+   "y0": 40,
+   "y1": 130,
+   "nivel": 28,
+   "corriente": -12,
+   "nombre": "río: se cruza nadando, con jacintos"
+  },
+  {
+   "x0": 1700,
+   "x1": 2200,
+   "y0": 0,
+   "y1": 40,
+   "nivel": 28,
+   "corriente": -12,
+   "nombre": "canal del ferry"
+  }
+ ],
+ "bajo": [
+  {
+   "x0": 2880,
+   "x1": 3040,
+   "y0": 0,
+   "y1": 40,
+   "z": 48,
+   "tipo": "redes_pesca"
+  }
+ ],
+ "solidos": [],
+ "carriles": [
+  {
+   "y": 20
+  },
+  {
+   "y": 50
+  },
+  {
+   "y": 80
+  },
+  {
+   "y": 110
+  }
+ ],
+ "entidades": [
+  {
+   "tipo": "salida",
+   "x": 40
+  },
+  {
+   "tipo": "meta",
+   "x": 3790
+  },
+  {
+   "tipo": "vehiculo",
+   "vehiculo": "ferry",
+   "x0": 1700,
+   "x1": 2200,
+   "y": 0,
+   "w": 110,
+   "d": 40,
+   "z": 12,
+   "velocidad": 80,
+   "espera": 2.2,
+   "nota": "va y viene entre los muelles; quien se sube cruza sin mojarse"
+  },
+  {
+   "tipo": "vehiculo",
+   "vehiculo": "xich_lo",
+   "carril": 3,
+   "cada": 7,
+   "desde": "derecha",
+   "x0": 2500,
+   "x1": 3840
+  },
+  {
+   "tipo": "objeto",
+   "objeto": "non_la",
+   "x": 640,
+   "y": 100
+  },
+  {
+   "tipo": "objeto",
+   "objeto": "paraguas",
+   "x": 1250,
+   "y": 60
+  },
+  {
+   "tipo": "objeto",
+   "objeto": "tubo",
+   "x": 2900,
+   "y": 100
+  },
+  {
+   "tipo": "objeto",
+   "objeto": "coco",
+   "x": 3600,
+   "y": 60
+  }
+ ],
+ "ranuras_deco": [
+  {
+   "x0": 0,
+   "x1": 1400,
+   "capa": "cerca",
+   "tema": "malecon_bach_dang"
+  },
+  {
+   "x0": 1400,
+   "x1": 2500,
+   "capa": "lejos",
+   "tema": "rio_landmark81"
+  },
+  {
+   "x0": 2500,
+   "x1": 3840,
+   "capa": "cerca",
+   "tema": "orilla_thu_thiem"
+  }
+ ],
+ "vida": [
+  "jacintos_flotando",
+  "agua_animada",
+  "ferry",
+  "botes_bambu"
+ ]
+}

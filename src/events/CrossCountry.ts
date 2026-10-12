@@ -3,57 +3,106 @@ import { Actor, HUECO, Item, NOTHING, type Intent, type World } from '../fight/a
 import { chip, PELEA } from '../core/music';
 import { ajustes, goma } from '../core/nivel';
 import { txt, flash } from '../core/ui';
-import { EventScene, prueba, type Competidor } from './base';
-import layoutJson from '../../data/stages/saigon_hem.layout.json';
+import { EventScene, prueba, type Competidor, type EventData } from './base';
+import hem from '../../data/stages/saigon_hem.layout.json';
+import benthanh from '../../data/stages/saigon_benthanh.layout.json';
+import rio from '../../data/stages/saigon_rio.layout.json';
+import azoteas from '../../data/stages/saigon_azoteas.layout.json';
+import estadio from '../../data/stages/saigon_estadio.layout.json';
 import type { Paso } from '../core/coach';
 import { hayArte, pintarEscenario, queueEscenario } from './escenario';
 import { efecto, talla } from '../core/fx';
+import { kit } from '../core/kit';
 
-/** El formato de layout de PixelForja (PEDIDO 10.2), la parte que este tramo usa. */
+/** El formato de layout de PixelForja (PEDIDO 10.2), la parte que el Cross Country usa. */
 interface Caja { x: number; y: number; w: number; d: number; z: number; tipo?: string }
-interface Layout {
-  id: string; nombre: string; largo: number; franja: { atras: number; adelante: number };
-  huecos: { x0: number; x1: number; y0: number; y1: number }[];
-  plataformas: Caja[]; muros: Caja[]; solidos: Caja[];
-  agua: { x0: number; x1: number; nivel: number; corriente: number }[];
-  bajo: { x0: number; x1: number; y0: number; y1: number; z: number }[];
-  postes: { x: number; y: number; alto: number }[];
-  carriles: { y: number }[];
-  entidades: { tipo: string; x?: number; y?: number; objeto?: string; carril?: number; cada?: number }[];
+interface Agua { x0: number; x1: number; y0?: number; y1?: number; nivel: number; corriente?: number; nombre?: string }
+interface Entidad {
+  tipo: string; x?: number; y?: number; x0?: number; x1?: number; objeto?: string; vehiculo?: string; carril?: number; cada?: number;
+  w?: number; d?: number; z?: number; velocidad?: number; espera?: number;
 }
-const L = layoutJson as unknown as Layout;
-const FT = L.franja.atras;
-const DEPTH = L.franja.adelante - L.franja.atras;
+interface Layout {
+  id: string; nombre: string; tramo: number; largo: number; franja: { atras: number; adelante: number }; hora: string; clima: string[];
+  piso: { x0: number; x1: number; y0?: number; y1?: number; tipo: string; nombre?: string }[];
+  huecos: { x0: number; x1: number; y0: number; y1: number; caida: 'agua' | 'vacio'; nombre?: string }[];
+  plataformas: Caja[]; muros: Caja[]; solidos: Caja[];
+  agua: Agua[];
+  bajo: { x0: number; x1: number; y0: number; y1: number; z: number; tipo?: string }[];
+  postes: { x: number; y: number; alto: number; tipo?: string }[];
+  carriles: { y: number }[];
+  entidades: Entidad[];
+}
+
+/** Los cinco tramos, en orden: del hẻm a la meta en el estadio. */
+const TRAMOS = [hem, benthanh, rio, azoteas, estadio] as unknown as Layout[];
+/** Lo que se dice antes de cada tramo. */
+const AYUDA: Record<string, string> = {
+  saigon_hem: 'MANTÉN {MOVER} ADELANTE PARA CORRER · {SALTO} SALTA CANALES Y MUROS · A LOS GOLPES SI HACE FALTA',
+  saigon_benthanh: 'PASILLOS ANGOSTOS: ELIGE UNO · SI PISAS LAS FRUTAS, EL DE ATRÁS SE RESBALA',
+  saigon_rio: 'EL FERRY ES SEGURO PERO HAY QUE ESPERARLO · NADANDO VAS DIRECTO: OJO CON LOS JACINTOS',
+  saigon_azoteas: '{SALTO} CORRIENDO ENTRE EDIFICIOS · CON LLUVIA SE RESBALA · LA VIGA CRUZA EL HUECO ANCHO',
+  saigon_estadio: '¡LA RECTA FINAL! {SALTO} LAS VALLAS Y A LA META',
+};
+// todos los tramos comparten la franja: la cámara y el marcador no cambian de uno a otro
+const FT = 200;
+const DEPTH = 130;
 /** escala 1: el arte de PixelForja está pensado para verse entero, sin pixeles disparejos */
 const ZOOM = 1;
 /** lo que se sube de un paso, sin saltar */
 const PASO = 6;
 const ALTO = 44;
+/** agua hasta acá es un charco (resbala); desde acá se nada */
+const CHARCO = 2;
+const HONDO = 20;
 
-interface Corredor { c: Competidor; a: Actor; done: boolean; time: number; safe: [number, number]; koT: number; carril: number; duda: number; cool: number; rodeo: number; rodeoY: number }
-interface Moto { x: number; y: number; v: number; g: Phaser.GameObjects.Container }
+interface Corredor {
+  c: Competidor; a: Actor; done: boolean; time: number; safe: [number, number]; koT: number; carril: number; duda: number; cool: number; rodeo: number; rodeoY: number;
+  /** río: por dónde cruza la máquina */
+  ruta: 'ferry' | 'nado';
+  enredo: number; resbalo: number; aire: boolean; enCharco: boolean; enFruta: boolean;
+  /** para despegar a la máquina si se queda dando vueltas en el mismo lugar */
+  mejorX: number; mejorT: number; desatasco: number; desatascoY: number;
+}
+interface Vehiculo { x: number; y: number; v: number; g: Phaser.GameObjects.Container }
+/** El ferry del río: una plataforma que va y viene entre los muelles y se lleva a quien esté encima. */
+interface Ferry extends Caja { x0: number; x1: number; v: number; espera: number; quieto: number; dir: 1 | -1; g: Phaser.GameObjects.Container }
+interface Jacinto { x: number; y: number; g: Phaser.GameObjects.Graphics; tocados: Set<Actor> }
+interface Fruta { x0: number; x1: number; y0: number; y1: number; t: number; dueño: Actor; g: Phaser.GameObjects.Graphics }
+
+/** Para pasar de un tramo al siguiente: los mismos cuatro y lo que llevan acumulado. */
+interface CrossData extends EventData { tramo?: number; cross?: { gente: Competidor[]; acum: Record<string, number> } }
 
 /**
- * Cross Country, tramo 1: el hẻm de Saigón. Corre, salta canales, trepa cajas para pasar el muro,
- * cruza la calle inundada y esquiva las motos; y en el camino, a los golpes, como en el original.
- * Escenario en gris mientras llega el arte de PixelForja (lote E1): esto es lo que se le entrega jugado.
+ * Cross Country Saigón, cinco tramos seguidos: el hẻm, el mercado Bến Thành, el río, las azoteas bajo el aguacero
+ * y la recta final en el estadio. Gana el menor tiempo sumado. En el camino, a los golpes, como en el original.
+ * Cada tramo se ve con el arte de PixelForja si ya llegó, y en gris si no.
  */
 export class CrossCountry extends EventScene implements World {
   actors: Actor[] = [];
   items: Item[] = [];
   floorTop = FT;
-  limites = { xmin: 12, xmax: L.largo - 12, depth: DEPTH };
+  limites = { xmin: 12, xmax: 3828, depth: DEPTH };
+  private L!: Layout;
+  private tramo = 0;
+  private acum: Record<string, number> = {};
   private gente2: Corredor[] = [];
   private cajas: Caja[] = [];
   private arte: ReturnType<typeof pintarEscenario> | null = null;
   /** el agua sobre los pies de cada uno, justo delante de su figura */
   private aguaPies = new Map<Actor, Phaser.GameObjects.Graphics>();
-  private motos: Moto[] = [];
-  private motoT: number[] = [];
+  private vehiculos: Vehiculo[] = [];
+  private vehT: number[] = [];
+  private ferry: Ferry | null = null;
+  private jacintos: Jacinto[] = [];
+  private jacT = 0;
+  private frutas: Fruta[] = [];
+  private derrame = new Map<Caja, number>();
+  private lluvia: Phaser.GameObjects.TileSprite | null = null;
   private meta = 3790;
   private clock = 0;
   private holdRun = 0;
   private stop = 0;
+  private entre: { t: number; go: () => void } | null = null;
   private hud!: Phaser.GameObjects.Graphics;
   private timeTxt!: Phaser.GameObjects.BitmapText;
   private heads: { img: Phaser.GameObjects.Image; r: Corredor }[] = [];
@@ -63,7 +112,17 @@ export class CrossCountry extends EventScene implements World {
 
   constructor() { super('CrossCountry'); }
 
-  preload() { queueEscenario(this, L.id); }
+  init(d: CrossData) {
+    super.init(d);
+    // el entrenamiento es siempre el hẻm; `tramo` sirve también para probar uno suelto
+    this.tramo = this.d.practica ? 0 : Phaser.Math.Clamp(d.tramo ?? 0, 0, TRAMOS.length - 1);
+    this.acum = {};
+    if (d.cross && !this.d.practica) { this.gente = d.cross.gente; this.acum = { ...d.cross.acum }; }
+    this.L = TRAMOS[this.tramo];
+    if (this.L.franja.atras !== FT || this.L.franja.adelante - this.L.franja.atras !== DEPTH) throw new Error(`${this.L.id}: la franja tiene que ser 200 a 330`);
+  }
+
+  preload() { queueEscenario(this, this.L.id); }
 
   get sc(): Phaser.Scene { return this; }
 
@@ -71,27 +130,38 @@ export class CrossCountry extends EventScene implements World {
   multDaño(from: Actor | null) { return from?.team === 0 ? ajustes().daño : 1; }
 
   create() {
+    const L = this.L;
     this.actors = [];
     this.items = [];
     this.gente2 = [];
     this.aguaPies.clear();
-    this.motos = [];
+    this.vehiculos = [];
+    this.jacintos = [];
+    this.frutas = [];
+    this.derrame.clear();
     this.heads = [];
     this.clock = 0;
+    this.jacT = 0;
     this.holdRun = 0;
     this.stop = 0;
+    this.entre = null;
+    this.lluvia = null;
+    this.limites = { xmin: 12, xmax: L.largo - 12, depth: DEPTH };
     this.cajas = [...L.plataformas, ...L.muros, ...L.solidos];
     this.meta = L.entidades.find((e) => e.tipo === 'meta')?.x ?? L.largo - 50;
     const salida = L.entidades.find((e) => e.tipo === 'salida')?.x ?? 40;
-    this.motoT = L.entidades.filter((e) => e.tipo === 'vehiculo').map((e) => (e.cada ?? 5) * 0.6);
+    this.vehT = this.vias().map((e) => (e.cada ?? 5) * 0.6);
     this.setup(ZOOM, L.largo);
+    this.armarFerry();
     // el arte de PixelForja si ya llegó; si no, el gris
     this.arte = hayArte(this, L.id) ? pintarEscenario(this, L.id, 5000) : null;
     if (!this.arte) this.dibujar();
     this.sparks = this.add.particles(0, 0, 'px', { speed: { min: 60, max: 180 }, lifespan: 260, scale: { start: 0.9, end: 0 }, tint: [0xffffff, 0xffe040, 0xffa020], emitting: false }).setDepth(5000);
     this.dusts = this.add.particles(0, 0, 'px', { speedX: { min: -40, max: 40 }, speedY: { min: -30, max: -6 }, lifespan: 380, scale: { start: 0.8, end: 0 }, tint: 0xb0a8b8, alpha: { start: 0.7, end: 0 }, emitting: false }).setDepth(4999);
     this.splash = this.add.particles(0, 0, 'px', { speed: { min: 30, max: 90 }, angle: { min: 200, max: 340 }, gravityY: 300, lifespan: 420, scale: { start: 1, end: 0.3 }, tint: [0xffffff, 0x9ad8f0], emitting: false }).setDepth(5000);
-    for (const e of L.entidades) if (e.tipo === 'objeto' && e.objeto) this.items.push(new Item(this, e.objeto, e.x ?? 0, e.y ?? 60));
+    for (const e of L.entidades) if (e.tipo === 'objeto' && e.objeto && this.hayObjeto(e.objeto)) this.items.push(new Item(this, e.objeto, e.x ?? 0, e.y ?? 60));
+    // el primer clima de la lista es el de hoy; los demás son los que el escenario puede tener otro día
+    if (L.clima[0] === 'aguacero') this.ponerLluvia();
 
     this.gente.forEach((c, i) => {
       const y = L.carriles[i % L.carriles.length].y;
@@ -99,18 +169,23 @@ export class CrossCountry extends EventScene implements World {
       if (c.team === 0) a.maxHp = a.hp = Math.round(a.maxHp * ajustes().vida);
       a.left = false;
       this.actors.push(a);
-      this.gente2.push({ c, a, done: false, time: 0, safe: [salida, y], koT: 0, carril: y, duda: 0, cool: 1, rodeo: -1, rodeoY: 0 });
+      this.gente2.push({ c, a, done: false, time: 0, safe: [salida, y], koT: 0, carril: y, duda: 0, cool: 1, rodeo: -1, rodeoY: 0, ruta: Math.random() < 0.4 ? 'ferry' : 'nado', enredo: 0, resbalo: 0, aire: false, enCharco: false, enFruta: false, mejorX: salida, mejorT: 0, desatasco: 0, desatascoY: 1 });
     });
     this.cameras.main.centerOn(salida + 200, 360 - 180 / ZOOM);
     this.hud = this.uiAdd(this.add.graphics().setDepth(8000));
     this.timeTxt = this.uiAdd(txt(this, 626, 14, '0.00', 'fuente_ui', 2, 1).setDepth(8001));
+    if (!this.d.practica) this.uiAdd(txt(this, 626, 32, `TRAMO ${this.tramo + 1}/${TRAMOS.length}`, 'fuente_ui', 1, 1).setDepth(8001).setTint(0xffe080));
     for (const r of this.gente2) this.heads.push({ img: this.uiAdd(this.add.image(0, 22, 'cabecitas', r.c.id).setDepth(8002)), r });
-    if (!this.arte) this.uiAdd(txt(this, 14, 326, 'TRAMO 1 · ESCENARIO EN GRIS', 'fuente_ui', 1, 0).setDepth(8001).setTint(0x8a8ab0));
+    if (!this.arte) this.uiAdd(txt(this, 14, 326, `TRAMO ${this.tramo + 1} · ESCENARIO EN GRIS`, 'fuente_ui', 1, 0).setDepth(8001).setTint(0x8a8ab0));
     chip.play(PELEA);
     const p = prueba('CrossCountry');
     if (this.d.practica) { void this.entrenar(p.nombre, this.pasos(), 40); return; }
-    void this.previa(p.nombre, p.lugar, 'MANTÉN {MOVER} ADELANTE PARA CORRER · {SALTO} SALTA CANALES Y MUROS · A LOS GOLPES SI HACE FALTA');
+    const titulo = this.tramo === 0 ? p.nombre : `TRAMO ${this.tramo + 1} DE ${TRAMOS.length}`;
+    void this.previa(titulo, `${L.nombre}, SAIGÓN`, AYUDA[L.id] ?? '');
   }
+
+  /** Solo los objetos que el kit ya trae (D1); los que pida un layout y no estén esperan a su lote. */
+  private hayObjeto(id: string) { return id in kit().objetos; }
 
   /** Entrenamiento: te lleva a cada obstáculo y espera a que lo pases. */
   private pasos(): Paso[] {
@@ -129,7 +204,17 @@ export class CrossCountry extends EventScene implements World {
 
   // ------------------------------------------------------------------ el terreno
 
-  private enHueco(x: number, y: number) { return L.huecos.some((h) => x >= h.x0 && x < h.x1 && y >= h.y0 && y < h.y1); }
+  private enHueco(x: number, y: number) { return this.L.huecos.some((h) => x >= h.x0 && x < h.x1 && y >= h.y0 && y < h.y1); }
+
+  /** El agua en (x, y), si hay: charco, calle inundada o río hondo según su nivel. */
+  private aguaEn(x: number, y: number) { return this.L.agua.find((w) => x >= w.x0 && x < w.x1 && y >= (w.y0 ?? 0) && y < (w.y1 ?? DEPTH)); }
+
+  /** El tipo de piso en (x, y): el último que lo cubre gana, como en PixelForja. */
+  private pisoEn(x: number, y: number) {
+    let t = 'asfalto';
+    for (const p of this.L.piso) if (x >= p.x0 && x < p.x1 && y >= (p.y0 ?? 0) && y < (p.y1 ?? DEPTH)) t = p.tipo;
+    return t;
+  }
 
   /** El techo más alto bajo (x, y) que quede a la altura de los pies (o un escalón más arriba). */
   suelo(x: number, y: number, z: number): number {
@@ -145,9 +230,11 @@ export class CrossCountry extends EventScene implements World {
   caida(a: Actor) {
     const r = this.gente2.find((g) => g.a === a);
     if (!r) return;
-    if (!efecto(this, 'chapuzon_grande', a.x, FT + a.y - 40, { depth: 5003 })) this.splash.explode(16, a.x, FT + a.y);
+    const agua = this.L.huecos.find((h) => a.x >= h.x0 && a.x < h.x1)?.caida !== 'vacio';
+    if (agua) { if (!efecto(this, 'chapuzon_grande', a.x, FT + a.y - 40, { depth: 5003 })) this.splash.explode(16, a.x, FT + a.y); }
+    else efecto(this, 'polvo_caer_grande', r.safe[0], FT + r.safe[1]);
     this.sfx('esquiva', 0.4);
-    if (a.human) this.letrero(a, '¡AL AGUA!', 0x9ad8ff);
+    if (a.human) this.letrero(a, agua ? '¡AL AGUA!' : '¡CASI TE CAES DEL EDIFICIO!', 0x9ad8ff);
     a.x = r.safe[0]; a.y = r.safe[1]; a.z = 0; a.vx = 0; a.vy = 0; a.vz = 0;
     a.dropAll();
     a.setSt('idle', 'idle');
@@ -165,7 +252,7 @@ export class CrossCountry extends EventScene implements World {
   }
   dust(x: number, y: number) {
     // en el agua salpica; en seco, polvo
-    const enAgua = L.agua.some((w) => x >= w.x0 && x < w.x1);
+    const enAgua = !!this.aguaEn(x, y);
     if (!efecto(this, enAgua ? 'salpicadura_piso' : 'polvo_caer_medio', x, FT + y)) this.dusts.explode(7, x, FT + y);
   }
 
@@ -177,14 +264,16 @@ export class CrossCountry extends EventScene implements World {
     if (a.human) this.sfx(`paso_${piso}_${Math.floor(Math.random() * 3)}`, 0.28);
   }
 
-  /** Qué hay bajo los pies, para el sonido: agua, madera (carro, cajas, mesas) o piedra. */
-  private pisoBajo(a: Actor): 'agua' | 'madera' | 'piedra' {
+  /** Qué hay bajo los pies, para el sonido: agua, madera, tierra, pasto o piedra. */
+  private pisoBajo(a: Actor): 'agua' | 'madera' | 'piedra' | 'tierra' {
     if (a.base > 0) {
       const c = this.cajas.find((b) => a.x >= b.x && a.x < b.x + b.w && a.y >= b.y && a.y < b.y + b.d && Math.abs(b.z - a.base) < 1);
-      if (c && /carro|cajas|mesas|puesto/.test(c.tipo ?? '')) return 'madera';
+      if (c && /carro|cajas|mesas|puesto|muelle|banca|bote|ferry|canastas/.test(c.tipo ?? '')) return 'madera';
       return 'piedra';
     }
-    return L.agua.some((w) => a.x >= w.x0 && a.x < w.x1) ? 'agua' : 'piedra';
+    if (this.aguaEn(a.x, a.y)) return 'agua';
+    const p = this.pisoEn(a.x, a.y);
+    return p === 'madera' ? 'madera' : p === 'tierra' || p === 'cancha' ? 'tierra' : 'piedra';
   }
   number(x: number, y: number, n: number) {
     const t = txt(this, x, FT + y - 52, `${n}`, 'fuente_ui', 1).setTint(0xff6060).setDepth(6000);
@@ -209,53 +298,85 @@ export class CrossCountry extends EventScene implements World {
     const dt = Math.min(0.05, dms / 1000);
     const p = this.pad.read();
     if (this.endTick(p)) { for (const r of this.gente2) r.a.update(dt, NOTHING); this.render(); this.filterUi(); return; }
+    if (this.entre) {
+      // entre tramos: la tabla se queda un rato y sigue sola (o con un botón)
+      this.entre.t -= dt;
+      for (const r of this.gente2) r.a.update(dt, NOTHING);
+      if (this.entre.t <= 0 || (this.entre.t < 2.4 && (p.pressed.punch || p.pressed.jump || p.pressed.start || p.pressed.kick))) { const go = this.entre.go; this.entre = null; go(); }
+      this.render(); this.filterUi(); return;
+    }
     if (this.stop > 0) { this.stop -= dt; this.render(); this.filterUi(); return; }
     const juego = this.fase === 'juego';
     if (juego) this.clock += dt;
     // correr sin doble toque: mantener adelante un ratito
     this.holdRun = p.x > 0 ? this.holdRun + dt : 0;
+    this.moverFerry(dt);
     for (const r of this.gente2) {
       const a = r.a;
-      const prevX = a.x;
+      const prevX = a.x, prevY = a.y;
       let it: Intent = NOTHING;
       if (juego && !r.done) it = a.human
         ? { x: p.x, y: p.y, run: p.run || this.holdRun > 0.22, punch: p.pressed.punch, kick: p.pressed.kick, jump: p.pressed.jump, special: false }
         : this.cerebro(r, dt);
+      // enredado en los jacintos: no avanza hasta soltarse
+      if (r.enredo > 0) { r.enredo -= dt; it = { ...NOTHING, punch: it.punch, kick: it.kick }; }
+      // en el río hondo se nada: no se salta
+      const w = this.aguaEn(a.x, a.y);
+      if (w && w.nivel >= HONDO && a.z < 3) it = { ...it, jump: false };
       // la máquina corre según el nivel, y con la goma si va muy adelante o muy atrás
       if (!a.human) a.vel = ajustes().cpuVel * goma(a.x - this.gente2[0].a.x);
       a.update(dt, it);
-      this.terreno(r, prevX, dt);
+      this.terreno(r, prevX, prevY, dt);
     }
     for (const i of this.items) i.update(dt);
-    if (juego && !this.d.practica) this.trafico(dt);
+    if (juego && !this.d.practica) { this.trafico(dt); this.rio(dt); }
+    this.fruta(dt);
     this.coach?.tick(dt);
     this.render();
     if (juego) this.checkEnd();
     this.filterUi();
   }
 
-  /** Agua, toldos, punto seguro para volver, KO y llegada. */
-  private terreno(r: Corredor, prevX: number, dt: number) {
+  /** Agua, toldos, resbalones, punto seguro para volver, KO y llegada. */
+  private terreno(r: Corredor, prevX: number, prevY: number, dt: number) {
     const a = r.a;
-    // si algo lo dejó metido en una caja (cargado, empujado), sale por arriba
+    const L = this.L;
+    // si algo lo dejó metido en una caja (cargado, empujado, el ferry que llega), sale por arriba
     if (a.st !== 'lifted') {
       const dentro = this.cajas.filter((c) => a.x >= c.x && a.x < c.x + c.w && a.y >= c.y && a.y < c.y + c.d && c.z > a.z + PASO);
       if (dentro.length) a.z = Math.max(...dentro.map((c) => c.z));
     }
-    // calle inundada: frena y la corriente empuja para atrás
-    const ag = L.agua.find((w) => a.x >= w.x0 && a.x < w.x1);
-    if (ag && a.z < 6) {
-      a.x = prevX + (a.x - prevX) * 0.62 + ag.corriente * dt;
+    // agua: el charco resbala, la calle inundada frena y empuja, y en el río se nada contra la corriente
+    const ag = this.aguaEn(a.x, a.y);
+    if (ag && a.z < 6 && ag.nivel > CHARCO) {
+      const k = ag.nivel >= HONDO ? 0.74 : 0.62;
+      a.x = prevX + (a.x - prevX) * k + (ag.corriente ?? 0) * dt;
+      if (ag.nivel >= HONDO) a.y = prevY + (a.y - prevY) * k;
       if (Math.abs(a.x - prevX) > 0.5 && Math.random() < dt * 10) this.splash.explode(2, a.x, FT + a.y);
     }
+    const charco = !!ag && ag.nivel <= CHARCO && a.grounded && a.base === 0;
+    if (charco && !r.enCharco && a.st === 'run' && Math.random() < (a.human ? 0.45 : 0.3)) this.resbalar(r, '¡RESBALÓN EN EL CHARCO!');
+    r.enCharco = charco;
+    // con aguacero, caer corriendo de un salto puede terminar de nalgas (en el zinc, más)
+    if (r.aire && a.grounded && a.st !== 'fall' && L.clima[0] === 'aguacero' && Math.abs(a.x - prevX) > 1.5) {
+      const zinc = this.pisoEn(a.x, a.y) === 'metal' && a.base === 0;
+      if (Math.random() < (zinc ? 0.25 : 0.1)) this.resbalar(r, zinc ? '¡EL ZINC MOJADO RESBALA!' : '¡RESBALÓN!');
+    }
+    // frutas: quien cae encima de un puesto de frutas las tumba al pasillo
+    if (r.aire && a.grounded && a.base > 0) {
+      const c = this.cajas.find((b) => b.tipo === 'puesto_frutas' && a.x >= b.x && a.x < b.x + b.w && a.y >= b.y && a.y < b.y + b.d && Math.abs(b.z - a.base) < 1);
+      if (c) this.derramar(c, a);
+    }
+    r.aire = !a.grounded;
     // toldo bajo: quien salta debajo se da en la cabeza
     if (a.vz > 0 && L.bajo.some((b) => a.x >= b.x0 && a.x < b.x1 && a.y >= b.y0 && a.y < b.y1 && a.z + ALTO > b.z)) {
       a.vz = -40;
       this.sfx('bloqueo', a.human ? 0.4 : 0.1);
       if (a.human) this.letrero(a, '¡AY, EL TOLDO!', 0xffe080);
     }
-    // el último piso firme, lejos de los huecos, para volver si se cae
-    if (a.grounded && a.base >= 0 && !L.huecos.some((h) => a.x > h.x0 - 50 && a.x < h.x1 + 10)) r.safe = [a.x, a.y];
+    // el último piso firme, lejos de los huecos y fuera del agua honda, para volver si se cae
+    if (a.grounded && a.base >= 0 && !(ag && ag.nivel >= HONDO) && !L.huecos.some((h) => a.x > h.x0 - 50 && a.x < h.x1 + 10) && !(this.ferry && a.base === this.ferry.z && a.x >= this.ferry.x0 - 4 && a.x <= this.ferry.x1 + 4)) r.safe = [a.x, a.y];
+    if (r.resbalo > 0) r.resbalo -= dt;
     // KO: en una carrera nadie queda fuera, se para un rato después
     if (r.koT > 0) {
       r.koT -= dt;
@@ -272,36 +393,184 @@ export class CrossCountry extends EventScene implements World {
     }
   }
 
+  /** Al piso sin daño: solo el susto y el tiempo perdido. */
+  private resbalar(r: Corredor, s: string) {
+    const a = r.a;
+    if (r.resbalo > 0 || !a.canBeHit() || a.carrying) return;
+    r.resbalo = 2.5;
+    a.knockdown(a.left ? -1 : 1, 70, 90);
+    this.sfx('esquiva', a.human ? 0.45 : 0.15);
+    if (a.human) this.letrero(a, s, 0x9ad8ff);
+  }
+
+  // ------------------------------------------------------------------ mercado: frutas al piso
+
+  /** Las frutas del puesto ruedan al pasillo, justo detrás; el que lo pisó ya pasó, el que viene se resbala. */
+  private derramar(c: Caja, a: Actor) {
+    if ((this.derrame.get(c) ?? 0) > this.clock) return;
+    this.derrame.set(c, this.clock + 12);
+    const f: Fruta = { x0: c.x + c.w, x1: c.x + c.w + 54, y0: c.y, y1: c.y + c.d, t: 10, dueño: a, g: this.add.graphics() };
+    const col = [0xff9a20, 0xffd040, 0x7ac83a, 0xe8403a, 0xb04ad0];
+    for (let i = 0; i < 26; i++) {
+      const x = f.x0 + Math.random() * (f.x1 - f.x0), y = f.y0 + 2 + Math.random() * (f.y1 - f.y0 - 4);
+      f.g.fillStyle(col[i % col.length]).fillCircle(Math.round(x), Math.round(FT + y), 2 + (i % 2));
+    }
+    f.g.setDepth(FT + f.y0 - 0.2);
+    this.frutas.push(f);
+    this.sfx('romper', a.human ? 0.4 : 0.15);
+    if (a.human) this.letrero(a, '¡SE CAYERON LAS FRUTAS!', 0xffb040);
+  }
+
+  private fruta(dt: number) {
+    for (const f of this.frutas) {
+      f.t -= dt;
+      if (f.t < 1.5) f.g.setAlpha(Math.max(0, f.t / 1.5));
+      for (const r of this.gente2) {
+        const a = r.a;
+        const en = a.x >= f.x0 && a.x < f.x1 && a.y >= f.y0 && a.y < f.y1 && a.grounded && a.base === 0;
+        if (en && !r.enFruta && a !== f.dueño && a.st === 'run' && Math.random() < 0.6) this.resbalar(r, '¡UNA CÁSCARA! ¡RESBALÓN!');
+        r.enFruta = en;
+      }
+    }
+    this.frutas = this.frutas.filter((f) => { if (f.t <= 0) { f.g.destroy(); return false; } return true; });
+  }
+
+  // ------------------------------------------------------------------ río: ferry y jacintos
+
+  private armarFerry() {
+    this.ferry = null;
+    const e = this.L.entidades.find((v) => v.tipo === 'vehiculo' && v.vehiculo === 'ferry');
+    if (!e) return;
+    const w = e.w ?? 110, d = e.d ?? 40, z = e.z ?? 12, x0 = e.x0 ?? 0, y = e.y ?? 0;
+    const g = this.add.container(x0, FT + y);
+    const casco = this.add.graphics();
+    casco.fillStyle(0xd8d0b8).fillRect(0, -z, w, d);
+    casco.fillStyle(0x8a3a2a).fillRect(0, d - z, w, z);
+    casco.fillStyle(0x30303a).fillRect(0, d - z, w, 2);
+    casco.lineStyle(1, 0x303038).strokeRect(0.5, -z + 0.5, w - 1, d + z - 1);
+    g.add([casco, this.add.bitmapText(w / 2, -z - 6, 'fuente_ui', 'FERRY').setOrigin(0.5).setTint(0xf0f0f8)]);
+    g.setDepth(FT + y + d - 0.5);
+    this.ferry = { x: x0, y, w, d, z, tipo: 'ferry', x0, x1: e.x1 ?? x0 + 400, v: e.velocidad ?? 80, espera: e.espera ?? 2, quieto: e.espera ?? 2, dir: 1, g };
+    this.cajas.push(this.ferry);
+  }
+
+  /** El ferry espera en cada muelle y cruza; quien va encima viaja con él. */
+  private moverFerry(dt: number) {
+    const f = this.ferry;
+    if (!f || this.fase !== 'juego') return;
+    let dx = 0;
+    if (f.quieto > 0) f.quieto -= dt;
+    else {
+      const fin = f.dir > 0 ? f.x1 - f.w : f.x0;
+      dx = Phaser.Math.Clamp(fin - f.x, -f.v * dt, f.v * dt);
+      if (Math.abs(fin - (f.x + dx)) < 0.5) { dx = fin - f.x; f.quieto = f.espera; f.dir = f.dir > 0 ? -1 : 1; this.sfx('bloqueo', 0.15); }
+    }
+    if (!dx) return;
+    for (const a of this.actors) if (a.grounded && Math.abs(a.base - f.z) < 1 && a.x >= f.x && a.x < f.x + f.w && a.y >= f.y && a.y < f.y + f.d) a.x += dx;
+    f.x += dx;
+    f.g.setX(Math.round(f.x));
+  }
+
+  /** ¿El ferry está atracado en este muelle (izquierda o derecha)? */
+  private atracado(lado: 'izq' | 'der') {
+    const f = this.ferry;
+    if (!f || f.quieto <= 0) return false;
+    return lado === 'izq' ? f.x <= f.x0 + 0.5 : f.x + f.w >= f.x1 - 0.5;
+  }
+
+  /** Jacintos de agua que bajan con la corriente por el río hondo: quien se los topa se enreda un rato. */
+  private rio(dt: number) {
+    const hondos = this.L.agua.filter((w) => w.nivel >= HONDO && (w.y1 ?? DEPTH) - (w.y0 ?? 0) > 60);
+    const me = this.gente2[0].a;
+    this.jacT -= dt;
+    if (hondos.length && this.jacT <= 0) {
+      this.jacT = 1.7 + Math.random() * 1.1;
+      const w = hondos[Math.floor(Math.random() * hondos.length)];
+      // salen delante de quien va más adelante dentro del río, para que siempre haya alguno por esquivar
+      const xs = this.actors.filter((a) => a.x >= w.x0 - 200 && a.x < w.x1).map((a) => a.x);
+      if (xs.length) {
+        const x = Math.min(w.x1 - 10, Math.max(...xs) + 140 + Math.random() * 160);
+        const y = (w.y0 ?? 0) + 6 + Math.random() * ((w.y1 ?? DEPTH) - (w.y0 ?? 0) - 12);
+        const g = this.add.graphics();
+        g.fillStyle(0x2a7a3a).fillEllipse(0, 0, 26, 9);
+        g.fillStyle(0x4aa84a).fillEllipse(-4, -1, 14, 6).fillEllipse(6, 0, 10, 5);
+        g.fillStyle(0xb08ae0).fillCircle(-2, -3, 2).fillCircle(5, -2, 1.5);
+        this.jacintos.push({ x, y, g, tocados: new Set() });
+      }
+    }
+    for (const j of this.jacintos) {
+      const w = this.aguaEn(j.x, j.y);
+      j.x += ((w?.corriente ?? -12) * 1.6 - 8) * dt;
+      j.g.setPosition(Math.round(j.x), Math.round(FT + j.y)).setDepth(FT + j.y + 0.3);
+      for (const r of this.gente2) {
+        const a = r.a;
+        if (j.tocados.has(a) || a.z > 4 || Math.abs(a.x - j.x) > 15 || Math.abs(a.y - j.y) > 8) continue;
+        j.tocados.add(a);
+        r.enredo = 0.8;
+        this.splash.explode(4, a.x, FT + a.y);
+        this.sfx('bloqueo', a.human ? 0.4 : 0.1);
+        if (a.human) this.letrero(a, '¡TE ENREDASTE EN LOS JACINTOS!', 0x8ae08a);
+      }
+    }
+    this.jacintos = this.jacintos.filter((j) => { const w = this.aguaEn(j.x, j.y); if (!w || j.x < me.x - 500) { j.g.destroy(); return false; } return true; });
+  }
+
   /**
    * La máquina corre hacia la meta: salta huecos y muros bajos, rodea lo que es muy alto,
-   * y pelea con quien se le cruce del otro equipo.
+   * cruza el río en ferry o nadando, y pelea con quien se le cruce del otro equipo.
    */
   private cerebro(r: Corredor, dt: number): Intent {
     const a = r.a;
     r.cool -= dt;
     if (!a.controllable) return NOTHING;
     if (r.duda > 0) { r.duda -= dt; return { ...NOTHING, x: 1 }; }
+    // si lleva rato sin avanzar (y no es que espera el ferry), prueba por otro lado un momento
+    if (a.x > r.mejorX + 24) { r.mejorX = a.x; r.mejorT = this.clock; }
+    const esperaFerry = !!this.ferry && a.x > this.ferry.x0 - 40 && a.x < this.ferry.x1 + 10 && Math.abs(a.base - this.ferry.z) < 1;
+    if (r.desatasco > 0) { r.desatasco -= dt; return { ...NOTHING, x: r.desatasco > 0.7 ? -1 : 1, y: r.desatascoY, run: true, jump: r.desatasco < 0.35 && a.grounded }; }
+    if (!esperaFerry && this.clock - r.mejorT > 3) {
+      r.mejorT = this.clock; r.rodeo = -1;
+      r.desatasco = 1.3;
+      r.desatascoY = a.y < DEPTH / 2 ? 1 : -1;
+      if (Math.random() < 0.3) r.desatascoY = -r.desatascoY;
+    }
     // rodeando: retrocede hasta pasar la caja que le tapaba el paso
     if (r.rodeo >= 0) {
       if (a.x > r.rodeo && a.controllable) return { ...NOTHING, x: -1, y: r.rodeoY };
       r.rodeo = -1;
     }
-    // se pasó del escalón: vuelve atrás hasta antes de la caja y toma impulso
     const it: Intent = { x: 1, y: 0, run: true, punch: false, kick: false, jump: false, special: false };
-    const ahead = a.x + 22;
     const base = a.base;
+    let destinoY = r.carril;
+    // el río: por el muelle hasta el ferry, o al agua por la parte de adelante
+    const f = this.ferry;
+    if (f) {
+      const muelleIni = f.x0 - 330, muelleFin = f.x1 + 300;
+      if (a.x > muelleIni && a.x < muelleFin) {
+        destinoY = r.ruta === 'ferry' ? f.y + f.d / 2 : Math.min(DEPTH - 20, f.y + f.d + 40);
+        const encima = a.grounded && Math.abs(base - f.z) < 1;
+        if (r.ruta === 'ferry' && encima) {
+          const enFerry = a.x >= f.x && a.x < f.x + f.w;
+          if (enFerry && !this.atracado('der')) return { ...NOTHING, y: Math.sign(f.y + f.d / 2 - a.y) * (Math.abs(f.y + f.d / 2 - a.y) > 6 ? 1 : 0) };
+          // en el muelle de salida: espera al borde a que el ferry esté
+          if (!enFerry && a.x > f.x0 - 26 && a.x < f.x0 && !this.atracado('izq')) return NOTHING;
+          if (enFerry && a.x > f.x + f.w - 20 && !this.atracado('der')) return NOTHING;
+        }
+        if (r.ruta === 'ferry' && a.x > f.x0 - 30 && a.x < f.x1 && base < f.z - 1 && a.grounded) r.ruta = 'nado';
+      }
+    }
+    const ahead = a.x + 22;
     // un hueco adelante: salta corriendo (a veces duda y se cae, como cualquiera)
     if (a.grounded && this.suelo(ahead, a.y, a.z) <= HUECO / 2) {
       if (Math.random() < 0.04) { r.duda = 0.25; return { ...NOTHING, x: 1 }; }
       it.jump = true;
     }
     // una caja adelante: si se sube de un salto, salta; si es muy alta, la rodea por donde quede más cerca
-    let destinoY = r.carril;
     const delante = (lejos: number) => this.cajas
-      .filter((c) => c.x + c.w > a.x && c.x - a.x < lejos && a.y >= c.y - 4 && a.y < c.y + c.d + 4 && c.z > base + PASO)
+      .filter((c) => c !== f && c.x + c.w > a.x && c.x - a.x < lejos && a.y >= c.y - 4 && a.y < c.y + c.d + 4 && c.z > base + PASO)
       .sort((p, q) => p.x - q.x)[0];
     // lo que no se salta de un brinco se rodea: busca la fila libre más cercana en los próximos metros
-    const libre = (y: number) => !this.cajas.some((c) => c.z > base + 32 && c.x + c.w > a.x && c.x - a.x < 160 && y >= c.y - 6 && y < c.y + c.d + 6);
+    const libre = (y: number) => !this.cajas.some((c) => c !== f && c.z > base + 32 && c.x + c.w > a.x && c.x - a.x < 160 && y >= c.y - 6 && y < c.y + c.d + 6);
     let acomodando = false;
     if (!libre(a.y)) {
       let best = -1;
@@ -313,11 +582,11 @@ export class CrossCountry extends EventScene implements World {
         const lo = Math.min(a.y, best), hi = Math.max(a.y, best);
         // cajas que tapan el camino en diagonal: si ya está encima, retrocede; si está cerca, se para y se corre de lado
         const tapa = this.cajas
-          .filter((c) => c.z > base + PASO && c.x + c.w > a.x - 2 && c.x - a.x < 60 && c.y < hi && c.y + c.d > lo)
+          .filter((c) => c !== f && c.z > base + PASO && c.x + c.w > a.x - 2 && c.x - a.x < 60 && c.y < hi && c.y + c.d > lo)
           .sort((p, q) => p.x - q.x)[0];
         if (acomodando && tapa && a.x >= tapa.x - 2) { r.rodeo = tapa.x - 10; r.rodeoY = sy; return { ...NOTHING, x: -1, y: sy }; }
         if (acomodando && tapa && tapa.x - a.x < 34) return { ...NOTHING, y: sy };
-        const pared = this.cajas.find((c) => c.z > base + 32 && c.x + c.w > a.x && c.x - a.x < 24 && a.y >= c.y - 4 && a.y < c.y + c.d + 4);
+        const pared = this.cajas.find((c) => c !== f && c.z > base + 32 && c.x + c.w > a.x && c.x - a.x < 24 && a.y >= c.y - 4 && a.y < c.y + c.d + 4);
         if (acomodando && pared) return { ...NOTHING, y: sy };
       }
     }
@@ -335,40 +604,54 @@ export class CrossCountry extends EventScene implements World {
     return it;
   }
 
-  /** Motos que vienen en contra por su carril; avisan con la corneta. */
+  /** Los vehículos que vienen en contra por su carril (motos, xích lô), cada uno en su tramo de calle. */
+  private vias() { return this.L.entidades.filter((e) => e.tipo === 'vehiculo' && e.vehiculo !== 'ferry' && e.carril); }
+
   private trafico(dt: number) {
+    const L = this.L;
     const me = this.gente2[0].a;
-    const vs = L.entidades.filter((e) => e.tipo === 'vehiculo');
-    vs.forEach((v, i) => {
-      this.motoT[i] -= dt;
-      if (this.motoT[i] > 0) return;
-      this.motoT[i] = (v.cada ?? 5) * (0.8 + Math.random() * 0.4);
+    this.vias().forEach((v, i) => {
+      this.vehT[i] -= dt;
+      if (this.vehT[i] > 0) return;
+      this.vehT[i] = (v.cada ?? 5) * (0.8 + Math.random() * 0.4);
+      const x0 = v.x0 ?? 0, x1 = v.x1 ?? L.largo;
+      // solo en su calle: no entran al mercado ni al río
+      if (me.x < x0 - 380 || me.x > x1) return;
       const y = L.carriles[Math.max(0, (v.carril ?? 1) - 1)].y;
-      const x = Math.min(L.largo + 40, me.x + 420);
+      const x = Math.min(x1 + 40, me.x + 420);
+      const moto = v.vehiculo !== 'xich_lo';
       const g = this.add.container(x, FT + y);
       const sombra = this.add.graphics();
-      sombra.fillStyle(0x000000, 0.3).fillEllipse(0, 0, 44, 8);
+      sombra.fillStyle(0x000000, 0.3).fillEllipse(0, 0, moto ? 44 : 56, 8);
       g.add(sombra);
       const vida = `esc_${L.id}_vida`;
-      if (this.arte && this.textures.get(vida).has('motos_fondo_0')) {
+      if (moto && this.arte && this.textures.exists(vida) && this.textures.get(vida).has('motos_fondo_0')) {
         // la moto de PixelForja, la misma que cruza al fondo
         const img = this.add.image(0, 2, vida, 'motos_fondo_0').setOrigin(0.5, 1);
         this.tweens.addCounter({ from: 0, to: 1, duration: 125, repeat: -1, onRepeat: () => img.setFrame(img.frame.name === 'motos_fondo_0' ? 'motos_fondo_1' : 'motos_fondo_0') });
         g.add(img);
-      } else {
+      } else if (moto) {
         const body = this.add.graphics();
         body.fillStyle(0xc03030).fillRect(-18, -20, 36, 12);
         body.fillStyle(0x303038).fillCircle(-12, -6, 6).fillCircle(12, -6, 6);
         body.fillStyle(0xe8e8f0).fillRect(-6, -34, 10, 14);
         g.add([body, txt(this, 0, -14, 'MOTO', 'fuente_ui', 1)]);
+      } else {
+        // xích lô: el pasajero adelante en su asiento y el que pedalea atrás
+        const body = this.add.graphics();
+        body.fillStyle(0x3a6ab0).fillRect(-26, -26, 24, 16);
+        body.fillStyle(0x303038).fillCircle(-22, -6, 6).fillCircle(-6, -6, 6).fillCircle(20, -6, 6);
+        body.fillStyle(0xe8e8f0).fillRect(10, -40, 10, 18);
+        body.lineStyle(2, 0x303038).lineBetween(-4, -12, 20, -12);
+        g.add([body, txt(this, 0, -48, 'XÍCH LÔ', 'fuente_ui', 1)]);
       }
-      this.motos.push({ x, y, v: -230, g });
-      chip.blip(523, 0.12, 'sq50', 0.12, 494);
-      this.time.delayedCall(140, () => chip.blip(523, 0.12, 'sq50', 0.12, 494));
-      const aviso = this.uiAdd(txt(this, 600, 180 + (y - 60) * 0.8, '¡MOTO! «', 'fuente_ui', 2, 1).setDepth(8100).setTint(0xff6060));
+      this.vehiculos.push({ x, y, v: moto ? -230 : -110, g });
+      chip.blip(moto ? 523 : 880, 0.12, 'sq50', 0.12, moto ? 494 : 988);
+      this.time.delayedCall(140, () => chip.blip(moto ? 523 : 880, 0.12, 'sq50', 0.12, moto ? 494 : 988));
+      const aviso = this.uiAdd(txt(this, 600, 180 + (y - 60) * 0.8, moto ? '¡MOTO! «' : '¡XÍCH LÔ! «', 'fuente_ui', 2, 1).setDepth(8100).setTint(0xff6060));
       this.tweens.add({ targets: aviso, alpha: 0.2, duration: 160, yoyo: true, repeat: 3, onComplete: () => aviso.destroy() });
     });
-    for (const m of this.motos) {
+    for (const m of this.vehiculos) {
       m.x += m.v * dt;
       m.g.setPosition(Math.round(m.x), FT + m.y).setDepth(FT + m.y);
       for (const r of this.gente2) {
@@ -378,11 +661,11 @@ export class CrossCountry extends EventScene implements World {
           a.knockdown(-1, 160, 200);
           this.onHit(null, a, 8, true);
           this.sfx('critico', a.human ? 0.5 : 0.2);
-          if (a.human) this.letrero(a, '¡PI PI! ¡TE ATROPELLÓ LA MOTO!', 0xff8080);
+          if (a.human) this.letrero(a, m.v < -150 ? '¡PI PI! ¡TE ATROPELLÓ LA MOTO!' : '¡CUIDADO CON EL XÍCH LÔ!', 0xff8080);
         }
       }
     }
-    this.motos = this.motos.filter((m) => { if (m.x < me.x - 500 || m.x < -60) { m.g.destroy(); return false; } return true; });
+    this.vehiculos = this.vehiculos.filter((m) => { if (m.x < me.x - 500 || m.x < -60) { m.g.destroy(); return false; } return true; });
   }
 
   private letrero(a: Actor, s: string, color: number) {
@@ -392,36 +675,58 @@ export class CrossCountry extends EventScene implements World {
 
   // ------------------------------------------------------------------ dibujo
 
-  /** El escenario en gris: piso, acera, canales, agua, cajas con su nombre, postes, toldo, salida y meta. */
+  /** La lluvia que cae: el efecto `lluvia` del kit en mosaico sobre la pantalla (o rayitas si no está). */
+  private ponerLluvia() {
+    if (this.textures.exists('fx_lluvia')) {
+      this.lluvia = this.add.tileSprite(320, 180, 640, 360, 'fx_lluvia', 0).setScrollFactor(0).setDepth(7000).setAlpha(0.45);
+      return;
+    }
+    this.add.particles(0, 0, 'px', { x: { min: 0, max: 700 }, y: -10, speedY: { min: 380, max: 460 }, speedX: -60, lifespan: 1000, quantity: 3, scaleY: 3, alpha: 0.4, tint: 0xc8e0ff }).setScrollFactor(0).setDepth(7000);
+  }
+
+  /** El escenario en gris: cielo según la hora, piso por tipo, huecos, agua, cajas con su nombre, postes, toldos, salida y meta. */
   private dibujar() {
+    const L = this.L;
     const W = L.largo;
+    const cielo: Record<string, [number, number]> = { manana: [0x8ab0d0, 0xd8e4ec], mediodia: [0x6aa8e0, 0xcfe6f6], tarde: [0x5a6070, 0x9aa0aa], atardecer: [0xd07a4a, 0xf2c890] };
+    const [c0, c1] = cielo[L.hora] ?? cielo.manana;
     const sky = this.add.graphics().setScrollFactor(0).setDepth(-20);
-    sky.fillGradientStyle(0x8ab0d0, 0x8ab0d0, 0xd8e4ec, 0xd8e4ec).fillRect(0, 0, 640, 360);
-    // fachadas en bloques grises (lo que va a ser el hẻm)
+    sky.fillGradientStyle(c0, c0, c1, c1).fillRect(0, 0, 640, 360);
+    // fachadas en bloques grises (en las azoteas, la ciudad queda abajo y lejos)
     const fondo = this.add.graphics().setDepth(-10);
+    const bajos = L.id === 'saigon_azoteas';
     for (let x = 0, k = 0; x < W; k++) {
-      const w = 60 + ((k * 37) % 50), h = 70 + ((k * 53) % 60);
+      const w = 60 + ((k * 37) % 50), h = (bajos ? 30 : 70) + ((k * 53) % 60);
       fondo.fillStyle(k % 2 ? 0x9a9aa4 : 0xa8a8b2).fillRect(x, FT - h, w, h);
       for (let wy = FT - h + 8; wy < FT - 10; wy += 16) for (let wx = x + 6; wx < x + w - 8; wx += 14) fondo.fillStyle(0x7a7a86).fillRect(wx, wy, 7, 8);
       x += w;
     }
     const g = this.add.graphics().setDepth(-5);
-    g.fillStyle(0x5a5a64).fillRect(0, FT, W, DEPTH);
-    g.fillStyle(0x8a8a94).fillRect(0, FT, W, 24);
-    g.fillStyle(0x6e6e78).fillRect(0, FT + 24, W, 2);
-    for (let x = 0; x < W; x += 80) g.fillStyle(0x66666f).fillRect(x, FT + 64, 40, 2);
-    // calle inundada
+    const PISO: Record<string, number> = { asfalto: 0x5a5a64, acera: 0x8a8a94, baldosa: 0x8e8278, tierra: 0x8a6a4a, madera: 0x7a5a3a, metal: 0x7a8490, cancha: 0xa8483a, agua: 0x2a6aa0, pasto: 0x4a8a3a };
+    for (const p of L.piso) g.fillStyle(PISO[p.tipo] ?? 0x5a5a64).fillRect(p.x0, FT + (p.y0 ?? 0), p.x1 - p.x0, (p.y1 ?? DEPTH) - (p.y0 ?? 0));
+    if (L.id === 'saigon_hem') for (let x = 0; x < W; x += 80) g.fillStyle(0x66666f).fillRect(x, FT + 64, 40, 2);
+    if (L.id === 'saigon_estadio') for (const y of [35, 65, 95]) g.fillStyle(0xf4f4f4, 0.7).fillRect(300, FT + y, W - 300, 1);
+    for (const p of L.piso) if (p.nombre && p.tipo !== 'agua') this.rotulo(p.x0 + 4, FT + (p.y0 ?? 0) + 6, p.nombre.toUpperCase());
+    // agua: charcos, calle inundada y río
     for (const w of L.agua) {
-      g.fillStyle(0x3a7ab0, 0.75).fillRect(w.x0, FT, w.x1 - w.x0, DEPTH);
-      for (let x = w.x0 + 6; x < w.x1; x += 22) for (let y = 10; y < DEPTH; y += 18) g.fillStyle(0x9ad8f0, 0.7).fillRect(x + (y % 11), FT + y, 8, 1);
-      this.rotulo(w.x0 + 4, FT + DEPTH + 10, 'CALLE INUNDADA · TE FRENA Y TE EMPUJA');
+      const y0 = w.y0 ?? 0, y1 = w.y1 ?? DEPTH;
+      const hondo = w.nivel >= HONDO;
+      g.fillStyle(hondo ? 0x285a90 : 0x3a7ab0, w.nivel <= CHARCO ? 0.55 : 0.8).fillRect(w.x0, FT + y0, w.x1 - w.x0, y1 - y0);
+      for (let x = w.x0 + 6; x < w.x1; x += 22) for (let y = y0 + 8; y < y1; y += 18) g.fillStyle(0x9ad8f0, 0.7).fillRect(x + (y % 11), FT + y, 8, 1);
+      const dice = w.nivel <= CHARCO ? 'CHARCO · RESBALA' : hondo ? `${(w.nombre ?? 'río').split(':')[0].toUpperCase()} · SE NADA` : 'CALLE INUNDADA · TE FRENA Y TE EMPUJA';
+      this.rotulo(w.x0 + 4, w.nivel <= CHARCO ? FT + y0 - 4 : hondo ? FT + y0 + 8 : FT + DEPTH + 10, dice);
     }
-    // canales: hueco con agua al fondo
+    // huecos: canal con agua al fondo, o el vacío entre edificios
     for (const h of L.huecos) {
-      g.fillStyle(0x1a2a40).fillRect(h.x0, FT + h.y0, h.x1 - h.x0, h.y1 - h.y0);
-      g.fillStyle(0x2a5a90).fillRect(h.x0, FT + h.y0 + 18, h.x1 - h.x0, h.y1 - h.y0 - 18);
-      g.fillStyle(0x9ad8f0).fillRect(h.x0, FT + h.y0 + 18, h.x1 - h.x0, 1);
-      this.rotulo(h.x0, FT + DEPTH + 10, h.y1 < DEPTH ? 'CANAL · PUENTECITO ADELANTE' : 'CANAL · ¡SALTA CORRIENDO!');
+      if (h.caida === 'vacio') {
+        g.fillStyle(0x16161e).fillRect(h.x0, FT + h.y0, h.x1 - h.x0, h.y1 - h.y0);
+        g.fillStyle(0x30303c).fillRect(h.x0, FT + h.y0, 2, h.y1 - h.y0).fillRect(h.x1 - 2, FT + h.y0, 2, h.y1 - h.y0);
+      } else {
+        g.fillStyle(0x1a2a40).fillRect(h.x0, FT + h.y0, h.x1 - h.x0, h.y1 - h.y0);
+        g.fillStyle(0x2a5a90).fillRect(h.x0, FT + h.y0 + 18, h.x1 - h.x0, h.y1 - h.y0 - 18);
+        g.fillStyle(0x9ad8f0).fillRect(h.x0, FT + h.y0 + 18, h.x1 - h.x0, 1);
+      }
+      if (h.y0 === 0 || h.y1 === DEPTH) this.rotulo(h.x0, FT + DEPTH + 10, h.caida === 'vacio' ? '¡SALTA CORRIENDO!' : h.y1 < DEPTH ? 'CANAL · PUENTECITO ADELANTE' : 'CANAL · ¡SALTA CORRIENDO!');
     }
     // marcas cada 320 px
     for (let x = 320; x < W; x += 320) { g.fillStyle(0xffffff, 0.35).fillRect(x, FT, 1, DEPTH); this.rotulo(x + 2, FT + 6, `${x}`); }
@@ -433,19 +738,21 @@ export class CrossCountry extends EventScene implements World {
     }
     // postes
     for (const p of L.postes) { g.fillStyle(0x4a4a54).fillRect(p.x, FT + p.y - p.alto, 4, p.alto); g.fillStyle(0xf2e090).fillRect(p.x - 6, FT + p.y - p.alto, 12, 4); }
-    // toldo
+    // lo que cuelga bajo: toldos, lámparas, ropa, redes
     for (const b of L.bajo) {
       const t = this.add.graphics().setDepth(FT + b.y1);
       t.fillStyle(0xc85a3a, 0.85).fillRect(b.x0, FT + b.y0 - b.z, b.x1 - b.x0, b.y1 - b.y0);
       for (let x = b.x0; x < b.x1; x += 12) t.fillStyle(0xf4e8d0, 0.85).fillRect(x, FT + b.y0 - b.z, 6, b.y1 - b.y0);
-      this.rotulo(b.x0, FT + b.y0 - b.z - 8, 'TOLDO · NO SALTES ABAJO');
+      this.rotulo(b.x0, FT + b.y0 - b.z - 8, `${(b.tipo ?? 'TOLDO').toUpperCase().replace(/_/g, ' ')} · NO SALTES ABAJO`);
     }
     // cajas: techo claro, frente oscuro, con su nombre
     for (const c of this.cajas) {
+      if (c === this.ferry) continue;
       const box = this.add.graphics().setDepth(FT + c.y + c.d - 0.5);
       const muro = L.muros.includes(c);
-      box.fillStyle(muro ? 0xb0a090 : 0xc8c8d0).fillRect(c.x, FT + c.y - c.z, c.w, c.d);
-      box.fillStyle(muro ? 0x807060 : 0x8a8a96).fillRect(c.x, FT + c.y + c.d - c.z, c.w, c.z);
+      const fruta = c.tipo === 'puesto_frutas';
+      box.fillStyle(fruta ? 0xe0b060 : muro ? 0xb0a090 : 0xc8c8d0).fillRect(c.x, FT + c.y - c.z, c.w, c.d);
+      box.fillStyle(fruta ? 0x9a6a30 : muro ? 0x807060 : 0x8a8a96).fillRect(c.x, FT + c.y + c.d - c.z, c.w, c.z);
       box.lineStyle(1, 0x303038, 0.8).strokeRect(c.x + 0.5, FT + c.y - c.z + 0.5, c.w - 1, c.d + c.z - 1);
       // el nombre encima de la caja, chiquito, para leer el gris
       this.add.bitmapText(c.x + c.w / 2, FT + c.y - c.z - 6, 'fuente_ui', (c.tipo ?? '').toUpperCase().replace(/_/g, ' ')).setOrigin(0.5).setDepth(FT + c.y + c.d - 0.4).setTint(0xf0f0f8).setAlpha(0.8);
@@ -466,14 +773,18 @@ export class CrossCountry extends EventScene implements World {
         const c = this.cajas.find((b) => a.x >= b.x && a.x < b.x + b.w && a.y >= b.y && a.y < b.y + b.d && Math.abs(b.z - piso) < 1);
         if (c) a.fig.setDepth(FT + c.y + c.d + 0.5);
       }
-      // en la calle inundada el agua tapa los pies
+      // en el agua, el agua tapa los pies (o medio cuerpo en el río)
       let g = this.aguaPies.get(a);
       if (!g) { g = this.add.graphics(); this.aguaPies.set(a, g); }
       g.clear().setDepth(a.fig.depth + 0.1);
-      const w = L.agua.find((q) => a.x >= q.x0 && a.x < q.x1);
-      if (w && a.z < 3 && a.st !== 'lifted') {
-        g.fillStyle(0x3a8ac0, 0.55).fillRect(Math.round(a.x) - 13, Math.round(FT + a.y) - w.nivel, 26, w.nivel + 1);
-        g.fillStyle(0xc8ecff, 0.8).fillRect(Math.round(a.x) - 11 + (Math.floor(this.time.now / 200) % 3), Math.round(FT + a.y) - w.nivel, 8, 1);
+      const w = this.aguaEn(a.x, a.y);
+      if (w && w.nivel > CHARCO && a.z < 3 && a.st !== 'lifted') {
+        // en el río, del color del río: se ve medio cuerpo afuera y el resto bajo el agua
+        const hondo = w.nivel >= HONDO;
+        const n = Math.min(w.nivel, 26);
+        const x = Math.round(a.x), y = Math.round(FT + a.y);
+        g.fillStyle(hondo ? (this.arte ? 0x2a6aa0 : 0x285a90) : 0x3a8ac0, hondo ? 0.92 : 0.55).fillRect(x - 15, y - n, 30, n + 2);
+        g.fillStyle(0xc8ecff, 0.85).fillRect(x - 13 + (Math.floor(this.time.now / 200) % 3), y - n, 9, 1).fillRect(x + 3 - (Math.floor(this.time.now / 260) % 3), y - n, 7, 1);
       }
     }
     const me = this.gente2[0].a;
@@ -481,26 +792,59 @@ export class CrossCountry extends EventScene implements World {
     const cur = cam.midPoint.x || me.x;
     cam.centerOn(cur + (me.x + 80 - cur) * 0.1, 360 - 180 / ZOOM);
     this.arte?.tick(this.game.loop.delta / 1000, cam.scrollX, (x, y) => this.actors.some((a) => Math.abs(a.x - x) < 70 && FT + a.y - y < 160));
-    // marcador: barra de avance con cabecitas, tiempo y vida
+    if (this.lluvia) {
+      this.lluvia.setFrame(Math.floor(this.time.now / 62) % 8);
+      this.lluvia.tilePositionX = cam.scrollX * 0.6;
+    }
+    // marcador: barra de avance con cabecitas, tiempo sumado y vida
     const g = this.hud;
     g.clear();
     g.fillStyle(0x000000, 0.55).fillRect(110, 14, 420, 16);
     g.lineStyle(1, 0xffffff, 0.6).lineBetween(120, 22, 520, 22);
     g.fillStyle(0xffffff).fillRect(519, 16, 2, 12);
     for (const h of this.heads) h.img.setPosition(120 + 400 * Phaser.Math.Clamp(h.r.a.x / this.meta, 0, 1), 22);
-    this.timeTxt.setText(this.clock.toFixed(2));
+    this.timeTxt.setText(((this.acum[this.gente2[0].c.id] ?? 0) + this.clock).toFixed(2));
     g.fillStyle(0x000000, 0.6).fillRect(14, 12, 84, 10);
     g.fillStyle(me.hp > me.maxHp * 0.3 ? 0x40e080 : 0xff5040).fillRect(16, 14, 80 * (me.hp / me.maxHp), 6);
   }
 
   private checkEnd() {
     const me = this.gente2[0];
-    if (this.d.practica) return;
-    if (this.porTiempo(this.gente2.map((r) => r.done), me.done, this.clock)) {
-      for (const r of this.gente2) if (!r.done) { r.done = true; r.time = this.clock + (this.meta - r.a.x) / 120; }
-      const orden = [...this.gente2].sort((p, q) => p.time - q.time).map((r) => ({ c: r.c, valor: `${r.time.toFixed(2)} S` }));
-      this.resultados(prueba('CrossCountry').nombre, orden);
+    if (this.d.practica || this.entre) return;
+    // nadie se queda esperando para siempre: 25 s después del primero, el tramo se cierra igual
+    const primero = Math.min(...this.gente2.filter((r) => r.done).map((r) => r.time));
+    const cierre = Number.isFinite(primero) && this.clock - primero > 25;
+    if (!cierre && !this.porTiempo(this.gente2.map((r) => r.done), me.done, this.clock)) return;
+    for (const r of this.gente2) if (!r.done) { r.done = true; r.time = this.clock + (this.meta - r.a.x) / 120; }
+    for (const r of this.gente2) this.acum[r.c.id] = (this.acum[r.c.id] ?? 0) + r.time;
+    const orden = [...this.gente2].sort((p, q) => this.acum[p.c.id] - this.acum[q.c.id]);
+    if (this.tramo === TRAMOS.length - 1) {
+      this.resultados(prueba('CrossCountry').nombre, orden.map((r) => ({ c: r.c, valor: `${this.acum[r.c.id].toFixed(2)} S` })));
+      return;
     }
+    this.entreTramos(orden);
+  }
+
+  /** Entre tramos: cómo van con el tiempo sumado, y al siguiente con los mismos cuatro. */
+  private entreTramos(orden: Corredor[]) {
+    this.fase = 'fin';
+    flash(this, 120);
+    chip.blip(1320, 0.2, 'sq25', 0.2, 1760);
+    const g = this.uiAdd(this.add.graphics().setDepth(8400));
+    g.fillStyle(0x08081a, 0.9).fillRect(140, 60, 360, 220);
+    g.lineStyle(2, 0xf2c230).strokeRect(141, 61, 358, 218);
+    this.uiAdd(txt(this, 320, 80, `TRAMO ${this.tramo + 1} DE ${TRAMOS.length} · ${this.L.nombre}`, 'fuente_ui', 1).setDepth(8500).setTint(0xffe080));
+    this.uiAdd(txt(this, 320, 98, 'ASÍ VA LA CARRERA', 'fuente_titulo', 1).setDepth(8500));
+    orden.forEach((r, i) => {
+      const y = 128 + i * 32;
+      this.uiAdd(txt(this, 168, y, `${i + 1}°`, 'fuente_ui', 2).setDepth(8500));
+      this.uiAdd(this.add.image(204, y, `retratos:${r.c.id}`, i === 0 ? 'chico_feliz' : 'chico_neutral').setScale(0.7).setDepth(8500));
+      this.uiAdd(txt(this, 228, y, this.nombre(r.c.id), 'fuente_ui', 2, 0).setDepth(8500).setTint(r.c.human ? 0xffe040 : r.c.team === 0 ? 0x9ac8ff : 0xffa0a0));
+      this.uiAdd(txt(this, 480, y - 4, `${this.acum[r.c.id].toFixed(2)} S`, 'fuente_ui', 2, 1).setDepth(8500));
+      this.uiAdd(txt(this, 480, y + 9, `ESTE TRAMO ${r.time.toFixed(2)}`, 'fuente_ui', 1, 1).setDepth(8500).setTint(0x9a9ac0));
+    });
+    this.uiAdd(txt(this, 320, 266, `SIGUE: ${TRAMOS[this.tramo + 1].nombre}`, 'fuente_ui', 1).setDepth(8500).setTint(0x8ae08a));
+    const data: CrossData = { ...this.d, tramo: this.tramo + 1, cross: { gente: this.gente, acum: this.acum } };
+    this.entre = { t: 4.2, go: () => { this.cameras.main.fadeOut(250); this.cameras.main.once('camerafadeoutcomplete', () => this.scene.restart(data)); } };
   }
 }
-

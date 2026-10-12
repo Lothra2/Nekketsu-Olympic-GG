@@ -12,7 +12,7 @@ export interface Competidor { id: string; team: 0 | 1; human: boolean }
 /** Estado de la Olimpiada Express (vive en el registro de Phaser). */
 export interface Gira { jugador: string; idx: number; puntos: [number, number]; resultados: { prueba: string; podio: string[] }[] }
 export const PRUEBAS_GIRA = [
-  { scene: 'CrossCountry', nombre: 'CROSS COUNTRY', lugar: 'HẺM DE SAIGÓN, VIETNAM' },
+  { scene: 'CrossCountry', nombre: 'CROSS COUNTRY', lugar: 'SAIGÓN, VIETNAM' },
   { scene: 'Vallas', nombre: 'VALLAS DEL CAFÉ', lugar: 'EJE CAFETERO, COLOMBIA' },
   { scene: 'Natacion', nombre: 'NATACIÓN HẠ LONG', lugar: 'BAHÍA DE HẠ LONG, VIETNAM' },
   { scene: 'Jabalina', nombre: 'JABALINA LLANERA', lugar: 'LLANOS DE APURE, VENEZUELA' },

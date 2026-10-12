@@ -1,0 +1,312 @@
+{
+ "pais": "vietnam",
+ "prueba": "crosscountry",
+ "franja": {
+  "atras": 200,
+  "adelante": 330
+ },
+ "id": "saigon_azoteas",
+ "tramo": 4,
+ "nombre": "AZOTEAS DE SAIGÓN",
+ "largo": 3840,
+ "hora": "tarde",
+ "clima": [
+  "aguacero"
+ ],
+ "paralaje": {
+  "cielo": "auto",
+  "lejos": "saigon_bitexco",
+  "cerca": "azoteas"
+ },
+ "piso": [
+  {
+   "x0": 0,
+   "x1": 3840,
+   "tipo": "baldosa"
+  },
+  {
+   "x0": 750,
+   "x1": 1500,
+   "tipo": "metal",
+   "nombre": "techo de zinc"
+  },
+  {
+   "x0": 3100,
+   "x1": 3170,
+   "y0": 60,
+   "y1": 76,
+   "tipo": "metal",
+   "nombre": "viga entre edificios"
+  }
+ ],
+ "huecos": [
+  {
+   "x0": 700,
+   "x1": 750,
+   "y0": 0,
+   "y1": 130,
+   "caida": "vacio",
+   "nombre": "entre edificios"
+  },
+  {
+   "x0": 1500,
+   "x1": 1560,
+   "y0": 0,
+   "y1": 130,
+   "caida": "vacio",
+   "nombre": "entre edificios"
+  },
+  {
+   "x0": 2300,
+   "x1": 2340,
+   "y0": 0,
+   "y1": 130,
+   "caida": "vacio",
+   "nombre": "entre edificios"
+  },
+  {
+   "x0": 3100,
+   "x1": 3170,
+   "y0": 0,
+   "y1": 60,
+   "caida": "vacio",
+   "nombre": "hueco ancho (la viga cruza en y 60 a 76)"
+  },
+  {
+   "x0": 3100,
+   "x1": 3170,
+   "y0": 76,
+   "y1": 130,
+   "caida": "vacio",
+   "nombre": "hueco ancho"
+  }
+ ],
+ "plataformas": [
+  {
+   "x": 480,
+   "y": 70,
+   "w": 48,
+   "d": 30,
+   "z": 20,
+   "tipo": "mesas_plasticas",
+   "subible": true,
+   "nota": "café de azotea"
+  },
+  {
+   "x": 1000,
+   "y": 40,
+   "w": 30,
+   "d": 24,
+   "z": 18,
+   "tipo": "aire_acondicionado",
+   "subible": true
+  },
+  {
+   "x": 1250,
+   "y": 90,
+   "w": 30,
+   "d": 24,
+   "z": 18,
+   "tipo": "aire_acondicionado",
+   "subible": true
+  },
+  {
+   "x": 2000,
+   "y": 20,
+   "w": 48,
+   "d": 30,
+   "z": 20,
+   "tipo": "mesas_plasticas",
+   "subible": true
+  },
+  {
+   "x": 2700,
+   "y": 50,
+   "w": 40,
+   "d": 30,
+   "z": 14,
+   "tipo": "macetas",
+   "subible": true
+  },
+  {
+   "x": 3400,
+   "y": 80,
+   "w": 30,
+   "d": 24,
+   "z": 18,
+   "tipo": "aire_acondicionado",
+   "subible": true
+  }
+ ],
+ "muros": [
+  {
+   "x": 1800,
+   "y": 0,
+   "w": 60,
+   "d": 70,
+   "z": 56,
+   "tipo": "caseta_escalera",
+   "nota": "se rodea por abajo (y 70 a 130)"
+  }
+ ],
+ "escaleras": [],
+ "postes": [
+  {
+   "x": 900,
+   "y": 10,
+   "alto": 90,
+   "tipo": "antena"
+  },
+  {
+   "x": 2950,
+   "y": 8,
+   "alto": 110,
+   "tipo": "antena"
+  },
+  {
+   "x": 3600,
+   "y": 10,
+   "alto": 90,
+   "tipo": "antena"
+  }
+ ],
+ "agua": [
+  {
+   "x0": 1100,
+   "x1": 1200,
+   "y0": 50,
+   "y1": 90,
+   "nivel": 1,
+   "nombre": "charco"
+  },
+  {
+   "x0": 1650,
+   "x1": 1750,
+   "y0": 80,
+   "y1": 120,
+   "nivel": 1,
+   "nombre": "charco"
+  },
+  {
+   "x0": 2850,
+   "x1": 2950,
+   "y0": 20,
+   "y1": 70,
+   "nivel": 1,
+   "nombre": "charco"
+  },
+  {
+   "x0": 3500,
+   "x1": 3600,
+   "y0": 40,
+   "y1": 90,
+   "nivel": 1,
+   "nombre": "charco"
+  }
+ ],
+ "bajo": [
+  {
+   "x0": 560,
+   "x1": 690,
+   "y0": 30,
+   "y1": 90,
+   "z": 46,
+   "tipo": "ropa_tendida"
+  },
+  {
+   "x0": 2400,
+   "x1": 2560,
+   "y0": 0,
+   "y1": 130,
+   "z": 46,
+   "tipo": "ropa_tendida"
+  }
+ ],
+ "solidos": [
+  {
+   "x": 300,
+   "y": 0,
+   "w": 34,
+   "d": 26,
+   "z": 44,
+   "tipo": "tanque_agua"
+  },
+  {
+   "x": 2100,
+   "y": 90,
+   "w": 34,
+   "d": 30,
+   "z": 44,
+   "tipo": "tanque_agua"
+  },
+  {
+   "x": 2600,
+   "y": 0,
+   "w": 34,
+   "d": 26,
+   "z": 44,
+   "tipo": "tanque_agua"
+  }
+ ],
+ "carriles": [
+  {
+   "y": 20
+  },
+  {
+   "y": 50
+  },
+  {
+   "y": 80
+  },
+  {
+   "y": 110
+  }
+ ],
+ "entidades": [
+  {
+   "tipo": "salida",
+   "x": 40
+  },
+  {
+   "tipo": "meta",
+   "x": 3790
+  },
+  {
+   "tipo": "objeto",
+   "objeto": "paraguas_roja",
+   "x": 600,
+   "y": 110
+  },
+  {
+   "tipo": "objeto",
+   "objeto": "silla_plastica_azul",
+   "x": 2050,
+   "y": 70
+  },
+  {
+   "tipo": "objeto",
+   "objeto": "pote_basura",
+   "x": 3300,
+   "y": 30
+  }
+ ],
+ "ranuras_deco": [
+  {
+   "x0": 0,
+   "x1": 3840,
+   "capa": "cerca",
+   "tema": "azoteas_cafes"
+  },
+  {
+   "x0": 3600,
+   "x1": 3840,
+   "capa": "frente",
+   "tema": "escalera_incendio"
+  }
+ ],
+ "vida": [
+  "lluvia",
+  "ropa_viento",
+  "charcos_crecen"
+ ]
+}

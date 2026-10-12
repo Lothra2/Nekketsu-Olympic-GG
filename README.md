@@ -9,7 +9,14 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
 - **Niveles** en el menú (se recuerdan): PASEO (la máquina va suave, tu equipo aguanta el doble y pega más, en jabalina no hay nulo y en natación no hay salida en falso), NORMAL (un poco de ventaja) y NEKKETSU (sin ayuda). En PASEO y NORMAL hay una "goma" invisible: si vas muy atrás la máquina afloja, y si vas muy adelante aprieta un poco. Los números están todos en `src/core/nivel.ts`.
 - **Olimpiada Express**: Familia GG contra el Instituto en 4 pruebas seguidas con medallero por equipos (10, 6, 4 y 2 puntos por puesto) y una final a pelea que vale 20. Termina con podio y fuegos artificiales.
 - **Pruebas sueltas**:
-  - *Cross Country* (hẻm de Saigón, tramo 1): la prueba estrella del original. Corres por el callejón, saltas canales y muros, rodeas el muro alto o trepas las cajas, cruzas la calle inundada y esquivas las motos; y con los rivales, a los golpes. El escenario va en gris hasta que llegue el arte del lote E1.
+  - *Cross Country Saigón*: la prueba estrella del original, en cinco tramos seguidos con el tiempo sumado.
+    1. El hẻm: canales, muros, la calle inundada y las motos. Ya tiene el arte de PixelForja.
+    2. El mercado Bến Thành: pasillos angostos entre puestos. Si caes encima de un puesto de frutas, se riegan y el que viene atrás se resbala.
+    3. El río Saigón: el ferry, que es seguro pero hay que esperarlo, o nadar directo entre jacintos que te enredan.
+    4. Las azoteas bajo el aguacero: saltos entre edificios, charcos y techos de zinc que resbalan, y una viga para cruzar el hueco ancho.
+    5. La recta final en el estadio, con vallas.
+
+    Los tramos 2 a 5 van en gris hasta que llegue su arte (lote E2). Con los rivales, a los golpes, como en el original.
   - *Vallas del Café* (Eje Cafetero): alterna puño y patada para correr, salta las vallas, codazo con ★. Si tocas una valla, se cae y te frena.
   - *Natación Hạ Long* (bahía de Hạ Long): sales con salto, si te tiras antes del ¡YA! te quedas un segundo. Alterna puño y patada para nadar, ★ es la patada de delfín.
   - *Jabalina Llanera* (Llanos de Apure): carrerita alternando botones, mantén salto para el ángulo y suelta para lanzar. Si pisas la raya es nulo. Dos intentos.
@@ -48,7 +55,9 @@ El kit ya viene en `public/assets/kit/` (se commitea a propósito). Lo describe 
 ```bash
 git submodule update --init && (cd tools/pixel_forja && npm install)   # la primera vez
 npm run kit            # escribe public/assets/kit
-npm run escenarios     # escenarios oblicuos desde data/stages (cuando PixelForja los trae en main)
+npm run escenarios     # regenera el arte de los escenarios que ya lo tienen (index.json)
+npm run escenarios -- saigon_rio   # suma uno nuevo, cuando Rick aprobó su ficha y sus postales
+npm run escenarios -- --validar    # valida todos los layouts de data/stages con las 9 pruebas, sin escribir nada
 ```
 
 Lo que PixelForja todavía no trae (por ejemplo `silbato` y `marcha_nekketsu`, del lote H) queda en `manifest.pendiente` y aparece solo al regenerar cuando llegue.
@@ -62,7 +71,8 @@ node scripts/capturas.mjs http://localhost:5173/ capturas          # intro, tít
 node scripts/prueba-pelea.mjs http://localhost:5173/ capturas rick kenji   # combo, levantar, lanzar, técnica, chancleta
 node scripts/prueba-pruebas.mjs http://localhost:5173/ capturas/pruebas  # vallas, natación, jabalina y medallero
 node scripts/prueba-entrenamiento.mjs http://localhost:5173/ capturas/entrenamiento  # completa los 4 entrenamientos
-node scripts/prueba-cross.mjs http://localhost:5173/ capturas/cross   # los cuatro con piloto automático de punta a punta
+node scripts/prueba-cross.mjs http://localhost:5173/ capturas/cross     # los cinco tramos con piloto automático, de punta a punta
+node scripts/prueba-cross.mjs http://localhost:5173/ capturas/cross 3   # solo un tramo (1 a 5)
 node scripts/prueba-teclas.mjs http://localhost:5173/   # cada tecla que nombra el juego hace lo que dice
 node scripts/prueba-tactil.mjs http://localhost:5173/ capturas   # en tablet el cartel nombra A, B y C y tocándolos avanza
 node scripts/tablet.mjs capturas                                   # tablet con controles táctiles

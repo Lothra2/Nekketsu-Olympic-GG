@@ -1,0 +1,437 @@
+{
+ "pais": "vietnam",
+ "prueba": "crosscountry",
+ "franja": {
+  "atras": 200,
+  "adelante": 330
+ },
+ "id": "saigon_benthanh",
+ "tramo": 2,
+ "nombre": "MERCADO BẾN THÀNH",
+ "largo": 3840,
+ "hora": "manana",
+ "clima": [
+  "despejado"
+ ],
+ "paralaje": {
+  "cielo": "auto",
+  "lejos": "saigon_skyline",
+  "cerca": "benthanh"
+ },
+ "piso": [
+  {
+   "x0": 0,
+   "x1": 3840,
+   "tipo": "asfalto"
+  },
+  {
+   "x0": 0,
+   "x1": 3840,
+   "y0": 0,
+   "y1": 24,
+   "tipo": "acera"
+  },
+  {
+   "x0": 640,
+   "x1": 3260,
+   "tipo": "baldosa",
+   "nombre": "piso del mercado"
+  }
+ ],
+ "huecos": [],
+ "plataformas": [
+  {
+   "x": 300,
+   "y": 60,
+   "w": 50,
+   "d": 28,
+   "z": 24,
+   "tipo": "carrito_cafe",
+   "subible": true
+  },
+  {
+   "x": 1100,
+   "y": 0,
+   "w": 44,
+   "d": 36,
+   "z": 22,
+   "tipo": "puesto_frutas",
+   "subible": true
+  },
+  {
+   "x": 1760,
+   "y": 0,
+   "w": 30,
+   "d": 36,
+   "z": 16,
+   "tipo": "cajas",
+   "subible": true
+  },
+  {
+   "x": 2440,
+   "y": 0,
+   "w": 44,
+   "d": 36,
+   "z": 22,
+   "tipo": "puesto_frutas",
+   "subible": true
+  },
+  {
+   "x": 2860,
+   "y": 0,
+   "w": 30,
+   "d": 36,
+   "z": 14,
+   "tipo": "canastas",
+   "subible": true
+  },
+  {
+   "x": 1460,
+   "y": 52,
+   "w": 26,
+   "d": 26,
+   "z": 12,
+   "tipo": "sacos_arroz",
+   "subible": true
+  },
+  {
+   "x": 2150,
+   "y": 52,
+   "w": 26,
+   "d": 26,
+   "z": 12,
+   "tipo": "sacos_arroz",
+   "subible": true
+  },
+  {
+   "x": 2780,
+   "y": 52,
+   "w": 26,
+   "d": 26,
+   "z": 12,
+   "tipo": "sacos_arroz",
+   "subible": true
+  },
+  {
+   "x": 1200,
+   "y": 94,
+   "w": 48,
+   "d": 36,
+   "z": 24,
+   "tipo": "puesto_frutas",
+   "subible": true
+  },
+  {
+   "x": 1860,
+   "y": 94,
+   "w": 34,
+   "d": 36,
+   "z": 16,
+   "tipo": "cubos_flores",
+   "subible": true
+  },
+  {
+   "x": 2560,
+   "y": 94,
+   "w": 48,
+   "d": 36,
+   "z": 24,
+   "tipo": "puesto_frutas",
+   "subible": true
+  }
+ ],
+ "muros": [
+  {
+   "x": 600,
+   "y": 0,
+   "w": 40,
+   "d": 40,
+   "z": 64,
+   "tipo": "porton_mercado",
+   "nota": "entrada del mercado: se pasa por el medio (y 40 a 90)"
+  },
+  {
+   "x": 600,
+   "y": 90,
+   "w": 40,
+   "d": 40,
+   "z": 64,
+   "tipo": "porton_mercado"
+  },
+  {
+   "x": 3220,
+   "y": 40,
+   "w": 40,
+   "d": 50,
+   "z": 64,
+   "tipo": "porton_mercado",
+   "nota": "salida: se pasa por arriba (y 0 a 40) o por abajo (y 90 a 130)"
+  }
+ ],
+ "escaleras": [],
+ "postes": [
+  {
+   "x": 200,
+   "y": 4,
+   "alto": 160,
+   "tipo": "poste_luz"
+  },
+  {
+   "x": 3500,
+   "y": 4,
+   "alto": 160,
+   "tipo": "poste_luz"
+  }
+ ],
+ "agua": [],
+ "bajo": [
+  {
+   "x0": 1990,
+   "x1": 2200,
+   "y0": 0,
+   "y1": 36,
+   "z": 50,
+   "tipo": "lamparas_colgantes"
+  }
+ ],
+ "solidos": [
+  {
+   "x": 780,
+   "y": 36,
+   "w": 180,
+   "d": 16,
+   "z": 46,
+   "tipo": "puesto_ropa",
+   "nombre": "fila de puestos de arriba"
+  },
+  {
+   "x": 1000,
+   "y": 36,
+   "w": 280,
+   "d": 16,
+   "z": 46,
+   "tipo": "puesto_flores",
+   "nombre": "fila de puestos de arriba"
+  },
+  {
+   "x": 1320,
+   "y": 36,
+   "w": 300,
+   "d": 16,
+   "z": 46,
+   "tipo": "puesto_telas",
+   "nombre": "fila de puestos de arriba"
+  },
+  {
+   "x": 1660,
+   "y": 36,
+   "w": 280,
+   "d": 16,
+   "z": 46,
+   "tipo": "puesto_comida",
+   "nombre": "fila de puestos de arriba"
+  },
+  {
+   "x": 1980,
+   "y": 36,
+   "w": 300,
+   "d": 16,
+   "z": 46,
+   "tipo": "puesto_recuerdos",
+   "nombre": "fila de puestos de arriba"
+  },
+  {
+   "x": 2320,
+   "y": 36,
+   "w": 280,
+   "d": 16,
+   "z": 46,
+   "tipo": "puesto_cafe",
+   "nombre": "fila de puestos de arriba"
+  },
+  {
+   "x": 2640,
+   "y": 36,
+   "w": 280,
+   "d": 16,
+   "z": 46,
+   "tipo": "puesto_ropa",
+   "nombre": "fila de puestos de arriba"
+  },
+  {
+   "x": 2960,
+   "y": 36,
+   "w": 80,
+   "d": 16,
+   "z": 46,
+   "tipo": "puesto_flores",
+   "nombre": "fila de puestos de arriba"
+  },
+  {
+   "x": 800,
+   "y": 78,
+   "w": 200,
+   "d": 16,
+   "z": 46,
+   "tipo": "puesto_comida",
+   "nombre": "fila de puestos de abajo"
+  },
+  {
+   "x": 1040,
+   "y": 78,
+   "w": 300,
+   "d": 16,
+   "z": 46,
+   "tipo": "puesto_recuerdos",
+   "nombre": "fila de puestos de abajo"
+  },
+  {
+   "x": 1380,
+   "y": 78,
+   "w": 280,
+   "d": 16,
+   "z": 46,
+   "tipo": "puesto_ropa",
+   "nombre": "fila de puestos de abajo"
+  },
+  {
+   "x": 1700,
+   "y": 78,
+   "w": 300,
+   "d": 16,
+   "z": 46,
+   "tipo": "puesto_telas",
+   "nombre": "fila de puestos de abajo"
+  },
+  {
+   "x": 2040,
+   "y": 78,
+   "w": 280,
+   "d": 16,
+   "z": 46,
+   "tipo": "puesto_flores",
+   "nombre": "fila de puestos de abajo"
+  },
+  {
+   "x": 2360,
+   "y": 78,
+   "w": 300,
+   "d": 16,
+   "z": 46,
+   "tipo": "puesto_comida",
+   "nombre": "fila de puestos de abajo"
+  },
+  {
+   "x": 2700,
+   "y": 78,
+   "w": 260,
+   "d": 16,
+   "z": 46,
+   "tipo": "puesto_cafe",
+   "nombre": "fila de puestos de abajo"
+  },
+  {
+   "x": 3000,
+   "y": 78,
+   "w": 40,
+   "d": 16,
+   "z": 46,
+   "tipo": "puesto_telas",
+   "nombre": "fila de puestos de abajo"
+  }
+ ],
+ "carriles": [
+  {
+   "y": 12
+  },
+  {
+   "y": 28
+  },
+  {
+   "y": 65
+  },
+  {
+   "y": 112
+  }
+ ],
+ "entidades": [
+  {
+   "tipo": "salida",
+   "x": 40
+  },
+  {
+   "tipo": "meta",
+   "x": 3790
+  },
+  {
+   "tipo": "objeto",
+   "objeto": "non_la",
+   "x": 900,
+   "y": 18
+  },
+  {
+   "tipo": "objeto",
+   "objeto": "coco",
+   "x": 1560,
+   "y": 65
+  },
+  {
+   "tipo": "objeto",
+   "objeto": "abanico",
+   "x": 2100,
+   "y": 112
+  },
+  {
+   "tipo": "objeto",
+   "objeto": "termo",
+   "x": 2700,
+   "y": 18
+  },
+  {
+   "tipo": "objeto",
+   "objeto": "chancleta",
+   "x": 3400,
+   "y": 60
+  },
+  {
+   "tipo": "objeto",
+   "objeto": "silla_plastica",
+   "x": 3620,
+   "y": 100
+  },
+  {
+   "tipo": "vehiculo",
+   "vehiculo": "moto",
+   "carril": 4,
+   "cada": 5,
+   "desde": "derecha",
+   "x0": 3260,
+   "x1": 3840
+  }
+ ],
+ "ranuras_deco": [
+  {
+   "x0": 0,
+   "x1": 640,
+   "capa": "cerca",
+   "tema": "calle_le_loi"
+  },
+  {
+   "x0": 640,
+   "x1": 3260,
+   "capa": "cerca",
+   "tema": "mercado_interior"
+  },
+  {
+   "x0": 3260,
+   "x1": 3840,
+   "capa": "cerca",
+   "tema": "calle"
+  }
+ ],
+ "vida": [
+  "vendedoras_pregonando",
+  "toldos_viento",
+  "palomas"
+ ]
+}

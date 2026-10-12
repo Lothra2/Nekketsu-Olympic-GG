@@ -1,0 +1,140 @@
+{
+ "pais": "vietnam",
+ "prueba": "crosscountry",
+ "franja": {
+  "atras": 200,
+  "adelante": 330
+ },
+ "id": "saigon_estadio",
+ "tramo": 5,
+ "nombre": "ESTADIO DE LA META",
+ "largo": 1920,
+ "hora": "atardecer",
+ "clima": [
+  "despejado"
+ ],
+ "paralaje": {
+  "cielo": "auto",
+  "lejos": "saigon_skyline",
+  "cerca": "gradas"
+ },
+ "piso": [
+  {
+   "x0": 0,
+   "x1": 300,
+   "tipo": "asfalto"
+  },
+  {
+   "x0": 300,
+   "x1": 1920,
+   "tipo": "cancha",
+   "nombre": "pista roja"
+  }
+ ],
+ "huecos": [],
+ "plataformas": [],
+ "muros": [
+  {
+   "x": 280,
+   "y": 0,
+   "w": 16,
+   "d": 45,
+   "z": 60,
+   "tipo": "porton_estadio",
+   "nota": "se entra por el medio (y 45 a 85)"
+  },
+  {
+   "x": 280,
+   "y": 85,
+   "w": 16,
+   "d": 45,
+   "z": 60,
+   "tipo": "porton_estadio"
+  },
+  {
+   "x": 800,
+   "y": 0,
+   "w": 6,
+   "d": 130,
+   "z": 14,
+   "tipo": "valla"
+  },
+  {
+   "x": 1100,
+   "y": 0,
+   "w": 6,
+   "d": 130,
+   "z": 14,
+   "tipo": "valla"
+  },
+  {
+   "x": 1400,
+   "y": 0,
+   "w": 6,
+   "d": 130,
+   "z": 14,
+   "tipo": "valla"
+  }
+ ],
+ "escaleras": [],
+ "postes": [
+  {
+   "x": 600,
+   "y": 2,
+   "alto": 200,
+   "tipo": "torre_luz"
+  },
+  {
+   "x": 1700,
+   "y": 2,
+   "alto": 200,
+   "tipo": "torre_luz"
+  }
+ ],
+ "agua": [],
+ "bajo": [],
+ "solidos": [],
+ "carriles": [
+  {
+   "y": 20
+  },
+  {
+   "y": 50
+  },
+  {
+   "y": 80
+  },
+  {
+   "y": 110
+  }
+ ],
+ "entidades": [
+  {
+   "tipo": "salida",
+   "x": 40
+  },
+  {
+   "tipo": "meta",
+   "x": 1860
+  }
+ ],
+ "ranuras_deco": [
+  {
+   "x0": 300,
+   "x1": 1920,
+   "capa": "cerca",
+   "tema": "gradas_llenas"
+  },
+  {
+   "x0": 1700,
+   "x1": 1920,
+   "capa": "cerca",
+   "tema": "marcador"
+  }
+ ],
+ "vida": [
+  "publico_ondeando",
+  "banderas",
+  "fuegos_artificiales"
+ ]
+}
