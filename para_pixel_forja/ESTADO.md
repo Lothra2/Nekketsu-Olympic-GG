@@ -13,8 +13,8 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 | 3 | C1 | Familia GG e Instituto Nekketsu | A | aprobado, en main | [pixel_forja#9](https://github.com/Lothra2/pixel_forja/pull/9) |
 | 4 | G1 fuentes | Acentos del vietnamita en las fuentes | Nada | aprobado, en main | [pixel_forja#10](https://github.com/Lothra2/pixel_forja/pull/10) |
 | 5 | I inicial | Kit a medida por configuración | A | aprobado, en main | [pixel_forja#11](https://github.com/Lothra2/pixel_forja/pull/11) |
-| 6 | E1 | Sistema de escenarios oblicuos + `saigon_hem` | A, I, layout de `saigon_hem` | pendiente, ya se puede empezar (el layout está listo y jugado en gris) | |
-| 7 | F | Efectos (y audio por configuración) | Nada | aprobado, falta merge a main | [pixel_forja#12](https://github.com/Lothra2/pixel_forja/pull/12) |
+| 6 | E1 | Sistema de escenarios oblicuos + `saigon_hem` | A, I, layout de `saigon_hem` | en curso: ficha de arte aprobada, postales esperando a Rick (rama `claude/olimpico-lote-e1`) | |
+| 7 | F | Efectos (y audio por configuración) | Nada | aprobado, en main | [pixel_forja#12](https://github.com/Lothra2/pixel_forja/pull/12) |
 | 8 | G1, H1 | Resto de interfaz y audio de la rebanada vertical | Nada | pendiente | |
 | 9 | B2, C2, D2, E2 | Cross Country completo y equipos nacionales | E1 | pendiente | |
 | 10 | B3, E3 | Obstáculos, Tama-wari, Kachinuki | E1 | pendiente | |
@@ -86,6 +86,16 @@ Se pidió para B1: el campo `cuerpo` (hurtbox sin implementos ni efectos), porqu
 - Motos por los carriles 2 y 4, desde la derecha.
 - Campos que agregó el juego y que el validador debe aceptar: `nombre` en el layout y en los huecos y el agua, `nota` en el muro alto, `tipo` en muros y sólidos, y `y0`/`y1` en `bajo` (el toldo cubre solo la acera).
 - Lo que el juego todavía no usa y queda para el arte: `postes`, `ranuras_deco`, `vida` y el clima `aguacero`.
+
+**E1 del lado del juego, listo para recibir el arte:**
+- El Cross Country pasó a ZOOM 1: el escenario se ve entero y a escala 1, sin pixeles disparejos.
+- `src/events/escenario.ts` carga `escenarios/<id>/` tal como lo exporta `exportar.ts` de la rama: cielo quieto, lejos con paralaje 0.25, cerca, piso y frente en trozos de 1280, objetos con `setDepth(franja.atras + orden)`, la vida (ropa, cables, palomas que se espantan cuando pasa alguien, motos al fondo), luces que laten y las partículas sin `fx`. Cuando el arte está, el juego deja de dibujar el gris.
+- `npm run escenarios` genera la carpeta desde `data/stages/*.layout.json` con el PixelForja del submódulo y escribe `public/assets/escenarios/index.json`. Se probó con la rama de E1 (`--forja`): el layout valida sin errores ni avisos, sale en menos de 1 s y el juego lo corre de punta a punta sin errores. El arte no se sube al juego hasta que E1 esté en `main`.
+- Las motos de los carriles 2 y 4 usan los cuadros de `motos_fondo` de `vida.png`, y quedan iguales al arte. Los objetos del piso siguen del kit (D1).
+- En la calle inundada, el juego tapa los pies con una franja de agua a la altura del `nivel`.
+- Cuando un atleta va encima de una caja o un muro, el juego lo dibuja delante de esa caja, para que no lo tape al pasar por arriba.
+- Todavía no usa `superficie.png` (los sonidos al pisar), `piso_mojado` (no hay aguacero aún) ni las partículas con `fx` (`onda_charco`, `petalo_buganvilla`): llegan cuando el kit pase a `kit.config.json` con los efectos del lote F.
+- Pedido chico para E1: el muro alto se ve como una columna de ladrillo. Conviene que el arte muestre el portón abierto adelante (y de 92 a 130), porque es el camino para rodearlo y hoy no se nota.
 
 ## Insumos que pone el juego
 

@@ -9,6 +9,8 @@ export class Boot extends Phaser.Scene {
 
   preload() {
     this.load.json('manifest', KIT + 'manifest.json');
+    // qué escenarios de PixelForja hay (si una prueba no tiene el suyo, se ve en gris)
+    this.load.json('escenarios', 'assets/escenarios/index.json');
   }
 
   create() {

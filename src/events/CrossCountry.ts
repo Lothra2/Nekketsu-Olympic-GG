@@ -6,6 +6,7 @@ import { txt, flash } from '../core/ui';
 import { EventScene, prueba, type Competidor } from './base';
 import layoutJson from '../../data/stages/saigon_hem.layout.json';
 import type { Paso } from '../core/coach';
+import { hayArte, pintarEscenario, queueEscenario } from './escenario';
 
 /** El formato de layout de PixelForja (PEDIDO 10.2), la parte que este tramo usa. */
 interface Caja { x: number; y: number; w: number; d: number; z: number; tipo?: string }
@@ -22,7 +23,8 @@ interface Layout {
 const L = layoutJson as unknown as Layout;
 const FT = L.franja.atras;
 const DEPTH = L.franja.adelante - L.franja.atras;
-const ZOOM = 1.35;
+/** escala 1: el arte de PixelForja está pensado para verse entero, sin pixeles disparejos */
+const ZOOM = 1;
 /** lo que se sube de un paso, sin saltar */
 const PASO = 6;
 const ALTO = 44;
@@ -42,6 +44,9 @@ export class CrossCountry extends EventScene implements World {
   limites = { xmin: 12, xmax: L.largo - 12, depth: DEPTH };
   private gente2: Corredor[] = [];
   private cajas: Caja[] = [];
+  private arte: ReturnType<typeof pintarEscenario> | null = null;
+  /** el agua sobre los pies de cada uno, justo delante de su figura */
+  private aguaPies = new Map<Actor, Phaser.GameObjects.Graphics>();
   private motos: Moto[] = [];
   private motoT: number[] = [];
   private meta = 3790;
@@ -57,6 +62,8 @@ export class CrossCountry extends EventScene implements World {
 
   constructor() { super('CrossCountry'); }
 
+  preload() { queueEscenario(this, L.id); }
+
   get sc(): Phaser.Scene { return this; }
 
   /** Tu equipo pega más según el nivel. */
@@ -66,6 +73,7 @@ export class CrossCountry extends EventScene implements World {
     this.actors = [];
     this.items = [];
     this.gente2 = [];
+    this.aguaPies.clear();
     this.motos = [];
     this.heads = [];
     this.clock = 0;
@@ -76,7 +84,9 @@ export class CrossCountry extends EventScene implements World {
     const salida = L.entidades.find((e) => e.tipo === 'salida')?.x ?? 40;
     this.motoT = L.entidades.filter((e) => e.tipo === 'vehiculo').map((e) => (e.cada ?? 5) * 0.6);
     this.setup(ZOOM, L.largo);
-    this.dibujar();
+    // el arte de PixelForja si ya llegó; si no, el gris
+    this.arte = hayArte(this, L.id) ? pintarEscenario(this, L.id, 5000) : null;
+    if (!this.arte) this.dibujar();
     this.sparks = this.add.particles(0, 0, 'px', { speed: { min: 60, max: 180 }, lifespan: 260, scale: { start: 0.9, end: 0 }, tint: [0xffffff, 0xffe040, 0xffa020], emitting: false }).setDepth(5000);
     this.dusts = this.add.particles(0, 0, 'px', { speedX: { min: -40, max: 40 }, speedY: { min: -30, max: -6 }, lifespan: 380, scale: { start: 0.8, end: 0 }, tint: 0xb0a8b8, alpha: { start: 0.7, end: 0 }, emitting: false }).setDepth(4999);
     this.splash = this.add.particles(0, 0, 'px', { speed: { min: 30, max: 90 }, angle: { min: 200, max: 340 }, gravityY: 300, lifespan: 420, scale: { start: 1, end: 0.3 }, tint: [0xffffff, 0x9ad8f0], emitting: false }).setDepth(5000);
@@ -94,7 +104,7 @@ export class CrossCountry extends EventScene implements World {
     this.hud = this.uiAdd(this.add.graphics().setDepth(8000));
     this.timeTxt = this.uiAdd(txt(this, 626, 14, '0.00', 'fuente_ui', 2, 1).setDepth(8001));
     for (const r of this.gente2) this.heads.push({ img: this.uiAdd(this.add.image(0, 22, 'cabecitas', r.c.id).setDepth(8002)), r });
-    this.uiAdd(txt(this, 14, 326, 'TRAMO 1 · ESCENARIO EN GRIS', 'fuente_ui', 1, 0).setDepth(8001).setTint(0x8a8ab0));
+    if (!this.arte) this.uiAdd(txt(this, 14, 326, 'TRAMO 1 · ESCENARIO EN GRIS', 'fuente_ui', 1, 0).setDepth(8001).setTint(0x8a8ab0));
     chip.play(PELEA);
     const p = prueba('CrossCountry');
     if (this.d.practica) { void this.entrenar(p.nombre, this.pasos(), 40); return; }
@@ -310,12 +320,22 @@ export class CrossCountry extends EventScene implements World {
       const y = L.carriles[Math.max(0, (v.carril ?? 1) - 1)].y;
       const x = Math.min(L.largo + 40, me.x + 420);
       const g = this.add.container(x, FT + y);
-      const body = this.add.graphics();
-      body.fillStyle(0x000000, 0.3).fillEllipse(0, 0, 40, 8);
-      body.fillStyle(0xc03030).fillRect(-18, -20, 36, 12);
-      body.fillStyle(0x303038).fillCircle(-12, -6, 6).fillCircle(12, -6, 6);
-      body.fillStyle(0xe8e8f0).fillRect(-6, -34, 10, 14);
-      g.add([body, txt(this, 0, -14, 'MOTO', 'fuente_ui', 1)]);
+      const sombra = this.add.graphics();
+      sombra.fillStyle(0x000000, 0.3).fillEllipse(0, 0, 44, 8);
+      g.add(sombra);
+      const vida = `esc_${L.id}_vida`;
+      if (this.arte && this.textures.get(vida).has('motos_fondo_0')) {
+        // la moto de PixelForja, la misma que cruza al fondo
+        const img = this.add.image(0, 2, vida, 'motos_fondo_0').setOrigin(0.5, 1);
+        this.tweens.addCounter({ from: 0, to: 1, duration: 125, repeat: -1, onRepeat: () => img.setFrame(img.frame.name === 'motos_fondo_0' ? 'motos_fondo_1' : 'motos_fondo_0') });
+        g.add(img);
+      } else {
+        const body = this.add.graphics();
+        body.fillStyle(0xc03030).fillRect(-18, -20, 36, 12);
+        body.fillStyle(0x303038).fillCircle(-12, -6, 6).fillCircle(12, -6, 6);
+        body.fillStyle(0xe8e8f0).fillRect(-6, -34, 10, 14);
+        g.add([body, txt(this, 0, -14, 'MOTO', 'fuente_ui', 1)]);
+      }
       this.motos.push({ x, y, v: -230, g });
       chip.blip(523, 0.12, 'sq50', 0.12, 494);
       this.time.delayedCall(140, () => chip.blip(523, 0.12, 'sq50', 0.12, 494));
@@ -413,10 +433,28 @@ export class CrossCountry extends EventScene implements World {
   private render() {
     for (const a of this.actors) a.render();
     for (const i of this.items) i.render();
+    for (const a of this.actors) {
+      // encima de una caja o un muro se dibuja delante de esa caja, para que no lo tape al pasar por arriba
+      const piso = a.base;
+      if (piso > 0) {
+        const c = this.cajas.find((b) => a.x >= b.x && a.x < b.x + b.w && a.y >= b.y && a.y < b.y + b.d && Math.abs(b.z - piso) < 1);
+        if (c) a.fig.setDepth(FT + c.y + c.d + 0.5);
+      }
+      // en la calle inundada el agua tapa los pies
+      let g = this.aguaPies.get(a);
+      if (!g) { g = this.add.graphics(); this.aguaPies.set(a, g); }
+      g.clear().setDepth(a.fig.depth + 0.1);
+      const w = L.agua.find((q) => a.x >= q.x0 && a.x < q.x1);
+      if (w && a.z < 3 && a.st !== 'lifted') {
+        g.fillStyle(0x3a8ac0, 0.55).fillRect(Math.round(a.x) - 13, Math.round(FT + a.y) - w.nivel, 26, w.nivel + 1);
+        g.fillStyle(0xc8ecff, 0.8).fillRect(Math.round(a.x) - 11 + (Math.floor(this.time.now / 200) % 3), Math.round(FT + a.y) - w.nivel, 8, 1);
+      }
+    }
     const me = this.gente2[0].a;
     const cam = this.cameras.main;
     const cur = cam.midPoint.x || me.x;
     cam.centerOn(cur + (me.x + 80 - cur) * 0.1, 360 - 180 / ZOOM);
+    this.arte?.tick(this.game.loop.delta / 1000, cam.scrollX, (x, y) => this.actors.some((a) => Math.abs(a.x - x) < 70 && FT + a.y - y < 160));
     // marcador: barra de avance con cabecitas, tiempo y vida
     const g = this.hud;
     g.clear();
