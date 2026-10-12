@@ -114,11 +114,6 @@ export class Jabalina extends EventScene {
     for (let m = 10; m * PX_M + FOUL < WORLD; m += 10) for (let y = 4; y < H - 18; y += 3) p.px(FOUL + m * PX_M, y, hex('#e8f0d8'));
     for (let x = FOUL; x < WORLD; x += 3) { p.px(x, 4, hex('#e8f0d8')); p.px(x, H - 20, hex('#e8f0d8')); }
     this.textures.addCanvas('campo', p.done());
-    const j = new Painter(30, 3);
-    j.rect(0, 1, 30, 1, hex('#e8e8f0'));
-    j.rect(12, 0, 6, 3, hex('#d02a2a'));
-    j.rect(27, 1, 3, 1, hex('#606070'));
-    this.textures.addCanvas('jabalina', j.done());
   }
 
   update(_t: number, dms: number) {

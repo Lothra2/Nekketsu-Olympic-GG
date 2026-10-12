@@ -3,6 +3,8 @@ import { Figura } from '../core/figura';
 import { chip, MARCHA, PELEA, SAIGON, TENSION } from '../core/music';
 import { txt, typewrite, wait, panel, flash, speedLines } from '../core/ui';
 import { Input } from '../core/input';
+import { efecto } from '../core/fx';
+import { kit } from '../core/kit';
 import { buildLogo, fireworks } from './logo';
 import { JET, PARADAS } from '../gfx/mapa';
 
@@ -14,7 +16,11 @@ const FAMILIA = [
 ];
 const INSTITUTO = ['kenji', 'ryu', 'goro', 'tetsu'];
 
-/** La intro: Japón, la gira, la Familia GG, los rivales, el puñetazo y el logo. Se salta con cualquier botón. */
+/**
+ * La intro: la presentación (con Thor arreglando el letrero), Japón, la gira, la Familia GG entrando cada uno a su
+ * manera, el montaje de las pruebas, el encuentro con el Instituto (que termina con Goro asustado de Thor), el VS,
+ * el puñetazo a la cámara y el logo. Se salta con cualquier botón.
+ */
 export class Intro extends Phaser.Scene {
   private done = false;
   private input2!: Input;
@@ -86,12 +92,67 @@ export class Intro extends Phaser.Scene {
     return f;
   }
 
+  /** Un tween que se puede esperar. */
+  private ir(targets: object, props: Phaser.Types.Tweens.TweenBuilderConfig | object, ms: number, ease = 'Linear') {
+    return new Promise<void>((res) => this.tweens.add({ targets, ...props, duration: ms, ease, onComplete: () => res() }));
+  }
+
+  /** Arriba a la derecha de la cabeza: donde van las reacciones de manga. */
+  private cabeza(f: Figura): [number, number] {
+    const s = f.scaleX;
+    return [f.x + 6 * s, f.y - (f.pivote[1] - f.celda * 0.16) * s];
+  }
+
+  /** Una reacción de manga sobre la cabeza (vena, gota, ¡!, lágrima, sonrojo) que sigue a la figura un rato. */
+  private reac(f: Figura, id: string, ms = 1400) {
+    const [x, y] = this.cabeza(f);
+    const s = efecto(this, id, x, y, { scale: f.scaleX * 1.2, queda: true });
+    if (!s) return;
+    this.add2(s);
+    this.tick.push(() => { if (s.active && f.active) s.setPosition(...this.cabeza(f)); });
+    this.time.delayedCall(ms, () => { if (s.active) this.tweens.add({ targets: s, alpha: 0, duration: 160, onComplete: () => s.destroy() }); });
+  }
+
+  /** Un efecto suelto en la toma (polvo, chispa, chapuzón). */
+  private fx(id: string, x: number, y: number, scale = 2, flip = false) {
+    const s = efecto(this, id, x, y, { scale, flip });
+    if (s) this.add2(s);
+    return s;
+  }
+
+  /** Onomatopeya de cómic que salta y se va. */
+  private pop(x: number, y: number, s: string, color = 0xffffff, scale = 2) {
+    const t = this.add2(txt(this, x, y, s, 'fuente_titulo', scale).setTint(color).setAngle(Phaser.Math.Between(-8, 8)));
+    t.setScale(scale * 2);
+    this.tweens.add({ targets: t, scale, duration: 140, ease: 'Back.out' });
+    this.tweens.add({ targets: t, y: y - 18, alpha: 0, delay: 650, duration: 300, onComplete: () => t.destroy() });
+    return t;
+  }
+
+  /** Salto en arco de un punto a otro, con sus cuadros de subir, arriba y bajar (o una animación entera, `anim`). */
+  private async salto(f: Figura, x1: number, y1: number, ms: number, alto: number, anim?: string) {
+    const x0 = f.x, y0 = f.y;
+    const o = { t: 0 };
+    f.set(anim ?? 'jump_rise', true);
+    this.sound.play('esquiva', { volume: 0.35 });
+    await new Promise<void>((res) => this.tweens.add({
+      targets: o, t: 1, duration: ms,
+      onUpdate: () => {
+        f.x = x0 + (x1 - x0) * o.t;
+        f.y = y0 + (y1 - y0) * o.t - Math.sin(o.t * Math.PI) * alto;
+        if (!anim) f.set(o.t < 0.4 ? 'jump_rise' : o.t < 0.6 ? 'jump_apex' : 'jump_fall');
+      },
+      onComplete: () => res(),
+    }));
+    if (!anim) f.set('land', true);
+  }
+
   private async run() {
     const S = this;
     const alive = () => !S.done && S.scene.isActive();
 
     // 0. la presentación
-    await this.presenta();
+    await this.presenta(alive);
     if (!alive()) return;
     this.clear();
 
@@ -101,20 +162,151 @@ export class Intro extends Phaser.Scene {
     await typewrite(this, l1, 'JAPÓN. INSTITUTO NEKKETSU.', 22);
     await wait(this, 300);
     await typewrite(this, l2, '10 AÑOS INVICTOS.', 18, 440);
-    await wait(this, 1200);
+    await wait(this, 1100);
     if (!alive()) return;
 
     // 2. la azotea de Kenji
+    await this.azotea(alive);
+    if (!alive()) return;
+
+    // 3. la gira: el jet despega y la ruta en el mapa
+    await this.vuelo(alive);
+    if (!alive()) return;
+    await this.ruta(alive);
+    if (!alive()) return;
+
+    // 4. Saigón: la Familia GG, cada uno a su manera
+    await this.familia(alive);
+    if (!alive()) return;
+
+    // 5. el montaje de las pruebas
+    await this.montaje(alive);
+    if (!alive()) return;
+
+    // 6. el encuentro con el Instituto
+    await this.encuentro(alive);
+    if (!alive()) return;
+
+    // 7. VS
+    await this.vs();
+    if (!alive()) return;
+
+    // 8. el puñetazo a la cámara
+    this.clear();
+    chip.stop(0.1);
+    this.cameras.main.setBackgroundColor('#000000');
+    const lines = this.add2(speedLines(this, 1, 0xd0303a));
+    const k = this.fig('kenji', 320, 300, 'walk', 4);
+    k.row = 'down';
+    this.tweens.add({ targets: k, scale: 8, y: 470, duration: 900, ease: 'Quad.in' });
+    await wait(this, 900);
+    if (!alive()) return;
+    k.set('jab', true);
+    let hit = false;
+    this.tick.push(() => {
+      if (!hit && k.anim.frame >= 2) {
+        hit = true;
+        chip.boom(0.9);
+        this.sound.play('critico', { volume: 0.8 });
+        flash(this, 240);
+        this.cameras.main.shake(380, 0.03);
+        lines.destroy();
+        this.crack(400, 200);
+      }
+    });
+    await wait(this, 1200);
+    if (!alive()) return;
+
+    // 9. el logo, y Thor que se cuela al final
+    this.clear();
+    this.cameras.main.setBackgroundColor('#0b0b14');
+    this.add2(this.add.image(320, 180, 'bg_caracas'));
+    this.add2(this.add.image(320, 280, 'bg_azotea'));
+    chip.play(MARCHA);
+    this.registry.set('marchaSonando', true);
+    await buildLogo(this, this.layer, true);
+    this.add2(fireworks(this));
+    await wait(this, 1100);
+    if (!alive()) return;
+    const thor = this.fig('thor', -40, 338, 'run', 2);
+    await this.ir(thor, { x: 560 }, 700);
+    if (!alive()) return;
+    thor.set('sit');
+    thor.row = 'down_right';
+    await wait(this, 250);
+    thor.set('bark', true);
+    this.sound.play('ladrido', { volume: 0.6 });
+    this.pop(580, 290, '¡GUAU!', 0xffe080, 1);
+    await wait(this, 1500);
+    this.finish();
+  }
+
+  /** "FAMILIA GG PRESENTA": la última G se cae y Thor la vuelve a poner en su sitio. */
+  private async presenta(alive: () => boolean) {
+    const word = 'FAMILIA GG';
+    const letters: Phaser.GameObjects.BitmapText[] = [];
+    const w = 34;
+    for (let i = 0; i < word.length; i++) {
+      if (word[i] === ' ') continue;
+      const t = this.add2(txt(this, 320 + (i - (word.length - 1) / 2) * w, 150, word[i], 'fuente_titulo', 3));
+      t.setAlpha(0).setY(110);
+      letters.push(t);
+      this.tweens.add({ targets: t, alpha: 1, y: 150, duration: 260, delay: i * 70, ease: 'Bounce.out', onStart: () => chip.blip(660 + i * 90, 0.06, 'sq25', 0.14) });
+    }
+    await wait(this, word.length * 70 + 450);
+    if (!alive()) return;
+    // la última G tiembla... y se cae
+    const g = letters[letters.length - 1];
+    const gx = g.x;
+    await this.ir(g, { angle: 12 }, 90);
+    await this.ir(g, { angle: -10 }, 90);
+    chip.blip(880, 0.4, 'sq50', 0.16, 180);
+    this.tweens.add({ targets: g, angle: 70, duration: 420 });
+    await this.ir(g, { y: 300 }, 480, 'Bounce.out');
+    if (!alive()) return;
+    this.sound.play('golpe', { volume: 0.4 });
+    this.fx('polvo_caer_medio', g.x, 304, 2);
+    await wait(this, 300);
+    // Thor la ve, la recoge y la tira para arriba
+    const thor = this.fig('thor', 700, 318, 'run', 2);
+    thor.left = true;
+    await this.ir(thor, { x: gx + 34 }, 520);
+    if (!alive()) return;
+    thor.set('idle');
+    this.reac(thor, 'exclamacion', 700);
+    chip.blip(1320, 0.08, 'sq25', 0.14);
+    await wait(this, 450);
+    thor.set('pickup', true);
+    await wait(this, 300);
+    thor.set('jump', true);
+    this.sound.play('ladrido', { volume: 0.5 });
+    this.tweens.add({ targets: g, angle: 0, duration: 380 });
+    await this.ir(g, { y: 150 }, 380, 'Back.out');
+    if (!alive()) return;
+    chip.blip(1320, 0.3, 'sq25', 0.18, 1760);
+    flash(this, 90);
+    thor.set('wag');
+    thor.row = 'down_right';
+    const pre = this.add2(txt(this, 320, 196, 'PRESENTA', 'fuente_ui', 2).setTint(0xffe080).setAlpha(0));
+    this.tweens.add({ targets: pre, alpha: 1, duration: 300 });
+    // brillo que cruza las letras
+    for (const [i, t] of letters.entries()) this.time.delayedCall(200 + i * 50, () => { if (t.active) { t.setTintFill(0xffffff); this.time.delayedCall(70, () => t.active && t.clearTint()); } });
+    await wait(this, 1500);
+  }
+
+  /** La azotea de Kenji: la ira, el rayo, la gira y Tetsu que llega tarde y se estrella. */
+  private async azotea(alive: () => boolean) {
     this.clear();
     this.cameras.main.fadeIn(600);
     this.add2(this.add.image(320, 180, 'bg_japon'));
     this.petals(0xffb7d0);
     const kenji = this.fig('kenji', 320, 262, 'idle', 2);
     kenji.row = 'up';
-    await wait(this, 1400);
+    await wait(this, 1300);
     const box = this.dialog('kenji', 'enojo');
     await typewrite(this, box.text, '¿NADIE EN JAPÓN NOS AGUANTA?', 26, 330);
-    await wait(this, 900);
+    this.reac(kenji, 'vena_enojo', 1600);
+    await wait(this, 800);
     if (!alive()) return;
     kenji.row = 'down';
     kenji.set('taunt', true);
@@ -129,22 +321,34 @@ export class Intro extends Phaser.Scene {
     await typewrite(this, box.text, '¡ENTONCES NOS VAMOS DE GIRA!', 26, 330);
     this.tweens.add({ targets: kenji, scale: 2, duration: 300 });
     aura.destroy();
-    for (const [i, id] of ['ryu', 'goro', 'tetsu'].entries()) {
-      const fromLeft = i % 2 === 0, tx = [210, 440, 140][i];
+    for (const [i, id] of ['ryu', 'goro'].entries()) {
+      const fromLeft = i === 0, tx = [210, 440][i];
       const f = this.fig(id, fromLeft ? -40 : 680, 262, 'run', 2);
       f.left = !fromLeft;
-      this.tweens.add({ targets: f, x: tx, duration: 700, delay: i * 250, onComplete: () => { f.set('idle'); f.row = 'down'; } });
+      this.tweens.add({ targets: f, x: tx, duration: 650, delay: i * 220, onComplete: () => { f.set('idle'); f.row = 'down'; } });
     }
-    await wait(this, 1900);
+    await wait(this, 1000);
     if (!alive()) return;
+    // Tetsu llega tarde, a toda velocidad... y se tropieza
+    const tetsu = this.fig('tetsu', -40, 262, 'run', 2);
+    await this.ir(tetsu, { x: 70 }, 260);
+    tetsu.set('ko_bounce', true);
+    this.sound.play('golpe', { volume: 0.5 });
+    this.pop(100, 200, '¡PAF!', 0xffe080);
+    this.fx('polvo_caer_medio', 100, 264, 2);
+    await this.ir(tetsu, { x: 120 }, 380, 'Quad.out');
+    if (!alive()) return;
+    box.text.setText('');
+    for (const f of [kenji, this.layer.list.find((o) => o instanceof Figura && o.who === 'ryu') as Figura]) if (f) { f.left = true; this.reac(f, 'gota_nervios', 1300); }
+    chip.blip(330, 0.4, 'tri', 0.14, 220);
+    await typewrite(this, box.text, '...', 6, 220);
+    tetsu.set('fall_getup', true);
+    this.reac(tetsu, 'sonrojo', 1100);
+    await wait(this, 900);
+  }
 
-    // 3. la gira: el jet despega y la ruta en el mapa
-    await this.vuelo(alive);
-    if (!alive()) return;
-    await this.ruta(alive);
-    if (!alive()) return;
-
-    // 4. Saigón: la Familia GG
+  /** La Familia GG llega a Saigón, cada uno con su entrada; después Thor. */
+  private async familia(alive: () => boolean) {
     this.clear();
     chip.play(SAIGON);
     this.add2(this.add.image(320, 180, 'bg_saigon'));
@@ -152,79 +356,417 @@ export class Intro extends Phaser.Scene {
     cap.setAlpha(0);
     this.tweens.add({ targets: cap, alpha: 1, duration: 300 });
     const thor = this.fig('thor', -40, 322, 'run', 2);
-    this.tweens.add({ targets: thor, x: 700, duration: 1500, onComplete: () => thor.destroy() });
+    this.tweens.add({ targets: thor, x: 700, duration: 1300, onComplete: () => thor.destroy() });
     chip.blip(520, 0.12, 'saw', 0.12, 300);
     this.sound.play('ladrido', { volume: 0.6 });
-    await wait(this, 900);
-    const spots = [200, 280, 360, 440];
-    const figs: Figura[] = [];
-    for (const [i, m] of FAMILIA.entries()) {
-      const f = this.fig(m.id, -40, 316, 'run', 2);
-      figs.push(f);
-      await new Promise<void>((res) => this.tweens.add({ targets: f, x: spots[i], duration: 520, onComplete: () => res() }));
-      if (!alive()) return;
-      f.row = 'down';
-      f.set('celebrate', true);
-      const card = this.card(m);
+    await wait(this, 800);
+    const Y = 316, spots = [190, 270, 350, 430];
+    const [rick, steph, sophie, alana] = FAMILIA.map((m) => this.fig(m.id, -60, Y, 'idle', 2));
+    const tarjeta = async (i: number, ms = 1250) => {
+      const card = this.card(FAMILIA[i]);
       chip.blip(660 + i * 110, 0.1, 'sq25', 0.16);
-      await wait(this, 1500);
+      await wait(this, ms);
       card.destroy();
-      f.set('idle');
-      if (!alive()) return;
-    }
+    };
+
+    // Rick: llega, posa y brilla
+    rick.set('run');
+    await this.ir(rick, { x: spots[0] }, 520);
+    if (!alive()) return;
+    rick.row = 'down';
+    rick.set('victory', true);
+    this.fx('brillo_record', rick.x + 8, Y - 50, 2);
+    chip.blip(1760, 0.12, 'sq25', 0.12);
+    await tarjeta(0);
+    if (!alive()) return;
+
+    // Steph: llega tan rápido que se pasa, frena y vuelve caminando para atrás
+    steph.set('run');
+    const lineas = this.add2(speedLines(this, 1, 0xffffff)).setAlpha(0.25);
+    await this.ir(steph, { x: 610 }, 260);
+    this.fx('polvo_frenar_grande', 610, Y, 2);
+    this.sound.play('esquiva', { volume: 0.5 });
+    this.pop(560, 230, '¡ÑIIIC!', 0xffffff, 1);
+    await wait(this, 300);
+    lineas.destroy();
+    steph.left = true;
+    steph.set('walk');
+    this.reac(steph, 'gota_nervios', 900);
+    await this.ir(steph, { x: spots[1] }, 650);
+    if (!alive()) return;
+    steph.left = false;
+    steph.row = 'down';
+    steph.set('celebrate', true);
+    await tarjeta(1);
+    if (!alive()) return;
+
+    // Sophie: entra dando un salto y cae justo en su sitio
+    sophie.x = -30; sophie.y = Y;
+    await this.salto(sophie, spots[2], Y, 700, 110);
+    this.fx('polvo_caer_medio', spots[2], Y, 2);
+    sophie.row = 'down';
+    sophie.set('celebrate', true);
+    chip.blip(1320, 0.15, 'sq25', 0.14, 1760);
+    await tarjeta(2);
+    if (!alive()) return;
+
+    // Alana: llega caminando tranquila... y con una mirada los asusta a todos
+    alana.set('walk');
+    await this.ir(alana, { x: spots[3] }, 900);
+    if (!alive()) return;
+    alana.row = 'down';
+    alana.set('idle');
+    await wait(this, 200);
+    for (const f of [rick, steph, sophie]) { f.left = false; f.row = 'right'; f.set('idle'); }
+    alana.left = true;
+    alana.set('taunt', true);
+    this.reac(alana, 'vena_enojo', 1500);
+    this.cameras.main.shake(140, 0.006);
+    chip.blip(160, 0.3, 'saw', 0.16, 90);
+    await wait(this, 350);
+    for (const f of [rick, steph, sophie]) this.reac(f, 'gota_nervios', 1400);
+    await tarjeta(3, 1400);
+    if (!alive()) return;
+    alana.left = false;
+
     // Thor vuelve corriendo y tiene su tarjeta
     const thor2 = this.fig('thor', 700, 330, 'run', 2);
     thor2.left = true;
-    await new Promise<void>((res) => this.tweens.add({ targets: thor2, x: 520, duration: 600, onComplete: () => res() }));
+    await this.ir(thor2, { x: 515 }, 550);
     if (!alive()) return;
     thor2.set('wag');
     thor2.row = 'down_right';
     const tc = this.thorCard();
     this.sound.play('ladrido', { volume: 0.6 });
-    await wait(this, 1500);
+    await wait(this, 1300);
     tc.destroy();
     if (!alive()) return;
-    for (const f of figs) f.set('victory', true);
+    for (const f of [rick, steph, sophie, alana]) { f.row = 'down'; f.set('victory', true); }
     thor2.set('celebrate', true);
     const fam = this.add2(txt(this, 320, 60, 'FAMILIA GG', 'fuente_titulo', 3));
     const sub = this.add2(txt(this, 320, 92, 'DE CARACAS A SAIGÓN', 'fuente_ui', 2));
     sub.setTint(0xffe080);
     this.tweens.add({ targets: fam, scale: { from: 5, to: 3 }, duration: 260, ease: 'Back.out' });
+    this.add2(fireworks(this));
     chip.boom(0.4);
-    await wait(this, 1800);
-    if (!alive()) return;
+    await wait(this, 1700);
+  }
 
-    // 4b. el montaje de las pruebas
-    await this.montaje(alive);
-    if (!alive()) return;
-    chip.play(TENSION);
-
-    // 5. los rivales que esperan
-    const rivales: [string, string, string[]][] = [
-      ['bg_bogota', 'BOGOTÁ, COLOMBIA', ['ryu', 'tetsu']],
-      ['bg_maracaibo', 'MARACAIBO, VENEZUELA', ['goro', 'kenji']],
-      ['bg_caracas', 'CARACAS, VENEZUELA', ['kenji', 'ryu', 'tetsu']],
+  /**
+   * Montaje estilo anime: un panel inclinado por prueba, con el atleta haciendo lo suyo de verdad
+   * (corre, salta la valla, se clava al agua, lanza, patea), y al final las cinco a la vez.
+   */
+  private async montaje(alive: () => boolean) {
+    chip.play(PELEA);
+    const cortes: { bg: string; color: number; palabra: string; lugar: string; escena: (der: boolean) => Promise<void> }[] = [
+      { bg: 'bg_saigon', color: 0xf2c230, palabra: '¡CROSS COUNTRY!', lugar: 'SAIGÓN · 5 TRAMOS', escena: (der) => this.corteCross(der) },
+      { bg: 'bg_cocora', color: 0x3cc86a, palabra: '¡VALLAS!', lugar: 'EJE CAFETERO, COLOMBIA', escena: (der) => this.corteVallas(der) },
+      { bg: 'bg_halong', color: 0x40c0ff, palabra: '¡NATACIÓN!', lugar: 'BAHÍA DE HẠ LONG, VIETNAM', escena: (der) => this.corteNatacion(der) },
+      { bg: 'bg_llanos', color: 0xf2a03a, palabra: '¡JABALINA!', lugar: 'LLANOS DE APURE, VENEZUELA', escena: (der) => this.corteJabalina(der) },
+      { bg: 'bg_caracas', color: 0xd0303a, palabra: '¡KACHINUKI!', lugar: 'AZOTEA DE CARACAS', escena: (der) => this.cortePelea(der) },
     ];
-    for (const [bg, name, ids] of rivales) {
+    for (const [n, c] of cortes.entries()) {
       this.clear();
-      this.add2(this.add.image(320, 180, bg));
-      if (bg === 'bg_bogota') this.rain();
-      if (bg === 'bg_maracaibo') this.lightning();
-      if (bg === 'bg_caracas') this.add2(this.add.image(320, 280, 'bg_azotea'));
-      ids.forEach((id, i) => {
-        const f = this.fig(id, 320 + (i - (ids.length - 1) / 2) * 90, 318, 'idle', 2);
-        f.row = 'down';
-        f.setTintFill(0x05050c);
-      });
-      this.add2(txt(this, 320, 22, name, 'fuente_titulo', 1));
-      const q = this.add2(txt(this, 320, 150, '¿QUIÉNES SERÁN?', 'fuente_titulo_plata', 2));
-      this.tweens.add({ targets: q, alpha: 0.3, duration: 300, yoyo: true, repeat: -1 });
-      chip.blip(220, 0.25, 'tri', 0.2, 110);
-      await wait(this, 1500);
+      const der = n % 2 === 0;
+      this.add2(this.add.rectangle(320, 180, 640, 360, 0x05050c));
+      // panel inclinado con el escenario adentro
+      const poly = der
+        ? [{ x: 90, y: 0 }, { x: 640, y: 0 }, { x: 640, y: 360 }, { x: 0, y: 360 }]
+        : [{ x: 0, y: 0 }, { x: 550, y: 0 }, { x: 640, y: 360 }, { x: 0, y: 360 }];
+      const bg = this.add2(this.add.image(320, 180, c.bg).setScale(1.2));
+      bg.setMask(this.mask(poly));
+      this.tweens.add({ targets: bg, x: der ? 296 : 344, duration: 1700 });
+      if (c.bg === 'bg_caracas') { const az = this.add2(this.add.image(320, 290, 'bg_azotea')); az.setMask(this.mask(poly)); }
+      const tinte = this.add2(this.add.graphics());
+      tinte.fillStyle(c.color, 0.16).fillPoints(poly, true);
+      const vel = this.fx('lineas_velocidad', 0, 0, 1);
+      vel?.setAlpha(0.35);
+      // la palabra y el lugar
+      const w = this.add2(txt(this, der ? 420 : 220, 70, c.palabra, 'fuente_titulo', c.palabra.length > 10 ? 2 : 3));
+      const sc = w.scaleX;
+      w.setScale(sc * 3).setAngle(der ? -5 : 5);
+      this.tweens.add({ targets: w, scale: sc, duration: 170, ease: 'Quad.in', onComplete: () => { chip.boom(0.7); this.cameras.main.shake(150, 0.012); } });
+      const l = this.add2(txt(this, der ? 420 : 220, 104, c.lugar, 'fuente_ui', 1).setTint(0xffe080).setAlpha(0).setAngle(der ? -5 : 5));
+      this.tweens.add({ targets: l, alpha: 1, delay: 250, duration: 200 });
+      // el borde blanco del corte
+      const filo = this.add2(this.add.graphics());
+      filo.fillStyle(0xffffff).fillPoints(der ? [{ x: 84, y: 0 }, { x: 94, y: 0 }, { x: 4, y: 360 }, { x: -6, y: 360 }] : [{ x: 546, y: 0 }, { x: 556, y: 0 }, { x: 646, y: 360 }, { x: 636, y: 360 }], true);
+      flash(this, 90);
+      await c.escena(der);
       if (!alive()) return;
     }
+    // las cinco a la vez
+    this.clear();
+    this.add2(this.add.rectangle(320, 180, 640, 360, 0xffffff));
+    const poses: { id: string; pack: string; anim: string; agua?: boolean }[] = [
+      { id: 'steph', pack: 'ngg_mov', anim: 'run' },
+      { id: 'sophie', pack: 'atletismo', anim: 'sprint' },
+      { id: 'alana', pack: 'natacion', anim: 'tread_water', agua: true },
+      { id: 'rick', pack: 'atletismo', anim: 'javelin' },
+      { id: 'thor', pack: '', anim: 'bark' },
+    ];
+    for (const [i, c] of cortes.entries()) {
+      const x0 = -36 + i * 136;
+      const poly = [{ x: x0 + 40, y: 0 }, { x: x0 + 172, y: 0 }, { x: x0 + 132, y: 360 }, { x: x0, y: 360 }];
+      const bg = this.add2(this.add.image(x0 + 86, 180, c.bg));
+      bg.setMask(this.mask(poly));
+      const tinte = this.add2(this.add.graphics());
+      tinte.fillStyle(c.color, 0.22).fillPoints(poly, true);
+      const p = poses[i];
+      if (p.agua) { const a = this.add2(this.add.graphics()); a.fillStyle(0x1f7fb8, 0.85).fillPoints([{ x: x0 + 13, y: 296 }, { x: x0 + 145, y: 296 }, { x: x0 + 132, y: 360 }, { x: x0, y: 360 }], true); a.fillStyle(0x9ad8f0).fillRect(x0 + 13, 296, 132, 2); }
+      const f = this.fig(p.id, x0 + 76, p.agua ? 318 : 322, 'idle', 2.5);
+      if (p.pack) f.anim.prefer = p.pack;
+      f.set(p.anim, true);
+      f.row = p.id === 'thor' ? 'down_right' : 'right';
+      this.tick.push(() => { if (f.active && f.anim.done) f.set(p.anim, true); });
+      f.setAlpha(0);
+      this.tweens.add({ targets: f, alpha: 1, duration: 120, delay: i * 100, onStart: () => chip.blip(520 + i * 130, 0.08, 'sq25', 0.16) });
+    }
+    await wait(this, 560);
+    const go = this.add2(txt(this, 320, 100, '¡A COMPETIR!', 'fuente_titulo', 4));
+    go.setScale(12);
+    this.tweens.add({ targets: go, scale: 4, duration: 220, ease: 'Quad.in', onComplete: () => { chip.boom(0.9); flash(this, 160); this.cameras.main.shake(280, 0.018); } });
+    await wait(this, 1700);
+  }
 
-    // 6. VS
+  /** Cross: Steph pasa volando con Rick detrás, y una moto que casi se los lleva. */
+  private async corteCross(der: boolean) {
+    const dir = der ? 1 : -1, x0 = der ? -60 : 700, x1 = der ? 720 : -80;
+    const steph = this.fig('steph', x0, 318, 'run', 3); steph.left = !der;
+    const rick = this.fig('rick', x0 - dir * 90, 324, 'run', 3); rick.left = !der;
+    const moto = this.add2(this.add.container(der ? 760 : -120, 300));
+    const body = this.add.graphics();
+    body.fillStyle(0xc03030).fillRect(-27, -30, 54, 18).fillStyle(0x303038).fillCircle(-18, -9, 9).fillCircle(18, -9, 9).fillStyle(0xe8e8f0).fillRect(-9, -51, 15, 21);
+    moto.add(body);
+    let paso = 0;
+    this.tick.push((dt) => {
+      paso += dt;
+      if (paso > 0.12 && steph.active) { paso = 0; this.fx('polvo_correr_medio', steph.x - dir * 10, 318, 2, !der); }
+    });
+    this.tweens.add({ targets: steph, x: x1, duration: 1500 });
+    this.tweens.add({ targets: rick, x: x1 - dir * 90, duration: 1500 });
+    await wait(this, 520);
+    chip.blip(523, 0.12, 'sq50', 0.12, 494);
+    this.time.delayedCall(140, () => chip.blip(523, 0.12, 'sq50', 0.12, 494));
+    this.tweens.add({ targets: moto, x: der ? -140 : 780, duration: 700 });
+    this.pop(320, 200, '¡PI PI!', 0xff8080, 1);
+    this.reac(rick, 'exclamacion', 600);
+    await wait(this, 1000);
+  }
+
+  /** Vallas: Sophie a toda velocidad y la valla por encima. */
+  private async corteVallas(der: boolean) {
+    const vx = 330;
+    this.add2(this.add.image(vx, 338, 'valla').setOrigin(0.5, 1).setScale(3).setFlipX(!der));
+    const sophie = this.fig('sophie', der ? -50 : 690, 338, 'sprint', 3);
+    sophie.anim.prefer = 'atletismo';
+    sophie.set('sprint', true);
+    sophie.left = !der;
+    const dir = der ? 1 : -1;
+    await this.ir(sophie, { x: vx - dir * 110 }, 520);
+    // el salto de longitud del pack de atletismo: así no cambia de ropa en el aire
+    await this.salto(sophie, vx + dir * 110, 338, 520, 70, 'long_jump');
+    sophie.set('sprint', true);
+    this.fx('polvo_caer_medio', sophie.x, 338, 2);
+    this.tweens.add({ targets: sophie, x: der ? 720 : -80, duration: 520 });
+    await wait(this, 620);
+  }
+
+  /** Natación: Alana se tira del poyete, se clava y sale nadando con su estela. */
+  private async corteNatacion(der: boolean) {
+    const agua = this.add2(this.add.graphics());
+    agua.fillStyle(0x1f7fb8, 0.75).fillRect(0, 300, 640, 60);
+    agua.fillStyle(0x9ad8f0).fillRect(0, 300, 640, 2);
+    const bx = der ? 70 : 570;
+    const poyete = this.add2(this.add.graphics());
+    poyete.fillStyle(0xe8e8f0).fillRect(bx - 30, 270, 60, 30).fillStyle(0x8a8a96).fillRect(bx - 30, 296, 60, 6);
+    const alana = this.fig('alana', bx, 270, 'idle', 3);
+    alana.anim.prefer = 'natacion';
+    alana.set('idle', true);
+    alana.left = !der;
+    await wait(this, 250);
+    const dir = der ? 1 : -1, cx = bx + dir * 230;
+    alana.set('dive', true);
+    this.sound.play('esquiva', { volume: 0.4 });
+    const o = { t: 0 };
+    await new Promise<void>((res) => this.tweens.add({ targets: o, t: 1, duration: 560, onUpdate: () => { alana.x = bx + (cx - bx) * o.t; alana.y = 270 + 52 * o.t - Math.sin(o.t * Math.PI) * 60; }, onComplete: () => res() }));
+    this.fx('chapuzon_grande', cx, 306, 2.5);
+    this.sound.play('esquiva', { volume: 0.5, rate: 0.6 });
+    this.pop(cx, 220, '¡SPLASH!', 0x9ad8f0, 1);
+    alana.set('swim', true);
+    alana.y = 326;
+    const estela = this.fx('estela', alana.x - dir * 30, 306, 2.5, !der);
+    this.tick.push(() => { if (estela?.active && alana.active) estela.setPosition(alana.x - dir * 30, 306); });
+    await this.ir(alana, { x: der ? 700 : -60 }, 1000);
+  }
+
+  /** Jabalina: Rick corre, lanza, y la jabalina cruza el cielo hasta el récord. */
+  private async corteJabalina(der: boolean) {
+    const rick = this.fig('rick', der ? 80 : 560, 336, 'javelin', 3);
+    rick.anim.prefer = 'atletismo';
+    rick.set('javelin', true);
+    rick.left = !der;
+    const dir = der ? 1 : -1;
+    this.tweens.add({ targets: rick, x: rick.x + dir * 120, duration: 520 });
+    await wait(this, 620);
+    const j = this.add2(this.add.image(rick.x + dir * 20, 250, 'jabalina').setScale(3).setFlipX(!der).setAngle(der ? -30 : 30));
+    chip.blip(440, 0.5, 'saw', 0.12, 1320);
+    this.sound.play('esquiva', { volume: 0.5 });
+    const o = { t: 0 }, xa = j.x, xb = der ? 700 : -60;
+    await new Promise<void>((res) => this.tweens.add({ targets: o, t: 1, duration: 760, onUpdate: () => {
+      j.x = xa + (xb - xa) * o.t;
+      j.y = 250 - Math.sin(o.t * Math.PI * 0.8) * 120 + o.t * 30;
+      j.setAngle((der ? 1 : -1) * (-30 + o.t * 60));
+    }, onComplete: () => res() }));
+    rick.set('celebrate', true);
+    const rec = this.add2(txt(this, der ? 500 : 140, 150, '¡RÉCORD!', 'fuente_titulo', 2).setTint(0xffe040));
+    rec.setScale(5);
+    this.tweens.add({ targets: rec, scale: 2, duration: 160, ease: 'Quad.in' });
+    this.fx('brillo_record', der ? 560 : 80, 140, 3);
+    await wait(this, 520);
+  }
+
+  /** Kachinuki: Steph le mete una patada a Kenji y lo saca volando con estrellitas. */
+  private async cortePelea(der: boolean) {
+    const kx = der ? 430 : 210;
+    const kenji = this.fig('kenji', kx, 330, 'taunt', 3);
+    kenji.left = der;
+    const steph = this.fig('steph', der ? -50 : 690, 330, 'run', 3);
+    steph.left = !der;
+    const dir = der ? 1 : -1;
+    await this.ir(steph, { x: kx - dir * 70 }, 380);
+    steph.set('kick_martial', true);
+    await wait(this, 160);
+    this.fx('chispa_golpe_pesado', kx - dir * 10, 270, 3);
+    this.sound.play('critico', { volume: 0.7 });
+    chip.boom(0.7);
+    flash(this, 100);
+    this.cameras.main.shake(220, 0.02);
+    // el golpe congela un instante y la cámara se acerca de un tirón
+    const cam = this.cameras.main;
+    this.tweens.add({ targets: cam, zoom: 1.3, duration: 70, yoyo: true, hold: 160 });
+    this.pop(kx, 200, '¡PUM!', 0xffe040, 3);
+    kenji.set('ko_bounce', true);
+    await wait(this, 180);
+    this.tweens.add({ targets: kenji, x: kx + dir * 150, duration: 520, ease: 'Quad.out' });
+    this.tweens.add({ targets: kenji, y: 270, duration: 260, yoyo: true, ease: 'Quad.out' });
+    await wait(this, 560);
+    this.reac(kenji, 'estrellas_mareo', 900);
+    steph.row = 'down_right';
+    steph.set('victory', true);
+    await wait(this, 650);
+  }
+
+  /**
+   * El encuentro en Saigón: el Instituto aparece entre rayos y se burla. Alana llama a Thor, Thor ladra, Goro
+   * (el gigante) se asusta y se esconde detrás de Kenji. Kenji, rojo de la pena: "¡nos vemos en la pista!".
+   */
+  private async encuentro(alive: () => boolean) {
+    this.clear();
+    chip.play(SAIGON);
+    this.add2(this.add.image(320, 180, 'bg_saigon'));
+    const Y = 318;
+    const fam = FAMILIA.map((m, i) => { const f = this.fig(m.id, 70 + i * 62, Y, 'celebrate', 2); f.row = 'down_right'; return f; });
+    const [rick, , sophie, alana] = fam;
+    const thor = this.fig('thor', 330, Y + 6, 'wag', 2);
+    thor.row = 'down_right';
+    await wait(this, 700);
+    if (!alive()) return;
+    // se nubla, rayo, y llegan ellos
+    chip.play(TENSION);
+    const sombra = this.add2(this.add.rectangle(320, 180, 640, 360, 0x0a0a20, 0));
+    this.tweens.add({ targets: sombra, fillAlpha: 0.5, duration: 400 });
+    flash(this, 160, 0xd0c0ff, 0.8);
+    chip.boom(0.7);
+    this.cameras.main.shake(200, 0.01);
+    for (const f of fam) { f.set('idle'); f.row = 'right'; }
+    // Kenji adelante, el resto detrás en fila: Ryu, Goro (el gigante) y Tetsu
+    const xs = [440, 506, 566, 622];
+    const inst = INSTITUTO.map((id, i) => {
+      const f = this.fig(id, 700 + i * 30, Y, 'run', 2);
+      f.left = true;
+      f.setTintFill(0x05050c);
+      this.tweens.add({ targets: f, x: xs[i], duration: 600, delay: i * 120, onComplete: () => f.set('idle') });
+      return f;
+    });
+    this.layer.bringToTop(sombra);
+    for (const f of [...fam, thor, ...inst]) this.layer.bringToTop(f);
+    await wait(this, 1100);
+    if (!alive()) return;
+    flash(this, 140);
+    for (const f of inst) f.clearTint();
+    const [kenji, ryu, goro, tetsu] = inst;
+    const nombre = this.add2(txt(this, 520, 40, 'INSTITUTO NEKKETSU', 'fuente_titulo_plata', 1));
+    nombre.setScale(4);
+    this.tweens.add({ targets: nombre, scale: 1, duration: 180, ease: 'Quad.in', onComplete: () => chip.boom(0.5) });
+    for (const f of fam) this.reac(f, 'exclamacion', 700);
+    await wait(this, 700);
+    this.tweens.add({ targets: nombre, alpha: 0, duration: 200 });
+    const box = this.dialog('kenji', 'feliz', true);
+    kenji.set('taunt', true);
+    await typewrite(this, box.text, '¿ESTOS SON LOS CAMPEONES? JA.', 24, 330);
+    this.reac(rick, 'vena_enojo', 1400);
+    this.reac(sophie, 'vena_enojo', 1400);
+    await wait(this, 400);
+    if (!alive()) return;
+    // Goro se ríe a carcajadas
+    goro.set('taunt', true);
+    for (const [i, s] of ['¡JA!', '¡JA!', '¡JA!'].entries()) this.time.delayedCall(i * 220, () => { this.pop(goro.x - 10 + i * 18, 214 - i * 10, s, 0xffd0d0, 1); chip.blip(220 - i * 20, 0.08, 'sq50', 0.14); });
+    this.cameras.main.shake(400, 0.004);
+    await wait(this, 900);
+    if (!alive()) return;
+    box.close();
+    // Alana: ¡THOR!
+    const box2 = this.dialog('alana', 'enojo', true);
+    alana.set('taunt', true);
+    this.reac(alana, 'vena_enojo', 1200);
+    await typewrite(this, box2.text, '¡THOR! ¡AL RESCATE!', 22, 880);
+    if (this.cache.audio.exists('thor_rescate')) this.sound.play('thor_rescate', { volume: 0.7 });
+    if (!alive()) return;
+    thor.set('run');
+    thor.row = 'right';
+    await this.ir(thor, { x: kenji.x - 52 }, 420);
+    if (!alive()) return;
+    box2.close();
+    thor.set('bark', true);
+    this.sound.play('ladrido', { volume: 0.8 });
+    this.pop(thor.x, 250, '¡GUAU!', 0xffe080);
+    this.cameras.main.shake(160, 0.01);
+    await wait(this, 250);
+    // el gigante pega un brinco y se esconde detrás de Kenji
+    this.reac(goro, 'exclamacion', 600);
+    chip.blip(660, 0.3, 'sq50', 0.18, 1760);
+    // ... y cae detrás de Kenji, que no lo tapa ni a la mitad
+    this.tweens.add({ targets: goro, y: Y - 80, duration: 280, ease: 'Quad.out', yoyo: true });
+    await this.ir(goro, { x: kenji.x + 18 }, 560);
+    this.layer.moveBelow(goro, kenji);
+    goro.set('sad', true);
+    this.reac(goro, 'lagrima_comica', 1600);
+    thor.set('bark', true);
+    this.sound.play('ladrido', { volume: 0.6 });
+    for (const f of [ryu, tetsu]) this.reac(f, 'gota_nervios', 1500);
+    await wait(this, 700);
+    if (!alive()) return;
+    // Kenji, colorado
+    this.reac(kenji, 'sonrojo', 1800);
+    const box3 = this.dialog('kenji', 'enojo', true);
+    await typewrite(this, box3.text, '¡N-NOS VEMOS EN LA PISTA!', 26, 330);
+    if (!alive()) return;
+    for (const [i, f] of inst.entries()) { f.left = false; f.set('run'); this.tweens.add({ targets: f, x: 760 + i * 20, duration: 520, delay: (3 - i) * 60 }); }
+    chip.blip(880, 0.4, 'sq25', 0.12, 220);
+    await wait(this, 600);
+    box3.close();
+    this.tweens.add({ targets: sombra, fillAlpha: 0, duration: 300 });
+    for (const f of fam) { f.row = 'down'; f.set('victory', true); }
+    thor.row = 'down_right';
+    thor.set('celebrate', true);
+    this.pop(320, 160, '¡JA!', 0xffe080, 3);
+    chip.blip(1320, 0.3, 'sq25', 0.2, 1760);
+    await wait(this, 1300);
+  }
+
+  /** VS: los dos equipos frente a frente. */
+  private async vs() {
     this.clear();
     chip.play(TENSION);
     const g = this.add2(this.add.graphics());
@@ -260,46 +802,7 @@ export class Intro extends Phaser.Scene {
     this.tweens.add({ targets: vs, scale: 6, duration: 240, ease: 'Quad.in', onComplete: () => { chip.boom(0.6); this.cameras.main.shake(200, 0.012); flash(this, 160); } });
     this.add2(txt(this, 140, 40, 'FAMILIA GG', 'fuente_titulo', 2));
     this.add2(txt(this, 500, 40, 'INSTITUTO NEKKETSU', 'fuente_titulo_plata', 1));
-    await wait(this, 2300);
-    if (!alive()) return;
-
-    // 7. el puñetazo a la cámara
-    this.clear();
-    chip.stop(0.1);
-    this.cameras.main.setBackgroundColor('#000000');
-    const lines = this.add2(speedLines(this, 1, 0xd0303a));
-    const k = this.fig('kenji', 320, 300, 'walk', 4);
-    k.row = 'down';
-    this.tweens.add({ targets: k, scale: 8, y: 470, duration: 900, ease: 'Quad.in' });
-    await wait(this, 900);
-    if (!alive()) return;
-    k.set('jab', true);
-    let hit = false;
-    this.tick.push(() => {
-      if (!hit && k.anim.frame >= 2) {
-        hit = true;
-        chip.boom(0.9);
-        this.sound.play('critico', { volume: 0.8 });
-        flash(this, 240);
-        this.cameras.main.shake(380, 0.03);
-        lines.destroy();
-        this.crack(400, 200);
-      }
-    });
-    await wait(this, 1200);
-    if (!alive()) return;
-
-    // 8. el logo
-    this.clear();
-    this.cameras.main.setBackgroundColor('#0b0b14');
-    this.add2(this.add.image(320, 180, 'bg_caracas'));
-    this.add2(this.add.image(320, 280, 'bg_azotea'));
-    chip.play(MARCHA);
-    this.registry.set('marchaSonando', true);
-    await buildLogo(this, this.layer, true);
-    this.add2(fireworks(this));
-    await wait(this, 2600);
-    this.finish();
+    await wait(this, 2200);
   }
 
   /** El jet de la Nekketsu Air cruza el atardecer con el Instituto en las ventanillas. */
@@ -343,7 +846,7 @@ export class Intro extends Phaser.Scene {
     this.tweens.add({ targets: title, scale: 2, duration: 200, ease: 'Quad.in', onComplete: () => { chip.boom(0.6); this.cameras.main.shake(160, 0.01); } });
     const ruta = this.add2(txt(this, 320, 66, 'TOKIO · SAIGÓN · BOGOTÁ · CARACAS', 'fuente_ui', 1).setTint(0xffe080).setAlpha(0));
     this.tweens.add({ targets: ruta, alpha: 1, duration: 300, delay: 300 });
-    await wait(this, 2100);
+    await wait(this, 2000);
     if (!alive()) return;
     // acelera y se va
     chip.blip(120, 0.6, 'saw', 0.12, 900);
@@ -443,7 +946,7 @@ export class Intro extends Phaser.Scene {
     await volar(0, 1, 1200, 20, [2.6, 2.3, 2.2]);
     await parada(1);
     if (!alive()) return;
-    await volar(1, 2, 2600, 150, [2.2, 1.15, 2.0]);
+    await volar(1, 2, 2400, 150, [2.2, 1.15, 2.0]);
     await parada(2);
     if (!alive()) return;
     await volar(2, 3, 800, 14, [2.0, 2.2, 2.3]);
@@ -455,104 +958,7 @@ export class Intro extends Phaser.Scene {
     const lema = this.add2(txt(this, 320, 150, '¡4 PAÍSES, 1 COPA!', 'fuente_titulo', 2));
     lema.setScale(8);
     this.tweens.add({ targets: lema, scale: 2, duration: 200, ease: 'Quad.in', onComplete: () => { chip.boom(0.8); flash(this, 120); this.cameras.main.shake(220, 0.014); } });
-    await wait(this, 1500);
-  }
-
-  /** "FAMILIA GG PRESENTA": letra por letra, con Thor moviendo la cola. */
-  private async presenta() {
-    const word = 'FAMILIA GG';
-    const letters: Phaser.GameObjects.BitmapText[] = [];
-    const w = 34;
-    for (let i = 0; i < word.length; i++) {
-      if (word[i] === ' ') continue;
-      const t = this.add2(txt(this, 320 + (i - (word.length - 1) / 2) * w, 150, word[i], 'fuente_titulo', 3));
-      t.setAlpha(0).setY(110);
-      letters.push(t);
-      this.tweens.add({ targets: t, alpha: 1, y: 150, duration: 260, delay: i * 70, ease: 'Bounce.out', onStart: () => chip.blip(660 + i * 90, 0.06, 'sq25', 0.14) });
-    }
-    await wait(this, word.length * 70 + 300);
-    const pre = this.add2(txt(this, 320, 196, 'PRESENTA', 'fuente_ui', 2).setTint(0xffe080).setAlpha(0));
-    this.tweens.add({ targets: pre, alpha: 1, duration: 300 });
-    const thor = this.fig('thor', 320, 270, 'wag', 2);
-    thor.row = 'down_right';
-    chip.blip(1320, 0.3, 'sq25', 0.18, 1760);
-    this.time.delayedCall(140, () => chip.blip(1760, 0.4, 'sq25', 0.16, 2093));
-    this.sound.play('ladrido', { volume: 0.5 });
-    // brillo que cruza las letras
-    for (const [i, t] of letters.entries()) this.time.delayedCall(500 + i * 50, () => { if (t.active) { t.setTintFill(0xffffff); this.time.delayedCall(70, () => t.active && t.clearTint()); } });
-    await wait(this, 1900);
-  }
-
-  /**
-   * Montaje estilo anime: cortes rápidos de cada prueba en paneles inclinados con líneas de velocidad,
-   * y al final los cuatro a la vez con "¡A COMPETIR!".
-   */
-  private async montaje(alive: () => boolean) {
-    chip.play(PELEA);
-    const cortes = [
-      { bg: 'bg_cocora', color: 0x3cc86a, id: 'sophie', pack: 'atletismo', anim: 'hurdles', palabra: '¡VALLAS!', agua: false },
-      { bg: 'bg_halong', color: 0x40c0ff, id: 'alana', pack: 'natacion', anim: 'swim_fly', palabra: '¡NATACIÓN!', agua: true },
-      { bg: 'bg_llanos', color: 0xf2a03a, id: 'rick', pack: 'atletismo', anim: 'javelin', palabra: '¡JABALINA!', agua: false },
-      { bg: 'bg_caracas', color: 0xd0303a, id: 'steph', pack: 'ngg_golpe', anim: 'kick_martial', palabra: '¡PELEA!', agua: false },
-    ];
-    for (const [n, c] of cortes.entries()) {
-      this.clear();
-      const der = n % 2 === 0;
-      this.add2(this.add.rectangle(320, 180, 640, 360, 0x05050c));
-      // panel inclinado con el escenario adentro
-      const poly = der
-        ? [{ x: 120, y: 0 }, { x: 640, y: 0 }, { x: 640, y: 360 }, { x: 20, y: 360 }]
-        : [{ x: 0, y: 0 }, { x: 520, y: 0 }, { x: 620, y: 360 }, { x: 0, y: 360 }];
-      const bg = this.add2(this.add.image(320, 180, c.bg).setScale(1.25));
-      bg.setMask(this.mask(poly));
-      this.tweens.add({ targets: bg, x: der ? 300 : 340, duration: 1300 });
-      const tinte = this.add2(this.add.graphics());
-      tinte.fillStyle(c.color, 0.25).fillPoints(poly, true);
-      const lines = this.add2(speedLines(this, 1, 0xffffff));
-      lines.setAlpha(0.5).setDepth(0);
-      if (c.agua) { const a = this.add2(this.add.graphics()); a.fillStyle(0x1f7fb8, 0.75).fillRect(0, 300, 640, 60); a.fillStyle(0x9ad8f0).fillRect(0, 300, 640, 2); }
-      // el atleta grande, entrando de lado
-      const f = this.fig(c.id, der ? -80 : 720, c.agua ? 330 : 340, 'idle', 4);
-      f.anim.prefer = c.pack;
-      f.set(c.anim, true);
-      f.left = !der;
-      this.tick.push(() => { if (f.active && f.anim.done) f.set(c.anim, true); });
-      this.tweens.add({ targets: f, x: der ? 250 : 390, duration: 260, ease: 'Quad.out' });
-      // el borde blanco del corte
-      const filo = this.add2(this.add.graphics());
-      filo.fillStyle(0xffffff).fillPoints(der ? [{ x: 114, y: 0 }, { x: 124, y: 0 }, { x: 24, y: 360 }, { x: 14, y: 360 }] : [{ x: 516, y: 0 }, { x: 526, y: 0 }, { x: 626, y: 360 }, { x: 616, y: 360 }], true);
-      flash(this, 90);
-      chip.boom(0.5);
-      await wait(this, 220);
-      const w = this.add2(txt(this, der ? 450 : 190, 100, c.palabra, 'fuente_titulo', 3));
-      w.setScale(9).setAngle(der ? -6 : 6);
-      this.tweens.add({ targets: w, scale: 3, duration: 180, ease: 'Quad.in', onComplete: () => { chip.boom(0.7); this.cameras.main.shake(160, 0.012); } });
-      await wait(this, 1080);
-      if (!alive()) return;
-    }
-    // los cuatro a la vez
-    this.clear();
-    this.add2(this.add.rectangle(320, 180, 640, 360, 0xffffff));
-    for (const [i, c] of cortes.entries()) {
-      const x0 = -40 + i * 170;
-      const poly = [{ x: x0 + 40, y: 0 }, { x: x0 + 204, y: 0 }, { x: x0 + 164, y: 360 }, { x: x0, y: 360 }];
-      const bg = this.add2(this.add.image(x0 + 100, 180, c.bg));
-      bg.setMask(this.mask(poly));
-      const tinte = this.add2(this.add.graphics());
-      tinte.fillStyle(c.color, 0.3).fillPoints(poly, true);
-      if (c.agua) { const a = this.add2(this.add.graphics()); a.fillStyle(0x1f7fb8, 0.8).fillPoints([{ x: x0 + 17, y: 280 }, { x: x0 + 181, y: 280 }, { x: x0 + 164, y: 360 }, { x: x0, y: 360 }], true); }
-      const f = this.fig(c.id, x0 + 96, c.agua ? 300 : 316, 'idle', 2.5);
-      f.anim.prefer = c.pack;
-      f.set(c.anim, true);
-      this.tick.push(() => { if (f.active && f.anim.done) f.set(c.anim, true); });
-      f.setAlpha(0);
-      this.tweens.add({ targets: f, alpha: 1, duration: 120, delay: i * 110, onStart: () => chip.blip(520 + i * 130, 0.08, 'sq25', 0.16) });
-    }
-    await wait(this, 520);
-    const go = this.add2(txt(this, 320, 110, '¡A COMPETIR!', 'fuente_titulo', 4));
-    go.setScale(12);
-    this.tweens.add({ targets: go, scale: 4, duration: 220, ease: 'Quad.in', onComplete: () => { chip.boom(0.9); flash(this, 160); this.cameras.main.shake(280, 0.018); } });
-    await wait(this, 1700);
+    await wait(this, 1400);
   }
 
   /** Máscara con la forma de un panel. */
@@ -563,14 +969,16 @@ export class Intro extends Phaser.Scene {
     return g.createGeometryMask();
   }
 
-  /** Caja de diálogo con retrato. */
-  private dialog(id: string, expr: string) {
-    this.add2(panel(this, 20, 286, 600, 64));
-    this.add2(this.add.image(54, 318, `retratos:${id}`, `chico_${expr}`).setScale(1));
-    const name = this.add2(txt(this, 86, 300, id === 'kenji' ? 'KENJI "TORO" SAKAMOTO' : id, 'fuente_ui', 1, 0));
-    name.setTint(0xf2c230);
-    const text = this.add2(txt(this, 86, 324, '', 'fuente_ui', 2, 0));
-    return { text };
+  /** Caja de diálogo con retrato. `arriba` la pone arriba, para no tapar a nadie. `close` la quita. */
+  private dialog(id: string, expr: string, arriba = false) {
+    const c = this.add2(this.add.container(0, arriba ? -262 : 0));
+    c.add(panel(this, 20, 286, 600, 64));
+    c.add(this.add.image(54, 318, `retratos:${id}`, `chico_${expr}`).setScale(1));
+    const nombres: Record<string, string> = { kenji: 'KENJI "TORO" SAKAMOTO', alana: 'ALANA, LA PEQUEÑA TERRIBLE' };
+    c.add(txt(this, 86, 300, nombres[id] ?? (kit().atletas[id]?.nombre ?? id), 'fuente_ui', 1, 0).setTint(0xf2c230));
+    const text = txt(this, 86, 324, '', 'fuente_ui', 2, 0);
+    c.add(text);
+    return { text, close: () => c.destroy() };
   }
 
   /** Tarjeta de presentación de un atleta. */
@@ -623,36 +1031,6 @@ export class Intro extends Phaser.Scene {
         if (p.x < -4) { p.x = 644; p.y = Math.random() * 300; }
         if (p.y > 364) p.y = -4;
       }
-    });
-  }
-
-  private rain() {
-    const g = this.add2(this.add.graphics());
-    const drops = Array.from({ length: 140 }, () => ({ x: Math.random() * 700, y: Math.random() * 360 }));
-    this.tick.push((dt) => {
-      g.clear();
-      g.lineStyle(1, 0xa8c0e0, 0.6);
-      for (const d of drops) {
-        d.x -= 90 * dt; d.y += 420 * dt;
-        if (d.y > 360) { d.y = -10; d.x = Math.random() * 700; }
-        g.lineBetween(d.x, d.y, d.x - 2, d.y + 7);
-      }
-    });
-  }
-
-  private lightning() {
-    const g = this.add2(this.add.graphics());
-    let next = 0.3;
-    this.tick.push((dt) => {
-      next -= dt;
-      if (next > 0) return;
-      next = 0.6 + Math.random();
-      g.clear();
-      let x = 420 + Math.random() * 180, y = 120;
-      g.lineStyle(2, 0xf0e8ff, 1);
-      while (y < 220) { const nx = x + (Math.random() - 0.5) * 24, ny = y + 8 + Math.random() * 10; g.lineBetween(x, y, nx, ny); x = nx; y = ny; }
-      flash(this, 140, 0xd0c0ff, 0.45);
-      this.time.delayedCall(120, () => g.clear());
     });
   }
 

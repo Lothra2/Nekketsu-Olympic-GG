@@ -106,17 +106,6 @@ export class Vallas extends EventScene {
       for (let x = START + 100; x < FINISH; x += 100) for (let y = 4; y < 118; y += 6) p.px(x, y, hex('#f4f0e8'));
       this.textures.addCanvas('pista', p.done());
     }
-    if (!this.textures.exists('valla')) {
-      const p = new Painter(14, 16);
-      p.rect(1, 3, 2, 13, hex('#c8c8d0')); p.rect(11, 3, 2, 13, hex('#c8c8d0'));
-      for (let x = 0; x < 14; x++) p.rect(x, 1, 1, 3, Math.floor(x / 3) % 2 ? hex('#d02a2a') : hex('#f4f4f4'));
-      p.rect(0, 14, 4, 2, hex('#6a6a70')); p.rect(10, 14, 4, 2, hex('#6a6a70'));
-      this.textures.addCanvas('valla', p.done());
-      const q = new Painter(18, 6);
-      for (let x = 0; x < 16; x++) q.rect(x + 1, 1, 1, 3, Math.floor(x / 3) % 2 ? hex('#d02a2a') : hex('#f4f4f4'));
-      q.rect(0, 4, 18, 2, hex('#8a8a90'));
-      this.textures.addCanvas('valla_caida', q.done());
-    }
   }
 
   update(_t: number, dms: number) {

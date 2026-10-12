@@ -5,7 +5,11 @@ import { kit } from './kit';
  * Los efectos del kit (lote F de PixelForja) puestos en el mundo con su ancla: el pixel del ancla cae justo
  * sobre el punto que se pide (los pies, la mano, la cabeza). Miran a la derecha; con `flip` se espejan.
  */
-export interface OpcionesFx { flip?: boolean; depth?: number; alpha?: number; scale?: number }
+export interface OpcionesFx {
+  flip?: boolean; depth?: number; alpha?: number; scale?: number;
+  /** los que no se repiten quedan en su último cuadro (el "¡!" que salta y se queda): el que llama los borra */
+  queda?: boolean;
+}
 
 export const hayFx = (id: string) => !!kit().fx?.[id];
 
@@ -22,7 +26,7 @@ export function efecto(scene: Phaser.Scene, id: string, x: number, y: number, o:
     .setScale(o.scale ?? 1);
   if (scene.anims.exists(`fx_${id}`)) {
     s.play(`fx_${id}`);
-    if (!e.loop) s.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => s.destroy());
+    if (!e.loop && !o.queda) s.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => s.destroy());
   }
   return s;
 }

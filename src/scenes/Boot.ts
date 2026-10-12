@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { KIT, setKit, queueKit, cutPortraits, makeFxAnims, type Manifest } from '../core/kit';
 import { makeBackdrops } from '../gfx/backdrops';
 import { makeMapa } from '../gfx/mapa';
+import { makeUtileria } from '../gfx/utileria';
 
 /** Carga el manifiesto, después todo el kit, y pinta los fondos. */
 export class Boot extends Phaser.Scene {
@@ -27,6 +28,7 @@ export class Boot extends Phaser.Scene {
       makeFxAnims(this);
       makeBackdrops(this);
       makeMapa(this);
+      makeUtileria(this);
       label.destroy();
       this.scene.start('Tap');
     });
