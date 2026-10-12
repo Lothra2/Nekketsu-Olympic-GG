@@ -1,0 +1,191 @@
+{
+ "id": "hoian",
+ "pais": "vietnam",
+ "prueba": "tamawari",
+ "nombre": "HỘI AN",
+ "nota": "Tama-wari de noche en la ciudad vieja: dos postes de bambú con su bola de papel arriba, uno por equipo. Misma franja que la pelea (246 a 344).",
+ "largo": 640,
+ "franja": {
+  "atras": 246,
+  "adelante": 344
+ },
+ "hora": "noche",
+ "clima": [
+  "despejado"
+ ],
+ "paralaje": {
+  "cielo": "auto",
+  "lejos": "rio_thu_bon_puente_japones",
+  "cerca": "casas_amarillas_hoian"
+ },
+ "piso": [
+  {
+   "x0": 0,
+   "x1": 640,
+   "tipo": "baldosa",
+   "nombre": "calle de piedra"
+  },
+  {
+   "x0": 0,
+   "x1": 640,
+   "y0": 0,
+   "y1": 14,
+   "tipo": "acera"
+  },
+  {
+   "x0": 0,
+   "x1": 640,
+   "y0": 84,
+   "y1": 98,
+   "tipo": "madera",
+   "nombre": "muelle del río"
+  }
+ ],
+ "huecos": [],
+ "plataformas": [],
+ "muros": [],
+ "escaleras": [],
+ "postes": [
+  {
+   "x": 110,
+   "y": 49,
+   "alto": 170,
+   "tipo": "poste_tamawari",
+   "nota": "el de la Familia GG: bambú con su bola de papel arriba"
+  },
+  {
+   "x": 530,
+   "y": 49,
+   "alto": 170,
+   "tipo": "poste_tamawari",
+   "nota": "el del Instituto Nekketsu"
+  },
+  {
+   "x": 20,
+   "y": 2,
+   "alto": 110,
+   "tipo": "poste_faroles"
+  },
+  {
+   "x": 620,
+   "y": 2,
+   "alto": 110,
+   "tipo": "poste_faroles"
+  }
+ ],
+ "agua": [],
+ "bajo": [
+  {
+   "x0": 20,
+   "x1": 620,
+   "y0": 0,
+   "y1": 98,
+   "z": 124,
+   "tipo": "cuerdas_faroles",
+   "nota": "faroles de seda colgando sobre la calle"
+  }
+ ],
+ "solidos": [
+  {
+   "x": 102,
+   "y": 43,
+   "w": 16,
+   "d": 12,
+   "z": 12,
+   "tipo": "base_poste"
+  },
+  {
+   "x": 522,
+   "y": 43,
+   "w": 16,
+   "d": 12,
+   "z": 12,
+   "tipo": "base_poste"
+  }
+ ],
+ "carriles": [
+  {
+   "y": 20
+  },
+  {
+   "y": 42
+  },
+  {
+   "y": 64
+  },
+  {
+   "y": 86
+  }
+ ],
+ "entidades": [
+  {
+   "tipo": "salida",
+   "x": 60
+  },
+  {
+   "tipo": "meta",
+   "x": 580
+  },
+  {
+   "tipo": "npc",
+   "npc": "bola_tama",
+   "x": 110,
+   "y": 49,
+   "z": 170,
+   "equipo": "familia_gg",
+   "nota": "la bola de papel de cada equipo, con el efecto bola_tama (4 estados de daño)"
+  },
+  {
+   "tipo": "npc",
+   "npc": "bola_tama",
+   "x": 530,
+   "y": 49,
+   "z": 170,
+   "equipo": "instituto_nekketsu"
+  },
+  {
+   "tipo": "npc",
+   "npc": "vendedora_faroles",
+   "x": 320,
+   "y": 4
+  },
+  {
+   "tipo": "objeto",
+   "objeto": "abanico",
+   "x": 260,
+   "y": 60
+  },
+  {
+   "tipo": "objeto",
+   "objeto": "non_la",
+   "x": 380,
+   "y": 30
+  }
+ ],
+ "ranuras_deco": [
+  {
+   "x0": 0,
+   "x1": 640,
+   "capa": "lejos",
+   "tema": "rio_thu_bon_puente_japones"
+  },
+  {
+   "x0": 0,
+   "x1": 640,
+   "capa": "cerca",
+   "tema": "casas_amarillas_faroles"
+  },
+  {
+   "x0": 0,
+   "x1": 640,
+   "capa": "frente",
+   "tema": "velitas_en_el_rio"
+  }
+ ],
+ "vida": [
+  "faroles_meciendose",
+  "velitas_rio",
+  "botes_con_faroles",
+  "publico"
+ ]
+}

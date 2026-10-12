@@ -35,8 +35,8 @@ Rick quiere que PixelForja trabaje toda la noche, de corrido. Mañana revisa tod
 
 **Lo que cambia, todo en el dibujo:**
 1. **Juntas y líneas de profundidad en diagonal, pendiente 1:2.** Hacia atrás, 1 px a la derecha por cada 2 px hacia arriba. Va en baldosas, grietas, bordillos, rayas de carril, tablas de muelle y juntas de la tapa de las cajas, igual que en la azotea de la pelea.
-2. **Cara lateral de cada caja**, la izquierda, como franja inclinada con la misma pendiente. Va por fuera de la huella, de 6 px como máximo, y más oscura que el frente.
-3. **Sombras proyectadas en diagonal.** Cajas, postes, toldos y vehículos tiran su sombra hacia la izquierda y adelante.
+2. **Cara lateral de cada caja**, la derecha (al irse hacia atrás todo corre a la derecha, así que esa es la que se ve), como franja inclinada con la misma pendiente. Va por fuera de la huella, de 6 px como máximo, y más oscura que el frente.
+3. **Sombras proyectadas en diagonal.** Cajas, postes, toldos y vehículos tiran su sombra hacia la izquierda y adelante, del lado contrario a la cara que se ve.
 4. **Fachadas con relieve.** Balcones que salen, aleros, puertas y ventanas hundidas, callejones con su pared lateral inclinada visible.
 5. **Una opción en `generarEscenario`** (por ejemplo `inclinacion: 0.5`, y 0 para el dibujo de hoy). Así se compara y se puede volver atrás.
 
@@ -131,7 +131,7 @@ Antes de arrancar, relee los layouts. Esta noche el juego sube la **Comuna 13 v2
 
 ## Lo que hace el juego esta noche
 
-- Su gris con la misma inclinación (juntas diagonales y cara lateral de las cajas).
+- Su gris con la misma inclinación (juntas diagonales y cara lateral derecha de las cajas).
 - La Comuna 13 v2: tramos con identidad y mecánicas nuevas (bailarines de break, la pelota de los pelados que cruza la calle, el metrocable en el fondo).
 - El layout de `hoian` para E3.
 - Todo queda en `data/stages/` y en `ESTADO.md` de la rama `claude/sweet-albattani-6orfv8`.

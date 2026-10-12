@@ -78,6 +78,10 @@ interface Jacinto { x: number; y: number; g: Phaser.GameObjects.Graphics; tocado
 interface Fruta { x0: number; x1: number; y0: number; y1: number; t: number; dueño: Actor; g: Phaser.GameObjects.Graphics }
 /** Un perro de la calle que duerme en el camino: si lo pisas, despierta, te tumba y te persigue un poco. */
 interface Perro { x: number; y: number; z: number; x0: number; f: Figura; zz: Phaser.GameObjects.BitmapText; despierto: number; presa: Actor | null }
+/** Bailarines de break en rueda: el que choca con uno, al piso. */
+interface Rueda { x: number; y: number; z: number; r: number; t: number; g: Phaser.GameObjects.Graphics[] }
+/** Los pelados que juegan fútbol: cada tanto la pelota cruza el callejón de lado a lado. */
+interface Pelados { x: number; cada: number; t: number; bola: { x: number; y: number; g: Phaser.GameObjects.Graphics } | null }
 
 /** Para pasar de un tramo al siguiente: los mismos cuatro y lo que llevan acumulado. */
 interface CrossData extends EventData { tramo?: number; suelto?: boolean; cross?: { gente: Competidor[]; acum: Record<string, number> } }
@@ -113,6 +117,10 @@ export class CrossCountry extends EventScene implements World {
   private derrame = new Map<Caja, number>();
   private lluvia: Phaser.GameObjects.TileSprite | null = null;
   private perros: Perro[] = [];
+  private ruedas: Rueda[] = [];
+  private pelados: Pelados[] = [];
+  /** el metrocable del fondo, en gris: las cabinas que cruzan el cielo */
+  private cabinas: { g: Phaser.GameObjects.Graphics; u: number }[] = [];
   private meta = 3790;
   private clock = 0;
   private holdRun = 0;
@@ -168,6 +176,9 @@ export class CrossCountry extends EventScene implements World {
     this.entre = null;
     this.lluvia = null;
     this.perros = [];
+    this.ruedas = [];
+    this.pelados = [];
+    this.cabinas = [];
     this.limites = { xmin: 12, xmax: L.largo - 12, depth: DEPTH };
     this.cajas = [...L.plataformas, ...L.muros, ...L.solidos];
     this.meta = L.entidades.find((e) => e.tipo === 'meta')?.x ?? L.largo - 50;
@@ -185,6 +196,7 @@ export class CrossCountry extends EventScene implements World {
     // el primer clima de la lista es el de hoy; los demás son los que el escenario puede tener otro día
     if (L.clima[0] === 'aguacero') this.ponerLluvia();
     this.armarPerros();
+    this.armarGente();
 
     this.gente.forEach((c, i) => {
       const y = L.carriles[i % L.carriles.length].y;
@@ -217,11 +229,12 @@ export class CrossCountry extends EventScene implements World {
     const ir = (x: number, y: number) => () => { const a = r().a; a.x = x; a.y = y; a.z = 0; a.setSt('idle', 'idle'); r().safe = [x, y]; this.cameras.main.centerOn(x + 80, 360 - 180 / ZOOM); flash(this, 120); };
     if (this.L.id === 'medellin_c13') return [
       { texto: 'MANTÉN {MOVER} ADELANTE\nY ARRANCAS A CORRER', botones: ['stick'], listo: () => r().a.st === 'run' },
-      { texto: 'UN PERRO DORMIDO: NO LO PISES,\nSÁLTALO CON {SALTO}', botones: ['stick', 'jump'], antes: ir(150, 70), listo: () => r().a.x > 290 && r().a.grounded },
-      { texto: 'ESCALONES: SE SUBEN SOLOS\nCAMINANDO, HASTA LA TERRAZA', botones: ['stick'], antes: ir(360, 60), listo: () => r().a.x > 470 && r().a.base >= 24 },
-      { texto: 'LA ESCALERA ELÉCTRICA VA AL REVÉS:\nCORRE FUERTE, O SUBE SALTANDO AL LADO', botones: ['stick', 'jump'], antes: ir(840, 30), listo: () => r().a.x > 1020 && r().a.base >= 72 },
-      { texto: 'EL HUECO: CRUZA POR LA VIGA\nO SÁLTALO CORRIENDO', botones: ['stick', 'jump'], antes: ir(1430, 67), listo: () => r().a.x > 1570 && r().a.grounded },
-      { texto: 'EL MURO: {SALTO} JUSTO ANTES\nDE LLEGAR. ¡DA IMPULSO!', botones: ['jump'], antes: ir(1820, 64), listo: () => r().a.base >= 100 },
+      { texto: 'UN PERRO DORMIDO: NO LO PISES,\nSÁLTALO CON {SALTO}', botones: ['stick', 'jump'], antes: ir(340, 30), listo: () => r().a.x > 470 && r().a.grounded },
+      { texto: 'ESCALONES: SE SUBEN SOLOS\nCAMINANDO, HASTA LA TERRAZA', botones: ['stick'], antes: ir(470, 60), listo: () => r().a.x > 600 && r().a.base >= 24 },
+      { texto: 'BAILARINES DE BREAK: RODÉALOS\nPOR ARRIBA O POR ABAJO', botones: ['stick'], antes: ir(700, 64), listo: () => r().a.x > 880 },
+      { texto: 'EL MURO PINTADO: {SALTO} JUSTO\nANTES DE LLEGAR. ¡DA IMPULSO!', botones: ['jump'], antes: ir(980, 64), listo: () => r().a.x > 1080 && r().a.grounded },
+      { texto: 'LA ESCALERA ELÉCTRICA VA AL REVÉS:\nCORRE FUERTE, O SUBE SALTANDO AL LADO', botones: ['stick', 'jump'], antes: ir(1100, 30), listo: () => r().a.x > 1260 && r().a.base >= 66 },
+      { texto: 'LA BARANDA: CRÚZALA EN EQUILIBRIO\nO SALTA EL HUECO CORRIENDO', botones: ['stick', 'jump'], antes: ir(2560, 67), listo: () => r().a.x > 2690 && r().a.grounded },
       { texto: '¡ESO! AHORA SUBE\nHASTA EL MIRADOR', botones: ['stick', 'jump'], listo: () => r().done },
     ];
     return [
@@ -365,6 +378,7 @@ export class CrossCountry extends EventScene implements World {
     if (juego && !this.d.practica) { this.trafico(dt); this.rio(dt); }
     this.fruta(dt);
     this.perrosTick(dt);
+    this.genteTick(dt);
     this.coach?.tick(dt);
     this.render();
     if (juego) this.checkEnd();
@@ -498,6 +512,90 @@ export class CrossCountry extends EventScene implements World {
       const zz = txt(this, x + 10, FT + y - z - 30, 'Z z', 'fuente_ui', 1).setTint(0xc8d8ff);
       this.tweens.add({ targets: zz, y: zz.y - 6, alpha: 0.3, duration: 900, yoyo: true, repeat: -1 });
       this.perros.push({ x, y, z, x0: x, f, zz, despierto: 0, presa: null });
+    }
+  }
+
+  /** Un monito gris para la gente del gris (bailarín, grafitero, músico, pelado): cabeza, cuerpo y brazos. */
+  private monito(color: number) {
+    const g = this.add.graphics();
+    g.fillStyle(0x2a2a34).fillEllipse(0, 0, 14, 4);
+    g.fillStyle(color).fillRect(-4, -22, 8, 14);
+    g.fillStyle(0x3a3a48).fillRect(-4, -8, 3, 8).fillRect(1, -8, 3, 8);
+    g.fillStyle(0xd8a888).fillCircle(0, -27, 5);
+    g.fillStyle(color).fillRect(-8, -20, 4, 3).fillRect(4, -20, 4, 3);
+    return g;
+  }
+
+  /** La gente de la calle según el layout: bailarines de break, pelados con su pelota y el resto de adorno. */
+  private armarGente() {
+    for (const e of this.L.entidades) {
+      if (e.tipo !== 'npc') continue;
+      const x = e.x ?? 0, y = e.y ?? 60, z = Math.max(0, this.suelo(x, y, 999));
+      const npc = String((e as { npc?: string }).npc ?? '');
+      if (npc === 'bailarines_break') {
+        const col = [0xff4fa0, 0x40d0ff, 0xffd040];
+        this.ruedas.push({ x, y, z, r: (e as { radio?: number }).radio ?? 26, t: 0, g: col.map((c) => this.monito(c)) });
+        if (!this.arte) this.rotulo(x - 30, FT + y - z - 50, 'BAILARINES DE BREAK');
+      } else if (npc === 'pelados_futbol') {
+        this.pelados.push({ x, cada: e.cada ?? 3, t: 1, bola: null });
+        if (!this.arte) {
+          // los pelados al fondo del callejón, esperando el pase
+          for (const [k, c] of [0x40c060, 0xe0e0e8].entries()) this.monito(c).setPosition(x - 20 + k * 40, FT + 2 - Math.max(0, this.suelo(x, 2, 999))).setDepth(FT + 2);
+          this.rotulo(x - 30, FT - Math.max(0, this.suelo(x, 2, 999)) - 40, 'LOS PELADOS JUEGAN FÚTBOL');
+        }
+      } else if (!this.arte) {
+        // los demás son adorno en el gris: grafitero, músicos, vendedor
+        this.monito(npc === 'grafitero' ? 0xb04ad0 : npc === 'musicos' ? 0xf2a03a : 0x6a9ad0).setPosition(x, FT + y - z).setDepth(FT + y);
+        this.rotulo(x - 24, FT + y - z - 40, npc.toUpperCase().replace(/_/g, ' '));
+      }
+    }
+    for (const e of this.L.entidades) if (e.tipo === 'animal' && e.animal === 'gallo' && !this.arte) {
+      const x = e.x ?? 0, y = e.y ?? 20, z = Math.max(0, this.suelo(x, y, 999));
+      const g = this.add.graphics().setPosition(x, FT + y - z).setDepth(FT + y);
+      g.fillStyle(0xe8e0d0).fillEllipse(0, -6, 12, 9).fillStyle(0xd03020).fillRect(2, -14, 4, 4).fillStyle(0xf2c230).fillRect(6, -9, 3, 2).fillStyle(0x2a6a3a).fillRect(-8, -12, 4, 6);
+      this.rotulo(x - 12, FT + y - z - 22, 'GALLO');
+    }
+  }
+
+  private genteTick(dt: number) {
+    for (const w of this.ruedas) {
+      w.t += dt;
+      w.g.forEach((g, i) => {
+        const a = w.t * 1.8 + (i * Math.PI * 2) / w.g.length;
+        const x = w.x + Math.cos(a) * w.r, y = w.y + Math.sin(a) * w.r * 0.5;
+        // uno hace el molino de cabeza, los otros bailan de pie
+        g.setPosition(Math.round(x), Math.round(FT + y - w.z)).setDepth(FT + y).setAngle(i === 0 ? (w.t * 720) % 360 : Math.sin(w.t * 8 + i) * 12);
+        for (const r of this.gente2) {
+          const a2 = r.a;
+          if (a2.z > w.z + 10 || Math.abs(a2.x - x) > 12 || Math.abs(a2.y - y) > 7) continue;
+          this.resbalar(r, '¡CUIDADO CON EL BREAK!');
+        }
+      });
+    }
+    for (const p of this.pelados) {
+      if (!p.bola) {
+        p.t -= dt;
+        if (p.t > 0) continue;
+        p.t = p.cada * (0.8 + Math.random() * 0.4);
+        const g = this.add.graphics();
+        g.fillStyle(0xf4f4f4).fillCircle(0, -4, 4).fillStyle(0x202020).fillRect(-1, -6, 2, 2).fillRect(-3, -3, 2, 2).fillRect(2, -3, 2, 2);
+        p.bola = { x: p.x + Phaser.Math.Between(-24, 24), y: -4, g };
+        this.sfx('golpe', 0.15);
+      }
+      const b = p.bola;
+      b.y += 120 * dt;
+      const z = Math.max(0, this.suelo(b.x, Math.min(DEPTH - 1, Math.max(0, b.y)), 999));
+      b.g.setPosition(Math.round(b.x), Math.round(FT + b.y - z - Math.abs(Math.sin(b.y / 9)) * 6)).setAngle(b.y * 8).setDepth(FT + b.y);
+      for (const r of this.gente2) {
+        const a = r.a;
+        if (a.z > z + 8 || Math.abs(a.x - b.x) > 9 || Math.abs(a.y - b.y) > 6) continue;
+        this.resbalar(r, '¡LA PELOTA! ¡PERDÓN, SEÑOR!');
+      }
+      if (b.y > DEPTH + 8) { b.g.destroy(); p.bola = null; }
+    }
+    for (const c of this.cabinas) {
+      c.u = (c.u + dt * 0.012) % 1;
+      c.g.setPosition(Math.round(-60 + c.u * 760), Math.round(70 - c.u * 50));
     }
   }
 
@@ -799,6 +897,13 @@ export class CrossCountry extends EventScene implements World {
     const g = this.add.graphics().setDepth(-5);
     const PISO: Record<string, number> = { asfalto: 0x5a5a64, acera: 0x8a8a94, baldosa: 0x8e8278, tierra: 0x8a6a4a, madera: 0x7a5a3a, metal: 0x7a8490, cancha: 0xa8483a, agua: 0x2a6aa0, pasto: 0x4a8a3a };
     for (const p of L.piso) g.fillStyle(PISO[p.tipo] ?? 0x5a5a64).fillRect(p.x0, FT + (p.y0 ?? 0), p.x1 - p.x0, (p.y1 ?? DEPTH) - (p.y0 ?? 0));
+    // la inclinación: juntas del piso en diagonal 1:2 (hacia atrás, un pixel a la derecha por cada dos hacia arriba),
+    // como la azotea de la pelea; así el piso se lee como un plano que se va hacia atrás
+    const juntas = this.add.graphics().setDepth(-4.9);
+    for (let x = -DEPTH; x < W; x += 32) {
+      for (let k = 0; k < DEPTH; k += 2) juntas.fillStyle(0x000000, 0.14).fillRect(x + Math.floor((DEPTH - k) / 2), FT + k, 1, 2);
+    }
+    for (let y = 26; y < DEPTH; y += 26) juntas.fillStyle(0xffffff, 0.06).fillRect(0, FT + y, W, 1);
     if (L.id === 'saigon_hem') for (let x = 0; x < W; x += 80) g.fillStyle(0x66666f).fillRect(x, FT + 64, 40, 2);
     if (L.id === 'saigon_estadio') for (const y of [35, 65, 95]) g.fillStyle(0xf4f4f4, 0.7).fillRect(300, FT + y, W - 300, 1);
     for (const p of L.piso) if (p.nombre && p.tipo !== 'agua') this.rotulo(p.x0 + 4, FT + (p.y0 ?? 0) + 6, p.nombre.toUpperCase());
@@ -836,16 +941,37 @@ export class CrossCountry extends EventScene implements World {
     // lo que cuelga bajo: toldos, lámparas, ropa, redes
     for (const b of L.bajo) {
       const t = this.add.graphics().setDepth(FT + b.y1);
+      if (b.tipo === 'techo_escalera') {
+        // el techo naranja ondulado de las escaleras eléctricas de la Comuna 13, en su estructura gris
+        t.fillStyle(0x6a6a74).fillRect(b.x0, FT + b.y0 - b.z + 6, 3, b.z - 10).fillRect(b.x1 - 3, FT + b.y0 - b.z + 6, 3, b.z - 10);
+        t.fillStyle(0xe8742a).fillRect(b.x0 - 4, FT + b.y0 - b.z, b.x1 - b.x0 + 8, 8);
+        for (let x = b.x0 - 4; x < b.x1 + 4; x += 6) t.fillStyle(0xb8501a).fillRect(x, FT + b.y0 - b.z, 2, 8);
+        continue;
+      }
+      if (b.tipo === 'tendedero') {
+        // la cuerda con ropa de colores
+        const y = FT + b.y0 - b.z;
+        t.lineStyle(1, 0x30303a).lineBetween(b.x0, y, b.x1, y);
+        const ropa = [0xe84a4a, 0x4a8ae8, 0xf2c230, 0x5ac85a, 0xf4f4f4, 0xd06ad0];
+        for (let x = b.x0 + 6, k = 0; x < b.x1 - 8; x += 16, k++) t.fillStyle(ropa[k % ropa.length]).fillRect(x, y, 10, 12 + (k % 3) * 3);
+        this.rotulo(b.x0, y - 8, 'TENDEDERO · NO SALTES ABAJO');
+        continue;
+      }
       t.fillStyle(0xc85a3a, 0.85).fillRect(b.x0, FT + b.y0 - b.z, b.x1 - b.x0, b.y1 - b.y0);
       for (let x = b.x0; x < b.x1; x += 12) t.fillStyle(0xf4e8d0, 0.85).fillRect(x, FT + b.y0 - b.z, 6, b.y1 - b.y0);
       this.rotulo(b.x0, FT + b.y0 - b.z - 8, `${(b.tipo ?? 'TOLDO').toUpperCase().replace(/_/g, ' ')} · NO SALTES ABAJO`);
     }
+    // la bandera en su asta
+    for (const p of L.postes) if (p.tipo === 'asta_bandera' && this.textures.exists('flag_co')) this.add.image(p.x + 4, FT + p.y - Math.max(0, this.suelo(p.x, p.y, 999)) - p.alto + 10, 'flag_co').setOrigin(0, 0.5).setScale(0.9).setDepth(FT + p.y);
+    this.adornos();
     // cajas: techo claro, frente oscuro, con su nombre
     // techo y frente por tipo, para leer el gris: ladrillo, zinc, la escalera eléctrica, la fruta
     const COLOR: Record<string, [number, number]> = {
       puesto_frutas: [0xe0b060, 0x9a6a30], terraza: [0xc89a7a, 0x9a5a3a], muro_ladrillo: [0xb8704a, 0x8a4a2a],
       techo_lata: [0xa8b4c4, 0x6a7888], escalera_electrica: [0xd0d4dc, 0xd06a2a], escalones: [0xd8c8a8, 0xa89878], escalon: [0xd8c8a8, 0xa89878],
-      viga: [0x7a7a8a, 0x4a4a58], muelle: [0xa87a4a, 0x6a4a2a],
+      viga: [0x7a7a8a, 0x4a4a58], muelle: [0xa87a4a, 0x6a4a2a], baranda: [0x7a8aa0, 0x4a5a70],
+      muro_grafiti: [0xd8b8a0, 0xb04ad0], escalera_pintada: [0xf2c230, 0x40a0d0], mirador: [0xd8c8b0, 0xa88868],
+      letras_comuna13: [0x30303a, 0x20202a], carrito_paletas: [0xf2e060, 0x40a040], tanque_agua: [0x3a3a44, 0x24242c],
     };
     for (const c of this.cajas) {
       if (c === this.ferry) continue;
@@ -858,9 +984,54 @@ export class CrossCountry extends EventScene implements World {
       if (c.tipo === 'escalera_electrica') for (let y = c.y + 6; y < c.y + c.d - 2; y += 14) box.fillStyle(0x30303a).fillTriangle(c.x + 3, FT + y - c.z, c.x + c.w - 4, FT + y - 4 - c.z, c.x + c.w - 4, FT + y + 4 - c.z);
       if (c.tipo === 'terraza' || c.tipo === 'muro_ladrillo') for (let y = FT + c.y + c.d - c.z + 6; y < FT + c.y + c.d; y += 8) box.fillStyle(0x7a3a22, 0.5).fillRect(c.x, y, c.w, 1);
       box.lineStyle(1, 0x303038, 0.8).strokeRect(c.x + 0.5, FT + c.y - c.z + 0.5, c.w - 1, c.d + c.z - 1);
+      // la cara lateral derecha, inclinada como las juntas del piso; y la sombra hacia el otro lado
+      const s = Math.min(6, Math.floor(c.d / 2));
+      if (s >= 2) {
+        const xr = c.x + c.w, yb = FT + c.y + c.d;
+        box.fillStyle(Phaser.Display.Color.ValueToColor(frente).darken(25).color).fillPoints([{ x: xr, y: yb - c.z }, { x: xr + s, y: yb - c.z - 2 * s }, { x: xr + s, y: yb - 2 * s }, { x: xr, y: yb }], true);
+        const sombra = this.add.graphics().setDepth(-4.5);
+        sombra.fillStyle(0x000000, 0.18).fillPoints([{ x: c.x, y: yb }, { x: xr, y: yb }, { x: xr - 8, y: yb + 4 }, { x: c.x - 8, y: yb + 4 }], true);
+      }
+      // las letras grandes del mirador, una de cada color
+      if (c.tipo === 'letras_comuna13') {
+        const col = [0xff4fa0, 0xf2c230, 0x40d0ff, 0x5ac85a, 0xff8a30, 0xb04ad0];
+        'COMUNA 13'.split('').forEach((ch, i) => this.add.bitmapText(c.x + 10 + i * 18, FT + c.y - c.z - 20, 'fuente_titulo', ch).setScale(2).setTint(col[i % col.length]).setDepth(FT + c.y + c.d - 0.3));
+        continue;
+      }
       // el nombre encima, una vez por grupo (los escalones seguidos llevan uno solo)
       const seguido = this.cajas.some((o) => o !== c && o.tipo === c.tipo && Math.abs(o.x + o.w - c.x) < 1 && o.y === c.y);
       if (!seguido) this.add.bitmapText(c.x + c.w / 2, FT + c.y - c.z - 6, 'fuente_ui', (c.tipo ?? '').toUpperCase().replace(/_/g, ' ')).setOrigin(0.5).setDepth(FT + c.y + c.d - 0.4).setTint(0xf0f0f8).setAlpha(0.8);
+    }
+  }
+
+  /** Lo que da identidad al gris: murales de colores en las paredes y el metrocable cruzando el cielo. */
+  private adornos() {
+    const L = this.L;
+    const ranuras = (L as unknown as { ranuras_deco?: { x0: number; x1: number; capa: string; tema: string }[] }).ranuras_deco ?? [];
+    const col = [0xff4fa0, 0x40d0ff, 0xffd040, 0x5ac85a, 0xb04ad0, 0xff8a30];
+    for (const r of ranuras) {
+      if (!/grafiti/.test(r.tema)) continue;
+      // murales sobre las casas del fondo: caras, ojos, flores y franjas de color
+      const g = this.add.graphics().setDepth(-9);
+      for (let x = r.x0 + 10, k = 0; x < r.x1 - 40; x += 70, k++) {
+        const y = FT - 90 + (k % 2) * 14, c1 = col[k % col.length], c2 = col[(k + 2) % col.length];
+        g.fillStyle(c1).fillRect(x, y, 56, 70);
+        g.fillStyle(c2).fillCircle(x + 28, y + 30, 16);
+        g.fillStyle(0xffffff).fillCircle(x + 22, y + 26, 4).fillCircle(x + 34, y + 26, 4);
+        g.fillStyle(0x101018).fillCircle(x + 22, y + 26, 2).fillCircle(x + 34, y + 26, 2);
+        g.fillStyle(col[(k + 4) % col.length]).fillRect(x, y + 58, 56, 6);
+      }
+    }
+    if ((L as unknown as { vida?: string[] }).vida?.includes('metrocable')) {
+      // el cable y las cabinas rojas que cruzan el valle
+      const cable = this.add.graphics().setScrollFactor(0).setDepth(-19);
+      cable.lineStyle(1, 0x30303a, 0.8).lineBetween(-20, 74, 700, 18);
+      for (let i = 0; i < 3; i++) {
+        const g = this.add.graphics().setScrollFactor(0).setDepth(-18);
+        g.lineStyle(1, 0x30303a).lineBetween(0, -10, 0, 0);
+        g.fillStyle(0xd03a2a).fillRect(-7, 0, 14, 10).fillStyle(0xe8f0f8).fillRect(-5, 2, 10, 4);
+        this.cabinas.push({ g, u: i / 3 });
+      }
     }
   }
 

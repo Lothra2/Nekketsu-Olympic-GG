@@ -164,16 +164,25 @@ Para las fichas de arte de E2:
 - Thor mira sentado al fondo, en x 40 (`npc`).
 - `npm run escenarios -- --validar`: la geometría valida. El arte espera el estilo `venezuela`, que PixelForja todavía no pinta.
 
-**Layout de `medellin_c13`, listo para E3.** Es la prueba de Obstáculos, ya jugable en gris: los cuatro en piloto automático llegan al mirador en unos 22 s sin trabarse.
-- Largo 3200, misma franja que el Cross (200 a 330). Se sube en terrazas desde la calle (z 0) hasta el mirador (z 148): la "subida vertical" del pedido es altura.
-- Escalones de 6 que se suben caminando (`escalon`) y escalones de 12 que se saltan (`escalones`).
-- Dos escaleras eléctricas (`escalera_electrica`, 8 escalones de 6) que van al revés. El juego empuja para atrás a quien va encima. El arte puede mostrar el techo naranja y las flechas.
-- La viga (`viga`) cruza un hueco `vacio` de 60, apoyada en una franja de piso (y 60 a 74), igual que en `saigon_azoteas`. También hay un muro de ladrillo, techos de zinc (`techo_lata`), aires acondicionados y materas.
-- Tendederos en `bajo`: quien salta debajo se da en la cabeza.
-- Perros dormidos: entidades `animal` con `animal: "perro_callejero"`. El juego hoy usa a Thor oscurecido y echado. Para B3 o C2 sirve un perro de la calle con `lie`, `bark` y `run`.
-- La mecánica del original: saltar justo antes de un obstáculo da impulso.
-- `npm run escenarios -- --validar`: la geometría valida. El arte espera el estilo `colombia_ladrillo`.
-- Para B2: `ladder`, `climb_wall` y `balance_walk` vendrían bien para trepar el muro y cruzar la viga. Hoy se salta.
+**Layout de `medellin_c13` v2, listo para E3.** Se rehízo para que la Comuna 13 se reconozca. Es la prueba de Obstáculos, jugable en gris: los cuatro en piloto automático llegan al mirador en unos 25 s y el entrenamiento tiene 8 pasos.
+- Largo 3600, la misma franja del Cross (200 a 330). Se sube por tramos con identidad, de la calle (z 0) hasta el mirador (z 144):
+  1. La estación San Javier, con el carrito de paletas de mango biche y un perro dormido.
+  2. La subida de los grafitis: terraza en z 24, murales, bailarines de break en rueda (si chocas con uno, te tumba) y un muro pintado que se salta con impulso.
+  3. La escalera eléctrica 1, al revés y con techo naranja (`techo_escalera` en `bajo`), con escalones empinados al lado.
+  4. El callejón de los perros: terraza en z 66, la pelota de los pelados que cruza de lado a lado (`pelados_futbol`), un tendedero y un tanque negro.
+  5. La escalera eléctrica 2, con su techo naranja.
+  6. Los techos de zinc en z 108: un hueco que se salta corriendo y una baranda que cruza el otro hueco en equilibrio (apoyada en una franja de piso, como la viga de las azoteas). Un gallo en el techo.
+  7. La escalera pintada (escalones de 12) hasta el mirador.
+  8. El mirador en z 144: las letras grandes "COMUNA 13" (`letras_comuna13`), la bandera de Colombia (`asta_bandera`) y los músicos.
+- `ranuras_deco` y `vida` dicen qué va en cada tramo: murales, casas de ladrillo apiladas, techos de zinc, el metrocable en el valle, banderines y ropa tendida.
+- El gris del juego ya pinta los murales, el metrocable cruzando el cielo, los techos naranjas y los tendederos con ropa, para que se lea el lugar mientras llega el arte.
+- `npm run escenarios -- --validar`: la geometría valida. El arte espera el estilo `colombia_ladrillo` (ver `NOCHE.md`, E3).
+
+**Layout de `hoian`, listo para E3.** Es el Tama-wari de noche en la ciudad vieja, con la misma franja que la pelea (246 a 344) y largo 640.
+- Dos postes de bambú (`poste_tamawari`) en x 110 y x 530, con su bola de papel arriba (`npc` `bola_tama`, z 170, una por equipo).
+- Faroles de seda colgando sobre la calle (`cuerdas_faroles` en `bajo`), el muelle del río adelante y la vendedora de faroles.
+- Pasa las 9 pruebas con el estilo `vietnam` de hoy. El estilo `vietnam_hoian` de la ficha tiene que lucir las casas amarillas, los faroles, el río Thu Bồn con velitas y el puente japonés.
+- El juego todavía no tiene el Tama-wari: llega con B3 (trepar el poste).
 
 **G1 resto y H1** (PR #13), esperando la revisión de Rick. Cuando entre a `main`, el juego pide en `kit.config.json`:
 - `ui.logo` y `ui.interfaz`: logo animado, diálogo 9-slice, paneles por equipo, barras, banners, controles táctiles, minimapa y números.
@@ -199,7 +208,8 @@ Lo que PixelForja lee de este repo y todavía no existe. Cada uno lo produce una
 | Equipos | `data/equipos.json` | I | Juego F0 | listo |
 | Layout del tramo 1 de Saigón | `data/stages/saigon_hem.layout.json` | E1 | Juego F3 (gris jugable) | listo, jugado en gris |
 | Layout de la azotea final | `data/stages/caracas_azotea.layout.json` | E3 | Juego F7 | listo, jugado en gris |
-| Layout de la Comuna 13 | `data/stages/medellin_c13.layout.json` | E3 | Juego F7 | listo, jugado en gris |
+| Layout de la Comuna 13 | `data/stages/medellin_c13.layout.json` | E3 | Juego F7 | v2 lista, jugada en gris |
+| Layout de Hội An | `data/stages/hoian.layout.json` | E3 | Juego F7 | listo (el Tama-wari en gris llega con B3) |
 | Layouts del Cross Country completo | `data/stages/saigon_benthanh`, `saigon_rio`, `saigon_azoteas`, `saigon_estadio` (`.layout.json`) | E2 | Juego F6 | listos, jugados en gris |
 | Resto de layouts | `data/stages/*.layout.json` | E3 a E6 | Juego F7 a F11 | pendiente |
 | Textos | `data/dialogs/*.json` | G1 | Juego F5 | pendiente |
