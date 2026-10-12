@@ -102,6 +102,8 @@ export class CrossCountry extends EventScene implements World {
   private arte: ReturnType<typeof pintarEscenario> | null = null;
   /** el agua sobre los pies de cada uno, justo delante de su figura */
   private aguaPies = new Map<Actor, Phaser.GameObjects.Graphics>();
+  /** la silueta de color de quien queda tapado detrás de algo alto (un puesto, un muro), para no perderlo de vista */
+  private siluetas = new Map<Actor, Phaser.GameObjects.Sprite>();
   private vehiculos: Vehiculo[] = [];
   private vehT: number[] = [];
   private ferry: Ferry | null = null;
@@ -153,6 +155,7 @@ export class CrossCountry extends EventScene implements World {
     this.items = [];
     this.gente2 = [];
     this.aguaPies.clear();
+    this.siluetas.clear();
     this.vehiculos = [];
     this.jacintos = [];
     this.frutas = [];
@@ -865,6 +868,24 @@ export class CrossCountry extends EventScene implements World {
     this.add.bitmapText(x, y, 'fuente_ui', s).setOrigin(0, 0.5).setDepth(-3).setTint(0xf0f0f8);
   }
 
+  /**
+   * Si algo alto que va delante le tapa más de medio cuerpo, encima va su silueta: amarilla la persona, azul su equipo
+   * y roja el otro. Así nadie se pierde detrás de los puestos del mercado.
+   */
+  private silueta(a: Actor) {
+    const pies = FT + a.y - a.z, cabeza = pies - ALTO;
+    const tapa = this.cajas.find((c) => c.y > a.y && a.x > c.x - 6 && a.x < c.x + c.w + 6 && FT + c.y - c.z < (pies + cabeza) / 2 && c.z > a.z + ALTO / 2);
+    let s = this.siluetas.get(a);
+    if (!tapa || !a.fig.visible) { s?.setVisible(false); return; }
+    if (!s) {
+      s = this.add.sprite(0, 0, a.fig.texture.key).setAlpha(0.6);
+      this.siluetas.set(a, s);
+    }
+    const f = a.fig;
+    s.setVisible(true).setTexture(f.texture.key, f.frame.name).setOrigin(f.originX, f.originY).setFlipX(f.flipX).setScale(f.scaleX, f.scaleY)
+      .setPosition(f.x, f.y).setTintFill(a.human ? 0xffe040 : a.team === 0 ? 0x6ab0ff : 0xff6a6a).setDepth(FT + tapa.y + tapa.d + 0.6);
+  }
+
   private render() {
     for (const a of this.actors) a.render();
     for (const i of this.items) i.render();
@@ -875,6 +896,7 @@ export class CrossCountry extends EventScene implements World {
         const c = this.cajas.find((b) => a.x >= b.x && a.x < b.x + b.w && a.y >= b.y && a.y < b.y + b.d && Math.abs(b.z - piso) < 1);
         if (c) a.fig.setDepth(FT + c.y + c.d + 0.5);
       }
+      this.silueta(a);
       // en el agua, el agua tapa los pies (o medio cuerpo en el río)
       let g = this.aguaPies.get(a);
       if (!g) { g = this.add.graphics(); this.aguaPies.set(a, g); }
