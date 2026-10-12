@@ -80,7 +80,8 @@ export class Fight extends Phaser.Scene implements World {
     this.cameras.main.fadeIn(250);
     // el mundo se ve de cerca y sigue la acción; el marcador va en su propia capa, sin acercar
     this.ui = this.add.layer().setDepth(10000);
-    this.zoom = ZOOMS[this.data0.modo] ?? 1.45;
+    // entrenando, un poco más lejos: el cartel de arriba no tapa a nadie
+    this.zoom = this.data0.practica ? 1.45 : ZOOMS[this.data0.modo] ?? 1.45;
     this.cameras.main.setZoom(this.zoom).setBounds(0, 0, 640, 360).centerOn(320, this.camY);
     this.cameras.main.ignore(this.ui);
     this.uiCam = this.cameras.add(0, 0, 640, 360).setName('ui');
@@ -151,11 +152,11 @@ export class Fight extends Phaser.Scene implements World {
       },
       { texto: '¡ARRIBA! CAMINA SI QUIERES\nY TOCA A PARA LANZARLO', teclas: 'J', botones: ['punch'], listo: () => saco.st === 'thrown' },
       {
-        texto: 'RECOGE LA CHANCLETA:\nPÁRATE ENCIMA Y TOCA A', teclas: 'J', botones: ['punch', 'stick'],
+        texto: 'RECOGE UN ARMA DEL PISO:\nPÁRATE ENCIMA Y TOCA A', teclas: 'J', botones: ['punch', 'stick'],
         antes: () => { const c = chancla(); if (c && c.st !== 'hand') { c.st = 'floor'; c.x = yo.x + yo.dir * 30; c.y = yo.y; c.z = 0; } },
-        listo: () => yo.weapon?.kind === 'chancleta',
+        listo: () => !!yo.weapon,
       },
-      { texto: 'B LA LANZA\n¡Y VUELVE GIRANDO!', teclas: 'K', botones: ['kick'], listo: () => chancla()?.st === 'flying' && chancla()?.thrower === yo },
+      { texto: 'B LA LANZA\n¡LA CHANCLETA VUELVE GIRANDO!', teclas: 'K', botones: ['kick'], listo: () => this.items.some((i) => i.st === 'flying' && i.thrower === yo) },
       { texto: 'TU BARRA NEKKETSU ESTÁ LLENA:\nTOCA LA ESTRELLA: TU TÉCNICA', teclas: 'U', botones: ['special'], antes: () => { yo.meter = 100; }, listo: () => this.specials.has(yo) || yo.st === 'special' },
     ];
   }

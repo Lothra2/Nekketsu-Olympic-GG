@@ -266,6 +266,7 @@ export class Jabalina extends EventScene {
     else l.fig.set(m > 45 ? 'celebrate' : 'idle', true);
     l.fig.row = 'down_right';
     this.time.delayedCall(this.skip ? 900 : 1800, () => {
+      if (this.fase !== 'juego') { t.destroy(); return; }
       t.destroy();
       l.fig.set('idle', true);
       const i = this.gente2.indexOf(l);

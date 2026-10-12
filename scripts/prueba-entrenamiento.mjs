@@ -75,7 +75,7 @@ if (!solo.length || solo.includes('pelea')) {
     const acercar = async (dx, dy, cerca = 22) => {
       if (Math.abs(dy) > 4) await key(dy > 0 ? 'ArrowDown' : 'ArrowUp', 60);
       if (Math.abs(dx) > cerca) await key(dx > 0 ? 'ArrowRight' : 'ArrowLeft', 90);
-      else if (Math.abs(dx) < 12) await key(dx > 0 ? 'ArrowLeft' : 'ArrowRight', 40);
+      else if (Math.abs(dx) < 12) { await key(dx > 0 ? 'ArrowLeft' : 'ArrowRight', 60); await key(dx > 0 ? 'ArrowRight' : 'ArrowLeft', 12); }
       return Math.abs(dx) <= cerca && Math.abs(dx) >= 12 && Math.abs(dy) <= 4;
     };
     if (i === 0) { await key('ArrowRight', 500); return; }
@@ -85,7 +85,12 @@ if (!solo.length || solo.includes('pelea')) {
     if (i === 4) { await key('ArrowLeft', 40); await page.waitForTimeout(40); await page.keyboard.down('ArrowLeft'); await page.waitForTimeout(300); await page.keyboard.up('ArrowLeft'); return; }
     if (i === 5) { if (s.rst === 'down' && (await acercar(s.dx, s.dy, 20))) await key('j'); else await page.waitForTimeout(80); return; }
     if (i === 6) { await key('ArrowRight', 200); await key('j'); await page.waitForTimeout(300); return; }
-    if (i === 7) { if (await acercar(s.cx, s.cy, 6)) await key('j'); return; }
+    if (i === 7) {
+      if (Math.abs(s.cy) > 4) await key(s.cy > 0 ? 'ArrowDown' : 'ArrowUp', 60);
+      else if (Math.abs(s.cx) > 10) await key(s.cx > 0 ? 'ArrowRight' : 'ArrowLeft', 60);
+      else { await key('j'); await page.waitForTimeout(400); }
+      return;
+    }
     if (i === 8) { await key('k'); await page.waitForTimeout(300); return; }
     if (i === 9) { await key('u'); await page.waitForTimeout(500); return; }
   }, 90);
