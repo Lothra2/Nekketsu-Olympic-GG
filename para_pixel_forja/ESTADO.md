@@ -26,6 +26,16 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 
 ## Lo último del lado del juego
 
+- **Listo para C7b, el gallo y la paloma ([pixel_forja#25](https://github.com/Lothra2/pixel_forja/pull/25)).** Probado con el kit de la rama C7b generado en local (`--solo animales`), sobre el arte de E3a y del hẻm.
+  - Las aves se cargan como tira (`ave_<id>`) cuando `animales.<id>.tipo` es `"ave"`, con una animación por tramo (`ave_<id>_<anim>`). Los demás animales siguen en atlas.
+  - Origen en el ancla. Para la izquierda, espejo y el origen en `w - ancla[0]`, así las patas quedan en el mismo pixel.
+  - Los eventos del kit suenan: `canto` (un kikirikí sintetizado mientras llega el audio) y `aleteo`.
+  - El gallo del techo de zinc (x 2200, y 20): canta al arrancar la carrera y, si está a la vista, cada tanto. Entre medio `idle` o `picotear`. Si alguien pasa a menos de 40 px por el techo, `asustarse` en su sitio.
+  - Las palomas, en el layout como `animal: "paloma"`: seis en el hẻm (tres en el arranque y tres pasando el canal) y tres en la plaza de Bến Thành. Picotean, caminan, y a menos de 40 px `despegar`, `volar` lejos del que viene, `volar` de vuelta y `aterrizar` donde estaban. La sombra se queda en el piso.
+  - Sin las aves en el kit, el gallo gris de antes y ninguna paloma.
+  - `scripts/prueba-aves.mjs`: las palomas despegan y vuelven, y el gallo canta y se asusta.
+- **E3b ajustado probado:** la Cruz del Ávila se ve debajo del marcador con el zoom de la pelea, y el vacío de 128 se repite solo (el juego usa el tamaño de la textura).
+
 - **Pedido para el próximo lote de motor: exportar un pack sin la pelota pintada.** Las animaciones de vóley (`vb_bump`, `vb_set`, `spike`, `block`, `serve`, `vb_dive`) y de fútbol (`trap`, `header`, `volley`, `chilena`) traen la pelota dibujada en los cuadros. En el juego la pelota la mueve la física, así que se verían dos. Propuesta: en `kit.config.json`, por pack, `"sin_props": true`. El pack sale sin la pelota en los cuadros y la posición de la pelota de cada cuadro va en los datos por cuadro (`objetos`, como el arma en la mano). Con eso entran Vóley Playa Margarita y Fútbol Callejero, y Đá cầu usa `volley`, `header` y `chilena` de verdad.
 - **Pruebas nuevas en el juego, con fondos pintados por código mientras llega el arte:** Tama-wari Hội An (usa el layout `hoian` y la bola `bola_tama` del kit, con una copia azul para la Familia) y Đá cầu en el parque Tao Đàn.
 

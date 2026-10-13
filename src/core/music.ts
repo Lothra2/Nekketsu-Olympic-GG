@@ -162,6 +162,23 @@ class Chip {
     this.osc(wave, f, this.ctx.currentTime + 0.001, dur, vol, this.sfx, slide);
   }
 
+  /** El kikirikí del gallo: tres notas que suben y la última larga que cae. */
+  kikiriki(vol = 0.1) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime + 0.001;
+    this.osc('saw', 640, t, 0.07, vol, this.sfx, 860);
+    this.osc('saw', 720, t + 0.1, 0.07, vol, this.sfx, 940);
+    this.osc('saw', 800, t + 0.2, 0.1, vol, this.sfx, 1080);
+    this.osc('saw', 980, t + 0.34, 0.5, vol, this.sfx, 620);
+  }
+
+  /** El aleteo de un ave: tres golpecitos de ruido. */
+  aleteo(vol = 0.12) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime + 0.001;
+    for (let i = 0; i < 3; i++) this.hit('s', t + i * 0.07, vol * (1 - i * 0.25), this.sfx);
+  }
+
   /** Golpe de ruido (explosiones, impacto de logo). */
   boom(vol = 0.6) {
     if (!this.ctx) return;

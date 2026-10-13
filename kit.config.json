@@ -129,7 +129,9 @@
   },
   "objetos": true,
   "animales": [
-    "thor"
+    "thor",
+    "gallo",
+    "paloma"
   ],
   "ui": {
     "fuentes": {

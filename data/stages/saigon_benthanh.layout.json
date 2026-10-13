@@ -407,6 +407,24 @@
    "desde": "derecha",
    "x0": 3260,
    "x1": 3840
+  },
+  {
+   "tipo": "animal",
+   "animal": "paloma",
+   "x": 430,
+   "y": 104
+  },
+  {
+   "tipo": "animal",
+   "animal": "paloma",
+   "x": 446,
+   "y": 112
+  },
+  {
+   "tipo": "animal",
+   "animal": "paloma",
+   "x": 462,
+   "y": 100
   }
  ],
  "ranuras_deco": [

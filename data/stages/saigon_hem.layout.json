@@ -48,6 +48,12 @@
   "entidades": [
     { "tipo": "salida", "x": 40 },
     { "tipo": "meta", "x": 3790 },
+    { "tipo": "animal", "animal": "paloma", "x": 210, "y": 34 },
+    { "tipo": "animal", "animal": "paloma", "x": 228, "y": 46 },
+    { "tipo": "animal", "animal": "paloma", "x": 246, "y": 38 },
+    { "tipo": "animal", "animal": "paloma", "x": 1480, "y": 70 },
+    { "tipo": "animal", "animal": "paloma", "x": 1496, "y": 82 },
+    { "tipo": "animal", "animal": "paloma", "x": 1512, "y": 76 },
     { "tipo": "objeto", "objeto": "silla_plastica", "x": 520, "y": 64 },
     { "tipo": "objeto", "objeto": "chancleta", "x": 700, "y": 104 },
     { "tipo": "objeto", "objeto": "coco", "x": 1100, "y": 40 },

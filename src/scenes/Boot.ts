@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { KIT, setKit, queueKit, cutPortraits, makeFxAnims, makeNpcAnims, type Manifest } from '../core/kit';
+import { KIT, setKit, queueKit, cutPortraits, makeFxAnims, makeNpcAnims, makeAveAnims, type Manifest } from '../core/kit';
 import { makeBackdrops } from '../gfx/backdrops';
 import { makeMapa } from '../gfx/mapa';
 import { makeUtileria } from '../gfx/utileria';
@@ -27,6 +27,7 @@ export class Boot extends Phaser.Scene {
       cutPortraits(this);
       makeFxAnims(this);
       makeNpcAnims(this);
+      makeAveAnims(this);
       makeBackdrops(this);
       makeMapa(this);
       makeUtileria(this);

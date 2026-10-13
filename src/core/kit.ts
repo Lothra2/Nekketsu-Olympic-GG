@@ -42,7 +42,18 @@ export interface Atleta {
 
 export interface Objeto { atlas: string; w: number; h: number; agarre: Pt; peso: 'liviano' | 'medio' | 'pesado'; rota: boolean; uso: string; nombre: { es: string; en: string }; anims: Record<string, number> }
 
-export interface Animal { nombre: string; celda: number; pivote: Pt; atlas: string; imagen: string; anims: Record<string, AnimData> }
+export interface Animal { nombre: string; celda: number; pivote: Pt; atlas: string; imagen: string; anims: Record<string, AnimData>; tipo?: string }
+
+/**
+ * Un ave del kit (lote C7b): va en `animales` con `tipo: "ave"`, pero en una tira como los NPC y no en atlas.
+ * El ancla son las patas sobre el piso. `aire` dice cuánto sube el dibujo sobre el ancla en cada cuadro (la sombra
+ * se queda abajo). Miran a la derecha: para la izquierda, espejo.
+ */
+export interface Ave {
+  nombre: string; tipo: 'ave'; imagen: string; w: number; h: number; ancla: Pt; cuadros: number;
+  anims: Record<string, { desde: number; cuadros: number; fps: number; loop: boolean; aire?: number[] }>;
+  eventos?: Record<string, { tipo: string; cuadro: number }[]>;
+}
 
 export interface Manifest {
   atletas: Record<string, Atleta>;
@@ -122,6 +133,10 @@ export interface Npc {
 export const npcs = (): Record<string, Npc> =>
   Object.fromEntries(Object.entries(kit().npc ?? {}).filter((e): e is [string, Npc] => typeof e[1] === 'object' && !!e[1]?.archivo));
 
+/** Las aves del kit (las que vienen en `animales` con `tipo: "ave"`). */
+export const aves = (): Record<string, Ave> =>
+  Object.fromEntries(Object.entries(kit().animales).filter(([, a]) => a.tipo === 'ave')) as unknown as Record<string, Ave>;
+
 /** Pone en la cola de carga todo el kit. Se llama con el manifiesto ya cargado. */
 export function queueKit(scene: Phaser.Scene) {
   const m = kit();
@@ -129,7 +144,8 @@ export function queueKit(scene: Phaser.Scene) {
     for (const [p, pd] of Object.entries(a.packs)) scene.load.atlas(texKey(id, p), KIT + pd.imagen, KIT + pd.atlas);
     scene.load.image(`retratos:${id}`, KIT + a.retratos.archivo);
   }
-  for (const [id, a] of Object.entries(m.animales)) scene.load.atlas(texKey(id, 'animal'), KIT + a.imagen, KIT + a.atlas);
+  for (const [id, a] of Object.entries(m.animales)) if (a.tipo !== 'ave') scene.load.atlas(texKey(id, 'animal'), KIT + a.imagen, KIT + a.atlas);
+  for (const [id, a] of Object.entries(aves())) scene.load.spritesheet(`ave_${id}`, KIT + a.imagen, { frameWidth: a.w, frameHeight: a.h });
   const armas = Object.values(m.objetos)[0];
   if (armas) scene.load.atlas('armas', KIT + armas.atlas.replace('.json', '.png'), KIT + armas.atlas);
   scene.load.image('cabecitas', KIT + m.cabecitas.archivo);
@@ -156,6 +172,17 @@ export function makeNpcAnims(scene: Phaser.Scene) {
       const key = `npc_${id}_${a}`;
       if (scene.anims.exists(key) || !scene.textures.exists(`npc_${id}`)) continue;
       scene.anims.create({ key, frames: scene.anims.generateFrameNumbers(`npc_${id}`, { start: d.desde, end: d.desde + d.cuadros - 1 }), frameRate: d.fps, repeat: d.loop ? -1 : 0 });
+    }
+  }
+}
+
+/** Una animación por cada tramo de la tira de cada ave: `ave_<id>_<anim>`. */
+export function makeAveAnims(scene: Phaser.Scene) {
+  for (const [id, a] of Object.entries(aves())) {
+    for (const [n, d] of Object.entries(a.anims)) {
+      const key = `ave_${id}_${n}`;
+      if (scene.anims.exists(key) || !scene.textures.exists(`ave_${id}`)) continue;
+      scene.anims.create({ key, frames: scene.anims.generateFrameNumbers(`ave_${id}`, { start: d.desde, end: d.desde + d.cuadros - 1 }), frameRate: d.fps, repeat: d.loop ? -1 : 0 });
     }
   }
 }

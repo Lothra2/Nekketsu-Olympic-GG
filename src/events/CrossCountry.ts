@@ -13,7 +13,7 @@ import estadio from '../../data/stages/saigon_estadio.layout.json';
 import type { Paso } from '../core/coach';
 import { hayArte, pintarEscenario, queueEscenario } from './escenario';
 import { efecto, talla } from '../core/fx';
-import { kit, npcs } from '../core/kit';
+import { kit, npcs, aves, type Ave } from '../core/kit';
 import { Figura } from '../core/figura';
 
 /** El formato de layout de PixelForja (PEDIDO 10.2), la parte que el Cross Country usa. */
@@ -84,6 +84,12 @@ interface Perro { x: number; y: number; z: number; x0: number; f: Figura; zz: Ph
 /** Bailarines de break en rueda: el que choca con uno, al piso. */
 interface Rueda { x: number; y: number; z: number; r: number; t: number; g: (Phaser.GameObjects.Graphics | Quieto)[] }
 /** Un NPC del kit en su sitio: lo suyo en bucle (`normal`) y su reacción cuando pasa alguien (`reac`). */
+/** Un ave del kit: el gallo se asusta en su sitio; la paloma se va volando y vuelve. `alt` es la altura del dibujo. */
+interface Pajaro {
+  id: string; a: Ave; s: Phaser.GameObjects.Sprite; sombra: Phaser.GameObjects.Ellipse;
+  x: number; y: number; alt: number; x0: number; y0: number; z0: number; izq0: boolean;
+  estado: 'suelo' | 'susto' | 'despega' | 'vuela' | 'vuelve' | 'aterriza'; t: number; vx: number; oir: boolean;
+}
 interface Quieto { s: Phaser.GameObjects.Sprite; id: string; normal: string; reac: string; espera: number; x: number; y: number }
 /** Los pelados que juegan fútbol: cada tanto la pelota cruza el callejón de lado a lado. */
 interface Pelados { x: number; cada: number; t: number; bola: { x: number; y: number; g: Phaser.GameObjects.Graphics | Phaser.GameObjects.Sprite } | null; chicos: Quieto[]; patea: boolean }
@@ -130,6 +136,8 @@ export class CrossCountry extends EventScene implements World {
   private perros: Perro[] = [];
   private ruedas: Rueda[] = [];
   private quietos: Quieto[] = [];
+  private pajaros: Pajaro[] = [];
+  private cantoInicio = false;
   private pelados: Pelados[] = [];
   /** el metrocable del fondo, en gris: las cabinas que cruzan el cielo */
   private cabinas: { g: Phaser.GameObjects.Graphics; u: number }[] = [];
@@ -212,6 +220,7 @@ export class CrossCountry extends EventScene implements World {
     if (L.clima[0] === 'aguacero') this.ponerLluvia();
     this.armarPerros();
     this.armarGente();
+    this.armarAves();
 
     this.gente.forEach((c, i) => {
       const y = L.carriles[i % L.carriles.length].y;
@@ -394,6 +403,7 @@ export class CrossCountry extends EventScene implements World {
     this.fruta(dt);
     this.perrosTick(dt);
     this.genteTick(dt);
+    this.avesTick(dt);
     this.coach?.tick(dt);
     this.render();
     if (juego) this.checkEnd();
@@ -613,11 +623,163 @@ export class CrossCountry extends EventScene implements World {
         }
       }
     }
-    for (const e of this.L.entidades) if (e.tipo === 'animal' && e.animal === 'gallo' && !this.arte) {
+    for (const e of this.L.entidades) if (e.tipo === 'animal' && e.animal === 'gallo' && !aves().gallo && !this.arte) {
       const x = e.x ?? 0, y = e.y ?? 20, z = Math.max(0, this.suelo(x, y, 999));
       const g = this.add.graphics().setPosition(this.px(x, y), FT + y - z).setDepth(FT + y);
       g.fillStyle(0xe8e0d0).fillEllipse(0, -6, 12, 9).fillStyle(0xd03020).fillRect(2, -14, 4, 4).fillStyle(0xf2c230).fillRect(6, -9, 3, 2).fillStyle(0x2a6a3a).fillRect(-8, -12, 4, 6);
       this.rotulo(this.px(x, y) - 12, FT + y - z - 22, 'GALLO');
+    }
+  }
+
+  // ------------------------------------------------------------------ aves: el gallo y las palomas (lote C7b)
+
+  /** El gallo del techo y las palomas, donde el layout los pone. Sin el kit de aves no se pone nada (el gallo gris sí). */
+  private armarAves() {
+    for (const e of this.L.entidades) {
+      if (e.tipo !== 'animal' || (e.animal !== 'gallo' && e.animal !== 'paloma')) continue;
+      // el gallo mira a los que vienen; las palomas, para cualquier lado
+      this.ave(e.animal, e.x ?? 0, e.y ?? 60, e.animal === 'gallo' || Math.random() < 0.5);
+    }
+  }
+
+  private ave(id: string, x: number, y: number, izq: boolean) {
+    const a = aves()[id];
+    if (!a || !this.anims.exists(`ave_${id}_idle`)) return;
+    const z = Math.max(0, this.suelo(x, y, 999));
+    const s = this.add.sprite(0, 0, `ave_${id}`, a.anims.idle.desde);
+    const sombra = this.add.ellipse(0, 0, Math.round(a.w * 0.5), 3, 0x000000, 0.25);
+    const p: Pajaro = { id, a, s, sombra, x, y, alt: z, x0: x, y0: y, z0: z, izq0: izq, estado: 'suelo', t: Math.random() * 2, vx: 0, oir: false };
+    this.voltear(p, izq);
+    s.play({ key: `ave_${id}_idle`, startFrame: Phaser.Math.Between(0, a.anims.idle.cuadros - 1) });
+    // los eventos del kit: el canto en el cuadro 3 de cantar, el aleteo en el 1 de asustarse y despegar
+    s.on(Phaser.Animations.Events.ANIMATION_UPDATE, (anim: Phaser.Animations.Animation, f: Phaser.Animations.AnimationFrame) => {
+      const n = anim.key.slice(`ave_${id}_`.length);
+      const i = Number(f.textureFrame) - (a.anims[n]?.desde ?? 0);
+      for (const ev of a.eventos?.[n] ?? []) {
+        if (ev.cuadro !== i || (!this.aveEnVista(p) && !p.oir)) continue;
+        if (ev.tipo === 'canto') chip.kikiriki(this.aveEnVista(p) ? 0.1 : 0.05);
+        else if (ev.tipo === 'aleteo') chip.aleteo(0.1);
+      }
+    });
+    this.pajaros.push(p);
+    this.ponerAve(p);
+  }
+
+  /** Miran a la derecha: a la izquierda, espejo, con el ancla en el mismo pixel de las patas. */
+  private voltear(p: Pajaro, izq: boolean) {
+    const { w, h, ancla } = p.a;
+    p.s.setFlipX(izq).setOrigin((izq ? w - ancla[0] - 0.5 : ancla[0] + 0.5) / w, (ancla[1] + 0.5) / h);
+  }
+
+  private aveEnVista(p: Pajaro) {
+    const v = this.cameras.main.worldView, sx = this.px(p.x, p.y);
+    return sx > v.x - 10 && sx < v.right + 10;
+  }
+
+  /** Toca una animación del ave y, al terminar, `luego` (una sola espera a la vez). Si el kit no la trae, salta a `luego`. */
+  private aveAnim(p: Pajaro, n: string, luego?: () => void) {
+    p.s.off(Phaser.Animations.Events.ANIMATION_COMPLETE);
+    if (!this.anims.exists(`ave_${p.id}_${n}`)) { luego?.(); return; }
+    p.s.play(`ave_${p.id}_${n}`);
+    if (luego) p.s.once(Phaser.Animations.Events.ANIMATION_COMPLETE, luego);
+  }
+
+  /** El dibujo a su altura y la sombra en el piso que tiene abajo; volando va encima de todo. */
+  private ponerAve(p: Pajaro) {
+    const piso = p.estado === 'suelo' || p.estado === 'susto' ? p.alt : Math.max(0, this.suelo(p.x, p.y, 999));
+    const sx = Math.round(this.px(p.x, p.y)), alto = p.alt - piso;
+    p.s.setPosition(sx, Math.round(FT + p.y - p.alt));
+    p.sombra.setPosition(sx, Math.round(FT + p.y - piso)).setScale(Math.max(0.35, 1 - alto / 90)).setVisible(alto < 140);
+    const d = this.profundidadEn(p.x, p.y, piso);
+    p.s.setDepth(alto > 10 ? 4500 : d);
+    p.sombra.setDepth(d - 0.05);
+  }
+
+  private avesTick(dt: number) {
+    const juego = this.fase === 'juego';
+    // el gallo canta cuando arranca la carrera, aunque esté lejos
+    const arranca = juego && !this.cantoInicio;
+    if (arranca) this.cantoInicio = true;
+    const cerca = (p: Pajaro, d = 40) => this.gente2.find((r) => Math.hypot(r.a.x - p.x, r.a.y - p.y) < d && Math.abs(r.a.z - p.z0) < 30)?.a;
+    for (const p of this.pajaros) {
+      p.t -= dt;
+      const quien = cerca(p);
+      if (p.id === 'gallo') {
+        if (arranca) { p.oir = true; p.estado = 'susto'; this.aveAnim(p, 'cantar', () => { p.oir = false; this.aveQuieta(p); }); }
+        else if (p.estado === 'suelo' && quien) {
+          p.estado = 'susto';
+          this.aveAnim(p, 'asustarse', () => { p.t = 1.2; this.aveQuieta(p); });
+        } else if (p.estado === 'suelo' && p.t <= 0) {
+          // entre medio picotea, se queda quieto y, si está a la vista, canta cada tanto
+          p.t = 2 + Math.random() * 3;
+          const canta = this.aveEnVista(p) && Math.random() < 0.3;
+          if (canta || Math.random() < 0.5) { p.estado = 'susto'; this.aveAnim(p, canta ? 'cantar' : 'picotear', () => this.aveQuieta(p)); }
+        }
+      } else this.palomaTick(p, dt, quien);
+      this.ponerAve(p);
+    }
+  }
+
+  /** Vuelve al idle en su sitio. */
+  private aveQuieta(p: Pajaro) {
+    if (!p.s.active) return;
+    p.estado = 'suelo';
+    this.aveAnim(p, 'idle');
+  }
+
+  /** La paloma: picotea y camina; si pasa alguien, despega, se va volando, vuelve y aterriza donde estaba. */
+  private palomaTick(p: Pajaro, dt: number, quien: Actor | undefined) {
+    const vuelta = Math.hypot(p.x - p.x0, p.y - p.y0);
+    switch (p.estado) {
+      case 'suelo': {
+        if (quien) {
+          // sale para el lado contrario de quien viene
+          p.estado = 'despega';
+          const izq = quien.x > p.x;
+          this.voltear(p, izq);
+          p.vx = (izq ? -1 : 1) * (70 + Math.random() * 30);
+          this.aveAnim(p, 'despegar', () => { p.estado = 'vuela'; p.t = 1.6 + Math.random() * 0.8; this.aveAnim(p, 'volar'); });
+          break;
+        }
+        if (p.s.anims.currentAnim?.key === `ave_${p.id}_caminar`) {
+          p.x += (p.s.flipX ? -1 : 1) * 8 * dt;
+          if (Math.abs(p.x - p.x0) > 14) this.voltear(p, p.x > p.x0);
+        }
+        if (p.t > 0) break;
+        p.t = 1 + Math.random() * 2;
+        const r = Math.random();
+        if (r < 0.35) { this.voltear(p, Math.random() < 0.5); this.aveAnim(p, 'caminar'); }
+        else if (r < 0.75) { this.aveAnim(p, 'picotear', () => this.aveAnim(p, 'idle')); }
+        else this.aveAnim(p, 'idle');
+        break;
+      }
+      case 'despega':
+        // los cuadros ya suben 3 px: el juego solo la empuja un poco
+        p.x += p.vx * 0.3 * dt;
+        break;
+      case 'vuela':
+        // se va para el fondo, subiendo
+        p.x += p.vx * dt;
+        p.y = Math.max(0, p.y - 14 * dt);
+        p.alt = Math.min(p.z0 + 90, p.alt + 45 * dt);
+        if (p.t <= 0) { p.estado = 'vuelve'; this.voltear(p, p.x0 < p.x); }
+        break;
+      case 'vuelve': {
+        // si todavía hay gente donde estaba, da otra vuelta
+        if (vuelta < 70 && this.gente2.some((r) => Math.hypot(r.a.x - p.x0, r.a.y - p.y0) < 50)) { p.estado = 'vuela'; p.t = 1; p.vx = -p.vx; this.voltear(p, p.vx < 0); break; }
+        const v = Math.min(1, (75 * dt) / Math.max(1, vuelta));
+        p.x += (p.x0 - p.x) * v;
+        p.y += (p.y0 - p.y) * v;
+        // baja a medida que llega: a 4 px del sitio toca el piso con los cuadros de aterrizar
+        p.alt = p.z0 + Math.min(p.alt - p.z0, Math.max(0, vuelta - 4) * 0.6);
+        if (vuelta < 4) {
+          p.x = p.x0; p.y = p.y0; p.alt = p.z0;
+          p.estado = 'aterriza';
+          this.aveAnim(p, 'aterrizar', () => { p.t = 1.5; this.voltear(p, p.izq0); this.aveQuieta(p); });
+        }
+        break;
+      }
+      default:
     }
   }
 
