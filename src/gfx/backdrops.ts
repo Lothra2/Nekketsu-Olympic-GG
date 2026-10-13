@@ -813,6 +813,48 @@ function barrio(): HTMLCanvasElement {
   return p.done();
 }
 
+/**
+ * Playa El Agua, en Margarita: el cielo limpio, el mar turquesa con sus olas, el cerro verde al fondo, las palmeras,
+ * los toldos de colores y los vendedores. Abajo, la arena de la cancha.
+ */
+function margarita(): HTMLCanvasElement {
+  const p = new Painter(W, H, M);
+  const r = rng(63);
+  p.vgrad(0, 160, [C('#3a9ae8'), C('#6ab8f0'), C('#a8daf8'), C('#d8f0fc')]);
+  for (let i = 0; i < 7; i++) { const cx = X0 + r() * AW, cy = 20 + r() * 50; for (let k = 0; k < 6; k++) p.circle(cx + k * 8 - 20, cy + Math.sin(k) * 3, 6 + r() * 4, C('#ffffff'), 230); }
+  // el cerro verde de la isla, al fondo
+  const cerro = (x: number) => 150 - 46 * Math.exp(-Math.pow((x - 120) / 140, 2)) - 20 * Math.exp(-Math.pow((x - 520) / 90, 2));
+  for (let x = X0; x < X1; x++) { const top = Math.round(cerro(x)); for (let y = top; y < 162; y++) p.px(x, y, (x * 5 + y * 3) % 9 === 0 ? C('#3a7a4a') : y < top + 2 ? C('#6aaa5a') : C('#4a8a52')); }
+  // el mar turquesa, más oscuro lejos, con las olas que revientan en la orilla
+  p.vgrad(160, 222, [C('#1a6ab8'), C('#2a9ac8'), C('#3ac8d0'), C('#7ae0d8')]);
+  for (let y = 166; y < 220; y += 5) for (let x = desde(0, 24); x < X1; x += 24) p.rect(x + ((y * 7) % 24), y, 8 + (y - 160) / 6, 1, C('#d8f8f8'), 160);
+  for (let x = desde(0, 4); x < X1; x += 4) p.rect(x, 218 + Math.round(Math.sin(x / 11) * 2), 4, 3, C('#ffffff'));
+  // una lancha y un velero
+  p.rect(480, 178, 22, 4, C('#f4f4f4')); p.rect(484, 174, 8, 4, C('#d02a2a'));
+  p.rect(150, 168, 12, 3, C('#f4f4f4')); p.line(156, 150, 156, 168, C('#5a4a3a')); for (let k = 0; k < 14; k++) p.rect(157, 152 + k, Math.round(k / 2), 1, C('#ffffff'));
+  // la arena de atrás, con toldos de colores, sillas y palmeras
+  p.rect(X0, 224, AW, 48, C('#f0dca8'));
+  for (let i = 0; i < 900; i++) p.px(X0 + r() * AW, 224 + r() * 48, r() < 0.5 ? C('#e0c890') : C('#f8ecc0'));
+  const TOLDOS = ['#e83a3a', '#f2c230', '#2a8ad0', '#3ac06a', '#e870b0'].map(C);
+  for (let x = desde(30, 110); x < X1; x += 110) {
+    const col = TOLDOS[Math.floor(r() * TOLDOS.length)];
+    for (let k = 0; k < 7; k++) p.rect(x - 14 + k, 228 + k, 28 - 2 * k, 1, k % 2 ? col : C('#ffffff'));
+    p.rect(x, 234, 1, 20, C('#8a7a6a'));
+    p.rect(x - 9, 250, 8, 3, C('#2a8ad0'));
+  }
+  const palmera = (x: number, alto: number) => {
+    for (let k = 0; k < alto; k++) p.rect(x + Math.round(Math.sin(k / 18) * 6), 262 - k, 3, 1, k % 4 ? C('#8a6a4a') : C('#6a4a32'));
+    const tx = x + Math.round(Math.sin(alto / 18) * 6) + 1, ty = 262 - alto;
+    for (let h = 0; h < 6; h++) { const a = (h / 6) * Math.PI * 2; for (let k = 0; k < 16; k++) p.rect(tx + Math.cos(a) * k, ty + Math.sin(a) * k * 0.5 + k * k * 0.03, 2, 2, h % 2 ? C('#2a8a3a') : C('#3aaa4a')); }
+    p.circle(tx, ty + 2, 2, C('#6a4a2a'));
+  };
+  for (const [x, a] of [[60, 70], [250, 86], [430, 64], [600, 78]] as [number, number][]) palmera(x, a);
+  // la arena de la cancha
+  p.vgrad(270, 360, [C('#f2dca0'), C('#e8cc88'), C('#dcbc78')]);
+  for (let i = 0; i < 1600; i++) p.px(X0 + r() * AW, 270 + r() * 90, r() < 0.5 ? C('#d8b870') : C('#f8e8b8'));
+  return p.done();
+}
+
 /** Registra todos los fondos como texturas. */
 export function makeBackdrops(scene: Phaser.Scene) {
   const add = (k: string, c: HTMLCanvasElement) => { if (!scene.textures.exists(k)) scene.textures.addCanvas(k, c); };
@@ -834,6 +876,7 @@ export function makeBackdrops(scene: Phaser.Scene) {
   add('bg_cartagena', cartagena());
   add('bg_liceo', liceo());
   add('bg_barrio', barrio());
+  add('bg_margarita', margarita());
   // banderas sueltas
   for (const k of ['jp', 'vn', 'co', 've'] as const) {
     const p = new Painter(38, 26);

@@ -29,6 +29,7 @@ export const PRUEBAS_GIRA: PruebaGira[] = [
   { id: 'Tejo', scene: 'Tejo', nombre: 'TEJO LA CANDELARIA', lugar: 'BOGOTÁ, COLOMBIA', bandera: 'flag_co' },
   { id: 'Quemado', scene: 'Quemado', nombre: 'QUEMADO NEKKETSU', lugar: 'PATIO DEL LICEO, CARACAS', bandera: 'flag_ve' },
   { id: 'Chapita', scene: 'Chapita', nombre: 'CHAPITA', lugar: 'BARRIO DE CARACAS, VENEZUELA', bandera: 'flag_ve' },
+  { id: 'Voley', scene: 'Voley', nombre: 'VÓLEY PLAYA MARGARITA', lugar: 'PLAYA EL AGUA, MARGARITA', bandera: 'flag_ve' },
   { id: 'Judo', scene: 'Fight', nombre: 'JUDO Y VOVINAM', lugar: 'HÀ NỘI, VIETNAM', bandera: 'flag_vn', datos: { modo: 'judo' } },
   { id: 'Fight', scene: 'Fight', nombre: 'KACHINUKI FINAL', lugar: 'AZOTEA DE CARACAS, VENEZUELA', bandera: 'flag_ve', datos: { modo: '4v4', rival: 'kenji' } },
 ];

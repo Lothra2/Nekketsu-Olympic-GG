@@ -29,6 +29,7 @@ const MENUS: Record<string, { id: string; label: string }[]> = {
     { id: 'judo', label: 'JUDO HÀ NỘI' },
     { id: 'Quemado', label: 'QUEMADO NEKKETSU' },
     { id: 'Chapita', label: 'CHAPITA CARACAS' },
+    { id: 'Voley', label: 'VÓLEY MARGARITA' },
     { id: '<', label: 'ATRÁS' },
   ],
   // el Cross completo son cinco tramos; para una partida corta se puede correr uno solo
@@ -53,6 +54,7 @@ const MENUS: Record<string, { id: string; label: string }[]> = {
     { id: 'practica:Tejo', label: 'TEJO' },
     { id: 'practica:Quemado', label: 'QUEMADO' },
     { id: 'practica:Chapita', label: 'CHAPITA' },
+    { id: 'practica:Voley', label: 'VÓLEY' },
     { id: 'practica:Fight', label: 'PELEA' },
     { id: '<', label: 'ATRÁS' },
   ],
