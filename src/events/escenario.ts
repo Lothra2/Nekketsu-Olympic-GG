@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { efecto, hayFx } from '../core/fx';
 import { kit } from '../core/kit';
+import { MAX_W } from '../core/pantalla';
 
 /**
  * El arte de un escenario oblicuo de PixelForja (pedido 10.3), en `public/assets/escenarios/<id>/`.
@@ -12,7 +13,19 @@ const BASE = 'assets/escenarios/';
 
 interface Capa { archivo?: string; archivos?: string[]; trozo?: number; y: number; paralaje?: number; repetir_x?: boolean; clima?: string }
 interface Cuadro { x: number; y: number; w: number; h: number }
-interface Pieza { id: string; tipo: string; capa: 'cerca' | 'tras_cerca'; x: number; y: number; fps: number; velocidad?: number; cada?: number; cuadros: Cuadro[] }
+/**
+ * Una pieza de vida. Por capa:
+ * - `tras_cerca`: entre la ciudad lejana y las casas (las motos del fondo que cruzan con `velocidad` y `cada`).
+ * - `cerca`: encima de las casas, quieta, cambia de cuadro a `fps`.
+ * - `lejos`: pegada a la capa lejos (x e y son pixeles de lejos.png), corre con su paralaje, se repite cada su ancho y
+ *   va de `recorrido.desde` a `recorrido.hasta` en `recorrido.segundos` (el metrocable).
+ * - `objeto`: encima de un objeto, ordenada con los atletas por su `orden` (los peldaños de la escalera eléctrica).
+ */
+interface Pieza {
+  id: string; tipo: string; capa: 'cerca' | 'tras_cerca' | 'lejos' | 'objeto'; x: number; y: number; fps: number;
+  velocidad?: number; cada?: number; orden?: number; cuadros: Cuadro[];
+  recorrido?: { desde: [number, number]; hasta: [number, number]; segundos: number; desfase?: number };
+}
 interface Objeto { id: string; tipo: string; cuadro: Cuadro; x: number; y: number; orden: number }
 interface Luz { x: number; y: number; color: string; radio: number; latido?: number; parpadeo?: number; encendida: boolean }
 interface Particula { tipo: string; fx?: string; x0: number; x1: number; y0: number; y1: number; color?: string[]; cada: number; sube?: number; vida?: number }
@@ -65,8 +78,9 @@ export function pintarEscenario(scene: Phaser.Scene, id: string, depthFrente: nu
   const C = e.capas;
   const W = scene.scale.width;
   // cielo quieto y ciudad lejana con su paralaje
-  scene.add.image(0, C.cielo.y, k(id, 'cielo')).setOrigin(0).setScrollFactor(0).setDepth(-40);
-  const lejos = scene.add.tileSprite(0, C.lejos.y, W, scene.textures.get(k(id, 'lejos')).getSourceImage().height, k(id, 'lejos')).setOrigin(0).setScrollFactor(0).setDepth(-35);
+  // (el cielo cierra el ciclo a lo ancho: se repite para cubrir la pantalla más ancha)
+  scene.add.tileSprite(0, C.cielo.y, MAX_W, scene.textures.get(k(id, 'cielo')).getSourceImage().height, k(id, 'cielo')).setOrigin(0).setScrollFactor(0).setDepth(-40);
+  const lejos = scene.add.tileSprite(0, C.lejos.y, MAX_W, scene.textures.get(k(id, 'lejos')).getSourceImage().height, k(id, 'lejos')).setOrigin(0).setScrollFactor(0).setDepth(-35);
   // trozos de 1280: casas, piso y primer plano
   const trozos = (n: string, depth: number) => C[n]?.archivos?.forEach((_a, i) => scene.add.image(i * (C[n].trozo ?? 1280), C[n].y, k(id, `${n}_${i}`)).setOrigin(0).setDepth(depth));
   trozos('cerca', -20);
@@ -75,11 +89,20 @@ export function pintarEscenario(scene: Phaser.Scene, id: string, depthFrente: nu
   // objetos ordenados con los atletas
   const obj = scene.cache.json.get(k(id, 'objetos_json')) as { objetos: Objeto[] };
   for (const o of obj.objetos) scene.add.image(o.x, o.y, k(id, 'objetos'), cuadro(scene, k(id, 'objetos'), o.id, o.cuadro)).setOrigin(0).setDepth(FT + o.orden);
-  // vida
-  const vida = e.vida.piezas.map((p) => {
+  // vida: la de la capa lejos va aparte (pegada a la ciudad lejana, con su paralaje)
+  const anchoLejos = scene.textures.get(k(id, 'lejos')).getSourceImage().width;
+  const profundidad = (p: Pieza) => (p.capa === 'tras_cerca' ? -22 : p.capa === 'objeto' ? FT + (p.orden ?? 0) : -19);
+  const vida = e.vida.piezas.filter((p) => p.capa !== 'lejos').map((p) => {
     const frames = p.cuadros.map((c, i) => cuadro(scene, k(id, 'vida'), `${p.id}_${i}`, c));
-    const img = scene.add.image(p.x, p.y, k(id, 'vida'), frames[0]).setOrigin(0).setDepth(p.capa === 'tras_cerca' ? -22 : -19);
+    const img = scene.add.image(p.x, p.y, k(id, 'vida'), frames[0]).setOrigin(0).setDepth(profundidad(p));
     return { p, img, frames, t: Math.random() * 3, vuela: false, x: p.x, y: p.y, espera: 0 };
+  });
+  // en la capa lejos: copias cada ancho de lejos.png, las que hagan falta para cubrir la pantalla más ancha
+  const copias = Math.ceil(MAX_W / anchoLejos) + 1;
+  const lejana = e.vida.piezas.filter((p) => p.capa === 'lejos' && p.recorrido).map((p) => {
+    const frames = p.cuadros.map((c, i) => cuadro(scene, k(id, 'vida'), `${p.id}_${i}`, c));
+    const imgs = Array.from({ length: copias }, () => scene.add.image(0, C.lejos.y + p.recorrido!.desde[1], k(id, 'vida'), frames[0]).setOrigin(0).setScrollFactor(0).setDepth(-34));
+    return { p, imgs, frames };
   });
   // luces que laten y partículas sencillas (las que piden un efecto del kit esperan al lote F)
   const luces = ((scene.cache.json.get(k(id, 'luces')) as { luces: Luz[] }).luces ?? []).filter((l) => l.encendida).map((l) => {
@@ -103,7 +126,19 @@ export function pintarEscenario(scene: Phaser.Scene, id: string, depthFrente: nu
     inclinacion: e.inclinacion ?? 0,
     /** Paralaje, vida y luces. `cerca(x, y)` dice si hay un atleta a mano (para espantar palomas). */
     tick(dt: number, camX: number, cerca: (x: number, y: number) => boolean) {
-      lejos.tilePositionX = camX * (C.lejos.paralaje ?? 0.25);
+      const lejosX = camX * (C.lejos.paralaje ?? 0.25);
+      lejos.tilePositionX = lejosX;
+      const ahora = scene.time.now / 1000;
+      for (const { p, imgs, frames } of lejana) {
+        const r = p.recorrido!;
+        const f = (((ahora / r.segundos + (r.desfase ?? 0)) % 1) + 1) % 1;
+        const x = r.desde[0] + (r.hasta[0] - r.desde[0]) * f, y = r.desde[1] + (r.hasta[1] - r.desde[1]) * f;
+        // la vuelta: x en lejos.png, menos lo que corrió la capa, llevado a la primera copia que asoma por la izquierda
+        let sx = (((x - lejosX) % anchoLejos) + anchoLejos) % anchoLejos;
+        if (sx > 0) sx -= anchoLejos;
+        const cuadroAhora = frames[Math.floor(ahora * (p.fps || 1)) % frames.length];
+        imgs.forEach((img, i) => img.setPosition(Math.round(sx + i * anchoLejos), Math.round(C.lejos.y + y)).setFrame(cuadroAhora));
+      }
       for (const v of vida) {
         v.t += dt;
         const { p } = v;

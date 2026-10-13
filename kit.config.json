@@ -142,6 +142,7 @@
   },
   "fx": true,
   "audio": {
+    "formato": "comprimido",
     "sfx": [
       "golpe",
       "critico",

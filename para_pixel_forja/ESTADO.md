@@ -26,6 +26,15 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 
 ## Lo último del lado del juego
 
+- **Listo para E3a (Comuna 13, [pixel_forja#22](https://github.com/Lothra2/pixel_forja/pull/22)) y H1b (audio comprimido, [pixel_forja#21](https://github.com/Lothra2/pixel_forja/pull/21)).** Probado con el arte de la rama E3a generado en local: 9 de 9 pruebas, la carrera de punta a punta sin atascos.
+  - Vida en la capa `lejos` (el metrocable): pegada a lejos.png, con su paralaje, repetida cada su ancho y moviéndose por su `recorrido`.
+  - Vida en la capa `objeto` (los peldaños que corren, la bandera): `setDepth(FT + orden)`.
+  - Quien se para en una caja encima de otra (tanque, aire, letras) va en `FT + ordenCaja + 0.5`, con la misma cuenta que `ordenCaja()`. La silueta de quien queda tapado usa el mismo orden.
+  - El cielo y la ciudad lejana cubren la pantalla ancha (hasta 800): se repiten a lo ancho.
+  - `medellin_c13`: el asta del mirador baja a `alto: 30`.
+  - Audio: `archivo` puede ser texto o lista. Los efectos se cargan al arrancar y la música y los ambientes recién cuando una escena los toca (`bucle()` en `src/core/kit.ts`), en bucle con el marcador de `muestras / frecuencia`. `kit.config.json` ya pide `"formato": "comprimido"`.
+  - El arte de la Comuna 13 entra al repo cuando Rick apruebe y E2 y E3a estén en `main`. Hasta entonces la Comuna 13 se ve en gris en el juego.
+
 - **Vista inclinada de verdad en el gris** (`src/events/CrossCountry.ts`). Es la misma proyección del piso de la pelea: `px = x + 0.35 * y`, y lo del fondo queda a la izquierda.
   - Cajas como volúmenes (techo, frente y la cara izquierda).
   - Escalones con su contrahuella, escaleras eléctricas con pasamanos y huecos con sus paredes.

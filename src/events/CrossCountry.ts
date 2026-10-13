@@ -1232,7 +1232,18 @@ export class CrossCountry extends EventScene implements World {
     }
     const f = a.fig;
     s.setVisible(true).setTexture(f.texture.key, f.frame.name).setOrigin(f.originX, f.originY).setFlipX(f.flipX).setScale(f.scaleX, f.scaleY)
-      .setPosition(f.x, f.y).setTintFill(a.human ? 0xffe040 : a.team === 0 ? 0x6ab0ff : 0xff6a6a).setDepth(FT + tapa.y + tapa.d + 0.6);
+      .setPosition(f.x, f.y).setTintFill(a.human ? 0xffe040 : a.team === 0 ? 0x6ab0ff : 0xff6a6a).setDepth(FT + this.ordenCaja(tapa) + 0.6);
+  }
+
+  /**
+   * El orden de dibujo de una caja, igual que el arte de PixelForja: su borde de adelante, o, si está parada encima de
+   * otra (el tanque en la terraza, las letras en el mirador), justo después de la caja que tiene debajo. Quien se para
+   * arriba va medio paso después, así la terraza de abajo no lo tapa.
+   */
+  private ordenCaja(b: Caja): number {
+    let base: Caja | undefined;
+    for (const o of this.cajas) if (o !== b && o.z < b.z && b.x >= o.x && b.x + b.w <= o.x + o.w && b.y >= o.y && b.y + b.d <= o.y + o.d && (!base || o.z > base.z)) base = o;
+    return base ? this.ordenCaja(base) + 0.3 : b.y + b.d;
   }
 
   private render() {
@@ -1243,7 +1254,7 @@ export class CrossCountry extends EventScene implements World {
       const piso = a.base;
       if (piso > 0) {
         const c = this.cajas.find((b) => a.x >= b.x && a.x < b.x + b.w && a.y >= b.y && a.y < b.y + b.d && Math.abs(b.z - piso) < 1);
-        if (c) a.fig.setDepth(FT + c.y + c.d + 0.5);
+        if (c) a.fig.setDepth(FT + this.ordenCaja(c) + 0.5);
       }
       this.silueta(a);
       // en el agua, el agua tapa los pies (o medio cuerpo en el río)

@@ -50,7 +50,7 @@ export interface Manifest {
   objetos: Record<string, Objeto>;
   cabecitas: { archivo: string; celda: number; orden: string[] };
   ui: { fuentes: Record<string, { png: string; fnt: string; alto_linea: number; base: number }> };
-  audio: Partial<Record<'sfx' | 'musica' | 'ambientes', Record<string, { archivo: string; duracion: number; bucle?: boolean }>>>;
+  audio: Partial<Record<'sfx' | 'musica' | 'ambientes', Record<string, Sonido>>>;
   fx?: Record<string, Fx>;
   /** lo que el kit todavía no trae (llega con un lote futuro) */
   pendiente?: string[];
@@ -95,6 +95,15 @@ export function findAnim(id: string, anim: string, prefer?: string): { pack: str
   return { pack, data: at.packs[pack].anims[anim] };
 }
 
+/**
+ * Un sonido del kit. Con `audio.formato: "comprimido"` (lote H1b), `archivo` es la lista [ogg, m4a]: Phaser carga el
+ * primero que el navegador sepa tocar (OGG en Chrome y Android, M4A en Safari del iPhone). `muestras / frecuencia` es
+ * el largo exacto del original: el bucle se cierra ahí y no en el final del archivo comprimido, que trae relleno.
+ */
+export interface Sonido { archivo: string | string[]; duracion: number; bucle?: boolean; muestras?: number; frecuencia?: number }
+
+const rutas = (a: Sonido) => [a.archivo].flat().map((f) => KIT + f);
+
 /** Pone en la cola de carga todo el kit. Se llama con el manifiesto ya cargado. */
 export function queueKit(scene: Phaser.Scene) {
   const m = kit();
@@ -108,10 +117,8 @@ export function queueKit(scene: Phaser.Scene) {
   scene.load.image('cabecitas', KIT + m.cabecitas.archivo);
   // solo las fuentes (el manifiesto también trae notas en esa sección)
   for (const [n, f] of Object.entries(m.ui.fuentes)) if (typeof f === 'object' && f?.png) scene.load.bitmapFont(n, KIT + f.png, KIT + f.fnt);
-  // sonidos con su nombre; ambientes y música con prefijo para que no choquen
-  for (const [n, a] of Object.entries(m.audio.sfx ?? {})) scene.load.audio(n, KIT + a.archivo);
-  for (const [n, a] of Object.entries(m.audio.ambientes ?? {})) scene.load.audio(`amb_${n}`, KIT + a.archivo);
-  for (const [n, a] of Object.entries(m.audio.musica ?? {})) scene.load.audio(`mus_${n}`, KIT + a.archivo);
+  // los efectos al arrancar; la música y los ambientes pesan y se cargan cuando una escena los pide (bucle())
+  for (const [n, a] of Object.entries(m.audio.sfx ?? {})) scene.load.audio(n, rutas(a));
   for (const [id, e] of Object.entries(m.fx ?? {})) scene.load.spritesheet(`fx_${id}`, KIT + e.archivo, { frameWidth: e.w, frameHeight: e.h });
 }
 
@@ -135,4 +142,31 @@ export function cutPortraits(scene: Phaser.Scene) {
   }
   const c = scene.textures.get('cabecitas');
   m.cabecitas.orden.forEach((id, i) => c.add(id, 0, i * m.cabecitas.celda, 0, m.cabecitas.celda, m.cabecitas.celda));
+}
+
+/**
+ * Toca en bucle una música (`musica`) o un ambiente (`ambientes`) del kit, cargándolo la primera vez. El bucle se
+ * cierra con un marcador de `muestras / frecuencia` segundos, el largo del original: así el relleno del OGG y del M4A
+ * no mete un silencio cada vuelta. Devuelve el sonido (o null si el kit no lo trae, o la escena se fue antes).
+ */
+export async function bucle(scene: Phaser.Scene, seccion: 'musica' | 'ambientes', n: string, volumen = 0.5): Promise<Phaser.Sound.BaseSound | null> {
+  const a = kit().audio[seccion]?.[n];
+  if (!a) return null;
+  const key = `${seccion === 'musica' ? 'mus' : 'amb'}_${n}`;
+  if (!scene.cache.audio.exists(key)) {
+    await new Promise<void>((res) => {
+      scene.load.audio(key, rutas(a));
+      scene.load.once(Phaser.Loader.Events.COMPLETE, () => res());
+      scene.load.start();
+    });
+  }
+  if (!scene.sys.isActive() || !scene.cache.audio.exists(key)) return null;
+  const s = scene.sound.add(key, { volume: volumen });
+  const largo = a.muestras && a.frecuencia ? a.muestras / a.frecuencia : 0;
+  if (largo > 0) {
+    s.addMarker({ name: 'bucle', start: 0, duration: largo, config: { loop: true, volume: volumen } });
+    s.play('bucle');
+  } else s.play({ loop: true });
+  scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => s.destroy());
+  return s;
 }
