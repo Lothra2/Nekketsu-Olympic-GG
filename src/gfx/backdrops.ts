@@ -581,6 +581,67 @@ function candelaria(): HTMLCanvasElement {
   return p.done();
 }
 
+
+/**
+ * Hà Nội de madrugada: el lago Hoàn Kiếm con la Torre de la Tortuga en su islote, el puente rojo Thê Húc hacia el
+ * templo Ngọc Sơn, los sauces, la neblina, y el tatami del dojo al aire libre en la orilla.
+ */
+function hanoi(): HTMLCanvasElement {
+  const p = new Painter(W, H, M);
+  const r = rng(101);
+  p.vgrad(0, 150, [C('#f2c8a8'), C('#f6dcc0'), C('#eae6d8'), C('#d8e0d8')]);
+  // la ciudad vieja a lo lejos, entre la neblina
+  buildings(p, { x0: X0, x1: X1, base: 150, minH: 10, maxH: 34, minW: 16, maxW: 34, cols: [C('#c8c4bc'), C('#bcb8b2'), C('#d0ccc4')], win: C('#e8e2d8'), winOff: C('#aaa49c'), lit: 0.3, seed: 102 });
+  for (let y = 110; y < 150; y++) for (let x = X0; x < X1; x++) if ((x * 5 + y * 3) % 4 === 0) p.px(x, y, C('#f0ece4'), 90);
+  // el lago, verde y quieto
+  p.vgrad(150, 232, [C('#8aa89a'), C('#6e9484'), C('#5a8474')]);
+  for (let i = 0; i < 300; i++) p.rect(X0 + r() * AW, 152 + r() * 78, 2 + r() * 6, 1, r() < 0.5 ? C('#a8c4b4') : C('#4e7666'), 160);
+  // la Torre de la Tortuga en su islote
+  p.circle(470, 168, 18, C('#4a6a4a'));
+  p.rect(452, 166, 36, 6, C('#3e5e3e'));
+  p.rect(462, 132, 16, 34, C('#c8b89a'));
+  p.rect(464, 120, 12, 12, C('#c0b090'));
+  p.rect(467, 110, 6, 10, C('#b8a888'));
+  for (const [y, w] of [[132, 22], [120, 18], [110, 12]] as [number, number][]) p.rect(470 - w / 2, y - 2, w, 2, C('#7a5a44'));
+  for (let k = 0; k < 3; k++) { p.rect(465 + k * 4, 140, 2, 6, C('#5a4a3a')); p.rect(465 + k * 4, 150, 2, 6, C('#5a4a3a')); }
+  // el puente rojo Thê Húc, en arco, y el templo Ngọc Sơn al final
+  for (let x = 40; x <= 230; x++) {
+    const u = (x - 40) / 190, y = 196 - Math.sin(u * Math.PI) * 18;
+    p.rect(x, y, 1, 4, C('#d02a2a'));
+    if (x % 6 === 0) p.rect(x, y - 6, 1, 6, C('#b02020'));
+    p.rect(x, y - 6, 1, 1, C('#e04040'));
+    if (x % 24 === 0) p.rect(x, y + 4, 2, 232 - y - 4, C('#8a2020'));
+  }
+  p.rect(222, 170, 46, 26, C('#c8a060'));
+  for (let k = 0; k < 7; k++) p.rect(216 + k, 162 + k, 58 - 2 * k, 1, k % 2 ? C('#5a3a2a') : C('#7a4a30'));
+  p.rect(238, 180, 14, 16, C('#5a2a1a'));
+  // sauces llorones en la orilla
+  for (const x of [-30, 330, 610]) {
+    p.rect(x - 3, 120, 6, 112, C('#5a4a3a'));
+    for (let i = 0; i < 220; i++) { const a = r() * Math.PI, d = r() * 50; const lx = x + Math.cos(a) * d * 1.3, ly = 110 + Math.sin(a) * 20 - 10; for (let k = 0; k < 8 + r() * 30; k += 2) p.px(lx, ly + k, r() < 0.5 ? C('#6a9a4a') : C('#8aba5a')); }
+  }
+  // la orilla y la tarima del dojo
+  p.rect(X0, 232, AW, 14, C('#7a5a3e'));
+  p.rect(X0, 232, AW, 2, C('#9a7a5a'));
+  for (let xx = desde(0, 20); xx < X1; xx += 20) p.rect(xx, 234, 1, 12, C('#5a4030'));
+  // el tatami: esteras verdes y amarillas con sus bordes
+  for (let y = 246; y < 344; y++) for (let x = p.x0; x < p.x1; x++) {
+    const cx = Math.floor((x + 400) / 64), cy = Math.floor((y - 246) / 33);
+    p.px(x, y, (cx + cy) % 2 ? C('#c8c070') : C('#9ab05a'));
+  }
+  for (let y = 246; y < 344; y += 33) p.rect(X0, y, AW, 1, C('#5a6a3a'));
+  for (let x = desde(0, 64) - 16; x < X1; x += 64) p.rect(x, 246, 1, 98, C('#5a6a3a'));
+  for (let i = 0; i < 1600; i++) p.px(X0 + r() * AW, 246 + r() * 98, C('#6a7a4a'), 70);
+  // la zona de combate, en rojo
+  p.rect(100, 252, 440, 2, C('#c03a2a'));
+  p.rect(100, 336, 440, 2, C('#c03a2a'));
+  p.rect(100, 252, 2, 86, C('#c03a2a'));
+  p.rect(538, 252, 2, 86, C('#c03a2a'));
+  p.rect(X0, 344, AW, 16, C('#6a4a32'));
+  for (let xx = desde(0, 24); xx < X1; xx += 24) p.rect(xx, 344, 1, 16, C('#4a3022'));
+  return p.done();
+}
+
 /** Registra todos los fondos como texturas. */
 export function makeBackdrops(scene: Phaser.Scene) {
   const add = (k: string, c: HTMLCanvasElement) => { if (!scene.textures.exists(k)) scene.textures.addCanvas(k, c); };
@@ -598,6 +659,7 @@ export function makeBackdrops(scene: Phaser.Scene) {
   add('bg_hoian', hoianCalle());
   add('bg_taodan', taodan());
   add('bg_candelaria', candelaria());
+  add('bg_hanoi', hanoi());
   // banderas sueltas
   for (const k of ['jp', 'vn', 'co', 've'] as const) {
     const p = new Painter(38, 26);

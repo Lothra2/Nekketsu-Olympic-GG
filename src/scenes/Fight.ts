@@ -5,7 +5,7 @@ import { DEPTH, FLOOR_TOP, XMAX, XMIN, type AttackDef } from '../fight/defs';
 import { Figura } from '../core/figura';
 import { ajustes } from '../core/nivel';
 import { efecto, talla } from '../core/fx';
-import { Input } from '../core/input';
+import { Input, rotular } from '../core/input';
 import { chip, PELEA, VICTORIA } from '../core/music';
 import { txt, flash, speedLines } from '../core/ui';
 import { FAMILIA, INSTITUTO, INFO } from './Select';
@@ -96,6 +96,11 @@ export class Fight extends Phaser.Scene implements World {
   /** con el arte: la ciudad allá abajo que se ve donde el piso se cayó, y el filo que se desmorona */
   private vacio: { img: Phaser.GameObjects.TileSprite; mascara: Phaser.GameObjects.Graphics } | null = null;
   private filo: Phaser.GameObjects.Sprite | null = null;
+  /** Judo y Vovinam: los puntos de cada lado (lanzamiento = ippon, 2; tumbar de un golpe = waza-ari, 1), el reloj y el punto de oro */
+  private puntos: [number, number] = [0, 0];
+  private relojJudo = 0;
+  private oro = false;
+  private get judo() { return this.data0.modo === 'judo'; }
   private relojTxt: Phaser.GameObjects.BitmapText | null = null;
   private pesado: { it: Item; sombra: Phaser.GameObjects.Ellipse } | null = null;
   /** la arepa que cae de vez en cuando: quien la pisa recupera vida */
@@ -135,7 +140,10 @@ export class Fight extends Phaser.Scene implements World {
     this.racha = { n: 0, t: 0 };
     this.rachaTxt = null;
     // entrenando no hay borde: el saco y tú no se caen
-    this.limites = this.data0.practica ? undefined : { xmin: XMIN, xmax: 700, depth: DEPTH };
+    this.limites = this.data0.practica || this.data0.modo === 'judo' ? undefined : { xmin: XMIN, xmax: 700, depth: DEPTH };
+    this.puntos = [0, 0];
+    this.relojJudo = 90;
+    this.oro = false;
   }
 
   get sc(): Phaser.Scene { return this; }
@@ -213,9 +221,9 @@ export class Fight extends Phaser.Scene implements World {
     // el mundo se ve de cerca y sigue la acción; el marcador va en su propia capa, sin acercar
     this.ui = this.add.layer().setDepth(10000);
     // entrenando, un poco más lejos: el cartel de arriba no tapa a nadie
-    this.arte = hayArte(this, 'caracas_azotea') ? pintarEscenario(this, 'caracas_azotea', 5000) : null;
+    this.arte = !this.judo && hayArte(this, 'caracas_azotea') ? pintarEscenario(this, 'caracas_azotea', 5000) : null;
     // con el arte, un poco más lejos: los neones, las torres y el Ávila se ven enteros debajo del marcador
-    this.zoom = this.arte ? (this.data0.practica ? 1.25 : ZOOMS_ARTE[this.data0.modo] ?? 1.25) : this.data0.practica ? 1.45 : ZOOMS[this.data0.modo] ?? 1.45;
+    this.zoom = this.judo ? 1.5 : this.arte ? (this.data0.practica ? 1.25 : ZOOMS_ARTE[this.data0.modo] ?? 1.25) : this.data0.practica ? 1.45 : ZOOMS[this.data0.modo] ?? 1.45;
     this.inclinacion = this.arte?.inclinacion ?? 0;
     this.vacio = null;
     this.filo = null;
@@ -223,7 +231,8 @@ export class Fight extends Phaser.Scene implements World {
     this.cameras.main.ignore(this.ui);
     this.uiCam = this.cameras.add(0, 0, 640, 360).setName('ui');
     this.camLock = false;
-    if (!this.arte) {
+    if (this.judo) this.add.image(320, 180, 'bg_hanoi').setDepth(-10);
+    else if (!this.arte) {
       this.add.image(320, 180, 'bg_caracas').setDepth(-10).setScrollFactor(0.45, 1);
       this.add.image(320, 280, 'bg_azotea').setDepth(-9);
       // en los edificios, más abajo que el marcador: se ven enteros con cualquier acercamiento
@@ -234,8 +243,10 @@ export class Fight extends Phaser.Scene implements World {
     const npc = azotea.entidades.find((e) => e.tipo === 'npc');
     const ty = this.arte ? (npc?.y ?? 2) : -2;
     this.thorFan = new Figura(this, this.px(npc?.x ?? 40, Math.max(0, ty)), FLOOR_TOP + ty, 'thor', 'sit').setDepth(FLOOR_TOP + ty);
+    // en el dojo, Thor mira desde la orilla
+    if (this.judo) this.thorFan.setPosition(70, FLOOR_TOP - 6).setDepth(FLOOR_TOP - 6);
     this.thorFan.row = 'down_right';
-    this.bordeG = this.data0.practica || this.arte ? null : this.add.graphics().setDepth(-8);
+    this.bordeG = this.data0.practica || this.arte || this.judo ? null : this.add.graphics().setDepth(-8);
     this.dibujarBorde();
 
     this.sparks = this.add.particles(0, 0, 'px', { speed: { min: 60, max: 180 }, lifespan: 260, scale: { start: 0.9, end: 0 }, tint: [0xffffff, 0xffe040, 0xffa020], emitting: false }).setDepth(5000);
@@ -257,9 +268,10 @@ export class Fight extends Phaser.Scene implements World {
       // entrenando, el rival es un saco: no se mueve ni pega
       if (!this.data0.practica) this.brains.set(a, new Brain(a, (modo === '4v4' ? 0.85 : 1) * ajustes().cpuAgresion));
     });
-    const n = modo === '4v4' ? 6 : 4;
+    // en el tatami no hay armas
+    const n = this.judo ? 0 : modo === '4v4' ? 6 : 4;
     for (let i = 0; i < n; i++) this.items.push(new Item(this, ARMAS_PISO[i], 200 + Math.random() * 240, 10 + Math.random() * (DEPTH - 20)));
-    if (!this.items.some((i) => i.kind === 'chancleta')) this.items.push(new Item(this, 'chancleta', this.player.x + 40, this.player.y));
+    if (!this.judo && !this.items.some((i) => i.kind === 'chancleta')) this.items.push(new Item(this, 'chancleta', this.player.x + 40, this.player.y));
 
     this.pad = new Input(this, undefined, this.ui);
     this.hud = this.uiAdd(this.add.graphics().setDepth(8000));
@@ -354,6 +366,7 @@ export class Fight extends Phaser.Scene implements World {
     this.tweens.add({ targets: t, y: t.y - 16, alpha: 0, duration: 650, onComplete: () => t.destroy() });
   }
   onHit(from: Actor | null, v: Actor, _dmg: number, kd: boolean) {
+    if (this.judo && kd && from && from.team !== v.team && this.phase === 'play') this.puntoJudo(from, from.st === 'grab' || from.st === 'throw');
     if (from === this.player && this.data0.practica) this.golpes.push(from.fig.anim.name);
     this.sfx(kd ? 'critico' : 'golpe', kd ? 0.55 : 0.45);
     this.sfx(v.team === 0 ? 'jugador_dolor' : 'enemigo_dolor', 0.25);
@@ -464,6 +477,7 @@ export class Fight extends Phaser.Scene implements World {
       this.dropT -= dt;
       if (this.dropT <= 0) { this.dropT = 9 + Math.random() * 5; this.skyDrop(); }
       if (this.limites) this.kachinuki(dt);
+      if (this.judo) this.relojDeJudo(dt);
       this.arepaTick(dt);
       if (this.slow <= 0) this.checkEnd();
     }
@@ -511,7 +525,19 @@ export class Fight extends Phaser.Scene implements World {
 
   private async roundIntro() {
     await this.vs();
-    await this.banner('¡LISTOS!', 'fuente_titulo_plata', 3, 800);
+    if (this.judo) {
+      // las reglas, en su franja, antes del ¡HAJIME!
+      this.dropT = this.arepaT = 1e9;
+      const band = this.uiAdd(this.add.graphics().setDepth(8400));
+      band.fillStyle(0x08081a, 0.82).fillRect(-80, 120, 800, 70);
+      band.fillStyle(0xf2c230).fillRect(-80, 120, 800, 2).fillRect(-80, 188, 800, 2);
+      const t1 = this.uiAdd(txt(this, 320, 138, 'JUDO Y VOVINAM · GANA EL PRIMERO A 3', 'fuente_titulo_plata', 1).setDepth(8500));
+      const t2 = this.uiAdd(txt(this, 320, 160, rotular('AGARRA Y LANZA CON {PATADA}: ¡IPPON! (2)', this.pad.fuente), 'fuente_ui', 1).setDepth(8500).setTint(0xffe080));
+      const t3 = this.uiAdd(txt(this, 320, 174, 'TÚMBALO DE UN GOLPE: ¡WAZA-ARI! (1)', 'fuente_ui', 1).setDepth(8500).setTint(0xc0c0e0));
+      await new Promise<void>((r) => this.time.delayedCall(2600, r));
+      band.destroy(); t1.destroy(); t2.destroy(); t3.destroy();
+    }
+    await this.banner(this.judo ? '¡HAJIME!' : '¡LISTOS!', 'fuente_titulo_plata', 3, 800);
     this.phase = 'play';
     chip.blip(1320, 0.2, 'sq50', 0.2, 1760);
     await this.banner('¡YA!', 'fuente_titulo', 5, 600);
@@ -809,6 +835,48 @@ export class Fight extends Phaser.Scene implements World {
     this.arepas = this.arepas.filter((ar) => { if (ar.t <= 0) { ar.g.destroy(); return false; } return true; });
   }
 
+  /** Judo y Vovinam: el reloj baja; al terminar gana el que tiene más puntos, y si van iguales, punto de oro. */
+  private relojDeJudo(dt: number) {
+    for (const a of this.actors) a.hp = Math.max(a.hp, a.maxHp * 0.4);
+    if (this.oro) { this.relojTxt?.setText('ORO'); return; }
+    this.relojJudo = Math.max(0, this.relojJudo - dt);
+    const r = Math.ceil(this.relojJudo);
+    this.relojTxt?.setText(`${Math.floor(r / 60)}:${String(r % 60).padStart(2, '0')}`).setTint(r <= 10 && Math.floor(this.relojJudo * 3) % 2 ? 0xff6060 : 0xffffff);
+    if (this.relojJudo > 0) return;
+    if (this.puntos[0] !== this.puntos[1]) { this.finJudo(this.puntos[0] > this.puntos[1] ? 0 : 1); return; }
+    this.oro = true;
+    void this.banner('¡PUNTO DE ORO!', 'fuente_titulo', 2, 1100);
+  }
+
+  /** Un punto en el judo: ¡IPPON! si fue lanzándolo desde el agarre, ¡WAZA-ARI! si lo tumbó de un golpe. Después, a empezar de nuevo. */
+  private puntoJudo(from: Actor, ippon: boolean) {
+    const tm = from.team;
+    this.puntos[tm] += ippon ? 2 : 1;
+    this.phase = 'intro';
+    this.shake(ippon ? 300 : 150, ippon ? 0.012 : 0.006);
+    if (ippon) flash(this, 160);
+    chip.boom(ippon ? 0.9 : 0.5);
+    void this.banner(ippon ? '¡IPPON!' : '¡WAZA-ARI!', 'fuente_titulo', ippon ? 3 : 2, 1000);
+    const fin = this.puntos[tm] >= 3 || this.oro;
+    this.time.delayedCall(1700, () => {
+      if (fin) { this.finJudo(tm); return; }
+      // ¡Hajime! de nuevo: cada uno a su lado, de pie
+      for (const a of this.actors) {
+        a.soltar();
+        a.x = a.team === 0 ? 220 : 420; a.y = 50; a.z = 0; a.vx = a.vy = a.vz = 0;
+        a.hp = a.maxHp;
+        a.left = a.team === 1;
+        a.setSt('idle', 'idle');
+      }
+      void this.banner('¡HAJIME!', 'fuente_titulo_plata', 2, 600).then(() => { this.phase = 'play'; });
+    });
+  }
+
+  private finJudo(tm: 0 | 1) {
+    this.phase = 'play';
+    if (tm === 0) this.victory(); else this.defeat();
+  }
+
   /** Las reglas de la final: el reloj, lo pesado que cae cada 30 s y la azotea que se achica a los 90 s. */
   private kachinuki(dt: number) {
     this.reloj += dt;
@@ -949,7 +1017,7 @@ export class Fight extends Phaser.Scene implements World {
   // ------------------------------------------------------------------ marcador
 
   private buildHud() {
-    if (this.limites) {
+    if (this.limites || this.judo) {
       this.relojTxt = this.uiAdd(txt(this, 320, 12, '0:00', 'fuente_ui', 2).setDepth(8001));
       this.hudObjs.push(this.relojTxt);
     } else this.relojTxt = null;
@@ -988,7 +1056,14 @@ export class Fight extends Phaser.Scene implements World {
       if (list.length === 1) {
         const a = list[0];
         const x = right ? 640 - 50 - 150 : 50;
-        bar(x, 18, 150, 6, a.hp / a.maxHp, hpCol(a.hp / a.maxHp), right);
+        if (this.judo) {
+          // en el judo no hay vida que bajar: tres puntos por lado, el que llega a 3 gana
+          for (let k = 0; k < 3; k++) {
+            const cx = right ? 640 - 58 - k * 16 : 58 + k * 16;
+            g.fillStyle(0x000000, 0.7).fillCircle(cx, 22, 6);
+            g.fillStyle(k < this.puntos[tm] ? 0xf2c230 : 0x3a2a3a).fillCircle(cx, 22, 5);
+          }
+        } else bar(x, 18, 150, 6, a.hp / a.maxHp, hpCol(a.hp / a.maxHp), right);
         const full = a.meter >= 100;
         bar(x + (right ? 50 : 0), 28, 100, 3, a.meter / 100, full ? (Math.floor(this.time.now / 120) % 2 ? 0xffffff : 0xf2c230) : 0xf2c230, right);
       } else {

@@ -112,13 +112,13 @@ export class Select extends Phaser.Scene {
         return;
       }
       // "CrossCountry@2": un tramo suelto del Cross
-      if (this.modo !== '1v1') { const [sc, t] = this.modo.split('@'); this.fadeTo(sc, t === undefined ? { jugador: id } : { jugador: id, tramo: Number(t), suelto: true }); return; }
+      if (this.modo !== '1v1' && this.modo !== 'judo') { const [sc, t] = this.modo.split('@'); this.fadeTo(sc, t === undefined ? { jugador: id } : { jugador: id, tramo: Number(t), suelto: true }); return; }
       this.paso = 'rival';
       this.sel = 0;
       this.build();
       return;
     }
-    this.go({ modo: '1v1', jugador: this.jugador, rival: id });
+    this.go({ modo: this.modo === 'judo' ? 'judo' : '1v1', jugador: this.jugador, rival: id });
   }
 
   private go(d: { modo: string; jugador: string; rival: string }) {

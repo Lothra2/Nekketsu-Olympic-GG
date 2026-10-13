@@ -25,6 +25,7 @@ const MENUS: Record<string, { id: string; label: string }[]> = {
     { id: 'Tamawari', label: 'TAMA-WARI HỘI AN' },
     { id: 'DaCau', label: 'ĐÁ CẦU SAIGÓN' },
     { id: 'Tejo', label: 'TEJO BOGOTÁ' },
+    { id: 'judo', label: 'JUDO HÀ NỘI' },
     { id: '<', label: 'ATRÁS' },
   ],
   // el Cross completo son cinco tramos; para una partida corta se puede correr uno solo

@@ -39,6 +39,9 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
     - Un botón fija la puntería (la línea que recorre la caja, vista desde arriba) y otro la fuerza (la barra con su raya).
     - Mecha que revienta: 3. Embocinada, adentro del bocín: 6. Moñona, las dos a la vez: 9, con fuegos artificiales.
     - Si en una ronda nadie suma, el tejo más cerca del bocín se lleva la mano: 1. Empatados al final, desempate.
+  - *Judo y Vovinam Hà Nội* (tatami frente al lago Hoàn Kiếm): 1 contra 1 con el motor de la pelea y otras reglas.
+    - Agarrar y lanzar con patada: ¡IPPON!, 2 puntos. Tumbar de un golpe: ¡WAZA-ARI!, 1. Gana el primero a 3.
+    - 1:30 de reloj. Si se acaba empatado, punto de oro. Después de cada punto, ¡HAJIME! de nuevo.
 - **Kachinuki Caracas**, la pelea final en una azotea de Parque Central de noche, en 1 contra 1 o 4 contra 4: Familia GG contra el Instituto Nekketsu.
   - Un borde sin baranda: caminando no te sales, pero si te tumban o te lanzan por ahí, quedas fuera.
   - Cada 30 s cae algo pesado del cielo. Antes aparece su sombra con un aro rojo.
@@ -121,6 +124,7 @@ node scripts/prueba-kachinuki.mjs http://localhost:5173/ capturas/kachinuki   # 
 node scripts/prueba-pruebas.mjs http://localhost:5173/ capturas/pruebas  # vallas, natación, jabalina y medallero
 node scripts/prueba-entrenamiento.mjs http://localhost:5173/ capturas/entrenamiento  # completa los 4 entrenamientos
 node scripts/prueba-tamawari.mjs http://localhost:5173/ capturas/tamawari   # el entrenamiento de Tama-wari jugado con el teclado
+node scripts/prueba-judo.mjs http://localhost:5173/ capturas/judo   # un combate de judo con la máquina de los dos lados hasta los 3 puntos
 node scripts/prueba-tejo.mjs http://localhost:5173/ capturas/tejo   # el entrenamiento de Tejo con un bot que apunta, y un partido de tres rondas
 node scripts/prueba-dacau.mjs http://localhost:5173/ capturas/dacau   # el entrenamiento de Đá cầu con un bot y un partido entero
 node scripts/prueba-cross.mjs http://localhost:5173/ capturas/cross     # los cinco tramos con piloto automático, de punta a punta
