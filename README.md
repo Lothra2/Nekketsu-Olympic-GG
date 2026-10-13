@@ -7,7 +7,7 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
 - **Intro épica** de casi un minuto: "Familia GG presenta" con Thor, Kenji en la azotea de Japón con rayo y aura, el jet de la Nekketsu Air con el Instituto en las ventanillas, la ruta en un mapa del Pacífico en pixel art con pines y sellos de pasaporte, la Familia GG en Saigón, un montaje estilo anime de las pruebas (vallas, natación, jabalina y pelea, y los cuatro juntos con "¡A COMPETIR!"), los rivales en silueta en Bogotá, Maracaibo y Caracas, el VS, el puñetazo a la cámara y el logo con la Marcha Nekketsu.
 - **Entrenamiento** para cada prueba y para la pelea: sin rivales ni reloj, un cartel dice qué hacer, espera a que lo hagas y los botones táctiles del paso laten en pantalla. Los carteles nombran el botón de lo que estés usando: J y K en teclado, A y B en la tablet, X y A en un control. Al final te ofrece jugar de verdad.
 - **Niveles** en el menú (se recuerdan): PASEO (la máquina va suave, tu equipo aguanta el doble y pega más, en jabalina no hay nulo y en natación no hay salida en falso), NORMAL (un poco de ventaja) y NEKKETSU (sin ayuda). En PASEO y NORMAL hay una "goma" invisible: si vas muy atrás la máquina afloja, y si vas muy adelante aprieta un poco. Los números están todos en `src/core/nivel.ts`.
-- **Olimpiada Express**: Familia GG contra el Instituto. Cada gira sortea 5 de las 9 pruebas (al menos una de Vietnam y una de Colombia) y cierra con el Kachinuki en Caracas. Medallero por equipos (10, 6, 4 y 2 puntos por puesto, el judo da 10 y 6) y la final vale 20. Termina con podio y fuegos artificiales.
+- **Olimpiada Express**: Familia GG contra el Instituto. Cada gira sortea 5 de las 10 pruebas (al menos una de Vietnam y una de Colombia) y cierra con el Kachinuki en Caracas. Medallero por equipos (10, 6, 4 y 2 puntos por puesto, el judo da 10 y 6) y la final vale 20. Termina con podio y fuegos artificiales.
 - **Pruebas sueltas**:
   - *Cross Country Saigón*: la prueba estrella del original, en cinco tramos seguidos con el tiempo sumado.
     1. El hẻm: canales, muros, la calle inundada y las motos. Ya tiene el arte de PixelForja.
@@ -26,6 +26,11 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
   - *Vallas del Café* (Eje Cafetero): alterna puño y patada para correr, salta las vallas, codazo con ★. Si tocas una valla, se cae y te frena.
   - *Natación Hạ Long* (bahía de Hạ Long): sales con salto, si te tiras antes del ¡YA! te quedas un segundo. Alterna puño y patada para nadar, ★ es la patada de delfín.
   - *Jabalina Llanera* (Llanos de Apure): carrerita alternando botones, mantén salto para el ángulo y suelta para lanzar. Si pisas la raya es nulo. Dos intentos.
+  - *Azoteas de Cartagena* (la ciudad amurallada al atardecer): el salto entre azoteas de 1992, con garrocha.
+    - Carrerita alternando puño y patada, y salto en la cajita roja para clavar la garrocha. Clavar tarde o temprano le quita impulso.
+    - Salto otra vez arriba del todo es el empuje: estira el salto.
+    - Las banderitas muestran el viento. El techo de enfrente se aleja en cada ronda: 5, 6 y 7 m.
+    - El que no llega cae en el balcón de las buganvillas, en el carrito de frutas o al lado de la palenquera, que lo regaña. Tres rondas, cuenta el mejor salto.
   - *Tama-wari Hội An* (de noche, entre faroles): cada equipo tiene un poste de bambú con una bola de papel arriba. Gana el primero que rompe la bola del otro.
     - Al pie del poste del otro, salto o arriba lo agarra. Machacar puño y patada trepa rápido; mantener arriba trepa despacio.
     - Arriba, puño a la bola, que se raja en 4 estados.
@@ -121,6 +126,7 @@ node scripts/prueba-girar.mjs http://localhost:5173/   # parado pide girar; al g
 node scripts/prueba-palanca.mjs http://localhost:5173/   # la palanca táctil con un dedo de verdad: bajar hasta el borde y volver a subir sin soltar
 node scripts/prueba-aves.mjs http://localhost:4173/ capturas/aves   # las palomas del hẻm despegan y vuelven, el gallo de la Comuna 13 canta y se asusta (hace falta el kit con aves)
 node scripts/prueba-gira.mjs http://localhost:4173/ capturas/gira   # la Olimpiada con Tama-wari, Đá cầu, Tejo y Judo: cada una arranca en gira, reparte puntos y vuelve al medallero
+node scripts/prueba-azoteas.mjs http://localhost:4173/ capturas/azoteas   # el entrenamiento con un bot y tres rondas con el techo alejándose, con caídas
 node scripts/prueba-borde.mjs http://localhost:5173/   # pegada al borde de arriba o de abajo, los muros y los huecos siguen valiendo
 node scripts/prueba-kachinuki.mjs http://localhost:5173/ capturas/kachinuki   # el borde, el rescate de Thor, lo que cae del cielo y la azotea que se achica
 node scripts/prueba-pruebas.mjs http://localhost:5173/ capturas/pruebas  # vallas, natación, jabalina y medallero

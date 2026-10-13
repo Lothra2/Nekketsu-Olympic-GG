@@ -12,6 +12,7 @@ import { Jabalina } from './events/Jabalina';
 import { Tamawari } from './events/Tamawari';
 import { DaCau } from './events/DaCau';
 import { Tejo } from './events/Tejo';
+import { Azoteas } from './events/Azoteas';
 import { CrossCountry } from './events/CrossCountry';
 import { Obstaculos } from './events/Obstaculos';
 import { BASE_H, BASE_W, instalarPantalla } from './core/pantalla';
@@ -27,7 +28,7 @@ const game = new Phaser.Game({
   // el ancho lo ajusta core/pantalla según la pantalla (de 640 a 800); FIT lo escala sin deformar
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
   input: { gamepad: true, activePointers: 4 },
-  scene: [Boot, Tap, Intro, Title, Select, Fight, Medallero, Vallas, Natacion, Jabalina, CrossCountry, Obstaculos, Tamawari, DaCau, Tejo],
+  scene: [Boot, Tap, Intro, Title, Select, Fight, Medallero, Vallas, Natacion, Jabalina, CrossCountry, Obstaculos, Tamawari, DaCau, Tejo, Azoteas],
 });
 
 instalarPantalla(game);

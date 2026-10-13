@@ -642,6 +642,72 @@ function hanoi(): HTMLCanvasElement {
   return p.done();
 }
 
+/**
+ * Cartagena al atardecer: el cielo naranja y rosado, el sol bajando sobre el Caribe, la muralla, la Torre del Reloj
+ * amarilla, la cúpula de San Pedro Claver y los techos de teja de la ciudad amurallada. Las azoteas de la prueba van
+ * encima, en el mundo.
+ */
+function cartagena(): HTMLCanvasElement {
+  const p = new Painter(W, H, M);
+  const r = rng(57);
+  p.vgrad(0, 176, [C('#3a3470'), C('#7a3e7a'), C('#d0607a'), C('#f2904a'), C('#f8c868')]);
+  // el sol, a medio hundir
+  p.circle(470, 168, 26, C('#ffe6a0'));
+  p.circle(470, 168, 22, C('#fff4d0'));
+  // nubes largas, encendidas por abajo
+  for (let i = 0; i < 9; i++) {
+    const cx = X0 + r() * AW, cy = 40 + r() * 90, w = 40 + r() * 70;
+    p.rect(cx, cy, w, 3, C('#f4a0a0'), 200);
+    p.rect(cx + 6, cy + 3, w - 12, 2, C('#ffd0a0'), 220);
+  }
+  // el mar: el reflejo del sol en rayitas
+  p.vgrad(170, 200, [C('#3a4a8a'), C('#2a3a70')]);
+  for (let y = 172; y < 200; y += 3) for (let k = 0; k < 4; k++) { const w = 14 - (y - 172) / 3 + r() * 6; p.rect(470 - w / 2 + (r() - 0.5) * 10, y, w, 1, C('#ffd890'), 220); }
+  for (let i = 0; i < 120; i++) p.px(X0 + r() * AW, 172 + r() * 28, C('#5a6aa8'));
+  // gaviotas
+  for (let i = 0; i < 7; i++) { const x = X0 + r() * AW, y = 60 + r() * 70; p.px(x, y, C('#2a1a3a')); p.px(x - 1, y - 1, C('#2a1a3a')); p.px(x + 1, y - 1, C('#2a1a3a')); p.px(x - 2, y - 1, C('#2a1a3a')); p.px(x + 2, y - 1, C('#2a1a3a')); }
+  // la muralla de piedra coralina
+  p.rect(X0, 196, AW, 12, C('#b8945a'));
+  p.rect(X0, 196, AW, 2, C('#d8b47a'));
+  for (let x = desde(0, 10); x < X1; x += 10) p.rect(x, 192, 6, 4, C('#b8945a'));
+  // la cúpula y el campanario de San Pedro Claver
+  p.rect(520, 140, 40, 60, C('#e8b05a'));
+  p.circle(540, 140, 18, C('#d8984a'));
+  p.rect(522, 140, 36, 2, C('#f8d890'));
+  p.rect(538, 118, 4, 6, C('#f4f0e2'));
+  p.rect(566, 120, 14, 80, C('#e8c070'));
+  p.rect(568, 112, 10, 8, C('#d8a050'));
+  p.rect(571, 106, 4, 6, C('#f4f0e2'));
+  for (let y = 130; y < 190; y += 14) p.rect(570, y, 6, 8, C('#6a3a2a'));
+  // la Torre del Reloj: amarilla, con su reloj y la puerta de arcos
+  const tx = 168;
+  p.rect(tx, 120, 44, 86, C('#f2c84a'));
+  p.rect(tx + 40, 120, 4, 86, C('#c8a03a'));
+  p.rect(tx + 6, 104, 32, 16, C('#f4d870'));
+  p.rect(tx + 12, 92, 20, 12, C('#f2c84a'));
+  p.rect(tx + 18, 82, 8, 10, C('#d8a040'));
+  p.rect(tx + 21, 76, 2, 6, C('#2a2a2a'));
+  p.circle(tx + 22, 132, 8, C('#f4f0e2'));
+  p.line(tx + 22, 132, tx + 22, 127, C('#2a2a2a'));
+  p.line(tx + 22, 132, tx + 26, 132, C('#2a2a2a'));
+  for (const ax of [tx + 6, tx + 18, tx + 30]) { p.rect(ax, 180, 8, 26, C('#5a3a2a')); p.circle(ax + 4, 180, 4, C('#5a3a2a')); }
+  // los techos de teja de la ciudad, en filas
+  for (const [y0, col, alto] of [[198, '#a8503a', 10], [206, '#c0603e', 14]] as [number, string, number][]) {
+    let x = X0 - 10;
+    while (x < X1) {
+      const w = 20 + Math.floor(r() * 30), h = alto + Math.floor(r() * 6);
+      const pared = [C('#f2d26a'), C('#7ab0e0'), C('#f4f0e2'), C('#e88a5a'), C('#e8a0b8'), C('#9ad0a0')][Math.floor(r() * 6)];
+      p.rect(x, y0, w, 40, pared);
+      for (let k = 0; k < 4; k++) p.rect(x - 2 + k, y0 - h / 2 + k, w + 4 - 2 * k, 1, C(col));
+      p.rect(x, y0 - h / 2 + 4, w, 3, C(col));
+      if (r() < 0.5) for (let i = 0; i < 6; i++) p.px(x + r() * w, y0 + 2 + r() * 4, C('#e0368a'));
+      x += w + 1;
+    }
+  }
+  p.rect(X0, 222, AW, H - 222, C('#6a3a3a'));
+  return p.done();
+}
+
 /** Registra todos los fondos como texturas. */
 export function makeBackdrops(scene: Phaser.Scene) {
   const add = (k: string, c: HTMLCanvasElement) => { if (!scene.textures.exists(k)) scene.textures.addCanvas(k, c); };
@@ -660,6 +726,7 @@ export function makeBackdrops(scene: Phaser.Scene) {
   add('bg_taodan', taodan());
   add('bg_candelaria', candelaria());
   add('bg_hanoi', hanoi());
+  add('bg_cartagena', cartagena());
   // banderas sueltas
   for (const k of ['jp', 'vn', 'co', 've'] as const) {
     const p = new Painter(38, 26);

@@ -23,6 +23,7 @@ export const PRUEBAS_GIRA: PruebaGira[] = [
   { id: 'Vallas', scene: 'Vallas', nombre: 'VALLAS DEL CAFÉ', lugar: 'EJE CAFETERO, COLOMBIA', bandera: 'flag_co' },
   { id: 'Natacion', scene: 'Natacion', nombre: 'NATACIÓN HẠ LONG', lugar: 'BAHÍA DE HẠ LONG, VIETNAM', bandera: 'flag_vn' },
   { id: 'Jabalina', scene: 'Jabalina', nombre: 'JABALINA LLANERA', lugar: 'LLANOS DE APURE, VENEZUELA', bandera: 'flag_ve' },
+  { id: 'Azoteas', scene: 'Azoteas', nombre: 'AZOTEAS DE CARTAGENA', lugar: 'CARTAGENA, COLOMBIA', bandera: 'flag_co' },
   { id: 'Tamawari', scene: 'Tamawari', nombre: 'TAMA-WARI HỘI AN', lugar: 'HỘI AN, VIETNAM', bandera: 'flag_vn' },
   { id: 'DaCau', scene: 'DaCau', nombre: 'ĐÁ CẦU TAO ĐÀN', lugar: 'SAIGÓN, VIETNAM', bandera: 'flag_vn' },
   { id: 'Tejo', scene: 'Tejo', nombre: 'TEJO LA CANDELARIA', lugar: 'BOGOTÁ, COLOMBIA', bandera: 'flag_co' },
