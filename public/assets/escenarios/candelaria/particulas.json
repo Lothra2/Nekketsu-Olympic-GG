@@ -1,0 +1,20 @@
+{
+ "nota": "x e y en pixeles de pantalla a escala 1 (y de pantalla = franja.atras + y del mundo). fx: nombre del efecto del catálogo (manifest.fx).",
+ "particulas": [
+  {
+   "tipo": "humo",
+   "x0": 542,
+   "x1": 562,
+   "y0": 262,
+   "y1": 280,
+   "color": [
+    "#c4beb4",
+    "#a6aeb2"
+   ],
+   "cada": 0.8,
+   "sube": 10,
+   "vida": 2.4,
+   "nota": "el humo de las mechas reventadas, que sube de la caja de greda (cuando revienta una, el juego pone mecha_tejo)"
+  }
+ ]
+}

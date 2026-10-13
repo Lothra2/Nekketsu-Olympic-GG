@@ -1,0 +1,341 @@
+{
+ "generado_con": "PixelForja",
+ "id": "dalat",
+ "nombre": "SÂN QUẦN VỢT ĐÀ LẠT",
+ "escala": 1,
+ "resolucion": [
+  640,
+  360
+ ],
+ "franja": {
+  "atras": 290,
+  "adelante": 330
+ },
+ "largo": 640,
+ "hora": "manana",
+ "clima": [
+  "neblina"
+ ],
+ "inclinacion": 0,
+ "ancho": 640,
+ "vista": "lado",
+ "nota_vista": "de lado: el dibujo va derecho (inclinación 0). El fondo (la capa cerca) va de la fila 0 a franja.atras (290) y es transparente donde se ven lejos y el cielo. El piso va de la fila 290 al borde de abajo de la pantalla: la franja donde se paran los atletas (y del mundo = fila de pantalla - 290) y lo de adelante. Las capas, los objetos y la vida se cargan igual que en la vista oblicua.",
+ "capas": {
+  "cielo": {
+   "archivo": "cielo_manana.png",
+   "y": 0,
+   "paralaje": 0,
+   "repetir_x": true
+  },
+  "lejos": {
+   "archivo": "lejos.png",
+   "y": 90,
+   "paralaje": 0.25,
+   "repetir_x": true
+  },
+  "tras_cerca": {
+   "nota": "la vida con capa tras_cerca va aquí: se ve por los callejones"
+  },
+  "cerca": {
+   "archivos": [
+    "cerca_0.png"
+   ],
+   "trozo": 1280,
+   "y": 0,
+   "paralaje": 1
+  },
+  "piso": {
+   "archivos": [
+    "piso_0.png"
+   ],
+   "trozo": 1280,
+   "y": 290,
+   "paralaje": 1,
+   "nota": "de lado: las primeras 40 filas son la franja donde se paran los atletas, las de abajo lo de adelante hasta el borde de la pantalla"
+  },
+  "objetos": {
+   "archivo": "objetos.json",
+   "nota": "entre el piso y el frente, ordenados con los atletas"
+  },
+  "frente": {
+   "archivos": [
+    "frente_0.png"
+   ],
+   "trozo": 1280,
+   "y": 316,
+   "paralaje": 1
+  }
+ },
+ "vida": {
+  "imagen": "vida.png",
+  "piezas": [
+   {
+    "id": "neblina_0",
+    "tipo": "neblina",
+    "capa": "lejos",
+    "x": -260,
+    "y": 62,
+    "fps": 1,
+    "recorrido": {
+     "desde": [
+      -260,
+      62
+     ],
+     "hasta": [
+      1280,
+      58
+     ],
+     "segundos": 90,
+     "desfase": 0.25
+    },
+    "cuadros": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 260,
+      "h": 22
+     }
+    ]
+   },
+   {
+    "id": "neblina_1",
+    "tipo": "neblina",
+    "capa": "lejos",
+    "x": 1280,
+    "y": 104,
+    "fps": 1,
+    "recorrido": {
+     "desde": [
+      1280,
+      104
+     ],
+     "hasta": [
+      -320,
+      108
+     ],
+     "segundos": 120,
+     "desfase": 0.6
+    },
+    "cuadros": [
+     {
+      "x": 261,
+      "y": 0,
+      "w": 320,
+      "h": 18
+     }
+    ]
+   },
+   {
+    "id": "publico",
+    "tipo": "publico",
+    "capa": "cerca",
+    "x": 192,
+    "y": 250,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 582,
+      "y": 0,
+      "w": 40,
+      "h": 30
+     },
+     {
+      "x": 623,
+      "y": 0,
+      "w": 40,
+      "h": 30
+     }
+    ]
+   }
+  ],
+  "nota": "capa cerca y tras_cerca: x, y de pantalla, como siempre. capa lejos: x, y en pixeles de la imagen lejos (que se repite cada su ancho y corre con su paralaje); va de recorrido.desde a recorrido.hasta en recorrido.segundos y vuelve a empezar, adelantada por desfase (0 a 1). capa objeto: va encima de un objeto, con setDepth(franja.atras + orden), como los objetos."
+ },
+ "callejones": [],
+ "superficie": {
+  "archivo": "superficie.png",
+  "y": 290,
+  "leyenda": [
+   {
+    "id": "tierra",
+    "color": "#c09050",
+    "paso": "paso_tierra",
+    "resbala": false
+   }
+  ]
+ },
+ "colision": "colision.json",
+ "luces": "luces.json",
+ "particulas": "particulas.json",
+ "paleta": [
+  {
+   "nombre": "tinta",
+   "hex": "#1a1c22"
+  },
+  {
+   "nombre": "sombra",
+   "hex": "#2e3634"
+  },
+  {
+   "nombre": "asfalto",
+   "hex": "#4a524c"
+  },
+  {
+   "nombre": "asfalto_claro",
+   "hex": "#6e7670"
+  },
+  {
+   "nombre": "cemento",
+   "hex": "#9aa09a"
+  },
+  {
+   "nombre": "cemento_claro",
+   "hex": "#c6cac2"
+  },
+  {
+   "nombre": "crema",
+   "hex": "#ece6d4"
+  },
+  {
+   "nombre": "luz",
+   "hex": "#fafaf2"
+  },
+  {
+   "nombre": "amarillo",
+   "hex": "#f0d066"
+  },
+  {
+   "nombre": "ocre",
+   "hex": "#d08a52"
+  },
+  {
+   "nombre": "terracota",
+   "hex": "#b0582e"
+  },
+  {
+   "nombre": "rojo",
+   "hex": "#cc3c32"
+  },
+  {
+   "nombre": "vino",
+   "hex": "#7a3026"
+  },
+  {
+   "nombre": "salmon",
+   "hex": "#e89c8a"
+  },
+  {
+   "nombre": "menta",
+   "hex": "#9cc8a8"
+  },
+  {
+   "nombre": "verde",
+   "hex": "#4e8456"
+  },
+  {
+   "nombre": "verde_oscuro",
+   "hex": "#264634"
+  },
+  {
+   "nombre": "celeste",
+   "hex": "#a8c4d6"
+  },
+  {
+   "nombre": "cielo",
+   "hex": "#d6e2e6"
+  },
+  {
+   "nombre": "azul",
+   "hex": "#5a7cb0"
+  },
+  {
+   "nombre": "azul_noche",
+   "hex": "#2e3e58"
+  },
+  {
+   "nombre": "canal",
+   "hex": "#7894a0"
+  },
+  {
+   "nombre": "oro",
+   "hex": "#f2b04c"
+  },
+  {
+   "nombre": "bruma",
+   "hex": "#dfe4e2"
+  }
+ ],
+ "verificacion": "verificacion.md",
+ "layout": {
+  "id": "dalat",
+  "pais": "vietnam",
+  "prueba": "tenis",
+  "vista": "lado",
+  "nombre": "SÂN QUẦN VỢT ĐÀ LẠT",
+  "nota": "Tenis de dobles de lado en una cancha de arcilla entre pinos de Đà Lạt, en la mañana con neblina. El piso de Tenis.ts está en la fila 310: la franja va de 290 a 330, la fila de atrás es el carril y 14 (fila 304) y la de adelante el y 26 (fila 316). La cancha va de x 34 a 606 entre las filas 298 y 322, y la red en x 320 con 20 de alto: las dos las dibuja el juego. La arcilla frena la pelota al picar.",
+  "largo": 640,
+  "franja": {
+   "atras": 290,
+   "adelante": 330
+  },
+  "hora": "manana",
+  "clima": [
+   "neblina"
+  ],
+  "paralaje": {
+   "cielo": "auto",
+   "lejos": "lago_xuan_huong_pinos",
+   "cerca": "cancha_arcilla_dalat"
+  },
+  "piso": [
+   {
+    "x0": 0,
+    "x1": 640,
+    "tipo": "greda",
+    "nombre": "la arcilla roja de la cancha"
+   }
+  ],
+  "huecos": [],
+  "plataformas": [],
+  "muros": [],
+  "escaleras": [],
+  "postes": [],
+  "agua": [],
+  "bajo": [],
+  "solidos": [],
+  "carriles": [
+   {
+    "y": 14
+   },
+   {
+    "y": 26
+   }
+  ],
+  "entidades": [
+   {
+    "tipo": "objeto",
+    "objeto": "red_tenis",
+    "x": 320,
+    "y": 20,
+    "nota": "la red la dibuja el juego: RED_X 320, RED_H 20"
+   }
+  ],
+  "ranuras_deco": [
+   {
+    "x0": 0,
+    "x1": 640,
+    "capa": "lejos",
+    "tema": "lago_xuan_huong_catedral_villa"
+   },
+   {
+    "x0": 0,
+    "x1": 640,
+    "capa": "cerca",
+    "tema": "pinos_malla_hortensias"
+   }
+  ],
+  "vida": [
+   "neblina",
+   "publico"
+  ]
+ }
+}

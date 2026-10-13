@@ -1,0 +1,86 @@
+{
+ "id": "judo_hanoi",
+ "pais": "vietnam",
+ "prueba": "judo",
+ "nombre": "VÕ ĐƯỜNG HÀ NỘI",
+ "nota": "Judo y Vovinam en un dojo de Hà Nội, de tarde. Misma franja que la pelea (246 a 344) y la vista inclinada de 0.35. Todo el piso es tatami: no hay armas ni borde.",
+ "largo": 640,
+ "franja": {
+  "atras": 246,
+  "adelante": 344
+ },
+ "hora": "tarde",
+ "clima": [
+  "despejado"
+ ],
+ "paralaje": {
+  "cielo": "auto",
+  "lejos": "ho_hoan_kiem",
+  "cerca": "dojo_hanoi"
+ },
+ "piso": [
+  {
+   "x0": 0,
+   "x1": 640,
+   "tipo": "tatami",
+   "nombre": "zona de seguridad (amarilla)"
+  },
+  {
+   "x0": 64,
+   "x1": 576,
+   "y0": 10,
+   "y1": 88,
+   "tipo": "tatami",
+   "nombre": "zona de combate (verde)"
+  }
+ ],
+ "huecos": [],
+ "plataformas": [],
+ "muros": [],
+ "escaleras": [],
+ "postes": [],
+ "agua": [],
+ "bajo": [],
+ "solidos": [],
+ "carriles": [
+  {
+   "y": 20
+  },
+  {
+   "y": 42
+  },
+  {
+   "y": 64
+  },
+  {
+   "y": 86
+  }
+ ],
+ "entidades": [
+  {
+   "tipo": "npc",
+   "npc": "thor",
+   "x": 70,
+   "y": 0,
+   "nota": "Thor mira desde la orilla del tatami: el juego lo sienta en la fila FLOOR_TOP - 6"
+  }
+ ],
+ "ranuras_deco": [
+  {
+   "x0": 0,
+   "x1": 640,
+   "capa": "lejos",
+   "tema": "lago_hoan_kiem_torre_tortuga"
+  },
+  {
+   "x0": 0,
+   "x1": 640,
+   "capa": "cerca",
+   "tema": "dojo_madera_ventanales"
+  }
+ ],
+ "vida": [
+  "publico",
+  "hojas_cayendo"
+ ]
+}

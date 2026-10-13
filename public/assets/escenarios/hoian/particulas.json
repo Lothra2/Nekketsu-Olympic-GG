@@ -1,0 +1,39 @@
+{
+ "nota": "x e y en pixeles de pantalla a escala 1 (y de pantalla = franja.atras + y del mundo). fx: nombre del efecto del catálogo (manifest.fx).",
+ "particulas": [
+  {
+   "tipo": "petalo",
+   "fx": "petalo_buganvilla",
+   "x0": 170,
+   "x1": 206,
+   "y0": 128,
+   "y1": 138,
+   "cada": 3,
+   "nota": "pétalos que caen de la buganvilla de la esquina"
+  },
+  {
+   "tipo": "petalo",
+   "fx": "petalo_buganvilla",
+   "x0": 494,
+   "x1": 524,
+   "y0": 158,
+   "y1": 166,
+   "cada": 4,
+   "nota": "pétalos que caen de la buganvilla del balcón"
+  },
+  {
+   "tipo": "brillo",
+   "x0": 34,
+   "x1": 674,
+   "y0": 349,
+   "y1": 360,
+   "color": [
+    "#ffa62a",
+    "#fff1c4"
+   ],
+   "cada": 0.6,
+   "vida": 0.4,
+   "nota": "brillitos de los faroles en el río de adelante"
+  }
+ ]
+}

@@ -26,5 +26,37 @@
  "saigon_rio": {
   "nombre": "RÍO SAIGÓN",
   "generado": "2026-10-13"
+ },
+ "barranquilla": {
+  "nombre": "CARNAVAL DE BARRANQUILLA",
+  "generado": "2026-10-13"
+ },
+ "cancha_maracaibo": {
+  "nombre": "CANCHA LA CHINITA, MARACAIBO",
+  "generado": "2026-10-13"
+ },
+ "candelaria": {
+  "nombre": "CANCHA DE TEJO LA CANDELARIA",
+  "generado": "2026-10-13"
+ },
+ "dalat": {
+  "nombre": "SÂN QUẦN VỢT ĐÀ LẠT",
+  "generado": "2026-10-13"
+ },
+ "hoian": {
+  "nombre": "HỘI AN",
+  "generado": "2026-10-13"
+ },
+ "judo_hanoi": {
+  "nombre": "VÕ ĐƯỜNG HÀ NỘI",
+  "generado": "2026-10-13"
+ },
+ "margarita": {
+  "nombre": "PLAYA EL AGUA, MARGARITA",
+  "generado": "2026-10-13"
+ },
+ "tao_dan": {
+  "nombre": "CÔNG VIÊN TAO ĐÀN",
+  "generado": "2026-10-13"
  }
 }

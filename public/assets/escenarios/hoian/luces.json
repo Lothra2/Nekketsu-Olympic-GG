@@ -1,0 +1,93 @@
+{
+ "hora": "noche",
+ "luces": [
+  {
+   "x": 189,
+   "y": 194,
+   "color": "#ffa62a",
+   "radio": 24,
+   "latido": 0.6,
+   "encendida": true,
+   "nota": "el farol de la puerta: alumbra la pared amarilla y la piedra"
+  },
+  {
+   "x": 308,
+   "y": 194,
+   "color": "#ffa62a",
+   "radio": 24,
+   "latido": 0.6,
+   "encendida": true,
+   "nota": "el farol de la puerta: alumbra la pared amarilla y la piedra"
+  },
+  {
+   "x": 417,
+   "y": 194,
+   "color": "#ffa62a",
+   "radio": 24,
+   "latido": 0.6,
+   "encendida": true,
+   "nota": "el farol de la puerta: alumbra la pared amarilla y la piedra"
+  },
+  {
+   "x": 333,
+   "y": 204,
+   "color": "#ffa62a",
+   "radio": 40,
+   "encendida": true,
+   "nota": "el puesto de faroles"
+  },
+  {
+   "x": 622,
+   "y": 204,
+   "color": "#ffa62a",
+   "radio": 40,
+   "encendida": true,
+   "nota": "el puesto de faroles"
+  },
+  {
+   "x": 21,
+   "y": 150,
+   "color": "#e2382a",
+   "radio": 32,
+   "latido": 0.8,
+   "encendida": true,
+   "nota": "los faroles del poste"
+  },
+  {
+   "x": 621,
+   "y": 150,
+   "color": "#e2382a",
+   "radio": 32,
+   "latido": 0.8,
+   "encendida": true,
+   "nota": "los faroles del poste"
+  },
+  {
+   "x": 48,
+   "y": 155,
+   "color": "#74c864",
+   "radio": 26,
+   "latido": 0.7,
+   "encendida": true,
+   "nota": "farol de seda de la cuerda: se mece con su vida"
+  },
+  {
+   "x": 254,
+   "y": 189,
+   "color": "#e2382a",
+   "radio": 26,
+   "latido": 0.7,
+   "encendida": true,
+   "nota": "farol de seda de la cuerda: se mece con su vida"
+  },
+  {
+   "x": 443,
+   "y": 189,
+   "color": "#ffa62a",
+   "radio": 26,
+   "latido": 0.7,
+   "encendida": true,
+   "nota": "farol de seda de la cuerda: se mece con su vida"
+  }
+ ]
+}

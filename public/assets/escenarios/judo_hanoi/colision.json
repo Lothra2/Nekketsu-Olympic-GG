@@ -1,0 +1,46 @@
+{
+ "id": "judo_hanoi",
+ "largo": 640,
+ "franja": {
+  "atras": 246,
+  "adelante": 344
+ },
+ "piso": [
+  {
+   "x0": 0,
+   "x1": 640,
+   "tipo": "tatami",
+   "nombre": "zona de seguridad (amarilla)"
+  },
+  {
+   "x0": 64,
+   "x1": 576,
+   "y0": 10,
+   "y1": 88,
+   "tipo": "tatami",
+   "nombre": "zona de combate (verde)"
+  }
+ ],
+ "huecos": [],
+ "plataformas": [],
+ "muros": [],
+ "escaleras": [],
+ "postes": [],
+ "agua": [],
+ "bajo": [],
+ "solidos": [],
+ "carriles": [
+  {
+   "y": 20
+  },
+  {
+   "y": 42
+  },
+  {
+   "y": 64
+  },
+  {
+   "y": 86
+  }
+ ]
+}

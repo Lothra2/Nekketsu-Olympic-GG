@@ -1,0 +1,47 @@
+{
+ "nota": "x e y en pixeles de pantalla a escala 1 (y de pantalla = franja.atras + y del mundo). fx: nombre del efecto del catálogo (manifest.fx).",
+ "particulas": [
+  {
+   "tipo": "brillo",
+   "x0": 133,
+   "x1": 217,
+   "y0": 150,
+   "y1": 260,
+   "color": [
+    "#fff6e4",
+    "#f6d27a"
+   ],
+   "cada": 0.9,
+   "vida": 1,
+   "nota": "el polvo que brilla en el rayo de sol (rayos_de_luz)"
+  },
+  {
+   "tipo": "brillo",
+   "x0": 313,
+   "x1": 397,
+   "y0": 150,
+   "y1": 260,
+   "color": [
+    "#fff6e4",
+    "#f6d27a"
+   ],
+   "cada": 0.9,
+   "vida": 1,
+   "nota": "el polvo que brilla en el rayo de sol (rayos_de_luz)"
+  },
+  {
+   "tipo": "brillo",
+   "x0": 553,
+   "x1": 637,
+   "y0": 150,
+   "y1": 260,
+   "color": [
+    "#fff6e4",
+    "#f6d27a"
+   ],
+   "cada": 0.9,
+   "vida": 1,
+   "nota": "el polvo que brilla en el rayo de sol (rayos_de_luz)"
+  }
+ ]
+}

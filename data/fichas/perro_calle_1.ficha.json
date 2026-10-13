@@ -1,0 +1,37 @@
+{
+  "format": "pixelforja.ficha",
+  "version": 3,
+  "name": "Canelo",
+  "body": {
+    "skeleton": "quadruped",
+    "species": "perro",
+    "size": 0.75
+  },
+  "palette": {
+    "fur": [
+      "#5e2500",
+      "#ae632f",
+      "#c98b4a",
+      "#daa968"
+    ],
+    "fur2": [
+      "#6f604f",
+      "#c6b49b",
+      "#efe3c8",
+      "#f8f2d8"
+    ],
+    "dark": [
+      "#0b0100",
+      "#2f1508",
+      "#4a3220",
+      "#685440"
+    ],
+    "eyes": "#2a1a10"
+  },
+  "markings": {
+    "chest": true,
+    "paws": false,
+    "mask": false
+  },
+  "movementProfile": "premium"
+}

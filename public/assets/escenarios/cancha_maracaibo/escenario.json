@@ -1,0 +1,368 @@
+{
+ "generado_con": "PixelForja",
+ "id": "cancha_maracaibo",
+ "nombre": "CANCHA LA CHINITA, MARACAIBO",
+ "escala": 1,
+ "resolucion": [
+  640,
+  360
+ ],
+ "franja": {
+  "atras": 212,
+  "adelante": 316
+ },
+ "largo": 640,
+ "hora": "noche",
+ "clima": [
+  "despejado",
+  "calor"
+ ],
+ "inclinacion": 0.35,
+ "ancho": 676,
+ "nota_inclinacion": "vista inclinada: px = x + 0.35 * y (lo del fondo queda a la izquierda). Las capas largas miden 676 px (largo + 0.35 * fondo de la franja). Los objetos ya vienen corridos: corre a los atletas igual.",
+ "capas": {
+  "cielo": {
+   "archivo": "cielo_noche.png",
+   "y": 0,
+   "paralaje": 0,
+   "repetir_x": true
+  },
+  "lejos": {
+   "archivo": "lejos.png",
+   "y": 12,
+   "paralaje": 0.25,
+   "repetir_x": true
+  },
+  "tras_cerca": {
+   "nota": "la vida con capa tras_cerca va aquí: se ve por los callejones"
+  },
+  "cerca": {
+   "archivos": [
+    "cerca_0.png"
+   ],
+   "trozo": 1280,
+   "y": 0,
+   "paralaje": 1
+  },
+  "piso": {
+   "archivos": [
+    "piso_0.png"
+   ],
+   "trozo": 1280,
+   "y": 212,
+   "paralaje": 1,
+   "nota": "las primeras 104 filas son la franja (inclinada), las de abajo el bordillo: la cara del piso que da a la cámara"
+  },
+  "objetos": {
+   "archivo": "objetos.json",
+   "nota": "entre el piso y el frente, ordenados con los atletas"
+  },
+  "frente": {
+   "archivos": [
+    "frente_0.png"
+   ],
+   "trozo": 1280,
+   "y": 302,
+   "paralaje": 1
+  }
+ },
+ "vida": {
+  "imagen": "vida.png",
+  "piezas": [
+   {
+    "id": "relampago_catatumbo",
+    "tipo": "relampago",
+    "capa": "cerca",
+    "x": 466,
+    "y": 48,
+    "fps": 4,
+    "cuadros": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 200,
+      "h": 84
+     },
+     {
+      "x": 201,
+      "y": 0,
+      "w": 200,
+      "h": 84
+     },
+     {
+      "x": 402,
+      "y": 0,
+      "w": 200,
+      "h": 84
+     },
+     {
+      "x": 603,
+      "y": 0,
+      "w": 200,
+      "h": 84
+     },
+     {
+      "x": 804,
+      "y": 0,
+      "w": 200,
+      "h": 84
+     },
+     {
+      "x": 1005,
+      "y": 0,
+      "w": 200,
+      "h": 84
+     },
+     {
+      "x": 1206,
+      "y": 0,
+      "w": 200,
+      "h": 84
+     },
+     {
+      "x": 1407,
+      "y": 0,
+      "w": 200,
+      "h": 84
+     }
+    ]
+   },
+   {
+    "id": "gaiteros",
+    "tipo": "gaiteros",
+    "capa": "cerca",
+    "x": 512,
+    "y": 170,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 1608,
+      "y": 0,
+      "w": 114,
+      "h": 40
+     },
+     {
+      "x": 1723,
+      "y": 0,
+      "w": 114,
+      "h": 40
+     }
+    ]
+   },
+   {
+    "id": "publico",
+    "tipo": "publico",
+    "capa": "cerca",
+    "x": 8,
+    "y": 150,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 1838,
+      "y": 0,
+      "w": 142,
+      "h": 40
+     },
+     {
+      "x": 0,
+      "y": 85,
+      "w": 142,
+      "h": 40
+     }
+    ]
+   }
+  ]
+ },
+ "callejones": [],
+ "superficie": {
+  "archivo": "superficie.png",
+  "y": 212,
+  "leyenda": [
+   {
+    "id": "acera",
+    "color": "#d0d0d0",
+    "paso": "paso_piedra",
+    "resbala": false
+   }
+  ]
+ },
+ "colision": "colision.json",
+ "luces": "luces.json",
+ "particulas": "particulas.json",
+ "paleta": [
+  {
+   "nombre": "tinta",
+   "hex": "#0c0a16"
+  },
+  {
+   "nombre": "sombra",
+   "hex": "#1c1a30"
+  },
+  {
+   "nombre": "asfalto",
+   "hex": "#2e2c46"
+  },
+  {
+   "nombre": "asfalto_claro",
+   "hex": "#4a4864"
+  },
+  {
+   "nombre": "cemento",
+   "hex": "#6c6a84"
+  },
+  {
+   "nombre": "cemento_claro",
+   "hex": "#9a96ac"
+  },
+  {
+   "nombre": "crema",
+   "hex": "#cfc8d0"
+  },
+  {
+   "nombre": "luz",
+   "hex": "#fff8e4"
+  },
+  {
+   "nombre": "amarillo",
+   "hex": "#ffd84a"
+  },
+  {
+   "nombre": "ocre",
+   "hex": "#e09a36"
+  },
+  {
+   "nombre": "terracota",
+   "hex": "#a0583a"
+  },
+  {
+   "nombre": "rojo",
+   "hex": "#e83a3c"
+  },
+  {
+   "nombre": "vino",
+   "hex": "#6e2440"
+  },
+  {
+   "nombre": "salmon",
+   "hex": "#e48ad8"
+  },
+  {
+   "nombre": "menta",
+   "hex": "#48c8b0"
+  },
+  {
+   "nombre": "verde",
+   "hex": "#2e7a5a"
+  },
+  {
+   "nombre": "verde_oscuro",
+   "hex": "#1a3a34"
+  },
+  {
+   "nombre": "celeste",
+   "hex": "#4a78c0"
+  },
+  {
+   "nombre": "cielo",
+   "hex": "#34428a"
+  },
+  {
+   "nombre": "azul",
+   "hex": "#202e66"
+  },
+  {
+   "nombre": "azul_noche",
+   "hex": "#10163a"
+  },
+  {
+   "nombre": "canal",
+   "hex": "#5a3e96"
+  },
+  {
+   "nombre": "oro",
+   "hex": "#ffb43a"
+  },
+  {
+   "nombre": "bruma",
+   "hex": "#4a3e78"
+  }
+ ],
+ "verificacion": "verificacion.md",
+ "layout": {
+  "id": "cancha_maracaibo",
+  "pais": "venezuela",
+  "prueba": "basket",
+  "nombre": "CANCHA LA CHINITA, MARACAIBO",
+  "nota": "Básquet 3x3 en una cancha de barrio de Maracaibo, de noche. Vista inclinada de 0.35, como la pelea, con la franja de Basket.ts: FT 212 y 104 de fondo (filas 212 a 316). La media cancha va de x 40 a 596, el aro en (566, 52) a 58 de alto y el área de x 496 a 596 entre y 32 y 72. El aro, el tablero y el poste los dibuja el juego, que los rompe con la clavada Nekketsu. Los relámpagos del Catatumbo van en la vida (la nube del fondo) y el juego suma el rayo_catatumbo y el destello de la cámara.",
+  "largo": 640,
+  "franja": {
+   "atras": 212,
+   "adelante": 316
+  },
+  "hora": "noche",
+  "clima": [
+   "despejado",
+   "calor"
+  ],
+  "paralaje": {
+   "cielo": "auto",
+   "lejos": "lago_puente_urdaneta",
+   "cerca": "cancha_barrio_maracaibo"
+  },
+  "piso": [
+   {
+    "x0": 0,
+    "x1": 640,
+    "tipo": "cancha",
+    "nombre": "la cancha de concreto pintada"
+   }
+  ],
+  "huecos": [],
+  "plataformas": [],
+  "muros": [],
+  "escaleras": [],
+  "postes": [],
+  "agua": [],
+  "bajo": [],
+  "solidos": [],
+  "carriles": [
+   {
+    "y": 24
+   },
+   {
+    "y": 52
+   },
+   {
+    "y": 80
+   }
+  ],
+  "entidades": [
+   {
+    "tipo": "objeto",
+    "objeto": "aro",
+    "x": 566,
+    "y": 52,
+    "nota": "el aro, el tablero y el poste los dibuja el juego (se rompen con la clavada Nekketsu)"
+   }
+  ],
+  "ranuras_deco": [
+   {
+    "x0": 0,
+    "x1": 640,
+    "capa": "lejos",
+    "tema": "lago_puente_urdaneta_catatumbo"
+   },
+   {
+    "x0": 0,
+    "x1": 640,
+    "capa": "cerca",
+    "tema": "malla_muro_gaiteros"
+   }
+  ],
+  "vida": [
+   "relampago",
+   "gaiteros",
+   "publico"
+  ]
+ }
+}

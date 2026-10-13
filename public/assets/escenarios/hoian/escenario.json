@@ -1,0 +1,620 @@
+{
+ "generado_con": "PixelForja",
+ "id": "hoian",
+ "nombre": "HỘI AN",
+ "escala": 1,
+ "resolucion": [
+  640,
+  360
+ ],
+ "franja": {
+  "atras": 246,
+  "adelante": 344
+ },
+ "largo": 640,
+ "hora": "noche",
+ "clima": [
+  "despejado"
+ ],
+ "inclinacion": 0.35,
+ "ancho": 674,
+ "nota_inclinacion": "vista inclinada: px = x + 0.35 * y (lo del fondo queda a la izquierda). Las capas largas miden 674 px (largo + 0.35 * fondo de la franja). Los objetos ya vienen corridos: corre a los atletas igual.",
+ "capas": {
+  "cielo": {
+   "archivo": "cielo_noche.png",
+   "y": 0,
+   "paralaje": 0,
+   "repetir_x": true
+  },
+  "lejos": {
+   "archivo": "lejos.png",
+   "y": 46,
+   "paralaje": 0.25,
+   "repetir_x": true
+  },
+  "tras_cerca": {
+   "nota": "la vida con capa tras_cerca va aquí: se ve por los callejones"
+  },
+  "cerca": {
+   "archivos": [
+    "cerca_0.png"
+   ],
+   "trozo": 1280,
+   "y": 0,
+   "paralaje": 1
+  },
+  "piso": {
+   "archivos": [
+    "piso_0.png"
+   ],
+   "trozo": 1280,
+   "y": 246,
+   "paralaje": 1,
+   "nota": "las primeras 98 filas son la franja (inclinada), las de abajo el bordillo: la cara del piso que da a la cámara"
+  },
+  "objetos": {
+   "archivo": "objetos.json",
+   "nota": "entre el piso y el frente, ordenados con los atletas"
+  },
+  "frente": {
+   "archivos": [
+    "frente_0.png"
+   ],
+   "trozo": 1280,
+   "y": 330,
+   "paralaje": 1
+  }
+ },
+ "vida": {
+  "imagen": "vida.png",
+  "piezas": [
+   {
+    "id": "faroles_cuerda_0",
+    "tipo": "faroles_meciendose",
+    "capa": "objeto",
+    "x": 19,
+    "y": 134,
+    "fps": 3,
+    "orden": 98.05,
+    "cuadros": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 604,
+      "h": 71
+     },
+     {
+      "x": 605,
+      "y": 0,
+      "w": 604,
+      "h": 71
+     },
+     {
+      "x": 1210,
+      "y": 0,
+      "w": 604,
+      "h": 71
+     },
+     {
+      "x": 0,
+      "y": 72,
+      "w": 604,
+      "h": 71
+     }
+    ]
+   },
+   {
+    "id": "faroles_poste_0",
+    "tipo": "faroles_meciendose",
+    "capa": "objeto",
+    "x": 4,
+    "y": 133,
+    "fps": 3,
+    "orden": 2.05,
+    "cuadros": [
+     {
+      "x": 605,
+      "y": 72,
+      "w": 34,
+      "h": 30
+     },
+     {
+      "x": 640,
+      "y": 72,
+      "w": 34,
+      "h": 30
+     },
+     {
+      "x": 675,
+      "y": 72,
+      "w": 34,
+      "h": 30
+     },
+     {
+      "x": 710,
+      "y": 72,
+      "w": 34,
+      "h": 30
+     }
+    ]
+   },
+   {
+    "id": "faroles_poste_1",
+    "tipo": "faroles_meciendose",
+    "capa": "objeto",
+    "x": 604,
+    "y": 133,
+    "fps": 3,
+    "orden": 2.05,
+    "cuadros": [
+     {
+      "x": 745,
+      "y": 72,
+      "w": 34,
+      "h": 30
+     },
+     {
+      "x": 780,
+      "y": 72,
+      "w": 34,
+      "h": 30
+     },
+     {
+      "x": 815,
+      "y": 72,
+      "w": 34,
+      "h": 30
+     },
+     {
+      "x": 850,
+      "y": 72,
+      "w": 34,
+      "h": 30
+     }
+    ]
+   },
+   {
+    "id": "velitas_rio",
+    "tipo": "velitas_rio",
+    "capa": "objeto",
+    "x": 0,
+    "y": 349,
+    "fps": 4,
+    "orden": 118,
+    "cuadros": [
+     {
+      "x": 885,
+      "y": 72,
+      "w": 674,
+      "h": 11
+     },
+     {
+      "x": 0,
+      "y": 144,
+      "w": 674,
+      "h": 11
+     },
+     {
+      "x": 675,
+      "y": 144,
+      "w": 674,
+      "h": 11
+     }
+    ]
+   },
+   {
+    "id": "bote_rio",
+    "tipo": "botes_con_faroles",
+    "capa": "cerca",
+    "x": 54,
+    "y": 209,
+    "fps": 1,
+    "cuadros": [
+     {
+      "x": 1350,
+      "y": 144,
+      "w": 56,
+      "h": 24
+     },
+     {
+      "x": 1407,
+      "y": 144,
+      "w": 56,
+      "h": 24
+     }
+    ]
+   },
+   {
+    "id": "bote_lejos",
+    "tipo": "botes_con_faroles",
+    "capa": "lejos",
+    "x": 260,
+    "y": 152,
+    "fps": 1,
+    "recorrido": {
+     "desde": [
+      260,
+      152
+     ],
+     "hasta": [
+      -60,
+      154
+     ],
+     "segundos": 45,
+     "desfase": 0.55
+    },
+    "cuadros": [
+     {
+      "x": 1464,
+      "y": 144,
+      "w": 54,
+      "h": 24
+     },
+     {
+      "x": 1519,
+      "y": 144,
+      "w": 54,
+      "h": 24
+     }
+    ]
+   },
+   {
+    "id": "publico_0",
+    "tipo": "publico",
+    "capa": "cerca",
+    "x": 174,
+    "y": 144,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 1574,
+      "y": 144,
+      "w": 106,
+      "h": 30
+     },
+     {
+      "x": 1681,
+      "y": 144,
+      "w": 106,
+      "h": 30
+     }
+    ]
+   },
+   {
+    "id": "publico_1",
+    "tipo": "publico",
+    "capa": "cerca",
+    "x": 400,
+    "y": 144,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 1788,
+      "y": 144,
+      "w": 116,
+      "h": 30
+     },
+     {
+      "x": 1905,
+      "y": 144,
+      "w": 116,
+      "h": 30
+     }
+    ]
+   }
+  ],
+  "nota": "capa cerca y tras_cerca: x, y de pantalla, como siempre. capa lejos: x, y en pixeles de la imagen lejos (que se repite cada su ancho y corre con su paralaje); va de recorrido.desde a recorrido.hasta en recorrido.segundos y vuelve a empezar, adelantada por desfase (0 a 1). capa objeto: va encima de un objeto, con setDepth(franja.atras + orden), como los objetos."
+ },
+ "callejones": [],
+ "superficie": {
+  "archivo": "superficie.png",
+  "y": 246,
+  "leyenda": [
+   {
+    "id": "acera",
+    "color": "#d0d0d0",
+    "paso": "paso_piedra",
+    "resbala": false
+   },
+   {
+    "id": "madera",
+    "color": "#a06030",
+    "paso": "paso_madera",
+    "resbala": false
+   }
+  ]
+ },
+ "colision": "colision.json",
+ "luces": "luces.json",
+ "particulas": "particulas.json",
+ "paleta": [
+  {
+   "nombre": "tinta",
+   "hex": "#140c16"
+  },
+  {
+   "nombre": "sombra",
+   "hex": "#2c1a22"
+  },
+  {
+   "nombre": "asfalto",
+   "hex": "#4a3230"
+  },
+  {
+   "nombre": "asfalto_claro",
+   "hex": "#6c5042"
+  },
+  {
+   "nombre": "cemento",
+   "hex": "#917058"
+  },
+  {
+   "nombre": "cemento_claro",
+   "hex": "#bc946c"
+  },
+  {
+   "nombre": "crema",
+   "hex": "#f2c886"
+  },
+  {
+   "nombre": "luz",
+   "hex": "#fff1c4"
+  },
+  {
+   "nombre": "amarillo",
+   "hex": "#e6b23e"
+  },
+  {
+   "nombre": "ocre",
+   "hex": "#ad7a2a"
+  },
+  {
+   "nombre": "terracota",
+   "hex": "#8c4630"
+  },
+  {
+   "nombre": "rojo",
+   "hex": "#e2382a"
+  },
+  {
+   "nombre": "vino",
+   "hex": "#6c1c26"
+  },
+  {
+   "nombre": "salmon",
+   "hex": "#e8509a"
+  },
+  {
+   "nombre": "menta",
+   "hex": "#74c864"
+  },
+  {
+   "nombre": "verde",
+   "hex": "#3a663a"
+  },
+  {
+   "nombre": "verde_oscuro",
+   "hex": "#1c3226"
+  },
+  {
+   "nombre": "celeste",
+   "hex": "#5a7cd6"
+  },
+  {
+   "nombre": "cielo",
+   "hex": "#2c3c7a"
+  },
+  {
+   "nombre": "azul",
+   "hex": "#1b2756"
+  },
+  {
+   "nombre": "azul_noche",
+   "hex": "#0e1434"
+  },
+  {
+   "nombre": "canal",
+   "hex": "#9452c8"
+  },
+  {
+   "nombre": "oro",
+   "hex": "#ffa62a"
+  },
+  {
+   "nombre": "bruma",
+   "hex": "#3c3466"
+  }
+ ],
+ "verificacion": "verificacion.md",
+ "layout": {
+  "id": "hoian",
+  "pais": "vietnam",
+  "prueba": "tamawari",
+  "nombre": "HỘI AN",
+  "nota": "Tama-wari de noche en la ciudad vieja: dos postes de bambú con su bola de papel arriba, uno por equipo. Misma franja que la pelea (246 a 344).",
+  "largo": 640,
+  "franja": {
+   "atras": 246,
+   "adelante": 344
+  },
+  "hora": "noche",
+  "clima": [
+   "despejado"
+  ],
+  "paralaje": {
+   "cielo": "auto",
+   "lejos": "rio_thu_bon_puente_japones",
+   "cerca": "casas_amarillas_hoian"
+  },
+  "piso": [
+   {
+    "x0": 0,
+    "x1": 640,
+    "tipo": "baldosa",
+    "nombre": "calle de piedra"
+   },
+   {
+    "x0": 0,
+    "x1": 640,
+    "y0": 0,
+    "y1": 14,
+    "tipo": "acera"
+   },
+   {
+    "x0": 0,
+    "x1": 640,
+    "y0": 84,
+    "y1": 98,
+    "tipo": "madera",
+    "nombre": "muelle del río"
+   }
+  ],
+  "huecos": [],
+  "plataformas": [],
+  "muros": [],
+  "escaleras": [],
+  "postes": [
+   {
+    "x": 110,
+    "y": 49,
+    "alto": 170,
+    "tipo": "poste_tamawari",
+    "nota": "el de la Familia GG: bambú con su bola de papel arriba"
+   },
+   {
+    "x": 530,
+    "y": 49,
+    "alto": 170,
+    "tipo": "poste_tamawari",
+    "nota": "el del Instituto Nekketsu"
+   },
+   {
+    "x": 20,
+    "y": 2,
+    "alto": 110,
+    "tipo": "poste_faroles"
+   },
+   {
+    "x": 620,
+    "y": 2,
+    "alto": 110,
+    "tipo": "poste_faroles"
+   }
+  ],
+  "agua": [],
+  "bajo": [
+   {
+    "x0": 20,
+    "x1": 620,
+    "y0": 0,
+    "y1": 98,
+    "z": 124,
+    "tipo": "cuerdas_faroles",
+    "nota": "faroles de seda colgando sobre la calle"
+   }
+  ],
+  "solidos": [
+   {
+    "x": 102,
+    "y": 43,
+    "w": 16,
+    "d": 12,
+    "z": 12,
+    "tipo": "base_poste"
+   },
+   {
+    "x": 522,
+    "y": 43,
+    "w": 16,
+    "d": 12,
+    "z": 12,
+    "tipo": "base_poste"
+   }
+  ],
+  "carriles": [
+   {
+    "y": 20
+   },
+   {
+    "y": 42
+   },
+   {
+    "y": 64
+   },
+   {
+    "y": 86
+   }
+  ],
+  "entidades": [
+   {
+    "tipo": "salida",
+    "x": 60
+   },
+   {
+    "tipo": "meta",
+    "x": 580
+   },
+   {
+    "tipo": "npc",
+    "npc": "bola_tama",
+    "x": 110,
+    "y": 49,
+    "z": 170,
+    "equipo": "familia_gg",
+    "nota": "la bola de papel de cada equipo, con el efecto bola_tama (4 estados de daño)"
+   },
+   {
+    "tipo": "npc",
+    "npc": "bola_tama",
+    "x": 530,
+    "y": 49,
+    "z": 170,
+    "equipo": "instituto_nekketsu"
+   },
+   {
+    "tipo": "npc",
+    "npc": "vendedora_faroles",
+    "x": 320,
+    "y": 4
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "abanico",
+    "x": 260,
+    "y": 60
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "non_la",
+    "x": 380,
+    "y": 30
+   }
+  ],
+  "ranuras_deco": [
+   {
+    "x0": 0,
+    "x1": 640,
+    "capa": "lejos",
+    "tema": "rio_thu_bon_puente_japones"
+   },
+   {
+    "x0": 0,
+    "x1": 640,
+    "capa": "cerca",
+    "tema": "casas_amarillas_faroles"
+   },
+   {
+    "x0": 0,
+    "x1": 640,
+    "capa": "frente",
+    "tema": "velitas_en_el_rio"
+   }
+  ],
+  "vida": [
+   "faroles_meciendose",
+   "velitas_rio",
+   "botes_con_faroles",
+   "publico"
+  ]
+ }
+}

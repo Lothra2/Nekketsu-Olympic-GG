@@ -105,13 +105,80 @@
       "swim_fly",
       "tread_water",
       "swim_exit"
-    ]
+    ],
+    "ngg_burlas": [
+      "burla_pulgar",
+      "burla_bruce_lee"
+    ],
+    "voley": {
+      "anims": [
+        "vb_bump",
+        "vb_set",
+        "spike",
+        "block",
+        "serve",
+        "vb_dive",
+        "vb_ready"
+      ],
+      "sin_props": true
+    },
+    "futbol": {
+      "anims": [
+        "trap",
+        "header",
+        "volley",
+        "chilena",
+        "shot",
+        "pass",
+        "slide"
+      ],
+      "sin_props": true
+    },
+    "keeper": {
+      "anims": [
+        "keeper_ready",
+        "keeper_dive",
+        "keeper_catch"
+      ],
+      "sin_props": true
+    },
+    "basket": {
+      "anims": [
+        "dribble",
+        "shoot",
+        "dunk"
+      ],
+      "sin_props": true
+    },
+    "tennis": {
+      "anims": [
+        "tn_ready",
+        "forehand",
+        "backhand",
+        "tennis_serve",
+        "tn_volley",
+        "tn_smash"
+      ],
+      "sin_props": true
+    },
+    "beisbol": {
+      "anims": [
+        "pitch",
+        "catch"
+      ],
+      "sin_props": true
+    }
+  },
+  "alias": {
+    "burla_familia_gg": "burla_pulgar",
+    "burla_instituto_nekketsu": "burla_bruce_lee"
   },
   "pruebas": {
     "pelea": [
       "ngg_mov",
       "ngg_golpe",
-      "ngg_carga"
+      "ngg_carga",
+      "ngg_burlas"
     ],
     "crosscountry": [
       "ngg_mov",
@@ -126,11 +193,46 @@
     ],
     "jabalina": [
       "atletismo"
+    ],
+    "voley": [
+      "ngg_mov",
+      "voley"
+    ],
+    "tenis": [
+      "ngg_mov",
+      "tennis"
+    ],
+    "futbol": [
+      "ngg_mov",
+      "ngg_golpe",
+      "futbol",
+      "keeper"
+    ],
+    "basket": [
+      "ngg_mov",
+      "ngg_golpe",
+      "basket"
+    ],
+    "dacau": [
+      "ngg_mov",
+      "futbol"
+    ],
+    "chapita": [
+      "ngg_mov",
+      "ngg_carga",
+      "beisbol"
+    ],
+    "quemado": [
+      "ngg_mov",
+      "ngg_carga",
+      "beisbol"
     ]
   },
   "objetos": true,
   "animales": [
     "thor",
+    "perro_calle_1",
+    "gato_1",
     "gallo",
     "paloma"
   ],
@@ -180,13 +282,35 @@
       "paso_tierra_1",
       "paso_tierra_2",
       "silbato",
-      "pistola"
+      "pistola",
+      "gallo",
+      "aleteo",
+      "mecha_tejo",
+      "toque_cau",
+      "caida_tatami",
+      "pitazo_largo",
+      "red_voley",
+      "rebote_balon",
+      "aro_basket",
+      "aro_fallo",
+      "chapa",
+      "chancleta"
     ],
     "ambientes": [
       "agua"
     ],
     "musica": [
-      "marcha_nekketsu"
+      "marcha_nekketsu",
+      "tema_instituto",
+      "saigon_chay",
+      "hoian_noche",
+      "ajiaco_rock",
+      "parce_corra",
+      "pana_dale",
+      "gaita_lago",
+      "carnaval_quilla",
+      "playa_margarita",
+      "dalat_niebla"
     ]
   },
   "npc": {
@@ -194,22 +318,45 @@
     "pelota": true,
     "personajes": {
       "bailarin_1": {
-        "anims": ["toprock", "molino", "reclama"]
+        "anims": [
+          "toprock",
+          "molino",
+          "reclama"
+        ]
       },
       "bailarin_2": {
-        "anims": ["toprock", "molino", "reclama"]
+        "anims": [
+          "toprock",
+          "molino",
+          "reclama"
+        ]
       },
       "bailarin_3": {
-        "anims": ["toprock", "molino", "reclama"]
+        "anims": [
+          "toprock",
+          "molino",
+          "reclama"
+        ]
       },
       "pelado_1": {
-        "anims": ["espera", "patear", "perdon"]
+        "anims": [
+          "espera",
+          "patear",
+          "perdon"
+        ]
       },
       "pelado_2": {
-        "anims": ["espera", "patear", "perdon"]
+        "anims": [
+          "espera",
+          "patear",
+          "perdon"
+        ]
       },
       "grafitero": {
-        "anims": ["pintar", "mirar"],
+        "anims": [
+          "pintar",
+          "mirar"
+        ],
         "vistas": {
           "pintar": "espalda_tres_cuartos"
         }
@@ -228,8 +375,20 @@
         "parlante": true
       },
       "vendedor_paletas": {
-        "anims": ["llamar", "ofrecer"],
+        "anims": [
+          "llamar",
+          "ofrecer"
+        ],
         "vista": "tres_cuartos"
+      },
+      "marimonda": {
+        "anims": {
+          "caminar": "walk",
+          "bailar": "dance"
+        },
+        "vistas": {
+          "caminar": "lado"
+        }
       }
     }
   }

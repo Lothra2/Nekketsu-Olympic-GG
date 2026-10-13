@@ -1,0 +1,143 @@
+{
+ "imagen": "objetos.png",
+ "nota": "x, y: esquina de arriba a la izquierda en pantalla a escala 1 (con la inclinación ya puesta). orden: la profundidad para ordenar con los atletas (se dibuja después de todo atleta con y menor). En Phaser: setDepth(franja.atras + orden). Las caras izquierdas de las cajas (tipo *_cara) van con orden y + 0.1: detrás de quien pasa a su lado.",
+ "nota_gancho": "gancho: x, y de pantalla a escala 1 donde va el ancla de lo que cuelga del objeto y pone el juego (el hilo de la bola_tama del Tama-wari, ancla [16, 0]).",
+ "objetos": [
+  {
+   "id": "poste_faroles_0",
+   "tipo": "poste_faroles",
+   "origen": "postes",
+   "cuadro": {
+    "x": 0,
+    "y": 0,
+    "w": 34,
+    "h": 116
+   },
+   "x": 4,
+   "y": 133,
+   "orden": 2
+  },
+  {
+   "id": "poste_faroles_3",
+   "tipo": "poste_faroles",
+   "origen": "postes",
+   "cuadro": {
+    "x": 35,
+    "y": 0,
+    "w": 34,
+    "h": 116
+   },
+   "x": 604,
+   "y": 133,
+   "orden": 2
+  },
+  {
+   "id": "base_poste_0_cara",
+   "tipo": "base_poste_cara",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 70,
+    "y": 0,
+    "w": 5,
+    "h": 25
+   },
+   "x": 117,
+   "y": 277,
+   "orden": 43.1
+  },
+  {
+   "id": "base_poste_1_cara",
+   "tipo": "base_poste_cara",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 76,
+    "y": 0,
+    "w": 5,
+    "h": 25
+   },
+   "x": 537,
+   "y": 277,
+   "orden": 43.1
+  },
+  {
+   "id": "poste_tamawari_1",
+   "tipo": "poste_tamawari",
+   "origen": "postes",
+   "cuadro": {
+    "x": 82,
+    "y": 0,
+    "w": 46,
+    "h": 188
+   },
+   "x": 105,
+   "y": 120,
+   "orden": 48.5,
+   "gancho": [
+    127,
+    125
+   ]
+  },
+  {
+   "id": "poste_tamawari_2",
+   "tipo": "poste_tamawari",
+   "origen": "postes",
+   "cuadro": {
+    "x": 129,
+    "y": 0,
+    "w": 46,
+    "h": 188
+   },
+   "x": 525,
+   "y": 120,
+   "orden": 48.5,
+   "gancho": [
+    547,
+    125
+   ]
+  },
+  {
+   "id": "base_poste_0",
+   "tipo": "base_poste",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 176,
+    "y": 0,
+    "w": 20,
+    "h": 24
+   },
+   "x": 117,
+   "y": 277,
+   "orden": 55,
+   "superficie": "piedra"
+  },
+  {
+   "id": "base_poste_1",
+   "tipo": "base_poste",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 197,
+    "y": 0,
+    "w": 20,
+    "h": 24
+   },
+   "x": 537,
+   "y": 277,
+   "orden": 55,
+   "superficie": "piedra"
+  },
+  {
+   "id": "cuerdas_faroles_0",
+   "tipo": "cuerdas_faroles",
+   "origen": "bajo",
+   "cuadro": {
+    "x": 218,
+    "y": 0,
+    "w": 604,
+    "h": 71
+   },
+   "x": 19,
+   "y": 134,
+   "orden": 98
+  }
+ ]
+}

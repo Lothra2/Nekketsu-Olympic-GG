@@ -1,0 +1,73 @@
+{
+ "id": "dalat",
+ "pais": "vietnam",
+ "prueba": "tenis",
+ "vista": "lado",
+ "nombre": "SÂN QUẦN VỢT ĐÀ LẠT",
+ "nota": "Tenis de dobles de lado en una cancha de arcilla entre pinos de Đà Lạt, en la mañana con neblina. El piso de Tenis.ts está en la fila 310: la franja va de 290 a 330, la fila de atrás es el carril y 14 (fila 304) y la de adelante el y 26 (fila 316). La cancha va de x 34 a 606 entre las filas 298 y 322, y la red en x 320 con 20 de alto: las dos las dibuja el juego. La arcilla frena la pelota al picar.",
+ "largo": 640,
+ "franja": {
+  "atras": 290,
+  "adelante": 330
+ },
+ "hora": "manana",
+ "clima": [
+  "neblina"
+ ],
+ "paralaje": {
+  "cielo": "auto",
+  "lejos": "lago_xuan_huong_pinos",
+  "cerca": "cancha_arcilla_dalat"
+ },
+ "piso": [
+  {
+   "x0": 0,
+   "x1": 640,
+   "tipo": "greda",
+   "nombre": "la arcilla roja de la cancha"
+  }
+ ],
+ "huecos": [],
+ "plataformas": [],
+ "muros": [],
+ "escaleras": [],
+ "postes": [],
+ "agua": [],
+ "bajo": [],
+ "solidos": [],
+ "carriles": [
+  {
+   "y": 14
+  },
+  {
+   "y": 26
+  }
+ ],
+ "entidades": [
+  {
+   "tipo": "objeto",
+   "objeto": "red_tenis",
+   "x": 320,
+   "y": 20,
+   "nota": "la red la dibuja el juego: RED_X 320, RED_H 20"
+  }
+ ],
+ "ranuras_deco": [
+  {
+   "x0": 0,
+   "x1": 640,
+   "capa": "lejos",
+   "tema": "lago_xuan_huong_catedral_villa"
+  },
+  {
+   "x0": 0,
+   "x1": 640,
+   "capa": "cerca",
+   "tema": "pinos_malla_hortensias"
+  }
+ ],
+ "vida": [
+  "neblina",
+  "publico"
+ ]
+}

@@ -1,0 +1,32 @@
+{
+ "id": "tao_dan",
+ "largo": 640,
+ "franja": {
+  "atras": 290,
+  "adelante": 330
+ },
+ "piso": [
+  {
+   "x0": 0,
+   "x1": 640,
+   "tipo": "tierra",
+   "nombre": "cancha de tierra apisonada"
+  }
+ ],
+ "huecos": [],
+ "plataformas": [],
+ "muros": [],
+ "escaleras": [],
+ "postes": [],
+ "agua": [],
+ "bajo": [],
+ "solidos": [],
+ "carriles": [
+  {
+   "y": 14
+  },
+  {
+   "y": 26
+  }
+ ]
+}

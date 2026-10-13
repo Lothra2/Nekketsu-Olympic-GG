@@ -1,0 +1,35 @@
+{
+ "nota": "x e y en pixeles de pantalla a escala 1 (y de pantalla = franja.atras + y del mundo). fx: nombre del efecto del catálogo (manifest.fx).",
+ "particulas": [
+  {
+   "tipo": "neblina",
+   "x0": 0,
+   "x1": 640,
+   "y0": 150,
+   "y1": 240,
+   "color": [
+    "#dfe4e2",
+    "#d6e2e6"
+   ],
+   "cada": 0.8,
+   "sube": 2,
+   "vida": 3,
+   "nota": "jirones de neblina que flotan entre los pinos"
+  },
+  {
+   "tipo": "polvo",
+   "x0": 20,
+   "x1": 620,
+   "y0": 300,
+   "y1": 326,
+   "color": [
+    "#d08a52",
+    "#b0582e"
+   ],
+   "cada": 1.4,
+   "sube": 4,
+   "vida": 0.8,
+   "nota": "el polvo de arcilla que levantan los pasos"
+  }
+ ]
+}

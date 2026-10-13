@@ -1,0 +1,435 @@
+{
+ "generado_con": "PixelForja",
+ "id": "margarita",
+ "nombre": "PLAYA EL AGUA, MARGARITA",
+ "escala": 1,
+ "resolucion": [
+  640,
+  360
+ ],
+ "franja": {
+  "atras": 290,
+  "adelante": 330
+ },
+ "largo": 640,
+ "hora": "mediodia",
+ "clima": [
+  "despejado",
+  "calor"
+ ],
+ "inclinacion": 0,
+ "ancho": 640,
+ "vista": "lado",
+ "nota_vista": "de lado: el dibujo va derecho (inclinación 0). El fondo (la capa cerca) va de la fila 0 a franja.atras (290) y es transparente donde se ven lejos y el cielo. El piso va de la fila 290 al borde de abajo de la pantalla: la franja donde se paran los atletas (y del mundo = fila de pantalla - 290) y lo de adelante. Las capas, los objetos y la vida se cargan igual que en la vista oblicua.",
+ "capas": {
+  "cielo": {
+   "archivo": "cielo_mediodia.png",
+   "y": 0,
+   "paralaje": 0,
+   "repetir_x": true
+  },
+  "lejos": {
+   "archivo": "lejos.png",
+   "y": 90,
+   "paralaje": 0.25,
+   "repetir_x": true
+  },
+  "tras_cerca": {
+   "nota": "la vida con capa tras_cerca va aquí: se ve por los callejones"
+  },
+  "cerca": {
+   "archivos": [
+    "cerca_0.png"
+   ],
+   "trozo": 1280,
+   "y": 0,
+   "paralaje": 1
+  },
+  "piso": {
+   "archivos": [
+    "piso_0.png"
+   ],
+   "trozo": 1280,
+   "y": 290,
+   "paralaje": 1,
+   "nota": "de lado: las primeras 40 filas son la franja donde se paran los atletas, las de abajo lo de adelante hasta el borde de la pantalla"
+  },
+  "objetos": {
+   "archivo": "objetos.json",
+   "nota": "entre el piso y el frente, ordenados con los atletas"
+  },
+  "frente": {
+   "archivos": [
+    "frente_0.png"
+   ],
+   "trozo": 1280,
+   "y": 316,
+   "paralaje": 1
+  }
+ },
+ "vida": {
+  "imagen": "vida.png",
+  "piezas": [
+   {
+    "id": "olas",
+    "tipo": "olas",
+    "capa": "cerca",
+    "x": 0,
+    "y": 210,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 640,
+      "h": 42
+     },
+     {
+      "x": 641,
+      "y": 0,
+      "w": 640,
+      "h": 42
+     },
+     {
+      "x": 1282,
+      "y": 0,
+      "w": 640,
+      "h": 42
+     },
+     {
+      "x": 0,
+      "y": 43,
+      "w": 640,
+      "h": 42
+     }
+    ]
+   },
+   {
+    "id": "toldo_0",
+    "tipo": "toldos_viento",
+    "capa": "cerca",
+    "x": 60,
+    "y": 198,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 641,
+      "y": 43,
+      "w": 52,
+      "h": 62
+     },
+     {
+      "x": 694,
+      "y": 43,
+      "w": 52,
+      "h": 62
+     }
+    ]
+   },
+   {
+    "id": "toldo_1",
+    "tipo": "toldos_viento",
+    "capa": "cerca",
+    "x": 518,
+    "y": 198,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 747,
+      "y": 43,
+      "w": 52,
+      "h": 62
+     },
+     {
+      "x": 800,
+      "y": 43,
+      "w": 52,
+      "h": 62
+     }
+    ]
+   },
+   {
+    "id": "vendedor_empanadas",
+    "tipo": "vendedor_empanadas",
+    "capa": "cerca",
+    "x": 400,
+    "y": 204,
+    "fps": 1.5,
+    "cuadros": [
+     {
+      "x": 853,
+      "y": 43,
+      "w": 34,
+      "h": 34
+     },
+     {
+      "x": 888,
+      "y": 43,
+      "w": 34,
+      "h": 34
+     }
+    ]
+   },
+   {
+    "id": "alcatraz_0",
+    "tipo": "alcatraces",
+    "capa": "lejos",
+    "x": 1280,
+    "y": 70,
+    "fps": 3,
+    "recorrido": {
+     "desde": [
+      1280,
+      70
+     ],
+     "hasta": [
+      -16,
+      84
+     ],
+     "segundos": 45,
+     "desfase": 0.55
+    },
+    "cuadros": [
+     {
+      "x": 923,
+      "y": 43,
+      "w": 15,
+      "h": 7
+     },
+     {
+      "x": 939,
+      "y": 43,
+      "w": 15,
+      "h": 7
+     }
+    ]
+   },
+   {
+    "id": "alcatraz_1",
+    "tipo": "alcatraces",
+    "capa": "lejos",
+    "x": 1290,
+    "y": 78,
+    "fps": 3,
+    "recorrido": {
+     "desde": [
+      1300,
+      78
+     ],
+     "hasta": [
+      4,
+      92
+     ],
+     "segundos": 45,
+     "desfase": 0.52
+    },
+    "cuadros": [
+     {
+      "x": 955,
+      "y": 43,
+      "w": 15,
+      "h": 7
+     },
+     {
+      "x": 971,
+      "y": 43,
+      "w": 15,
+      "h": 7
+     }
+    ]
+   }
+  ],
+  "nota": "capa cerca y tras_cerca: x, y de pantalla, como siempre. capa lejos: x, y en pixeles de la imagen lejos (que se repite cada su ancho y corre con su paralaje); va de recorrido.desde a recorrido.hasta en recorrido.segundos y vuelve a empezar, adelantada por desfase (0 a 1). capa objeto: va encima de un objeto, con setDepth(franja.atras + orden), como los objetos."
+ },
+ "callejones": [],
+ "superficie": {
+  "archivo": "superficie.png",
+  "y": 290,
+  "leyenda": [
+   {
+    "id": "tierra",
+    "color": "#c09050",
+    "paso": "paso_tierra",
+    "resbala": false
+   }
+  ]
+ },
+ "colision": "colision.json",
+ "luces": "luces.json",
+ "particulas": "particulas.json",
+ "paleta": [
+  {
+   "nombre": "tinta",
+   "hex": "#1c1820"
+  },
+  {
+   "nombre": "sombra",
+   "hex": "#3a3238"
+  },
+  {
+   "nombre": "asfalto",
+   "hex": "#5e5450"
+  },
+  {
+   "nombre": "asfalto_claro",
+   "hex": "#8a7a6a"
+  },
+  {
+   "nombre": "cemento",
+   "hex": "#b8a68c"
+  },
+  {
+   "nombre": "cemento_claro",
+   "hex": "#dccaa6"
+  },
+  {
+   "nombre": "crema",
+   "hex": "#f2e4c2"
+  },
+  {
+   "nombre": "luz",
+   "hex": "#fffcf0"
+  },
+  {
+   "nombre": "amarillo",
+   "hex": "#f6d25a"
+  },
+  {
+   "nombre": "ocre",
+   "hex": "#c8963e"
+  },
+  {
+   "nombre": "terracota",
+   "hex": "#a65a36"
+  },
+  {
+   "nombre": "rojo",
+   "hex": "#e0403a"
+  },
+  {
+   "nombre": "vino",
+   "hex": "#80282c"
+  },
+  {
+   "nombre": "salmon",
+   "hex": "#f08a74"
+  },
+  {
+   "nombre": "menta",
+   "hex": "#5ad8c8"
+  },
+  {
+   "nombre": "verde",
+   "hex": "#4c9a3e"
+  },
+  {
+   "nombre": "verde_oscuro",
+   "hex": "#255a32"
+  },
+  {
+   "nombre": "celeste",
+   "hex": "#5ab4ec"
+  },
+  {
+   "nombre": "cielo",
+   "hex": "#b4e0f8"
+  },
+  {
+   "nombre": "azul",
+   "hex": "#2a62b8"
+  },
+  {
+   "nombre": "azul_noche",
+   "hex": "#1e3a6a"
+  },
+  {
+   "nombre": "canal",
+   "hex": "#1f8eaa"
+  },
+  {
+   "nombre": "oro",
+   "hex": "#f7a828"
+  },
+  {
+   "nombre": "bruma",
+   "hex": "#e2f0ee"
+  }
+ ],
+ "verificacion": "verificacion.md",
+ "layout": {
+  "id": "margarita",
+  "pais": "venezuela",
+  "prueba": "voley",
+  "vista": "lado",
+  "nombre": "PLAYA EL AGUA, MARGARITA",
+  "nota": "Vóley Playa de lado en Playa El Agua, isla de Margarita, al mediodía. El piso de Voley.ts está en la fila 310: la franja va de 290 a 330, la fila de atrás es el carril y 14 (fila 304) y la de adelante el y 26 (fila 316). La cancha va de x 34 a 606 entre las filas 298 y 322, y la red en x 320 con 46 de alto: las dos las dibuja el juego. La arena frena al correr.",
+  "largo": 640,
+  "franja": {
+   "atras": 290,
+   "adelante": 330
+  },
+  "hora": "mediodia",
+  "clima": [
+   "despejado",
+   "calor"
+  ],
+  "paralaje": {
+   "cielo": "auto",
+   "lejos": "mar_caribe_cerro",
+   "cerca": "playa_el_agua"
+  },
+  "piso": [
+   {
+    "x0": 0,
+    "x1": 640,
+    "tipo": "arena",
+    "nombre": "la arena de la cancha"
+   }
+  ],
+  "huecos": [],
+  "plataformas": [],
+  "muros": [],
+  "escaleras": [],
+  "postes": [],
+  "agua": [],
+  "bajo": [],
+  "solidos": [],
+  "carriles": [
+   {
+    "y": 14
+   },
+   {
+    "y": 26
+   }
+  ],
+  "entidades": [
+   {
+    "tipo": "objeto",
+    "objeto": "red_voley",
+    "x": 320,
+    "y": 20,
+    "nota": "la red la dibuja el juego: RED_X 320, RED_H 46"
+   }
+  ],
+  "ranuras_deco": [
+   {
+    "x0": 0,
+    "x1": 640,
+    "capa": "lejos",
+    "tema": "mar_caribe_cerro"
+   },
+   {
+    "x0": 0,
+    "x1": 640,
+    "capa": "cerca",
+    "tema": "palmas_toldos_churuata"
+   }
+  ],
+  "vida": [
+   "olas",
+   "toldos_viento",
+   "vendedor_empanadas",
+   "alcatraces"
+  ]
+ }
+}

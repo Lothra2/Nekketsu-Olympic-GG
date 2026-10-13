@@ -1,0 +1,519 @@
+{
+ "generado_con": "PixelForja",
+ "id": "barranquilla",
+ "nombre": "CARNAVAL DE BARRANQUILLA",
+ "escala": 1,
+ "resolucion": [
+  640,
+  360
+ ],
+ "franja": {
+  "atras": 212,
+  "adelante": 316
+ },
+ "largo": 640,
+ "hora": "mediodia",
+ "clima": [
+  "despejado",
+  "calor"
+ ],
+ "inclinacion": 0.35,
+ "ancho": 676,
+ "nota_inclinacion": "vista inclinada: px = x + 0.35 * y (lo del fondo queda a la izquierda). Las capas largas miden 676 px (largo + 0.35 * fondo de la franja). Los objetos ya vienen corridos: corre a los atletas igual.",
+ "capas": {
+  "cielo": {
+   "archivo": "cielo_mediodia.png",
+   "y": 0,
+   "paralaje": 0,
+   "repetir_x": true
+  },
+  "lejos": {
+   "archivo": "lejos.png",
+   "y": 12,
+   "paralaje": 0.25,
+   "repetir_x": true
+  },
+  "tras_cerca": {
+   "nota": "la vida con capa tras_cerca va aquí: se ve por los callejones"
+  },
+  "cerca": {
+   "archivos": [
+    "cerca_0.png"
+   ],
+   "trozo": 1280,
+   "y": 0,
+   "paralaje": 1
+  },
+  "piso": {
+   "archivos": [
+    "piso_0.png"
+   ],
+   "trozo": 1280,
+   "y": 212,
+   "paralaje": 1,
+   "nota": "las primeras 104 filas son la franja (inclinada), las de abajo el bordillo: la cara del piso que da a la cámara"
+  },
+  "objetos": {
+   "archivo": "objetos.json",
+   "nota": "entre el piso y el frente, ordenados con los atletas"
+  },
+  "frente": {
+   "archivos": [
+    "frente_0.png"
+   ],
+   "trozo": 1280,
+   "y": 302,
+   "paralaje": 1
+  }
+ },
+ "vida": {
+  "imagen": "vida.png",
+  "piezas": [
+   {
+    "id": "publico_0",
+    "tipo": "publico",
+    "capa": "cerca",
+    "x": 0,
+    "y": 132,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 192,
+      "h": 66
+     },
+     {
+      "x": 193,
+      "y": 0,
+      "w": 192,
+      "h": 66
+     }
+    ]
+   },
+   {
+    "id": "publico_1",
+    "tipo": "publico",
+    "capa": "cerca",
+    "x": 488,
+    "y": 132,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 386,
+      "y": 0,
+      "w": 188,
+      "h": 66
+     },
+     {
+      "x": 575,
+      "y": 0,
+      "w": 188,
+      "h": 66
+     }
+    ]
+   },
+   {
+    "id": "guirnaldas_0",
+    "tipo": "guirnaldas",
+    "capa": "cerca",
+    "x": 0,
+    "y": 23,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 764,
+      "y": 0,
+      "w": 676,
+      "h": 37
+     },
+     {
+      "x": 0,
+      "y": 67,
+      "w": 676,
+      "h": 37
+     }
+    ]
+   },
+   {
+    "id": "guirnaldas_1",
+    "tipo": "guirnaldas",
+    "capa": "cerca",
+    "x": 140,
+    "y": 11,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 677,
+      "y": 67,
+      "w": 424,
+      "h": 31
+     },
+     {
+      "x": 1102,
+      "y": 67,
+      "w": 424,
+      "h": 31
+     }
+    ]
+   },
+   {
+    "id": "guirnaldas_2",
+    "tipo": "guirnaldas",
+    "capa": "cerca",
+    "x": 0,
+    "y": 87,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 0,
+      "y": 105,
+      "w": 676,
+      "h": 27
+     },
+     {
+      "x": 677,
+      "y": 105,
+      "w": 676,
+      "h": 27
+     }
+    ]
+   },
+   {
+    "id": "guirnaldas_3",
+    "tipo": "guirnaldas",
+    "capa": "cerca",
+    "x": 0,
+    "y": 49,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 1354,
+      "y": 105,
+      "w": 210,
+      "h": 29
+     },
+     {
+      "x": 1565,
+      "y": 105,
+      "w": 210,
+      "h": 29
+     }
+    ]
+   },
+   {
+    "id": "guirnaldas_4",
+    "tipo": "guirnaldas",
+    "capa": "cerca",
+    "x": 474,
+    "y": 51,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 1776,
+      "y": 105,
+      "w": 202,
+      "h": 31
+     },
+     {
+      "x": 0,
+      "y": 137,
+      "w": 202,
+      "h": 31
+     }
+    ]
+   },
+   {
+    "id": "comparsa_208",
+    "tipo": "comparsa",
+    "capa": "cerca",
+    "x": 208,
+    "y": 162,
+    "fps": 4,
+    "cuadros": [
+     {
+      "x": 203,
+      "y": 137,
+      "w": 70,
+      "h": 50
+     },
+     {
+      "x": 274,
+      "y": 137,
+      "w": 70,
+      "h": 50
+     },
+     {
+      "x": 345,
+      "y": 137,
+      "w": 70,
+      "h": 50
+     },
+     {
+      "x": 416,
+      "y": 137,
+      "w": 70,
+      "h": 50
+     }
+    ]
+   },
+   {
+    "id": "comparsa_398",
+    "tipo": "comparsa",
+    "capa": "cerca",
+    "x": 398,
+    "y": 162,
+    "fps": 4,
+    "cuadros": [
+     {
+      "x": 487,
+      "y": 137,
+      "w": 66,
+      "h": 50
+     },
+     {
+      "x": 554,
+      "y": 137,
+      "w": 66,
+      "h": 50
+     },
+     {
+      "x": 621,
+      "y": 137,
+      "w": 66,
+      "h": 50
+     },
+     {
+      "x": 688,
+      "y": 137,
+      "w": 66,
+      "h": 50
+     }
+    ]
+   }
+  ]
+ },
+ "callejones": [],
+ "superficie": {
+  "archivo": "superficie.png",
+  "y": 212,
+  "leyenda": [
+   {
+    "id": "acera",
+    "color": "#d0d0d0",
+    "paso": "paso_piedra",
+    "resbala": false
+   }
+  ]
+ },
+ "colision": "colision.json",
+ "luces": "luces.json",
+ "particulas": "particulas.json",
+ "paleta": [
+  {
+   "nombre": "tinta",
+   "hex": "#1e161c"
+  },
+  {
+   "nombre": "sombra",
+   "hex": "#3c2c34"
+  },
+  {
+   "nombre": "asfalto",
+   "hex": "#5a5258"
+  },
+  {
+   "nombre": "asfalto_claro",
+   "hex": "#7c7478"
+  },
+  {
+   "nombre": "cemento",
+   "hex": "#a49c98"
+  },
+  {
+   "nombre": "cemento_claro",
+   "hex": "#cec6bc"
+  },
+  {
+   "nombre": "crema",
+   "hex": "#f4ead6"
+  },
+  {
+   "nombre": "luz",
+   "hex": "#fffbf2"
+  },
+  {
+   "nombre": "amarillo",
+   "hex": "#fcd03a"
+  },
+  {
+   "nombre": "ocre",
+   "hex": "#e08c2c"
+  },
+  {
+   "nombre": "terracota",
+   "hex": "#b45a30"
+  },
+  {
+   "nombre": "rojo",
+   "hex": "#e43434"
+  },
+  {
+   "nombre": "vino",
+   "hex": "#86223a"
+  },
+  {
+   "nombre": "salmon",
+   "hex": "#f47aa8"
+  },
+  {
+   "nombre": "menta",
+   "hex": "#3cc8b4"
+  },
+  {
+   "nombre": "verde",
+   "hex": "#3ca448"
+  },
+  {
+   "nombre": "verde_oscuro",
+   "hex": "#1e6036"
+  },
+  {
+   "nombre": "celeste",
+   "hex": "#4eaaf0"
+  },
+  {
+   "nombre": "cielo",
+   "hex": "#a8d8fa"
+  },
+  {
+   "nombre": "azul",
+   "hex": "#2a52c8"
+  },
+  {
+   "nombre": "azul_noche",
+   "hex": "#22306a"
+  },
+  {
+   "nombre": "canal",
+   "hex": "#9a4cc8"
+  },
+  {
+   "nombre": "oro",
+   "hex": "#ff9a1e"
+  },
+  {
+   "nombre": "bruma",
+   "hex": "#dceaf0"
+  }
+ ],
+ "verificacion": "verificacion.md",
+ "layout": {
+  "id": "barranquilla",
+  "pais": "colombia",
+  "prueba": "futbol",
+  "nombre": "CARNAVAL DE BARRANQUILLA",
+  "nota": "Fútbol Callejero en una calle del Carnaval de Barranquilla, al mediodía. Vista inclinada de 0.35, como la pelea, con la franja de Futbol.ts: FT 212 y 104 de fondo (filas 212 a 316). Las líneas de gol en x 26 y 600, el medio en x 313. Los arcos de piedra van de y 34 a y 70 en cada línea de gol, con 26 de alto: los pinta el arte, en dos objetos cada uno (la columna de atrás con el palo y la de adelante). La Marimonda cruza la calle cada tanto: es un NPC del kit.",
+  "largo": 640,
+  "franja": {
+   "atras": 212,
+   "adelante": 316
+  },
+  "hora": "mediodia",
+  "clima": [
+   "despejado",
+   "calor"
+  ],
+  "paralaje": {
+   "cielo": "auto",
+   "lejos": "barranquilla_mediodia",
+   "cerca": "calle_carnaval_barranquilla"
+  },
+  "piso": [
+   {
+    "x0": 0,
+    "x1": 640,
+    "tipo": "cancha",
+    "nombre": "la calle de asfalto"
+   }
+  ],
+  "huecos": [],
+  "plataformas": [],
+  "muros": [],
+  "escaleras": [],
+  "postes": [],
+  "agua": [],
+  "bajo": [],
+  "solidos": [],
+  "carriles": [
+   {
+    "y": 24
+   },
+   {
+    "y": 52
+   },
+   {
+    "y": 80
+   }
+  ],
+  "entidades": [
+   {
+    "tipo": "objeto",
+    "objeto": "arco_piedra",
+    "x": 26,
+    "y": 34,
+    "parte": "atras",
+    "nota": "la columna de atrás del arco de la izquierda, con el palo de arriba"
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "arco_piedra",
+    "x": 26,
+    "y": 70,
+    "nota": "la columna de adelante del arco de la izquierda"
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "arco_piedra",
+    "x": 600,
+    "y": 34,
+    "parte": "atras",
+    "nota": "la columna de atrás del arco de la derecha, con el palo de arriba"
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "arco_piedra",
+    "x": 600,
+    "y": 70,
+    "nota": "la columna de adelante del arco de la derecha"
+   },
+   {
+    "tipo": "npc",
+    "npc": "marimonda",
+    "x0": 16,
+    "x1": 610,
+    "nota": "la Marimonda cruza la calle de lado a lado cada tanto, en una y al azar entre 20 y 84: caminar y bailar"
+   }
+  ],
+  "ranuras_deco": [
+   {
+    "x0": 0,
+    "x1": 640,
+    "capa": "lejos",
+    "tema": "barranquilla_mediodia"
+   },
+   {
+    "x0": 0,
+    "x1": 640,
+    "capa": "cerca",
+    "tema": "casas_palcos_guirnaldas"
+   }
+  ],
+  "vida": [
+   "publico",
+   "guirnaldas",
+   "comparsa",
+   "confeti"
+  ]
+ }
+}

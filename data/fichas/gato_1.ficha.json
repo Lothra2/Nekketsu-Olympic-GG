@@ -1,0 +1,37 @@
+{
+  "format": "pixelforja.ficha",
+  "version": 3,
+  "name": "Mango",
+  "body": {
+    "skeleton": "quadruped",
+    "species": "gato",
+    "size": 0.8
+  },
+  "palette": {
+    "fur": [
+      "#672200",
+      "#c46022",
+      "#e08a3a",
+      "#f0aa5b"
+    ],
+    "fur2": [
+      "#736150",
+      "#cbb59c",
+      "#f4e4c8",
+      "#fdf3d8"
+    ],
+    "dark": [
+      "#2c0401",
+      "#591e07",
+      "#7a3e14",
+      "#8c592e"
+    ],
+    "eyes": "#3c6a2a"
+  },
+  "markings": {
+    "chest": true,
+    "paws": true,
+    "mask": false
+  },
+  "movementProfile": "premium"
+}

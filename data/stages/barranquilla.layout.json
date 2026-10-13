@@ -1,0 +1,108 @@
+{
+ "id": "barranquilla",
+ "pais": "colombia",
+ "prueba": "futbol",
+ "nombre": "CARNAVAL DE BARRANQUILLA",
+ "nota": "Fútbol Callejero en una calle del Carnaval de Barranquilla, al mediodía. Vista inclinada de 0.35, como la pelea, con la franja de Futbol.ts: FT 212 y 104 de fondo (filas 212 a 316). Las líneas de gol en x 26 y 600, el medio en x 313. Los arcos de piedra van de y 34 a y 70 en cada línea de gol, con 26 de alto: los pinta el arte, en dos objetos cada uno (la columna de atrás con el palo y la de adelante). La Marimonda cruza la calle cada tanto: es un NPC del kit.",
+ "largo": 640,
+ "franja": {
+  "atras": 212,
+  "adelante": 316
+ },
+ "hora": "mediodia",
+ "clima": [
+  "despejado",
+  "calor"
+ ],
+ "paralaje": {
+  "cielo": "auto",
+  "lejos": "barranquilla_mediodia",
+  "cerca": "calle_carnaval_barranquilla"
+ },
+ "piso": [
+  {
+   "x0": 0,
+   "x1": 640,
+   "tipo": "cancha",
+   "nombre": "la calle de asfalto"
+  }
+ ],
+ "huecos": [],
+ "plataformas": [],
+ "muros": [],
+ "escaleras": [],
+ "postes": [],
+ "agua": [],
+ "bajo": [],
+ "solidos": [],
+ "carriles": [
+  {
+   "y": 24
+  },
+  {
+   "y": 52
+  },
+  {
+   "y": 80
+  }
+ ],
+ "entidades": [
+  {
+   "tipo": "objeto",
+   "objeto": "arco_piedra",
+   "x": 26,
+   "y": 34,
+   "parte": "atras",
+   "nota": "la columna de atrás del arco de la izquierda, con el palo de arriba"
+  },
+  {
+   "tipo": "objeto",
+   "objeto": "arco_piedra",
+   "x": 26,
+   "y": 70,
+   "nota": "la columna de adelante del arco de la izquierda"
+  },
+  {
+   "tipo": "objeto",
+   "objeto": "arco_piedra",
+   "x": 600,
+   "y": 34,
+   "parte": "atras",
+   "nota": "la columna de atrás del arco de la derecha, con el palo de arriba"
+  },
+  {
+   "tipo": "objeto",
+   "objeto": "arco_piedra",
+   "x": 600,
+   "y": 70,
+   "nota": "la columna de adelante del arco de la derecha"
+  },
+  {
+   "tipo": "npc",
+   "npc": "marimonda",
+   "x0": 16,
+   "x1": 610,
+   "nota": "la Marimonda cruza la calle de lado a lado cada tanto, en una y al azar entre 20 y 84: caminar y bailar"
+  }
+ ],
+ "ranuras_deco": [
+  {
+   "x0": 0,
+   "x1": 640,
+   "capa": "lejos",
+   "tema": "barranquilla_mediodia"
+  },
+  {
+   "x0": 0,
+   "x1": 640,
+   "capa": "cerca",
+   "tema": "casas_palcos_guirnaldas"
+  }
+ ],
+ "vida": [
+  "publico",
+  "guirnaldas",
+  "comparsa",
+  "confeti"
+ ]
+}

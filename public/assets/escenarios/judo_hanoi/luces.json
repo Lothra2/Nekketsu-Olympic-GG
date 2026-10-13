@@ -1,0 +1,41 @@
+{
+ "hora": "tarde",
+ "luces": [
+  {
+   "x": 90,
+   "y": 250,
+   "color": "#f4dcb0",
+   "radio": 60,
+   "latido": 0.15,
+   "encendida": true,
+   "nota": "el sol de la tarde que entra por el ventanal y cae en el tatami"
+  },
+  {
+   "x": 228,
+   "y": 250,
+   "color": "#f4dcb0",
+   "radio": 60,
+   "latido": 0.15,
+   "encendida": true,
+   "nota": "el sol de la tarde que entra por el ventanal y cae en el tatami"
+  },
+  {
+   "x": 486,
+   "y": 250,
+   "color": "#f4dcb0",
+   "radio": 60,
+   "latido": 0.15,
+   "encendida": true,
+   "nota": "el sol de la tarde que entra por el ventanal y cae en el tatami"
+  },
+  {
+   "x": 624,
+   "y": 250,
+   "color": "#f4dcb0",
+   "radio": 60,
+   "latido": 0.15,
+   "encendida": true,
+   "nota": "el sol de la tarde que entra por el ventanal y cae en el tatami"
+  }
+ ]
+}

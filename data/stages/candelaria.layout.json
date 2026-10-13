@@ -1,0 +1,86 @@
+{
+ "id": "candelaria",
+ "pais": "colombia",
+ "prueba": "tejo",
+ "vista": "lado",
+ "nombre": "CANCHA DE TEJO LA CANDELARIA",
+ "nota": "Tejo de lado en una cancha techada de La Candelaria, Bogotá, en la tarde nublada. El piso de Tejo.ts está en la fila 300: la franja va de 286 a 310. Los que esperan se paran en la fila 296 (y 10) y el que lanza en la 300 (y 14), detrás de la raya de x 104. La caja de greda va de x 534 a 584, como la que dibuja el juego.",
+ "largo": 640,
+ "franja": {
+  "atras": 286,
+  "adelante": 310
+ },
+ "hora": "tarde",
+ "clima": [
+  "nublado",
+  "llovizna"
+ ],
+ "paralaje": {
+  "cielo": "auto",
+  "lejos": "monserrate_llovizna",
+  "cerca": "cancha_tejo_candelaria"
+ },
+ "piso": [
+  {
+   "x0": 0,
+   "x1": 640,
+   "tipo": "tierra",
+   "nombre": "la cancha de tierra"
+  }
+ ],
+ "huecos": [],
+ "plataformas": [],
+ "muros": [],
+ "escaleras": [],
+ "postes": [],
+ "agua": [],
+ "bajo": [],
+ "solidos": [
+  {
+   "x": 534,
+   "y": 8,
+   "w": 50,
+   "d": 6,
+   "z": 52,
+   "tipo": "caja_greda",
+   "nota": "la caja de tejo vista de lado: la cara de greda sube de (534, 300) a (582, 250) y el palo de atrás llega a la fila 248, como la de Tejo.ts. El bocín, en (548, 280)"
+  }
+ ],
+ "carriles": [
+  {
+   "y": 10
+  },
+  {
+   "y": 14
+  }
+ ],
+ "entidades": [
+  {
+   "tipo": "objeto",
+   "objeto": "raya_tejo",
+   "x": 104,
+   "y": 14,
+   "nota": "la raya de lanzamiento (LINEA de Tejo.ts)"
+  }
+ ],
+ "ranuras_deco": [
+  {
+   "x0": 0,
+   "x1": 640,
+   "capa": "lejos",
+   "tema": "monserrate_casas_coloniales"
+  },
+  {
+   "x0": 0,
+   "x1": 640,
+   "capa": "cerca",
+   "tema": "cancha_techada_madera"
+  }
+ ],
+ "vida": [
+  "banderines",
+  "publico",
+  "llovizna",
+  "humo_mechas"
+ ]
+}

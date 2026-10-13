@@ -1,0 +1,23 @@
+{
+ "hora": "manana",
+ "luces": [
+  {
+   "x": 120,
+   "y": 220,
+   "color": "#f0d066",
+   "radio": 80,
+   "latido": 0.1,
+   "encendida": true,
+   "nota": "el sol de la mañana que entra entre los pinos y la neblina"
+  },
+  {
+   "x": 470,
+   "y": 230,
+   "color": "#f0d066",
+   "radio": 70,
+   "latido": 0.08,
+   "encendida": true,
+   "nota": "el sol de la mañana sobre la malla"
+  }
+ ]
+}

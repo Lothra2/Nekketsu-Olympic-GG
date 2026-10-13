@@ -1,0 +1,75 @@
+{
+ "id": "tao_dan",
+ "pais": "vietnam",
+ "prueba": "da_cau",
+ "vista": "lado",
+ "nombre": "CÔNG VIÊN TAO ĐÀN",
+ "nota": "Đá cầu de lado en el parque Tao Đàn de Saigón, al amanecer. El piso de DaCau.ts está en la fila 310: la franja va de 290 a 330, la fila de atrás es el carril y 14 (fila 304) y la de adelante el y 26 (fila 316). La cancha va de x 34 a 606 entre las filas 298 y 322, y la red en x 320: las dos las dibuja el juego.",
+ "largo": 640,
+ "franja": {
+  "atras": 290,
+  "adelante": 330
+ },
+ "hora": "amanecer",
+ "clima": [
+  "despejado"
+ ],
+ "paralaje": {
+  "cielo": "auto",
+  "lejos": "saigon_amanecer",
+  "cerca": "parque_tao_dan"
+ },
+ "piso": [
+  {
+   "x0": 0,
+   "x1": 640,
+   "tipo": "tierra",
+   "nombre": "cancha de tierra apisonada"
+  }
+ ],
+ "huecos": [],
+ "plataformas": [],
+ "muros": [],
+ "escaleras": [],
+ "postes": [],
+ "agua": [],
+ "bajo": [],
+ "solidos": [],
+ "carriles": [
+  {
+   "y": 14
+  },
+  {
+   "y": 26
+  }
+ ],
+ "entidades": [
+  {
+   "tipo": "objeto",
+   "objeto": "red_da_cau",
+   "x": 320,
+   "y": 20,
+   "nota": "la red la dibuja el juego: RED_X 320, 30 de alto"
+  }
+ ],
+ "ranuras_deco": [
+  {
+   "x0": 0,
+   "x1": 640,
+   "capa": "lejos",
+   "tema": "saigon_en_la_bruma"
+  },
+  {
+   "x0": 0,
+   "x1": 640,
+   "capa": "cerca",
+   "tema": "arboles_dau_jaulas_tai_chi"
+  }
+ ],
+ "vida": [
+  "tai_chi",
+  "abuelos_ejercicio",
+  "pajaros",
+  "rayos_de_luz"
+ ]
+}

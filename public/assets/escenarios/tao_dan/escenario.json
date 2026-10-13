@@ -1,0 +1,377 @@
+{
+ "generado_con": "PixelForja",
+ "id": "tao_dan",
+ "nombre": "CÔNG VIÊN TAO ĐÀN",
+ "escala": 1,
+ "resolucion": [
+  640,
+  360
+ ],
+ "franja": {
+  "atras": 290,
+  "adelante": 330
+ },
+ "largo": 640,
+ "hora": "amanecer",
+ "clima": [
+  "despejado"
+ ],
+ "inclinacion": 0,
+ "ancho": 640,
+ "vista": "lado",
+ "nota_vista": "de lado: el dibujo va derecho (inclinación 0). El fondo (la capa cerca) va de la fila 0 a franja.atras (290) y es transparente donde se ven lejos y el cielo. El piso va de la fila 290 al borde de abajo de la pantalla: la franja donde se paran los atletas (y del mundo = fila de pantalla - 290) y lo de adelante. Las capas, los objetos y la vida se cargan igual que en la vista oblicua.",
+ "capas": {
+  "cielo": {
+   "archivo": "cielo_amanecer.png",
+   "y": 0,
+   "paralaje": 0,
+   "repetir_x": true
+  },
+  "lejos": {
+   "archivo": "lejos.png",
+   "y": 90,
+   "paralaje": 0.25,
+   "repetir_x": true
+  },
+  "tras_cerca": {
+   "nota": "la vida con capa tras_cerca va aquí: se ve por los callejones"
+  },
+  "cerca": {
+   "archivos": [
+    "cerca_0.png"
+   ],
+   "trozo": 1280,
+   "y": 0,
+   "paralaje": 1
+  },
+  "piso": {
+   "archivos": [
+    "piso_0.png"
+   ],
+   "trozo": 1280,
+   "y": 290,
+   "paralaje": 1,
+   "nota": "de lado: las primeras 40 filas son la franja donde se paran los atletas, las de abajo lo de adelante hasta el borde de la pantalla"
+  },
+  "objetos": {
+   "archivo": "objetos.json",
+   "nota": "entre el piso y el frente, ordenados con los atletas"
+  },
+  "frente": {
+   "archivos": [
+    "frente_0.png"
+   ],
+   "trozo": 1280,
+   "y": 316,
+   "paralaje": 1
+  }
+ },
+ "vida": {
+  "imagen": "vida.png",
+  "piezas": [
+   {
+    "id": "tai_chi",
+    "tipo": "tai_chi",
+    "capa": "cerca",
+    "x": 122,
+    "y": 234,
+    "fps": 1.5,
+    "cuadros": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 150,
+      "h": 38
+     },
+     {
+      "x": 151,
+      "y": 0,
+      "w": 150,
+      "h": 38
+     },
+     {
+      "x": 302,
+      "y": 0,
+      "w": 150,
+      "h": 38
+     },
+     {
+      "x": 453,
+      "y": 0,
+      "w": 150,
+      "h": 38
+     }
+    ]
+   },
+   {
+    "id": "abuelos_ejercicio",
+    "tipo": "abuelos_ejercicio",
+    "capa": "cerca",
+    "x": 548,
+    "y": 234,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 604,
+      "y": 0,
+      "w": 58,
+      "h": 38
+     },
+     {
+      "x": 663,
+      "y": 0,
+      "w": 58,
+      "h": 38
+     }
+    ]
+   },
+   {
+    "id": "pajaros_jaulas",
+    "tipo": "pajaros",
+    "capa": "cerca",
+    "x": 404,
+    "y": 202,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 722,
+      "y": 0,
+      "w": 68,
+      "h": 30
+     },
+     {
+      "x": 791,
+      "y": 0,
+      "w": 68,
+      "h": 30
+     }
+    ]
+   },
+   {
+    "id": "pajaros_lejos",
+    "tipo": "pajaros",
+    "capa": "lejos",
+    "x": 1280,
+    "y": 30,
+    "fps": 4,
+    "recorrido": {
+     "desde": [
+      1280,
+      30
+     ],
+     "hasta": [
+      -10,
+      18
+     ],
+     "segundos": 40,
+     "desfase": 0.4
+    },
+    "cuadros": [
+     {
+      "x": 860,
+      "y": 0,
+      "w": 7,
+      "h": 4
+     },
+     {
+      "x": 868,
+      "y": 0,
+      "w": 7,
+      "h": 4
+     }
+    ]
+   }
+  ],
+  "nota": "capa cerca y tras_cerca: x, y de pantalla, como siempre. capa lejos: x, y en pixeles de la imagen lejos (que se repite cada su ancho y corre con su paralaje); va de recorrido.desde a recorrido.hasta en recorrido.segundos y vuelve a empezar, adelantada por desfase (0 a 1). capa objeto: va encima de un objeto, con setDepth(franja.atras + orden), como los objetos."
+ },
+ "callejones": [],
+ "superficie": {
+  "archivo": "superficie.png",
+  "y": 290,
+  "leyenda": [
+   {
+    "id": "tierra",
+    "color": "#c09050",
+    "paso": "paso_tierra",
+    "resbala": false
+   }
+  ]
+ },
+ "colision": "colision.json",
+ "luces": "luces.json",
+ "particulas": "particulas.json",
+ "paleta": [
+  {
+   "nombre": "tinta",
+   "hex": "#1e1824"
+  },
+  {
+   "nombre": "sombra",
+   "hex": "#3a3040"
+  },
+  {
+   "nombre": "asfalto",
+   "hex": "#5a4c56"
+  },
+  {
+   "nombre": "asfalto_claro",
+   "hex": "#7e6c70"
+  },
+  {
+   "nombre": "cemento",
+   "hex": "#a8968e"
+  },
+  {
+   "nombre": "cemento_claro",
+   "hex": "#d0c0ae"
+  },
+  {
+   "nombre": "crema",
+   "hex": "#f2e2c4"
+  },
+  {
+   "nombre": "luz",
+   "hex": "#fff6e4"
+  },
+  {
+   "nombre": "amarillo",
+   "hex": "#f6d27a"
+  },
+  {
+   "nombre": "ocre",
+   "hex": "#c8945a"
+  },
+  {
+   "nombre": "terracota",
+   "hex": "#a6603e"
+  },
+  {
+   "nombre": "rojo",
+   "hex": "#d8483a"
+  },
+  {
+   "nombre": "vino",
+   "hex": "#7c2e34"
+  },
+  {
+   "nombre": "salmon",
+   "hex": "#f0a28a"
+  },
+  {
+   "nombre": "menta",
+   "hex": "#a6cc9a"
+  },
+  {
+   "nombre": "verde",
+   "hex": "#5a9058"
+  },
+  {
+   "nombre": "verde_oscuro",
+   "hex": "#2c5440"
+  },
+  {
+   "nombre": "celeste",
+   "hex": "#9cb8d8"
+  },
+  {
+   "nombre": "cielo",
+   "hex": "#f4d0b4"
+  },
+  {
+   "nombre": "azul",
+   "hex": "#4a68a0"
+  },
+  {
+   "nombre": "azul_noche",
+   "hex": "#2c3a5c"
+  },
+  {
+   "nombre": "canal",
+   "hex": "#8a94b4"
+  },
+  {
+   "nombre": "oro",
+   "hex": "#f6b04a"
+  },
+  {
+   "nombre": "bruma",
+   "hex": "#e8c6b6"
+  }
+ ],
+ "verificacion": "verificacion.md",
+ "layout": {
+  "id": "tao_dan",
+  "pais": "vietnam",
+  "prueba": "da_cau",
+  "vista": "lado",
+  "nombre": "CÔNG VIÊN TAO ĐÀN",
+  "nota": "Đá cầu de lado en el parque Tao Đàn de Saigón, al amanecer. El piso de DaCau.ts está en la fila 310: la franja va de 290 a 330, la fila de atrás es el carril y 14 (fila 304) y la de adelante el y 26 (fila 316). La cancha va de x 34 a 606 entre las filas 298 y 322, y la red en x 320: las dos las dibuja el juego.",
+  "largo": 640,
+  "franja": {
+   "atras": 290,
+   "adelante": 330
+  },
+  "hora": "amanecer",
+  "clima": [
+   "despejado"
+  ],
+  "paralaje": {
+   "cielo": "auto",
+   "lejos": "saigon_amanecer",
+   "cerca": "parque_tao_dan"
+  },
+  "piso": [
+   {
+    "x0": 0,
+    "x1": 640,
+    "tipo": "tierra",
+    "nombre": "cancha de tierra apisonada"
+   }
+  ],
+  "huecos": [],
+  "plataformas": [],
+  "muros": [],
+  "escaleras": [],
+  "postes": [],
+  "agua": [],
+  "bajo": [],
+  "solidos": [],
+  "carriles": [
+   {
+    "y": 14
+   },
+   {
+    "y": 26
+   }
+  ],
+  "entidades": [
+   {
+    "tipo": "objeto",
+    "objeto": "red_da_cau",
+    "x": 320,
+    "y": 20,
+    "nota": "la red la dibuja el juego: RED_X 320, 30 de alto"
+   }
+  ],
+  "ranuras_deco": [
+   {
+    "x0": 0,
+    "x1": 640,
+    "capa": "lejos",
+    "tema": "saigon_en_la_bruma"
+   },
+   {
+    "x0": 0,
+    "x1": 640,
+    "capa": "cerca",
+    "tema": "arboles_dau_jaulas_tai_chi"
+   }
+  ],
+  "vida": [
+   "tai_chi",
+   "abuelos_ejercicio",
+   "pajaros",
+   "rayos_de_luz"
+  ]
+ }
+}

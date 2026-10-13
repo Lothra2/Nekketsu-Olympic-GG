@@ -1,0 +1,77 @@
+{
+ "id": "cancha_maracaibo",
+ "pais": "venezuela",
+ "prueba": "basket",
+ "nombre": "CANCHA LA CHINITA, MARACAIBO",
+ "nota": "Básquet 3x3 en una cancha de barrio de Maracaibo, de noche. Vista inclinada de 0.35, como la pelea, con la franja de Basket.ts: FT 212 y 104 de fondo (filas 212 a 316). La media cancha va de x 40 a 596, el aro en (566, 52) a 58 de alto y el área de x 496 a 596 entre y 32 y 72. El aro, el tablero y el poste los dibuja el juego, que los rompe con la clavada Nekketsu. Los relámpagos del Catatumbo van en la vida (la nube del fondo) y el juego suma el rayo_catatumbo y el destello de la cámara.",
+ "largo": 640,
+ "franja": {
+  "atras": 212,
+  "adelante": 316
+ },
+ "hora": "noche",
+ "clima": [
+  "despejado",
+  "calor"
+ ],
+ "paralaje": {
+  "cielo": "auto",
+  "lejos": "lago_puente_urdaneta",
+  "cerca": "cancha_barrio_maracaibo"
+ },
+ "piso": [
+  {
+   "x0": 0,
+   "x1": 640,
+   "tipo": "cancha",
+   "nombre": "la cancha de concreto pintada"
+  }
+ ],
+ "huecos": [],
+ "plataformas": [],
+ "muros": [],
+ "escaleras": [],
+ "postes": [],
+ "agua": [],
+ "bajo": [],
+ "solidos": [],
+ "carriles": [
+  {
+   "y": 24
+  },
+  {
+   "y": 52
+  },
+  {
+   "y": 80
+  }
+ ],
+ "entidades": [
+  {
+   "tipo": "objeto",
+   "objeto": "aro",
+   "x": 566,
+   "y": 52,
+   "nota": "el aro, el tablero y el poste los dibuja el juego (se rompen con la clavada Nekketsu)"
+  }
+ ],
+ "ranuras_deco": [
+  {
+   "x0": 0,
+   "x1": 640,
+   "capa": "lejos",
+   "tema": "lago_puente_urdaneta_catatumbo"
+  },
+  {
+   "x0": 0,
+   "x1": 640,
+   "capa": "cerca",
+   "tema": "malla_muro_gaiteros"
+  }
+ ],
+ "vida": [
+  "relampago",
+  "gaiteros",
+  "publico"
+ ]
+}

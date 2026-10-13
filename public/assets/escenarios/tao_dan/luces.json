@@ -1,0 +1,32 @@
+{
+ "hora": "amanecer",
+ "luces": [
+  {
+   "x": 203,
+   "y": 250,
+   "color": "#f6d27a",
+   "radio": 70,
+   "latido": 0.12,
+   "encendida": true,
+   "nota": "el rayo de sol del amanecer que entra entre los troncos"
+  },
+  {
+   "x": 383,
+   "y": 250,
+   "color": "#f6d27a",
+   "radio": 70,
+   "latido": 0.12,
+   "encendida": true,
+   "nota": "el rayo de sol del amanecer que entra entre los troncos"
+  },
+  {
+   "x": 623,
+   "y": 250,
+   "color": "#f6d27a",
+   "radio": 70,
+   "latido": 0.12,
+   "encendida": true,
+   "nota": "el rayo de sol del amanecer que entra entre los troncos"
+  }
+ ]
+}

@@ -1,0 +1,158 @@
+{
+  "format": "pixelforja.ficha",
+  "version": 3,
+  "name": "Marimonda del Carnaval de Barranquilla (capucha con trompa y orejotas, traje de colores)",
+  "body": {
+    "skeleton": "human",
+    "proportions": {
+      "preset": "chibi",
+      "height": 1.12,
+      "build": 1.12,
+      "legs": 1.05,
+      "arms": 1.1,
+      "head": 1,
+      "shoulders": 1.1,
+      "hips": 1
+    }
+  },
+  "palette": {
+    "skin": [
+      "#6d4735",
+      "#a8704e",
+      "#c98c62",
+      "#e8b088"
+    ],
+    "hair": [
+      "#1e1418",
+      "#2a2026",
+      "#3a2e34",
+      "#4a3c42"
+    ],
+    "eyes": "#2a1c14",
+    "top": [
+      "#8a6a08",
+      "#d8a810",
+      "#f2c230",
+      "#ffe27a"
+    ],
+    "bottom": [
+      "#7a1418",
+      "#b8242a",
+      "#e43434",
+      "#ff7a6a"
+    ],
+    "socks": [
+      "#020203",
+      "#101016",
+      "#2a2a30",
+      "#49494f"
+    ],
+    "shoes": [
+      "#100a0c",
+      "#1e1418",
+      "#2e2228",
+      "#3e3036"
+    ],
+    "accessory": [
+      "#0e3a70",
+      "#1e5ab8",
+      "#2a7ae8",
+      "#7ab4ff"
+    ]
+  },
+  "outfit": {
+    "sleeves": "long",
+    "bottom": "pants",
+    "socks": "low",
+    "shoes": "tenis",
+    "print": null,
+    "jacket": "#3ca448",
+    "jacketClosed": false,
+    "jacketSleeves": "long",
+    "neck": null,
+    "pattern": "rayas",
+    "pattern2": "#2a52c8"
+  },
+  "face": {
+    "eyes": "round",
+    "mouth": "line",
+    "blush": false,
+    "brows": false,
+    "glasses": null
+  },
+  "heads": {},
+  "avatar": {
+    "version": 1,
+    "look": "stardew",
+    "skin": "#c98c62",
+    "face": {
+      "dome": 1.12,
+      "forehead": 0.58,
+      "eyeNose": 0.6,
+      "noseMouth": 0.3,
+      "mouthChin": 0.52,
+      "cheek": 0.97,
+      "jaw": 0.84,
+      "chin": 2.6,
+      "eyeX": 0.42,
+      "ears": 0.18,
+      "mouth": 0.3
+    },
+    "hair": {
+      "style": "corto",
+      "color": "#2a2026",
+      "params": {
+        "top": 0.22,
+        "side": 0.08,
+        "back": 0.1,
+        "recede": 0,
+        "length": 1,
+        "fringe": 0,
+        "part": 0,
+        "sweep": 0.3,
+        "curl": 0,
+        "tail": "none"
+      }
+    },
+    "eyes": {
+      "style": "brillo",
+      "color": "#3a2418"
+    },
+    "brows": {
+      "style": "normal"
+    },
+    "nose": "normal",
+    "beard": {
+      "style": "ninguna",
+      "color": "#6a665e",
+      "gray": 0
+    },
+    "glasses": {
+      "style": "ninguno",
+      "color": "#1e1e24"
+    },
+    "kit": "lpc",
+    "lpc": {
+      "head": "male",
+      "hair": "buzzcut",
+      "brows": null,
+      "nose": null,
+      "beard": null,
+      "mustache": null,
+      "glasses": null,
+      "hat": "marimonda",
+      "hatColor": "#e8402e"
+    },
+    "body": {
+      "age": "adulto",
+      "build": "normal",
+      "shape": "recto"
+    }
+  },
+  "headMode": "avatar",
+  "physics": {
+    "hairLag": 1
+  },
+  "movementProfile": "premium",
+  "cell": 64
+}

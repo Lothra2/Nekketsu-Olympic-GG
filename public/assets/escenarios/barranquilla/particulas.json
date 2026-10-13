@@ -1,0 +1,32 @@
+{
+ "nota": "x e y en pixeles de pantalla a escala 1 (y de pantalla = franja.atras + y del mundo). fx: nombre del efecto del catálogo (manifest.fx).",
+ "particulas": [
+  {
+   "tipo": "confeti",
+   "fx": "confeti",
+   "x0": 40,
+   "x1": 640,
+   "y0": 120,
+   "y1": 190,
+   "cada": 2.2,
+   "nota": "el confeti que tiran desde los palcos (el efecto confeti del kit)"
+  },
+  {
+   "tipo": "confeti",
+   "x0": 0,
+   "x1": 676,
+   "y0": 20,
+   "y1": 140,
+   "color": [
+    "#e43434",
+    "#fcd03a",
+    "#3ca448",
+    "#2a52c8",
+    "#9a4cc8"
+   ],
+   "cada": 0.15,
+   "vida": 2.5,
+   "nota": "papelitos de colores que caen sobre la calle"
+  }
+ ]
+}

@@ -1,0 +1,454 @@
+{
+ "generado_con": "PixelForja",
+ "id": "judo_hanoi",
+ "nombre": "VÕ ĐƯỜNG HÀ NỘI",
+ "escala": 1,
+ "resolucion": [
+  640,
+  360
+ ],
+ "franja": {
+  "atras": 246,
+  "adelante": 344
+ },
+ "largo": 640,
+ "hora": "tarde",
+ "clima": [
+  "despejado"
+ ],
+ "inclinacion": 0.35,
+ "ancho": 674,
+ "nota_inclinacion": "vista inclinada: px = x + 0.35 * y (lo del fondo queda a la izquierda). Las capas largas miden 674 px (largo + 0.35 * fondo de la franja). Los objetos ya vienen corridos: corre a los atletas igual.",
+ "capas": {
+  "cielo": {
+   "archivo": "cielo_tarde.png",
+   "y": 0,
+   "paralaje": 0,
+   "repetir_x": true
+  },
+  "lejos": {
+   "archivo": "lejos.png",
+   "y": 46,
+   "paralaje": 0.25,
+   "repetir_x": true
+  },
+  "tras_cerca": {
+   "nota": "la vida con capa tras_cerca va aquí: se ve por los callejones"
+  },
+  "cerca": {
+   "archivos": [
+    "cerca_0.png"
+   ],
+   "trozo": 1280,
+   "y": 0,
+   "paralaje": 1
+  },
+  "piso": {
+   "archivos": [
+    "piso_0.png"
+   ],
+   "trozo": 1280,
+   "y": 246,
+   "paralaje": 1,
+   "nota": "las primeras 98 filas son la franja (inclinada), las de abajo el bordillo: la cara del piso que da a la cámara"
+  },
+  "objetos": {
+   "archivo": "objetos.json",
+   "nota": "entre el piso y el frente, ordenados con los atletas"
+  },
+  "frente": {
+   "archivos": [
+    "frente_0.png"
+   ],
+   "trozo": 1280,
+   "y": 330,
+   "paralaje": 1
+  }
+ },
+ "vida": {
+  "imagen": "vida.png",
+  "piezas": [
+   {
+    "id": "publico_100",
+    "tipo": "publico",
+    "capa": "cerca",
+    "x": 100,
+    "y": 196,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 280,
+      "h": 50
+     },
+     {
+      "x": 281,
+      "y": 0,
+      "w": 280,
+      "h": 50
+     }
+    ]
+   },
+   {
+    "id": "publico_380",
+    "tipo": "publico",
+    "capa": "cerca",
+    "x": 380,
+    "y": 196,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 562,
+      "y": 0,
+      "w": 292,
+      "h": 50
+     },
+     {
+      "x": 855,
+      "y": 0,
+      "w": 292,
+      "h": 50
+     }
+    ]
+   },
+   {
+    "id": "hojas_0",
+    "tipo": "hojas_cayendo",
+    "capa": "cerca",
+    "x": 30,
+    "y": 100,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 1148,
+      "y": 0,
+      "w": 80,
+      "h": 96
+     },
+     {
+      "x": 1229,
+      "y": 0,
+      "w": 80,
+      "h": 96
+     },
+     {
+      "x": 1310,
+      "y": 0,
+      "w": 80,
+      "h": 96
+     },
+     {
+      "x": 1391,
+      "y": 0,
+      "w": 80,
+      "h": 96
+     }
+    ]
+   },
+   {
+    "id": "hojas_1",
+    "tipo": "hojas_cayendo",
+    "capa": "cerca",
+    "x": 168,
+    "y": 100,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 1472,
+      "y": 0,
+      "w": 80,
+      "h": 96
+     },
+     {
+      "x": 1553,
+      "y": 0,
+      "w": 80,
+      "h": 96
+     },
+     {
+      "x": 1634,
+      "y": 0,
+      "w": 80,
+      "h": 96
+     },
+     {
+      "x": 1715,
+      "y": 0,
+      "w": 80,
+      "h": 96
+     }
+    ]
+   },
+   {
+    "id": "hojas_2",
+    "tipo": "hojas_cayendo",
+    "capa": "cerca",
+    "x": 426,
+    "y": 100,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 1796,
+      "y": 0,
+      "w": 80,
+      "h": 96
+     },
+     {
+      "x": 1877,
+      "y": 0,
+      "w": 80,
+      "h": 96
+     },
+     {
+      "x": 1958,
+      "y": 0,
+      "w": 80,
+      "h": 96
+     },
+     {
+      "x": 0,
+      "y": 97,
+      "w": 80,
+      "h": 96
+     }
+    ]
+   },
+   {
+    "id": "hojas_3",
+    "tipo": "hojas_cayendo",
+    "capa": "cerca",
+    "x": 564,
+    "y": 100,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 81,
+      "y": 97,
+      "w": 80,
+      "h": 96
+     },
+     {
+      "x": 162,
+      "y": 97,
+      "w": 80,
+      "h": 96
+     },
+     {
+      "x": 243,
+      "y": 97,
+      "w": 80,
+      "h": 96
+     },
+     {
+      "x": 324,
+      "y": 97,
+      "w": 80,
+      "h": 96
+     }
+    ]
+   }
+  ]
+ },
+ "callejones": [],
+ "superficie": {
+  "archivo": "superficie.png",
+  "y": 246,
+  "leyenda": [
+   {
+    "id": "madera",
+    "color": "#a06030",
+    "paso": "paso_madera",
+    "resbala": false
+   }
+  ]
+ },
+ "colision": "colision.json",
+ "luces": "luces.json",
+ "particulas": "particulas.json",
+ "paleta": [
+  {
+   "nombre": "tinta",
+   "hex": "#1c1418"
+  },
+  {
+   "nombre": "sombra",
+   "hex": "#3c2c28"
+  },
+  {
+   "nombre": "asfalto",
+   "hex": "#5e4838"
+  },
+  {
+   "nombre": "asfalto_claro",
+   "hex": "#82664c"
+  },
+  {
+   "nombre": "cemento",
+   "hex": "#a88a68"
+  },
+  {
+   "nombre": "cemento_claro",
+   "hex": "#cdb088"
+  },
+  {
+   "nombre": "crema",
+   "hex": "#efd8ae"
+  },
+  {
+   "nombre": "luz",
+   "hex": "#fff6e2"
+  },
+  {
+   "nombre": "amarillo",
+   "hex": "#dcbc58"
+  },
+  {
+   "nombre": "ocre",
+   "hex": "#b8863c"
+  },
+  {
+   "nombre": "terracota",
+   "hex": "#965834"
+  },
+  {
+   "nombre": "rojo",
+   "hex": "#d63a2c"
+  },
+  {
+   "nombre": "vino",
+   "hex": "#7a2228"
+  },
+  {
+   "nombre": "salmon",
+   "hex": "#e2a07c"
+  },
+  {
+   "nombre": "menta",
+   "hex": "#8fc77a"
+  },
+  {
+   "nombre": "verde",
+   "hex": "#4f9a4c"
+  },
+  {
+   "nombre": "verde_oscuro",
+   "hex": "#2c5a36"
+  },
+  {
+   "nombre": "celeste",
+   "hex": "#a8c8d4"
+  },
+  {
+   "nombre": "cielo",
+   "hex": "#f4dcb0"
+  },
+  {
+   "nombre": "azul",
+   "hex": "#2f5a9a"
+  },
+  {
+   "nombre": "azul_noche",
+   "hex": "#24304c"
+  },
+  {
+   "nombre": "canal",
+   "hex": "#6c9c86"
+  },
+  {
+   "nombre": "oro",
+   "hex": "#f6b23a"
+  },
+  {
+   "nombre": "bruma",
+   "hex": "#e6caa0"
+  }
+ ],
+ "verificacion": "verificacion.md",
+ "layout": {
+  "id": "judo_hanoi",
+  "pais": "vietnam",
+  "prueba": "judo",
+  "nombre": "VÕ ĐƯỜNG HÀ NỘI",
+  "nota": "Judo y Vovinam en un dojo de Hà Nội, de tarde. Misma franja que la pelea (246 a 344) y la vista inclinada de 0.35. Todo el piso es tatami: no hay armas ni borde.",
+  "largo": 640,
+  "franja": {
+   "atras": 246,
+   "adelante": 344
+  },
+  "hora": "tarde",
+  "clima": [
+   "despejado"
+  ],
+  "paralaje": {
+   "cielo": "auto",
+   "lejos": "ho_hoan_kiem",
+   "cerca": "dojo_hanoi"
+  },
+  "piso": [
+   {
+    "x0": 0,
+    "x1": 640,
+    "tipo": "tatami",
+    "nombre": "zona de seguridad (amarilla)"
+   },
+   {
+    "x0": 64,
+    "x1": 576,
+    "y0": 10,
+    "y1": 88,
+    "tipo": "tatami",
+    "nombre": "zona de combate (verde)"
+   }
+  ],
+  "huecos": [],
+  "plataformas": [],
+  "muros": [],
+  "escaleras": [],
+  "postes": [],
+  "agua": [],
+  "bajo": [],
+  "solidos": [],
+  "carriles": [
+   {
+    "y": 20
+   },
+   {
+    "y": 42
+   },
+   {
+    "y": 64
+   },
+   {
+    "y": 86
+   }
+  ],
+  "entidades": [
+   {
+    "tipo": "npc",
+    "npc": "thor",
+    "x": 70,
+    "y": 0,
+    "nota": "Thor mira desde la orilla del tatami: el juego lo sienta en la fila FLOOR_TOP - 6"
+   }
+  ],
+  "ranuras_deco": [
+   {
+    "x0": 0,
+    "x1": 640,
+    "capa": "lejos",
+    "tema": "lago_hoan_kiem_torre_tortuga"
+   },
+   {
+    "x0": 0,
+    "x1": 640,
+    "capa": "cerca",
+    "tema": "dojo_madera_ventanales"
+   }
+  ],
+  "vida": [
+   "publico",
+   "hojas_cayendo"
+  ]
+ }
+}

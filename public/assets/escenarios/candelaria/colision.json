@@ -1,0 +1,42 @@
+{
+ "id": "candelaria",
+ "largo": 640,
+ "franja": {
+  "atras": 286,
+  "adelante": 310
+ },
+ "piso": [
+  {
+   "x0": 0,
+   "x1": 640,
+   "tipo": "tierra",
+   "nombre": "la cancha de tierra"
+  }
+ ],
+ "huecos": [],
+ "plataformas": [],
+ "muros": [],
+ "escaleras": [],
+ "postes": [],
+ "agua": [],
+ "bajo": [],
+ "solidos": [
+  {
+   "x": 534,
+   "y": 8,
+   "w": 50,
+   "d": 6,
+   "z": 52,
+   "tipo": "caja_greda",
+   "nota": "la caja de tejo vista de lado: la cara de greda sube de (534, 300) a (582, 250) y el palo de atrás llega a la fila 248, como la de Tejo.ts. El bocín, en (548, 280)"
+  }
+ ],
+ "carriles": [
+  {
+   "y": 10
+  },
+  {
+   "y": 14
+  }
+ ]
+}

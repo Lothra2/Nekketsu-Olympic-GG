@@ -1,0 +1,62 @@
+{
+ "nota": "x e y en pixeles de pantalla a escala 1 (y de pantalla = franja.atras + y del mundo). fx: nombre del efecto del catálogo (manifest.fx).",
+ "particulas": [
+  {
+   "tipo": "brillo",
+   "x0": 72,
+   "x1": 120,
+   "y0": 36,
+   "y1": 62,
+   "color": [
+    "#ffd84a",
+    "#fff8e4"
+   ],
+   "cada": 0.5,
+   "vida": 0.6,
+   "nota": "las polillas que dan vueltas alrededor del bombillo"
+  },
+  {
+   "tipo": "brillo",
+   "x0": 312,
+   "x1": 360,
+   "y0": 30,
+   "y1": 56,
+   "color": [
+    "#ffd84a",
+    "#fff8e4"
+   ],
+   "cada": 0.5,
+   "vida": 0.6,
+   "nota": "las polillas que dan vueltas alrededor del bombillo"
+  },
+  {
+   "tipo": "brillo",
+   "x0": 576,
+   "x1": 624,
+   "y0": 36,
+   "y1": 62,
+   "color": [
+    "#ffd84a",
+    "#fff8e4"
+   ],
+   "cada": 0.5,
+   "vida": 0.6,
+   "nota": "las polillas que dan vueltas alrededor del bombillo"
+  },
+  {
+   "tipo": "calor",
+   "x0": 40,
+   "x1": 640,
+   "y0": 200,
+   "y1": 300,
+   "color": [
+    "#9a96ac",
+    "#cfc8d0"
+   ],
+   "cada": 1.2,
+   "sube": 6,
+   "vida": 1.6,
+   "nota": "el calor que sube del concreto: ¡qué calor, primo!"
+  }
+ ]
+}

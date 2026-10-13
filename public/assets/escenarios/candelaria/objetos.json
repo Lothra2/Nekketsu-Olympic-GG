@@ -1,0 +1,21 @@
+{
+ "imagen": "objetos.png",
+ "nota": "x, y: esquina de arriba a la izquierda en pantalla a escala 1 (con la inclinación ya puesta). orden: la profundidad para ordenar con los atletas (se dibuja después de todo atleta con y menor). En Phaser: setDepth(franja.atras + orden). Las caras izquierdas de las cajas (tipo *_cara) van con orden y + 0.1: detrás de quien pasa a su lado.",
+ "objetos": [
+  {
+   "id": "caja_greda_0",
+   "tipo": "caja_greda",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 0,
+    "y": 0,
+    "w": 50,
+    "h": 58
+   },
+   "x": 534,
+   "y": 242,
+   "orden": 14,
+   "superficie": "piedra"
+  }
+ ]
+}

@@ -1,0 +1,376 @@
+{
+ "generado_con": "PixelForja",
+ "id": "candelaria",
+ "nombre": "CANCHA DE TEJO LA CANDELARIA",
+ "escala": 1,
+ "resolucion": [
+  640,
+  360
+ ],
+ "franja": {
+  "atras": 286,
+  "adelante": 310
+ },
+ "largo": 640,
+ "hora": "tarde",
+ "clima": [
+  "nublado",
+  "llovizna"
+ ],
+ "inclinacion": 0,
+ "ancho": 640,
+ "vista": "lado",
+ "nota_vista": "de lado: el dibujo va derecho (inclinación 0). El fondo (la capa cerca) va de la fila 0 a franja.atras (286) y es transparente donde se ven lejos y el cielo. El piso va de la fila 286 al borde de abajo de la pantalla: la franja donde se paran los atletas (y del mundo = fila de pantalla - 286) y lo de adelante. Las capas, los objetos y la vida se cargan igual que en la vista oblicua.",
+ "capas": {
+  "cielo": {
+   "archivo": "cielo_tarde.png",
+   "y": 0,
+   "paralaje": 0,
+   "repetir_x": true
+  },
+  "lejos": {
+   "archivo": "lejos.png",
+   "y": 86,
+   "paralaje": 0.25,
+   "repetir_x": true
+  },
+  "tras_cerca": {
+   "nota": "la vida con capa tras_cerca va aquí: se ve por los callejones"
+  },
+  "cerca": {
+   "archivos": [
+    "cerca_0.png"
+   ],
+   "trozo": 1280,
+   "y": 0,
+   "paralaje": 1
+  },
+  "piso": {
+   "archivos": [
+    "piso_0.png"
+   ],
+   "trozo": 1280,
+   "y": 286,
+   "paralaje": 1,
+   "nota": "de lado: las primeras 24 filas son la franja donde se paran los atletas, las de abajo lo de adelante hasta el borde de la pantalla"
+  },
+  "objetos": {
+   "archivo": "objetos.json",
+   "nota": "entre el piso y el frente, ordenados con los atletas"
+  },
+  "frente": {
+   "archivos": [
+    "frente_0.png"
+   ],
+   "trozo": 1280,
+   "y": 296,
+   "paralaje": 1
+  }
+ },
+ "vida": {
+  "imagen": "vida.png",
+  "piezas": [
+   {
+    "id": "banderines",
+    "tipo": "banderines",
+    "capa": "cerca",
+    "x": 0,
+    "y": 64,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 640,
+      "h": 34
+     },
+     {
+      "x": 641,
+      "y": 0,
+      "w": 640,
+      "h": 34
+     }
+    ]
+   },
+   {
+    "id": "publico",
+    "tipo": "publico",
+    "capa": "cerca",
+    "x": 128,
+    "y": 226,
+    "fps": 1.5,
+    "cuadros": [
+     {
+      "x": 1282,
+      "y": 0,
+      "w": 240,
+      "h": 40
+     },
+     {
+      "x": 1523,
+      "y": 0,
+      "w": 240,
+      "h": 40
+     }
+    ]
+   },
+   {
+    "id": "llovizna_0",
+    "tipo": "llovizna",
+    "capa": "cerca",
+    "x": 148,
+    "y": 112,
+    "fps": 6,
+    "cuadros": [
+     {
+      "x": 1764,
+      "y": 0,
+      "w": 88,
+      "h": 92
+     },
+     {
+      "x": 1853,
+      "y": 0,
+      "w": 88,
+      "h": 92
+     },
+     {
+      "x": 1942,
+      "y": 0,
+      "w": 88,
+      "h": 92
+     }
+    ]
+   },
+   {
+    "id": "llovizna_1",
+    "tipo": "llovizna",
+    "capa": "cerca",
+    "x": 396,
+    "y": 104,
+    "fps": 6,
+    "cuadros": [
+     {
+      "x": 0,
+      "y": 93,
+      "w": 64,
+      "h": 68
+     },
+     {
+      "x": 65,
+      "y": 93,
+      "w": 64,
+      "h": 68
+     },
+     {
+      "x": 130,
+      "y": 93,
+      "w": 64,
+      "h": 68
+     }
+    ]
+   }
+  ]
+ },
+ "callejones": [],
+ "superficie": {
+  "archivo": "superficie.png",
+  "y": 286,
+  "leyenda": [
+   {
+    "id": "tierra",
+    "color": "#c09050",
+    "paso": "paso_tierra",
+    "resbala": false
+   }
+  ]
+ },
+ "colision": "colision.json",
+ "luces": "luces.json",
+ "particulas": "particulas.json",
+ "paleta": [
+  {
+   "nombre": "tinta",
+   "hex": "#1e1a1e"
+  },
+  {
+   "nombre": "sombra",
+   "hex": "#3a3232"
+  },
+  {
+   "nombre": "asfalto",
+   "hex": "#56504c"
+  },
+  {
+   "nombre": "asfalto_claro",
+   "hex": "#78706a"
+  },
+  {
+   "nombre": "cemento",
+   "hex": "#9c968e"
+  },
+  {
+   "nombre": "cemento_claro",
+   "hex": "#c4beb4"
+  },
+  {
+   "nombre": "crema",
+   "hex": "#e8e2d4"
+  },
+  {
+   "nombre": "luz",
+   "hex": "#f8f6ee"
+  },
+  {
+   "nombre": "amarillo",
+   "hex": "#f2c838"
+  },
+  {
+   "nombre": "ocre",
+   "hex": "#b08048"
+  },
+  {
+   "nombre": "terracota",
+   "hex": "#8a5030"
+  },
+  {
+   "nombre": "rojo",
+   "hex": "#cc3a2e"
+  },
+  {
+   "nombre": "vino",
+   "hex": "#6a2a26"
+  },
+  {
+   "nombre": "salmon",
+   "hex": "#d68c6a"
+  },
+  {
+   "nombre": "menta",
+   "hex": "#76b098"
+  },
+  {
+   "nombre": "verde",
+   "hex": "#3e7a4c"
+  },
+  {
+   "nombre": "verde_oscuro",
+   "hex": "#264a34"
+  },
+  {
+   "nombre": "celeste",
+   "hex": "#8ea6b8"
+  },
+  {
+   "nombre": "cielo",
+   "hex": "#b6c2ca"
+  },
+  {
+   "nombre": "azul",
+   "hex": "#2c4c9a"
+  },
+  {
+   "nombre": "azul_noche",
+   "hex": "#2a3446"
+  },
+  {
+   "nombre": "canal",
+   "hex": "#647480"
+  },
+  {
+   "nombre": "oro",
+   "hex": "#f0a040"
+  },
+  {
+   "nombre": "bruma",
+   "hex": "#a6aeb2"
+  }
+ ],
+ "verificacion": "verificacion.md",
+ "layout": {
+  "id": "candelaria",
+  "pais": "colombia",
+  "prueba": "tejo",
+  "vista": "lado",
+  "nombre": "CANCHA DE TEJO LA CANDELARIA",
+  "nota": "Tejo de lado en una cancha techada de La Candelaria, Bogotá, en la tarde nublada. El piso de Tejo.ts está en la fila 300: la franja va de 286 a 310. Los que esperan se paran en la fila 296 (y 10) y el que lanza en la 300 (y 14), detrás de la raya de x 104. La caja de greda va de x 534 a 584, como la que dibuja el juego.",
+  "largo": 640,
+  "franja": {
+   "atras": 286,
+   "adelante": 310
+  },
+  "hora": "tarde",
+  "clima": [
+   "nublado",
+   "llovizna"
+  ],
+  "paralaje": {
+   "cielo": "auto",
+   "lejos": "monserrate_llovizna",
+   "cerca": "cancha_tejo_candelaria"
+  },
+  "piso": [
+   {
+    "x0": 0,
+    "x1": 640,
+    "tipo": "tierra",
+    "nombre": "la cancha de tierra"
+   }
+  ],
+  "huecos": [],
+  "plataformas": [],
+  "muros": [],
+  "escaleras": [],
+  "postes": [],
+  "agua": [],
+  "bajo": [],
+  "solidos": [
+   {
+    "x": 534,
+    "y": 8,
+    "w": 50,
+    "d": 6,
+    "z": 52,
+    "tipo": "caja_greda",
+    "nota": "la caja de tejo vista de lado: la cara de greda sube de (534, 300) a (582, 250) y el palo de atrás llega a la fila 248, como la de Tejo.ts. El bocín, en (548, 280)"
+   }
+  ],
+  "carriles": [
+   {
+    "y": 10
+   },
+   {
+    "y": 14
+   }
+  ],
+  "entidades": [
+   {
+    "tipo": "objeto",
+    "objeto": "raya_tejo",
+    "x": 104,
+    "y": 14,
+    "nota": "la raya de lanzamiento (LINEA de Tejo.ts)"
+   }
+  ],
+  "ranuras_deco": [
+   {
+    "x0": 0,
+    "x1": 640,
+    "capa": "lejos",
+    "tema": "monserrate_casas_coloniales"
+   },
+   {
+    "x0": 0,
+    "x1": 640,
+    "capa": "cerca",
+    "tema": "cancha_techada_madera"
+   }
+  ],
+  "vida": [
+   "banderines",
+   "publico",
+   "llovizna",
+   "humo_mechas"
+  ]
+ }
+}
