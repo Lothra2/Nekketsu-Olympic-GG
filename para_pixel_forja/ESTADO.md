@@ -26,6 +26,11 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 
 ## Lo último del lado del juego
 
+- **Prueba nueva: Azoteas de Cartagena** (salto con garrocha entre techos, al atardecer). Usa `pole_vault` del motor que ya está en main, sumado al pack `atletismo` (las demás animaciones del pack quedan iguales), con su `elevacion` y el `despegue`/`aterriza` en los cuadros 3 y 11. Lo que le falta en arte:
+  - `vault_fail` (del pedido): hoy el que no llega cae con `jump_fall` y aterriza con `land_flat`.
+  - El escenario `cartagena` (E4): hoy son fachadas pintadas por código, de lado. Hay balcón con buganvillas, carrito de frutas y una palenquera dibujada a mano que sería un NPC con `regañar`.
+- **La Olimpiada Express sortea 5 de las 10 pruebas** en cada gira, más la final del Kachinuki.
+
 - **Listo para C7b, el gallo y la paloma ([pixel_forja#25](https://github.com/Lothra2/pixel_forja/pull/25)).** Probado con el kit de la rama C7b generado en local (`--solo animales`), sobre el arte de E3a y del hẻm.
   - Las aves se cargan como tira (`ave_<id>`) cuando `animales.<id>.tipo` es `"ave"`, con una animación por tramo (`ave_<id>_<anim>`). Los demás animales siguen en atlas.
   - Origen en el ancla. Para la izquierda, espejo y el origen en `w - ancla[0]`, así las patas quedan en el mismo pixel.
