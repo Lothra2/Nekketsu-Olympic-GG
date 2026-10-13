@@ -84,7 +84,7 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
   - Barra Nekketsu y técnicas con corte de anime: Puño Mach (Rick), Patada Huracán (Steph), Chilena Asesina (Sophie), ¡Thor al Rescate! (Alana), Uppercut del Dragón (Kenji).
   - Cámara lenta en el K.O. final, victoria con fanfarria y "SE ACABÓ LA VAINA" si pierdes.
 - Música original sintetizada en el momento: Marcha Nekketsu, tema de pelea, tensión de la intro y fanfarria.
-- Cada mundo con su tema de PixelForja: Saigón, la Comuna 13, Hội An, Bogotá, Margarita, Đà Lạt, el Carnaval de Barranquilla, la gaita de Maracaibo, Caracas y el tema del Instituto en el Kachinuki. Donde no hay tema, suena la pelea sintetizada.
+- Cada mundo con su tema de PixelForja: Saigón, la Comuna 13, Hội An, Bogotá, Margarita, Đà Lạt, el Carnaval de Barranquilla, la gaita de Maracaibo, Caracas, la champeta de Cartagena, el bambuco del Eje Cafetero, los remeros de Hạ Long, el pajarillo de Apure y el tema del Instituto en el Kachinuki. El judo sigue con la pelea sintetizada.
 - Los deportes de pelota usan las animaciones de PixelForja sin la pelota pintada: la pelota la mueve el juego y, mientras alguien la tiene, va donde la pone la animación. En la pelea, cada equipo se burla con su gesto y su frase en un globo.
 
 ## Pantalla

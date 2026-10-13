@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { Figura } from '../core/figura';
 import { ajustes, goma } from '../core/nivel';
 import { efecto } from '../core/fx';
-import { chip, PELEA } from '../core/music';
+import { chip } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { Painter, hex } from '../gfx/paint';
 import { EventScene, prueba, type Competidor } from './base';
@@ -79,7 +79,7 @@ export class Natacion extends EventScene {
     this.timeTxt = this.uiAdd(txt(this, 626, 14, '0.00', 'fuente_ui', 2, 1).setDepth(8001));
     for (const s of this.swimmers) this.heads.push({ img: this.uiAdd(this.add.image(0, 22, 'cabecitas', s.c.id).setDepth(8002)), s });
     this.uiAdd(txt(this, 66, 326, 'BRAZADA', 'fuente_ui', 1).setDepth(8001));
-    chip.play(PELEA);
+    this.tema('halong_remos');
     // el agua de la bahía de fondo, suavecito, mientras dure la prueba
     if (this.cache.audio.exists('amb_agua')) {
       const amb = this.sound.add('amb_agua', { loop: true, volume: 0.16 });

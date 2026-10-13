@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { Figura } from '../core/figura';
 import { ajustes } from '../core/nivel';
 import { efecto } from '../core/fx';
-import { chip, PELEA } from '../core/music';
+import { chip } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { Painter, hex, rng, type RGB } from '../gfx/paint';
 import { EventScene, prueba, type Competidor } from './base';
@@ -115,7 +115,7 @@ export class Azoteas extends EventScene {
       this.esperando(this.gente2[i]);
     });
     this.hud = this.uiAdd(this.add.graphics().setDepth(8000));
-    chip.play(PELEA);
+    this.tema('champeta_murallas');
     this.cameras.main.centerOn(this.camX, 360 - 180 / ZOOM);
     if (this.d.practica) void this.entrenar('AZOTEAS DE CARTAGENA', this.pasos(), 40);
     else void this.previa('AZOTEAS DE CARTAGENA', 'CARTAGENA, COLOMBIA', 'ALTERNA {PUÑO} Y {PATADA} PARA CORRER · {SALTO} EN LA CAJITA PARA CLAVAR LA GARROCHA');

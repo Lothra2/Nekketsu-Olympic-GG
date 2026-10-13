@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { Figura } from '../core/figura';
 import { ajustes } from '../core/nivel';
 import { efecto } from '../core/fx';
-import { chip, PELEA } from '../core/music';
+import { chip } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { Painter, hex } from '../gfx/paint';
 import { EventScene, prueba, type Competidor } from './base';
@@ -80,7 +80,7 @@ export class Jabalina extends EventScene {
       fig.setPosition(18 + i * 13, TOP + (WAIT_Y[i % 3] ?? 42));
     });
     this.hud = this.uiAdd(this.add.graphics().setDepth(8000));
-    chip.play(PELEA);
+    this.tema('pajarillo_llano');
     this.cameras.main.centerOn(this.camX, 360 - 180 / ZOOM);
     if (this.d.practica) void this.entrenar('JABALINA LLANERA', this.pasos(), 100);
     else void this.previa('JABALINA LLANERA', 'LLANOS DE APURE, VENEZUELA', 'ALTERNA {PUÑO} Y {PATADA} PARA CORRER · MANTÉN {SALTO} Y SUELTA PARA LANZAR');

@@ -19966,6 +19966,34 @@
     "bucle": true,
     "muestras": 826875,
     "frecuencia": 22050
+   },
+   "champeta_murallas": {
+    "archivo": ["audio/musica/champeta_murallas.ogg","audio/musica/champeta_murallas.m4a"],
+    "duracion": 36.36,
+    "bucle": true,
+    "muestras": 801819,
+    "frecuencia": 22050
+   },
+   "cafe_neblina": {
+    "archivo": ["audio/musica/cafe_neblina.ogg","audio/musica/cafe_neblina.m4a"],
+    "duracion": 30.97,
+    "bucle": true,
+    "muestras": 682839,
+    "frecuencia": 22050
+   },
+   "halong_remos": {
+    "archivo": ["audio/musica/halong_remos.ogg","audio/musica/halong_remos.m4a"],
+    "duracion": 35.56,
+    "bucle": true,
+    "muestras": 784000,
+    "frecuencia": 22050
+   },
+   "pajarillo_llano": {
+    "archivo": ["audio/musica/pajarillo_llano.ogg","audio/musica/pajarillo_llano.m4a"],
+    "duracion": 36.73,
+    "bucle": true,
+    "muestras": 810001,
+    "frecuencia": 22050
    }
   },
   "ambientes": {

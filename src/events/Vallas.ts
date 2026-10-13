@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { Figura } from '../core/figura';
 import { ajustes, goma } from '../core/nivel';
 import { efecto } from '../core/fx';
-import { chip, PELEA } from '../core/music';
+import { chip } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { Painter, hex } from '../gfx/paint';
 import { EventScene, prueba, type Competidor } from './base';
@@ -72,7 +72,7 @@ export class Vallas extends EventScene {
     this.hud = this.uiAdd(this.add.graphics().setDepth(8000));
     this.timeTxt = this.uiAdd(txt(this, 626, 14, '0.00', 'fuente_ui', 2, 1).setDepth(8001));
     this.racers.forEach((r) => this.uiAdd(this.add.image(0, 22, 'cabecitas', r.c.id).setDepth(8002).setData('r', r)));
-    chip.play(PELEA);
+    this.tema('cafe_neblina');
     if (this.d.practica) void this.entrenar('VALLAS DEL CAFÉ', this.pasos());
     else void this.previa('VALLAS DEL CAFÉ', 'EJE CAFETERO, COLOMBIA', 'ALTERNA {PUÑO} Y {PATADA} PARA CORRER · {SALTO} SALTA · {ESPECIAL} CODAZO');
   }
