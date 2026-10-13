@@ -1075,7 +1075,7 @@ export class Intro extends Phaser.Scene {
    * La tarjeta de presentación sobre quien se presenta, con su flechita apuntándole. Los demás quedan en penumbra
    * mientras dura, para que el ojo vaya directo a quien toca.
    */
-  private tarjetaSobre(f: Figura, otros: Figura[], color: number, llenar: (c: Phaser.GameObjects.Container, x0: number, y0: number) => void) {
+  private tarjetaSobre(f: Figura, otros: Figura[], color: number, llenar: (c: Phaser.GameObjects.Container, x0: number, y0: number) => Phaser.GameObjects.BitmapText) {
     const W = 228, H = 96;
     const [hx, hy, r] = this.cabeza(f);
     const cx = Phaser.Math.Clamp(hx, W / 2 + 10, 640 - W / 2 - 10), x0 = Math.round(cx - W / 2);
@@ -1092,7 +1092,7 @@ export class Intro extends Phaser.Scene {
     g.fillStyle(0xf2c230).fillTriangle(px - 8, y1, px + 8, y1, hx, y1 + 10);
     g.fillStyle(0x08081a).fillTriangle(px - 5, y1 - 1, px + 5, y1 - 1, hx, y1 + 6);
     c.add(g);
-    llenar(c, x0, y0);
+    const nombre = llenar(c, x0, y0);
     // las reacciones que ya están en pantalla siguen viéndose encima de la tarjeta
     for (const m of this.marcas) if (m.active) this.layer.bringToTop(m);
     // aparece desde arriba, con rebote
@@ -1100,9 +1100,8 @@ export class Intro extends Phaser.Scene {
     this.tweens.add({ targets: c, y: 0, alpha: 1, duration: 260, ease: 'Back.out' });
     const sombra = otros.filter((o) => o !== f);
     for (const o of sombra) o.setTint(0x6a6a88);
-    // un destello que barre a quien se presenta
-    const brillo = this.add2(this.add.rectangle(hx, f.y - f.celda * f.scaleY * 0.5, 6, f.celda * f.scaleY, 0xffffff, 0.5).setAngle(18));
-    this.tweens.add({ targets: brillo, x: hx + 40, alpha: 0, duration: 380, onComplete: () => brillo.destroy() });
+    // cuando la tarjeta termina de caer, un destello le pasa por encima al nombre
+    this.time.delayedCall(300, () => this.destello(c, nombre));
     return {
       cerrar: () => new Promise<void>((res) => {
         for (const o of sombra) o.clearTint();
@@ -1111,13 +1110,37 @@ export class Intro extends Phaser.Scene {
     };
   }
 
+  /**
+   * Un destello que cruza las letras de un nombre: una copia blanca del texto, vista solo a través de una franja
+   * inclinada que lo recorre de izquierda a derecha. Va dentro de la tarjeta, así que queda encima y se va con ella.
+   */
+  private destello(c: Phaser.GameObjects.Container, t: Phaser.GameObjects.BitmapText) {
+    if (!c.active || !t.active) return;
+    const b = t.getBounds();
+    const copia = this.add.bitmapText(t.x, t.y, t.font, t.text).setScale(t.scaleX).setOrigin(t.originX, t.originY).setTintFill(0xffffff);
+    c.add(copia);
+    const franja = this.make.graphics({}, false);
+    // una franja ancha y una finita detrás, como el reflejo de un metal
+    franja.fillStyle(0xffffff).fillPoints([{ x: 8, y: -4 }, { x: 22, y: -4 }, { x: 6, y: b.height + 4 }, { x: -8, y: b.height + 4 }], true);
+    franja.fillPoints([{ x: -2, y: -4 }, { x: 2, y: -4 }, { x: -14, y: b.height + 4 }, { x: -18, y: b.height + 4 }], true);
+    franja.setPosition(b.x - 24, b.y);
+    copia.setMask(franja.createGeometryMask());
+    chip.blip(1568, 0.05, 'sq25', 0.08);
+    this.tweens.add({
+      targets: franja, x: b.right + 20, duration: 560, ease: 'Sine.inOut',
+      onComplete: () => { copia.clearMask(true); copia.destroy(); franja.destroy(); },
+    });
+  }
+
   private card(m: (typeof FAMILIA)[number], f: Figura, otros: Figura[]) {
     return this.tarjetaSobre(f, otros, m.color, (c, x0, top) => {
       c.add(this.add.image(x0 + 42, top + 50, `retratos:${m.id}`, 'grande_feliz').setScale(0.7));
-      c.add(txt(this, x0 + 84, top + 16, m.nombre, 'fuente_titulo', 1, 0));
+      const nombre = txt(this, x0 + 84, top + 16, m.nombre, 'fuente_titulo', 1, 0);
+      c.add(nombre);
       c.add(txt(this, x0 + 84, top + 38, m.apodo, 'fuente_ui', 1, 0).setTint(0xffe080));
       c.add(txt(this, x0 + 84, top + 58, 'TÉCNICA', 'fuente_ui', 1, 0).setTint(0x8a8ab0));
       c.add(txt(this, x0 + 84, top + 72, m.tecnica, 'fuente_ui', 1, 0).setTint(0xff6a6a));
+      return nombre;
     });
   }
 
@@ -1127,10 +1150,12 @@ export class Intro extends Phaser.Scene {
       t.row = 'down_right';
       c.add(t);
       this.tick.push((dt) => { if (t.active) t.step(dt); });
-      c.add(txt(this, x0 + 84, top + 16, 'THOR', 'fuente_titulo', 1, 0));
+      const nombre = txt(this, x0 + 84, top + 16, 'THOR', 'fuente_titulo', 1, 0);
+      c.add(nombre);
       c.add(txt(this, x0 + 84, top + 38, 'EL GUARDIÁN', 'fuente_ui', 1, 0).setTint(0xffe080));
       c.add(txt(this, x0 + 84, top + 58, 'TÉCNICA', 'fuente_ui', 1, 0).setTint(0x8a8ab0));
       c.add(txt(this, x0 + 84, top + 72, '¡GUAU GUAU!', 'fuente_ui', 1, 0).setTint(0xff6a6a));
+      return nombre;
     });
   }
 
