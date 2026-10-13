@@ -219,9 +219,20 @@ class TouchPad {
     if (this.stick && p.id === this.stick.id) {
       this.stick.x = p.x;
       this.stick.y = p.y;
-      const dx = p.x - this.stick.ox, dy = p.y - this.stick.oy, m = Math.hypot(dx, dy), r = Math.min(m, 30);
+      let dx = p.x - this.stick.ox, dy = p.y - this.stick.oy, m = Math.hypot(dx, dy);
+      // la base sigue al dedo cuando se pasa del borde: así, al cambiar de dirección responde enseguida
+      // (si no, después de arrastrar mucho hacia abajo había que volver hasta donde se puso el dedo para subir)
+      const lejos = 26;
+      if (m > lejos) {
+        this.stick.ox += (dx / m) * (m - lejos);
+        this.stick.oy += (dy / m) * (m - lejos);
+        dx = p.x - this.stick.ox; dy = p.y - this.stick.oy; m = lejos;
+        this.base.setPosition(this.stick.ox, this.stick.oy);
+      }
+      const r = Math.min(m, lejos);
       this.knob.setPosition(this.stick.ox + (m ? (dx / m) * r : 0), this.stick.oy + (m ? (dy / m) * r : 0));
-      this.runBtn = m > 34;
+      // la palanca hasta el borde: corre
+      this.runBtn = m >= lejos - 1;
     }
   }
 
@@ -237,13 +248,22 @@ class TouchPad {
   }
 
   read() {
+    // si el dedo ya no está (el iPhone a veces se traga el levantar el dedo en el borde de abajo), se suelta sola
+    if (this.stick) {
+      const ptr = this.scene.input.manager.pointers.find((q) => q.id === this.stick!.id);
+      if (!ptr || !ptr.isDown) this.up({ id: this.stick.id } as Phaser.Input.Pointer);
+    }
+    for (const id of [...this.btnDown.keys()]) {
+      const ptr = this.scene.input.manager.pointers.find((q) => q.id === id);
+      if (!ptr || !ptr.isDown) this.up({ id } as Phaser.Input.Pointer);
+    }
     const held = empty();
     for (const b of this.btnDown.values()) held[b] = true;
     let x = 0, y = 0;
     if (this.stick) {
       const dx = this.stick.x - this.stick.ox, dy = this.stick.y - this.stick.oy;
-      if (Math.abs(dx) > 10) x = Math.sign(dx);
-      if (Math.abs(dy) > 10) y = Math.sign(dy);
+      if (Math.abs(dx) > 8) x = Math.sign(dx);
+      if (Math.abs(dy) > 8) y = Math.sign(dy);
     }
     return { x, y, held, run: this.runBtn };
   }

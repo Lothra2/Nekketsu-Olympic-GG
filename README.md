@@ -111,6 +111,7 @@ node scripts/prueba-pelea-nueva.mjs http://localhost:5173/ capturas/pelea_nueva 
 node scripts/prueba-intro.mjs http://localhost:5173/ capturas/intro [844x390]   # la intro cuadro a cuadro: reacciones, tarjetas y textos enteros y sin tapar (también en pantalla ancha)
 node scripts/prueba-celular.mjs http://localhost:5173/ capturas/celular 844 390   # cada escena en un celular alargado: llena la pantalla, todo centrado
 node scripts/prueba-girar.mjs http://localhost:5173/   # parado pide girar; al girar (y al cambiar de pantalla) todo se acomoda
+node scripts/prueba-palanca.mjs http://localhost:5173/   # la palanca táctil con un dedo de verdad: bajar hasta el borde y volver a subir sin soltar
 node scripts/prueba-borde.mjs http://localhost:5173/   # pegada al borde de arriba o de abajo, los muros y los huecos siguen valiendo
 node scripts/prueba-kachinuki.mjs http://localhost:5173/ capturas/kachinuki   # el borde, el rescate de Thor, lo que cae del cielo y la azotea que se achica
 node scripts/prueba-pruebas.mjs http://localhost:5173/ capturas/pruebas  # vallas, natación, jabalina y medallero
