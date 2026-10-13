@@ -25,6 +25,14 @@ const INSTITUTO = ['kenji', 'ryu', 'goro', 'tetsu'];
 const OJOS: Record<string, number> = { rick: -1, steph: 5, sophie: 5, alana: 5, kenji: 3, ryu: 3, goro: 7, tetsu: 4 };
 
 /**
+ * El centro de los cachetes de quien se sonroja, en pixeles del kit desde su punto `cabeza`: [x, y]. Medido en su
+ * sprite de frente (Kenji tiene los ojos grandes y los cachetes más abajo; los lentes de Tetsu tapan la fila de
+ * los ojos). El tercer número, si está, recorta lo rosado a ese ancho para caras más angostas que el efecto (18 px).
+ * Los demás: centrado y 3 pixeles bajo los ojos.
+ */
+const CACHETES: Record<string, [number, number, number?]> = { kenji: [0, 8, 14], tetsu: [0.5, 7] };
+
+/**
  * La intro: la presentación (con Thor arreglando el letrero), Japón, la gira, la Familia GG entrando cada uno a su
  * manera, el montaje de las pruebas, el encuentro con el Instituto (que termina con Goro asustado de Thor), el VS,
  * el puñetazo a la cámara y el logo. Se salta con cualquier botón.
@@ -133,7 +141,10 @@ export class Intro extends Phaser.Scene {
     const [x, y, r] = this.cabeza(f);
     const ojos = y + (OJOS[f.who] ?? 4) * f.scaleY;
     if (id === 'lagrima_comica') return [x, ojos];
-    if (id === 'sonrojo') return [x, ojos + 3 * f.scaleY];
+    if (id === 'sonrojo') {
+      const [cx, cy] = CACHETES[f.who] ?? [0, (OJOS[f.who] ?? 4) + 3];
+      return [x + cx * f.scaleX * (f.left ? -1 : 1), y + cy * f.scaleY];
+    }
     // las estrellas giran centradas sobre la cabeza
     if (id === 'estrellas_mareo') return [Phaser.Math.Clamp(x, 16 * f.scaleX + 4, 636 - 16 * f.scaleX), y - r * 0.8];
     // arriba a la derecha de la cabeza; pegado al borde derecho, a la izquierda (el efecto se dibuja espejado)
@@ -154,6 +165,13 @@ export class Intro extends Phaser.Scene {
     if (!s) return;
     this.add2(s);
     s.setName(`reac:${id}:${f.who}`);
+    // el sonrojo del kit tiene el ancla en su borde de arriba: se centra en lo rosado (columnas 1 a 18, filas 2 a 4)
+    // para que quede justo en los cachetes
+    if (id === 'sonrojo') {
+      s.setOrigin(10 / s.width, 3.5 / s.height);
+      const ancho = CACHETES[f.who]?.[2];
+      if (ancho) s.setCrop(10 - ancho / 2, 0, ancho, s.height);
+    }
     // lo que va en la cara queda pegado a su figura (si alguien está delante, la tapa igual que a la cara);
     // lo que va sobre la cabeza queda encima de todo, también de las tarjetas que salgan después
     if (id === 'lagrima_comica' || id === 'sonrojo') this.layer.moveAbove(s, f);
