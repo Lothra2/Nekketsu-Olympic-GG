@@ -1,12 +1,14 @@
 import Phaser from 'phaser';
 import { Figura } from '../core/figura';
+import { pelotaKit } from '../core/kit';
 import { ajustes } from '../core/nivel';
 import { efecto } from '../core/fx';
-import { chip, PELEA } from '../core/music';
+import { chip } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { rotular } from '../core/input';
 import { Painter, hex } from '../gfx/paint';
 import { EventScene, prueba, type Competidor } from './base';
+import { queueEscenario } from './escenario';
 import type { Paso } from '../core/coach';
 
 /** el piso de la cancha (vista de lado): los de atrás un poco más arriba que los de adelante */
@@ -73,6 +75,8 @@ export class Tenis extends EventScene {
 
   constructor() { super('Tenis'); }
 
+  preload() { queueEscenario(this, 'dalat'); }
+
   create() {
     this.pat = [];
     this.raquetas = [];
@@ -87,7 +91,7 @@ export class Tenis extends EventScene {
     this.llego = false;
     this.setup(ZOOM, 640);
     this.texturas();
-    this.add.image(320, 180, 'bg_dalat').setDepth(-10);
+    this.escenario('dalat', 'bg_dalat');
     this.cancha();
     // entrenando: tú solo de este lado y Kenji del otro, que te la devuelve suave
     const gente: Competidor[] = this.d.practica ? [this.gente[0], { id: 'kenji', team: 1, human: false }] : this.gente;
@@ -103,7 +107,9 @@ export class Tenis extends EventScene {
       this.raquetas.push(this.add.image(0, 0, 'raqueta').setOrigin(0.15, 0.5));
       this.pat.push({ c, fig, sombra, x: casa, fila, z: 0, vz: 0, st: 'piso', golpeT: 0, cool: 0, puntos: 0, toques: 0, casa, pensar: Math.random() * 0.2, quiereX: casa, salta: false, plan: { n: -1, tipo: 'bien', reaccion: 0, ruido: 0 } });
     });
-    const spr = this.add.image(0, 0, 'pelota_tenis').setDepth(5000).setScale(1.2);
+    // la pelota del kit (lote SP2), del tamaño de los atletas; si no llegó, la pintada por código
+    const pk = pelotaKit(this, 'pelota_tenis');
+    const spr = (pk ? this.add.image(0, 0, 'pelotas', pk) : this.add.image(0, 0, 'pelota_tenis').setScale(1.2)).setDepth(5000);
     // un rastro suave detrás dla pelota, para seguirlo con la vista
     const rastro = this.add.particles(0, 0, 'px', { lifespan: 260, scale: { start: 0.6, end: 0 }, alpha: { start: 0.5, end: 0 }, tint: 0xffffff, frequency: 30 }).setDepth(4999);
     rastro.startFollow(spr);
@@ -118,7 +124,7 @@ export class Tenis extends EventScene {
     this.uiAdd(txt(this, 250, 16, 'FAMILIA GG', 'fuente_ui', 1, 1).setDepth(8001).setTint(0x9ac8ff));
     this.uiAdd(txt(this, 390, 16, 'INSTITUTO', 'fuente_ui', 1, 0).setDepth(8001).setTint(0xffa0a0));
     this.toqueTxt = this.uiAdd(txt(this, 320, 34, '', 'fuente_ui', 1).setDepth(8001).setTint(0xffe080));
-    chip.play(PELEA);
+    this.tema('dalat_niebla');
     if (this.d.practica) void this.entrenar('TENIS', this.pasos());
     else void this.previa('TENIS DE DOBLES', 'ĐÀ LẠT, VIETNAM', '{MOVER} AL CÍRCULO · DEJA QUE PIQUE · {PUÑO} DRIVE · {PATADA} GLOBO · {SALTO} Y {PUÑO}: SMASH');
   }
@@ -252,13 +258,16 @@ export class Tenis extends EventScene {
     if (c.en === 'mano' && c.dueño === p) {
       c.x = p.x + dir * 8; c.z = 22;
       this.lanzar(team === 0 ? Phaser.Math.Between(360, 470) : this.d.practica ? Phaser.Math.Clamp(this.pat[0].x + Phaser.Math.Between(-30, 30), 170, 280) : Phaser.Math.Between(170, 280), 58);
-      this.golpeAnim(p, 'weapon_swing_heavy');
+      this.golpeAnim(p, 'tennis_serve', 'weapon_swing_heavy');
       c.ultimo = p; c.ultimoTiro = 'saque'; c.lado = team; c.toques = 1;
       this.sfx('esquiva', 0.3);
       return;
     }
     const alto = this.alcance(p);
-    this.golpeAnim(p, p.st === 'aire' ? 'weapon_swing_heavy' : 'weapon_swing');
+    // en el aire el smash; pegado a la red, la volea; el globo de revés; y el drive de derecha
+    if (p.st === 'aire') this.golpeAnim(p, 'tn_smash', 'weapon_swing_heavy');
+    else if (Math.abs(p.x - RED_X) < 80) this.golpeAnim(p, 'tn_volley', 'weapon_swing');
+    else this.golpeAnim(p, quiere === 'pase' ? 'backhand' : 'forehand', 'weapon_swing');
     if (alto === null) { p.golpeT = 0.25; return; }
     // un solo golpe por lado: si tu compañero ya le pegó, punto para el otro
     if (c.lado !== team) { c.lado = team; c.toques = 0; }
@@ -306,9 +315,10 @@ export class Tenis extends EventScene {
     efecto(this, 'chispa_golpe_liviano', c.x, PISO + FILA[p.fila] - c.z, { depth: 5001 });
   }
 
-  private golpeAnim(p: Voleador, anim: string) {
+  /** El golpe con la animación de tenis del kit (con su raqueta, sin la pelota) desde el contacto, o el swing de antes. */
+  private golpeAnim(p: Voleador, anim: string, respaldo: string) {
     p.golpeT = 0.32;
-    p.fig.set(anim, true, 1.4);
+    p.fig.contacto(anim, respaldo, 1.4);
   }
 
   // ------------------------------------------------------------------ puntos
@@ -404,8 +414,9 @@ export class Tenis extends EventScene {
       }
       // la animación: caminar, correr o quieto, cuando no está pegando ni celebrando (moverse corta la celebración)
       if (q.st === 'piso' && q.golpeT <= 0) {
-        const quiere = mx ? (corre ? 'run' : 'walk') : 'idle';
-        const libre = ['idle', 'walk', 'run'].includes(q.fig.anim.name) || q.fig.anim.done || mx !== 0;
+        // quieto, en guardia de tenis si el kit la trae
+        const quiere = mx ? (corre ? 'run' : 'walk') : q.fig.anim.has('tn_ready') ? 'tn_ready' : 'idle';
+        const libre = ['idle', 'tn_ready', 'walk', 'run'].includes(q.fig.anim.name) || q.fig.anim.done || mx !== 0;
         if (libre && q.fig.anim.name !== quiere) q.fig.set(quiere);
       }
       q.fig.step(dt, Math.abs(mx) * vel * dt);
@@ -522,6 +533,8 @@ export class Tenis extends EventScene {
       const mano = a.data.manos?.[q.fig.rowIndex]?.[a.frame]?.[0] ?? [6, -20];
       const [ax, ay, ang] = arma ?? [mano[0], mano[1], 330];
       const izq = q.fig.left;
+      // las del pack de tenis traen la raqueta dibujada: la de código se esconde
+      this.raquetas[i].setVisible(a.pack !== 'tennis');
       this.raquetas[i].setPosition(Math.round(q.x + (izq ? -ax : ax)), Math.round(y - q.z + ay)).setDepth(y + 0.5)
         .setFlipX(izq).setRotation(Phaser.Math.DegToRad(izq ? -ang : ang)).setOrigin(izq ? 0.85 : 0.15, 0.5);
       q.sombra.setPosition(Math.round(q.x), y).setScale(Math.max(0.5, 1 - q.z / 80)).setDepth(y - 1);

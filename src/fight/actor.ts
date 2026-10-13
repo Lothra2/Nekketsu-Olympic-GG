@@ -47,6 +47,8 @@ export interface World {
    * izquierda, como las juntas del piso de la azotea). 0 o nada: todo derecho. Solo cambia el dibujo, no el mundo.
    */
   inclinacion?: number;
+  /** el gesto fuerte de una burla de equipo (evento `frase` del kit): el globo con la frase */
+  frase?(a: Actor): void;
 }
 
 /** Lo que devuelve `suelo` donde no hay piso. */
@@ -180,7 +182,12 @@ export class Actor {
       case 'guard': this.guardTick(dt, it); break;
       case 'grab': this.grabTick(dt, it); break;
       case 'grabbed': this.grabbedTick(dt, it); break;
-      case 'taunt': this.fig.step(dt); if (this.t > this.burlaT) this.setSt('idle', 'idle'); break;
+      case 'taunt': {
+        const ev = this.fig.step(dt);
+        if (ev.some((e) => e.tipo === 'frase')) this.w.frase?.(this);
+        if (this.t > this.burlaT) this.setSt('idle', 'idle');
+        break;
+      }
     }
     this.clamp();
   }
@@ -557,14 +564,25 @@ export class Actor {
     this.w.aviso?.(v, '¡PISOTÓN!', 0xffb040);
   }
 
-  /** Burlarse un ratito (riéndose o señalando): queda abierto a que le peguen. */
-  burla(seg = 1) {
-    if (!this.controllable) return false;
-    const anim = Math.random() < 0.5 && this.tiene('laugh') ? 'laugh' : this.tiene('point') ? 'point' : 'taunt';
-    this.burlaT = seg;
+  /** La burla de su equipo del kit (lote C5): `burla_<equipo>`, si la trae. */
+  get burlaDeEquipo(): string | null {
+    const eq = (kit().atletas[this.id] as { equipo?: string } | undefined)?.equipo;
+    return eq && this.tiene(`burla_${eq}`) ? `burla_${eq}` : null;
+  }
+
+  /**
+   * Burlarse un ratito: casi siempre con la burla de su equipo (entera, con su globo en el gesto fuerte), o riéndose o
+   * señalando. Queda abierto a que le peguen. Devuelve la animación, o null si no pudo.
+   */
+  burla(seg = 1): string | null {
+    if (!this.controllable) return null;
+    const eq = this.burlaDeEquipo;
+    const anim = eq && Math.random() < 0.7 ? eq : Math.random() < 0.5 && this.tiene('laugh') ? 'laugh' : this.tiene('point') ? 'point' : 'taunt';
     this.setSt('taunt', anim);
+    // la del equipo dura lo que dura su animación
+    this.burlaT = anim === eq ? Math.max(seg, this.fig.anim.data.cuadros / this.fig.anim.data.fps) : seg;
     this.vx = 0;
-    return true;
+    return anim;
   }
 
   private falling(dt: number) {

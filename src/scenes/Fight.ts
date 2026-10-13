@@ -11,6 +11,7 @@ import { txt, flash, speedLines } from '../core/ui';
 import { FAMILIA, INSTITUTO, INFO } from './Select';
 import { PUNTOS, type Gira } from '../events/base';
 import { Coach, type Paso } from '../core/coach';
+import { kit, bucle } from '../core/kit';
 import azotea from '../../data/stages/caracas_azotea.layout.json';
 import { hayArte, pintarEscenario, queueEscenario } from '../events/escenario';
 
@@ -43,6 +44,11 @@ const FRASE: Record<string, string> = {
 };
 /** Las burlas del Instituto cuando te tumba. */
 const BURLAS = ['¡JAJAJA!', '¿ESO ES TODO?', '¡QUÉ LENTO!', '¡NI ME DESPEINÉ!', '¡LEVÁNTATE, PUES!'];
+/** Lo que dice cada equipo en el gesto fuerte de su burla (el pulgar de la Familia, el "ven" del Instituto). */
+const FRASE_EQUIPO: Record<string, string[]> = {
+  familia_gg: ['¡ASÍ MISMO!', '¡ESO, FAMILIA!', '¡BUENA ESA!'],
+  instituto_nekketsu: ['¡VEN, PUES!', '¿ESO ES TODO?', '¡NI ME DESPEINÉ!'],
+};
 /** Las onomatopeyas de cómic de los golpes fuertes. */
 const PUM = ['¡POW!', '¡BAM!', '¡CATAPLUM!', '¡PUM!', '¡KRAK!'];
 const PAF = ['¡PAF!', '¡ZAS!', '¡TOING!', '¡PLAF!'];
@@ -151,6 +157,21 @@ export class Fight extends Phaser.Scene implements World {
   /** Para la máquina: dónde hay comida en el piso. */
   get comida() { return this.arepas.map((a) => ({ x: a.x, y: a.y })); }
 
+  /** El globo de una burla de equipo, en el gesto fuerte: blanco con su colita, y la frase de su equipo. */
+  frase(a: Actor) {
+    const eq = (kit().atletas[a.id] as { equipo?: string } | undefined)?.equipo ?? '';
+    const s = Phaser.Utils.Array.GetRandom(FRASE_EQUIPO[eq] ?? BURLAS);
+    const x = this.px(a.x, a.y), y = FLOOR_TOP + a.y - a.z - 66;
+    const t = txt(this, x, y, s, 'fuente_ui', 1).setDepth(6001).setTint(a.team === 0 ? 0x2a5ab0 : 0xb02a3a);
+    const w = t.width + 10, h = 14;
+    const g = this.add.graphics().setDepth(6000).setPosition(x, y);
+    g.fillStyle(0xffffff).fillRoundedRect(-w / 2, -h / 2, w, h, 4).fillTriangle(-3, h / 2 - 1, 3, h / 2 - 1, a.dir > 0 ? -6 : 6, h / 2 + 5);
+    g.lineStyle(1, 0x1e1418).strokeRoundedRect(-w / 2, -h / 2, w, h, 4);
+    g.setScale(0.3); t.setScale(0.3);
+    this.tweens.add({ targets: [g, t], scale: 1, duration: 160, ease: 'Back.out' });
+    this.tweens.add({ targets: [g, t], alpha: 0, delay: 1100, duration: 300, onComplete: () => { g.destroy(); t.destroy(); } });
+  }
+
   /** Un cartelito de cómic chiquito sobre alguien. */
   aviso(a: Actor, s: string, color: number) {
     const t = txt(this, this.px(a.x, a.y), FLOOR_TOP + a.y - a.z - 58, s, 'fuente_ui', 1).setTint(color).setDepth(6000);
@@ -211,7 +232,34 @@ export class Fight extends Phaser.Scene implements World {
     this.tweens.add({ targets: t, y: t.y - 16, alpha: 0, delay: 500, duration: 600, onComplete: () => t.destroy() });
   }
 
-  preload() { queueEscenario(this, 'caracas_azotea'); }
+  /** el escenario de PixelForja: el dojo de Hà Nội en el judo, la azotea de Caracas en la pelea */
+  private get escenario() { return this.judo ? 'judo_hanoi' : 'caracas_azotea'; }
+
+  preload() { queueEscenario(this, this.escenario); }
+
+  /** el tema que suena en bucle (lotes H2 y H3 de PixelForja) */
+  private temaSonando: Phaser.Sound.BaseSound | null = null;
+
+  /**
+   * La música de la pelea: el tema del Instituto en el 4 contra 4 y el de Caracas en el 1 contra 1. El judo y el
+   * entrenamiento siguen con la pelea del chip, y también todo si el kit no trae el tema.
+   */
+  private tema() {
+    this.temaSonando = null;
+    const n = this.judo || this.data0.practica ? null : this.data0.modo === '4v4' ? 'tema_instituto' : 'pana_dale';
+    if (!n || !kit().audio.musica?.[n]) { chip.play(PELEA); return; }
+    chip.stop(0.2);
+    void bucle(this, 'musica', n, 0.4).then((s) => { this.temaSonando = s; if (this.phase === 'end') this.callarTema(); });
+  }
+
+  private callarTema() {
+    const s = this.temaSonando;
+    this.temaSonando = null;
+    if (s) this.tweens.add({ targets: s, volume: 0, duration: 300, onComplete: () => s.stop() });
+  }
+
+  /** Un efecto del kit si lo trae (los del judo, lote H2). */
+  private suena(n: string, volumen = 0.5) { if (this.cache.audio.exists(n)) this.sound.play(n, { volume: volumen }); }
 
   /** La x de pantalla de un punto del piso, con la vista inclinada del arte. */
   px(x: number, y: number) { return x + this.inclinacion * y; }
@@ -221,7 +269,7 @@ export class Fight extends Phaser.Scene implements World {
     // el mundo se ve de cerca y sigue la acción; el marcador va en su propia capa, sin acercar
     this.ui = this.add.layer().setDepth(10000);
     // entrenando, un poco más lejos: el cartel de arriba no tapa a nadie
-    this.arte = !this.judo && hayArte(this, 'caracas_azotea') ? pintarEscenario(this, 'caracas_azotea', 5000) : null;
+    this.arte = hayArte(this, this.escenario) ? pintarEscenario(this, this.escenario, 5000) : null;
     // con el arte, un poco más lejos: los neones, las torres y el Ávila se ven enteros debajo del marcador
     this.zoom = this.judo ? 1.5 : this.arte ? (this.data0.practica ? 1.25 : ZOOMS_ARTE[this.data0.modo] ?? 1.25) : this.data0.practica ? 1.45 : ZOOMS[this.data0.modo] ?? 1.45;
     this.inclinacion = this.arte?.inclinacion ?? 0;
@@ -231,7 +279,7 @@ export class Fight extends Phaser.Scene implements World {
     this.cameras.main.ignore(this.ui);
     this.uiCam = this.cameras.add(0, 0, 640, 360).setName('ui');
     this.camLock = false;
-    if (this.judo) this.add.image(320, 180, 'bg_hanoi').setDepth(-10);
+    if (this.judo) { if (!this.arte) this.add.image(320, 180, 'bg_hanoi').setDepth(-10); }
     else if (!this.arte) {
       this.add.image(320, 180, 'bg_caracas').setDepth(-10).setScrollFactor(0.45, 1);
       this.add.image(320, 280, 'bg_azotea').setDepth(-9);
@@ -277,7 +325,7 @@ export class Fight extends Phaser.Scene implements World {
     this.hud = this.uiAdd(this.add.graphics().setDepth(8000));
     this.buildHud();
     this.registry.set('marchaSonando', false);
-    chip.play(PELEA);
+    this.tema();
     if (this.data0.practica) void this.entrenar(); else void this.roundIntro();
   }
 
@@ -326,6 +374,7 @@ export class Fight extends Phaser.Scene implements World {
 
   private finPractica() {
     this.phase = 'end';
+    this.callarTema();
     chip.play(VICTORIA);
     flash(this, 150);
     const g = this.uiAdd(this.add.graphics().setDepth(8400));
@@ -383,10 +432,15 @@ export class Fight extends Phaser.Scene implements World {
     const cabeza = FLOOR_TOP + v.y - v.z - 40;
     if (kd) this.onomatopeya(this.px(v.x, v.y) + (from ? from.dir * 10 : 0), cabeza, Phaser.Utils.Array.GetRandom(PUM), true);
     else if (from === this.player && this.racha.n % 3 === 0) this.onomatopeya(this.px(v.x, v.y), cabeza, Phaser.Utils.Array.GetRandom(PAF), false);
-    // el Instituto se burla cuando te tumba (y si le pegas mientras se ríe, se lo merece)
-    if (kd && v.human && from && from.team === 1 && this.phase === 'play' && Math.random() < 0.65) {
+    // el Instituto se burla cuando te tumba (y si le pegas mientras se ríe, se lo merece); los de la Familia que
+    // maneja la máquina celebran con su pulgar cuando tumban a uno del Instituto
+    const seBurla = kd && from && this.phase === 'play' && (from.team === 1 ? v.human && Math.random() < 0.65 : !from.human && Math.random() < 0.35);
+    if (seBurla) {
       this.time.delayedCall(520, () => {
-        if (!from.alive || this.phase !== 'play' || !from.burla(1.1)) return;
+        if (!from.alive || this.phase !== 'play') return;
+        const anim = from.burla(1.1);
+        // la del equipo trae su globo en el gesto fuerte (frase()); la risa y el dedo, el texto de una vez
+        if (!anim || anim === from.burlaDeEquipo) return;
         const t = txt(this, this.px(from.x, from.y), FLOOR_TOP + from.y - 62, Phaser.Utils.Array.GetRandom(BURLAS), 'fuente_ui', 1).setDepth(6000).setTint(0xffa0a0);
         this.tweens.add({ targets: t, y: t.y - 8, alpha: 0, delay: 700, duration: 400, onComplete: () => t.destroy() });
       });
@@ -537,6 +591,7 @@ export class Fight extends Phaser.Scene implements World {
       await new Promise<void>((r) => this.time.delayedCall(2600, r));
       band.destroy(); t1.destroy(); t2.destroy(); t3.destroy();
     }
+    if (this.judo) this.suena('pitazo_largo', 0.5);
     await this.banner(this.judo ? '¡HAJIME!' : '¡LISTOS!', 'fuente_titulo_plata', 3, 800);
     this.phase = 'play';
     chip.blip(1320, 0.2, 'sq50', 0.2, 1760);
@@ -601,6 +656,7 @@ export class Fight extends Phaser.Scene implements World {
     // fuegos artificiales sobre Caracas
     this.fuegosArtificiales();
     this.phase = 'end';
+    this.callarTema();
     chip.play(VICTORIA);
     for (const a of this.actors) if (a.team === 0 && a.alive) { a.fig.row = 'down'; a.setSt('win', 'victory'); }
     this.thorFan?.set('celebrate', true);
@@ -615,6 +671,7 @@ export class Fight extends Phaser.Scene implements World {
 
   private defeat() {
     this.phase = 'end';
+    this.callarTema();
     chip.stop(0.6);
     chip.blip(330, 0.5, 'tri', 0.25, 110);
     for (const a of this.actors) if (a.team === 1 && a.alive) { a.fig.row = 'down'; a.setSt('win', 'victory'); }
@@ -868,6 +925,7 @@ export class Fight extends Phaser.Scene implements World {
     this.shake(ippon ? 300 : 150, ippon ? 0.012 : 0.006);
     if (ippon) flash(this, 160);
     chip.boom(ippon ? 0.9 : 0.5);
+    this.suena('caida_tatami', ippon ? 0.8 : 0.5);
     void this.banner(ippon ? '¡IPPON!' : '¡WAZA-ARI!', 'fuente_titulo', ippon ? 3 : 2, 1000);
     const fin = this.puntos[tm] >= 3 || this.oro;
     this.time.delayedCall(1700, () => {
@@ -886,6 +944,7 @@ export class Fight extends Phaser.Scene implements World {
 
   private finJudo(tm: 0 | 1) {
     this.phase = 'play';
+    this.suena('pitazo_largo', 0.5);
     if (tm === 0) this.victory(); else this.defeat();
   }
 

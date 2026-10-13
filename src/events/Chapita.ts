@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { Figura } from '../core/figura';
 import { ajustes } from '../core/nivel';
 import { efecto } from '../core/fx';
-import { chip, PELEA } from '../core/music';
+import { chip } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { Painter, hex } from '../gfx/paint';
 import { EventScene, prueba, type Competidor } from './base';
@@ -114,7 +114,7 @@ export class Chapita extends EventScene {
     this.ayudaTxt = this.uiAdd(txt(this, 320, 340, '', 'fuente_ui', 1).setDepth(8001).setTint(0xffffff));
     if (this.d.practica) this.ayudaTxt.setY(326);
     this.mitad();
-    chip.play(PELEA);
+    this.tema('pana_dale');
     this.cameras.main.centerOn(this.camX, 360 - 180 / ZOOM);
     if (this.d.practica) void this.entrenar('CHAPITA', this.pasos(), 40);
     else void this.previa('CHAPITA', 'BARRIO DE CARACAS, VENEZUELA', '{PUÑO} BATEA · {MOVER} ARRIBA LA MANDA ALTA · LANZANDO: {PUÑO} RECTA, {PATADA} CURVA');
@@ -279,7 +279,8 @@ export class Chapita extends EventScene {
         this.quiereLanz = curvas ? (Math.random() < 0.5 ? 'sube' : 'baja') : 'recta';
       }
       this.st = 'lanza';
-      this.pit.fig.set('weapon_throw', true);
+      // el lanzamiento de béisbol del kit (sin la pelota pintada: la chapa va en su punto) o el de la pelea
+      this.pit.fig.set(this.pit.fig.anim.has('pitch') ? 'pitch' : 'weapon_throw', true);
       return;
     }
     if (this.st === 'lanza') {
@@ -384,7 +385,7 @@ export class Chapita extends EventScene {
     c.t = 0;
     this.st = 'resultado';
     this.espera = 1.2;
-    this.sound.play('golpe', { volume: 0.4 + 0.3 * q, rate: 1.2 });
+    this.suena('chapa', 0.5 + 0.3 * q, () => this.sound.play('golpe', { volume: 0.4 + 0.3 * q, rate: 1.2 }));
     efecto(this, q > 0.85 ? 'chispa_golpe_pesado' : 'chispa_golpe_liviano', CONTACTO, PISO - c.z, { depth: PISO + 5 });
     if (q > 0.85) { this.cameras.main.shake(100, 0.006); chip.blip(1320, 0.08, 'sq25', 0.2, 1760); }
     if (this.humanoBatea()) { this.contactos++; if (c.tipo !== 'recta') this.contactosCurva++; }
@@ -503,7 +504,7 @@ export class Chapita extends EventScene {
           if (u >= 1) {
             ev.remove();
             ch.destroy();
-            this.sound.play('golpe', { volume: 0.5 });
+            this.suena('chancleta', 0.6, () => this.sound.play('golpe', { volume: 0.5 }));
             efecto(this, 'estrellas_mareo', BAT_X, PISO - 46, { depth: 6000 });
             this.bat.fig.set('hit', true);
             this.swing = null;
@@ -596,8 +597,10 @@ export class Chapita extends EventScene {
     const c = this.chapa;
     if (p) {
       const a = p.anim, arma = a.name === 'weapon_throw' ? a.data.arma?.[p.rowIndex]?.[a.frame] : null;
-      this.chapaMano.setVisible(!!arma && c.st !== 'lanzada');
-      if (arma) {
+      const ob = a.name === 'pitch' ? p.pelota() : null;
+      this.chapaMano.setVisible((!!arma || !!ob) && c.st !== 'lanzada');
+      if (ob) this.chapaMano.setFrame('chapa_mano_0').setFlipX(p.left).setPosition(Math.round(ob.x), Math.round(ob.y));
+      else if (arma) {
         const k = ((Math.round(arma[2] / 22.5) % 16) + 16) % 16;
         this.chapaMano.setFrame(`chapa_mano_${k}`).setFlipX(p.left).setPosition(Math.round(p.x + (p.left ? -arma[0] : arma[0])), Math.round(p.y + arma[1]));
       }

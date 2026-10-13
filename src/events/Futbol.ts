@@ -2,10 +2,11 @@ import Phaser from 'phaser';
 import { Figura } from '../core/figura';
 import { ajustes } from '../core/nivel';
 import { efecto } from '../core/fx';
-import { chip, PELEA } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { Painter, hex } from '../gfx/paint';
 import { EventScene, prueba, type Competidor } from './base';
+import { queueEscenario } from './escenario';
+import { npcs, pelotaKit } from '../core/kit';
 import { FAMILIA, INSTITUTO } from '../scenes/Select';
 import type { Paso } from '../core/coach';
 import type { Pad } from '../core/input';
@@ -28,6 +29,8 @@ interface Jug {
   t: number; vx: number; vy: number; goles: number;
   /** la máquina: cuándo decide y adónde va */
   ia: { t: number; tx: number; ty: number };
+  /** la estirada del arquero con la del kit: hacia la cámara (down) o hacia el fondo (up) */
+  filaVuelo?: 'down' | 'up';
 }
 interface Balon {
   x: number; y: number; z: number; vx: number; vy: number; vz: number;
@@ -43,7 +46,8 @@ interface Balon {
  * apunta arriba o abajo) y puño lo pasa. Salto para cabecear. Con la barra llena, especial es el tiro Nekketsu.
  * Los arcos son de piedra y cada tanto una Marimonda se mete a la cancha. Dos minutos y medio, y gol de oro si hay
  * empate.
- * Mientras llega el pack de fútbol sin el balón pintado, los tiros usan las patadas de la pelea.
+ * Con los packs de fútbol y de arquero del kit (sin el balón pintado), los tiros, los pases, la barrida, el cabezazo y
+ * el arquero usan sus animaciones; sin ellos, las patadas de la pelea.
  */
 export class Futbol extends EventScene {
   private js: Jug[] = [];
@@ -57,7 +61,9 @@ export class Futbol extends EventScene {
   private saque: 0 | 1 = 0;
   /** al sacar del medio, un ratico sin barridas para que el que saca pueda arrancar */
   private protegido = 0;
-  private marimonda!: Phaser.GameObjects.Image;
+  private marimonda!: Phaser.GameObjects.Sprite;
+  /** la Marimonda es la del kit (camina y baila); si no llegó, la pintada por código, que rebota */
+  private mariKit = false;
   private mari = { x: -60, y: 50, vx: 0, t: 12 };
   private hud!: Phaser.GameObjects.Graphics;
   private marcadorTxt!: Phaser.GameObjects.BitmapText;
@@ -74,6 +80,8 @@ export class Futbol extends EventScene {
 
   constructor() { super('Futbol'); }
 
+  preload() { queueEscenario(this, 'barranquilla'); }
+
   create() {
     this.js = [];
     this.ctrl = null;
@@ -87,21 +95,25 @@ export class Futbol extends EventScene {
     this.mari = { x: -60, y: 50, vx: 0, t: 14 };
     this.setup(1, 640);
     this.texturas();
-    this.add.image(320, 180, 'bg_barranquilla').setDepth(-10);
+    this.escenario('barranquilla', 'bg_barranquilla');
     this.cancha();
     this.armarEquipos();
-    const spr = this.add.image(0, 0, 'balon_futbol').setScale(1.2);
+    // la pelota del kit (lote SP2), del tamaño de los atletas; si no llegó, la pintada por código
+    const pk = pelotaKit(this, 'balon_futbol');
+    const spr = (pk ? this.add.image(0, 0, 'pelotas', pk) : this.add.image(0, 0, 'balon_futbol').setScale(1.2));
     const sombra = this.add.ellipse(0, 0, 9, 3, 0x000000, 0.3);
     const fuego = this.add.particles(0, 0, 'px', { lifespan: 300, scale: { start: 1.4, end: 0 }, alpha: { start: 0.8, end: 0 }, tint: [0xffe040, 0xff6020, 0xffffff], frequency: 14, emitting: false }).setDepth(4999);
     fuego.startFollow(spr);
     this.bola = { x: 300, y: PROF / 2, z: 0, vx: 0, vy: 0, vz: 0, dueño: null, ultimo: null, especial: false, t: 0, libre: 0, seEscapo: null, spr, sombra, fuego };
-    this.marimonda = this.add.image(-80, 0, 'marimonda').setOrigin(0.5, 1).setVisible(false);
+    const mk = npcs().marimonda;
+    this.mariKit = !!mk && this.anims.exists('npc_marimonda_caminar');
+    this.marimonda = (this.mariKit ? this.add.sprite(-80, 0, 'npc_marimonda', 0).setOrigin((mk.ancla[0] + 0.5) / mk.w, (mk.ancla[1] + 0.5) / mk.h) : this.add.sprite(-80, 0, 'marimonda').setOrigin(0.5, 1)).setVisible(false);
     this.hud = this.uiAdd(this.add.graphics().setDepth(8000));
     this.marcadorTxt = this.uiAdd(txt(this, 320, 14, '', 'fuente_titulo', 1).setDepth(8001));
     this.relojTxt = this.uiAdd(txt(this, 320, 32, '', 'fuente_ui', 1).setDepth(8001).setTint(0xffe080));
     this.flecha = this.add.triangle(0, 0, 0, 0, 8, 0, 4, 6, 0xffe040).setDepth(6000);
     this.saqueDe(0);
-    chip.play(PELEA);
+    this.tema('carnaval_quilla');
     this.cameras.main.centerOn(320, 180);
     if (this.d.practica) void this.entrenar('FÚTBOL', this.pasos(), 40);
     else void this.previa('FÚTBOL CALLEJERO', 'CARNAVAL DE BARRANQUILLA, COLOMBIA', '{PUÑO} PASE · {PATADA} TIRO (O BARRIDA SIN BALÓN) · {SALTO} CABEZAZO · {ESPECIAL} CON LA BARRA LLENA');
@@ -159,8 +171,9 @@ export class Futbol extends EventScene {
     for (let a = 0; a < Math.PI * 2; a += 0.25) linea(P(313 + Math.cos(a) * 18, PROF / 2 + Math.sin(a) * 12), P(313 + Math.cos(a + 0.25) * 18, PROF / 2 + Math.sin(a + 0.25) * 12));
     // las áreas chiquitas
     for (const [x0, x1] of [[GOL[0], GOL[0] + 40], [GOL[1] - 40, GOL[1]]]) { linea(P(x0, ARCO.y0 - 10), P(x1, ARCO.y0 - 10)); linea(P(x0, ARCO.y1 + 10), P(x1, ARCO.y1 + 10)); linea(P(x0 === GOL[0] ? x1 : x0, ARCO.y0 - 10), P(x0 === GOL[0] ? x1 : x0, ARCO.y1 + 10)); }
-    // los arcos de piedra: dos columnas y el arco de arriba, en la línea de gol
-    for (const x of GOL) {
+    // los arcos de piedra: dos columnas y el arco de arriba, en la línea de gol (con el arte vienen pintados, cada uno
+    // en dos piezas: la columna de atrás en FT + 35 y la de adelante en FT + 71, y el arquero queda entre las dos)
+    if (!this.arteFondo) for (const x of GOL) {
       const a = this.add.graphics().setDepth(FT + ARCO.y1 + 1);
       const [p0, p1] = [P(x, ARCO.y0), P(x, ARCO.y1)];
       a.fillStyle(0xc8b490).fillRect(p0.x - 3, p0.y - ARCO.alto - 4, 5, ARCO.alto + 4).fillRect(p1.x - 3, p1.y - ARCO.alto - 4, 5, ARCO.alto + 4);
@@ -277,7 +290,7 @@ export class Futbol extends EventScene {
       const d = j.ia.ty - j.y;
       j.y += Math.sign(d) * Math.min(Math.abs(d), 240 * dt);
       j.fig.step(dt);
-      if (j.t <= 0) { j.st = 'libre'; j.fig.setAngle(0); }
+      if (j.t <= 0) { j.st = 'libre'; j.fig.setAngle(0); j.filaVuelo = undefined; }
       this.limitar(j);
       return;
     }
@@ -303,7 +316,10 @@ export class Futbol extends EventScene {
     else if (j.arquero) j.dir = j.team === 0 ? 1 : -1;
     const v = Math.hypot(vx, vy);
     if (j.z > 0) j.fig.set(j.vz > 0 ? 'jump_rise' : 'jump_fall');
-    else j.fig.set(v > 8 ? (v > 100 ? 'run' : 'walk') : j.arquero ? 'guard' : 'idle');
+    else if (v > 8) j.fig.set(v > 100 ? 'run' : 'walk');
+    // el arquero: con el balón en las manos, abrazado; si no, en guardia (las del kit si llegaron)
+    else if (j.arquero) j.fig.set(this.bola.dueño === j && j.fig.anim.has('keeper_catch') ? 'keeper_catch' : j.fig.anim.has('keeper_ready') ? 'keeper_ready' : 'guard');
+    else j.fig.set('idle');
     j.fig.step(dt, v > 8 ? v * dt : undefined);
     // con el balón en los pies: lo lleva adelante
     const b = this.bola;
@@ -395,7 +411,9 @@ export class Futbol extends EventScene {
         // se lanza si no llega caminando
         if (Math.abs(ty - j.y) > 8 && j.st === 'libre' && tLlega < 0.35) {
           j.st = 'vuela'; j.t = 0.5; j.ia.ty = Phaser.Math.Clamp(ty, ARCO.y0 - 6, ARCO.y1 + 6); j.vy = 0; j.vx = 0;
-          j.fig.set('jump_fall', true).setAngle(j.team === 0 ? -70 : 70);
+          // la estirada del kit va hacia donde se tira (de frente o de espalda); sin ella, la caída girada de antes
+          if (j.fig.anim.has('keeper_dive')) { j.fig.set('keeper_dive', true); j.filaVuelo = j.ia.ty > j.y ? 'down' : 'up'; }
+          else j.fig.set('jump_fall', true).setAngle(j.team === 0 ? -70 : 70);
         }
       }
     }
@@ -415,7 +433,8 @@ export class Futbol extends EventScene {
     b.dueño = null; b.ultimo = j; b.especial = especial; b.t = 0; b.libre = 0.25; b.seEscapo = null;
     this.stats.tiros[j.team]++;
     j.st = 'patea'; j.t = 0.35;
-    j.fig.set(especial ? 'flying_kick' : 'kick_martial', true, 1.4);
+    if (especial) j.fig.set('flying_kick', true, 1.4);
+    else j.fig.contacto('shot', 'kick_martial', 1.4);
     if (especial) {
       this.nek[j.team] = 0;
       efecto(this, 'aura_nekketsu', this.sx(j.x, j.y), FT + j.y, { depth: FT + j.y - 0.1 });
@@ -441,7 +460,8 @@ export class Futbol extends EventScene {
     b.vx = (tx - b.x) / t; b.vy = (ty - b.y) / t; b.vz = j.arquero ? (G * t) / 2 : 30;
     b.dueño = null; b.ultimo = j; b.especial = false; b.t = 0; b.libre = 0.2; b.seEscapo = null;
     j.st = 'patea'; j.t = 0.25;
-    j.fig.set(j.arquero ? 'throw_overhead' : 'low_kick', true, 1.4);
+    if (j.arquero) j.fig.set('throw_overhead', true, 1.4);
+    else j.fig.contacto('pass', 'low_kick', 1.4);
     this.sound.play('esquiva', { volume: 0.25, rate: 1.3 });
     if (j.team === 0 && this.d.practica) this.pases++;
   }
@@ -451,7 +471,7 @@ export class Futbol extends EventScene {
     j.st = 'barre'; j.t = 0.42;
     j.vx = Math.sign(dx || j.dir) * 190; j.vy = dy * 60;
     j.dir = j.vx > 0 ? 1 : -1;
-    j.fig.set('slip_wet', true, 1.6);
+    j.fig.set(j.fig.anim.has('slide') ? 'slide' : 'slip_wet', true, 1.6);
     efecto(this, 'polvo_frenar_medio', this.sx(j.x, j.y), FT + j.y);
   }
 
@@ -479,7 +499,7 @@ export class Futbol extends EventScene {
     this.tirar(j, (Math.random() - 0.5) * 2, false);
     b.vz = -40;
     this.letrero(j, '¡CABEZAZO!', 0x8ae0ff);
-    j.fig.set('jump_rise', true);
+    j.fig.contacto('header', 'jump_rise');
   }
 
   private moverBola(dt: number) {
@@ -562,6 +582,8 @@ export class Futbol extends EventScene {
   private moverMarimonda(dt: number) {
     const m = this.mari;
     if (this.d.practica) return;
+    // en el festejo del gol, la que está cruzando se para a bailar
+    if (m.vx !== 0 && this.pausa > 0) return;
     if (m.vx === 0) {
       m.t -= dt;
       if (m.t > 0) return;
@@ -585,7 +607,7 @@ export class Futbol extends EventScene {
   private pintar() {
     for (const j of this.js) {
       j.fig.left = j.dir < 0;
-      j.fig.row = 'right';
+      j.fig.row = j.st === 'vuela' && j.filaVuelo ? j.filaVuelo : 'right';
       j.fig.refresh();
       const x = Math.round(this.sx(j.x, j.y)), y = FT + j.y;
       j.fig.setPosition(x, Math.round(y - j.z)).setDepth(y);
@@ -593,10 +615,16 @@ export class Futbol extends EventScene {
     }
     const b = this.bola;
     const sx = Math.round(this.sx(b.x, b.y));
-    b.spr.setPosition(sx, Math.round(FT + b.y - b.z - 3)).setDepth(FT + b.y + 0.3).setRotation(b.spr.rotation + (b.dueño ? 0 : b.vx * 0.002));
+    // en las manos del arquero, donde la pone la animación del kit
+    const mano = b.dueño?.arquero ? b.dueño.fig.pelota() : null;
+    if (mano) b.spr.setPosition(Math.round(mano.x), Math.round(mano.y)).setDepth(b.dueño!.fig.depth + (mano.detras ? -0.1 : 0.1));
+    else b.spr.setPosition(sx, Math.round(FT + b.y - b.z - 3)).setDepth(FT + b.y + 0.3).setRotation(b.spr.rotation + (b.dueño ? 0 : b.vx * 0.002));
     b.sombra.setPosition(sx, FT + b.y).setDepth(FT + b.y - 0.6).setScale(Math.max(0.4, 1 - b.z / 80));
     const m = this.mari;
-    this.marimonda.setVisible(m.vx !== 0).setPosition(Math.round(this.sx(m.x, m.y)), FT + m.y).setDepth(FT + m.y).setFlipX(m.vx < 0).setY(FT + m.y - Math.abs(Math.sin(this.time.now / 120)) * 3);
+    this.marimonda.setVisible(m.vx !== 0).setPosition(Math.round(this.sx(m.x, m.y)), FT + m.y).setDepth(FT + m.y).setFlipX(m.vx < 0);
+    if (!this.mariKit) this.marimonda.setY(FT + m.y - Math.abs(Math.sin(this.time.now / 120)) * 3);
+    else if (m.vx !== 0 && this.pausa <= 0) this.marimonda.play('npc_marimonda_caminar', true);
+    else if (m.vx !== 0) this.marimonda.play('npc_marimonda_bailar', true);
     const c = this.ctrl;
     this.flecha.setVisible(!!c && this.fase === 'juego');
     if (c) this.flecha.setPosition(Math.round(this.sx(c.x, c.y)) - 4, Math.round(FT + c.y - c.z - 54 + Math.sin(this.time.now / 120) * 2));

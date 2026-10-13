@@ -1,12 +1,14 @@
 import Phaser from 'phaser';
 import { Figura } from '../core/figura';
+import { pelotaKit } from '../core/kit';
 import { ajustes } from '../core/nivel';
 import { efecto } from '../core/fx';
-import { chip, PELEA } from '../core/music';
+import { chip } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { rotular } from '../core/input';
 import { Painter, hex } from '../gfx/paint';
 import { EventScene, prueba, type Competidor } from './base';
+import { queueEscenario } from './escenario';
 import type { Paso } from '../core/coach';
 
 /** el piso de la cancha (vista de lado): los de atrás un poco más arriba que los de adelante */
@@ -64,6 +66,8 @@ export class Voley extends EventScene {
 
   constructor() { super('Voley'); }
 
+  preload() { queueEscenario(this, 'margarita'); }
+
   create() {
     this.pat = [];
     this.marcador = [0, 0];
@@ -76,7 +80,7 @@ export class Voley extends EventScene {
     this.llego = false;
     this.setup(ZOOM, 640);
     this.texturas();
-    this.add.image(320, 180, 'bg_margarita').setDepth(-10);
+    this.escenario('margarita', 'bg_margarita');
     this.cancha();
     // entrenando: tú solo de este lado y Kenji del otro, que te la devuelve suave
     const gente: Competidor[] = this.d.practica ? [this.gente[0], { id: 'kenji', team: 1, human: false }] : this.gente;
@@ -91,7 +95,9 @@ export class Voley extends EventScene {
       const sombra = this.add.ellipse(casa, PISO + FILA[fila], 20, 5, 0x000000, 0.3);
       this.pat.push({ c, fig, sombra, x: casa, fila, z: 0, vz: 0, st: 'piso', golpeT: 0, cool: 0, puntos: 0, toques: 0, casa, pensar: Math.random() * 0.2, quiereX: casa, salta: false, plan: { n: -1, tipo: 'bien', reaccion: 0, ruido: 0 } });
     });
-    const spr = this.add.image(0, 0, 'balon_voley').setDepth(5000).setScale(1.3);
+    // la pelota del kit (lote SP2), del tamaño de los atletas; si no llegó, la pintada por código
+    const pk = pelotaKit(this, 'balon_voley');
+    const spr = (pk ? this.add.image(0, 0, 'pelotas', pk) : this.add.image(0, 0, 'balon_voley').setScale(1.3)).setDepth(5000);
     // un rastro suave detrás dla pelota, para seguirlo con la vista
     const rastro = this.add.particles(0, 0, 'px', { lifespan: 260, scale: { start: 0.6, end: 0 }, alpha: { start: 0.5, end: 0 }, tint: 0xffffff, frequency: 30 }).setDepth(4999);
     rastro.startFollow(spr);
@@ -106,7 +112,7 @@ export class Voley extends EventScene {
     this.uiAdd(txt(this, 250, 16, 'FAMILIA GG', 'fuente_ui', 1, 1).setDepth(8001).setTint(0x9ac8ff));
     this.uiAdd(txt(this, 390, 16, 'INSTITUTO', 'fuente_ui', 1, 0).setDepth(8001).setTint(0xffa0a0));
     this.toqueTxt = this.uiAdd(txt(this, 320, 34, '', 'fuente_ui', 1).setDepth(8001).setTint(0xffe080));
-    chip.play(PELEA);
+    this.tema('playa_margarita');
     if (this.d.practica) void this.entrenar('VÓLEY PLAYA', this.pasos());
     else void this.previa('VÓLEY PLAYA', 'PLAYA EL AGUA, MARGARITA', '{MOVER} AL CÍRCULO · {PUÑO} AL OTRO LADO · {PATADA} LA LEVANTA · {SALTO} Y {PUÑO}: REMATE');
   }
@@ -219,13 +225,15 @@ export class Voley extends EventScene {
     if (c.en === 'mano' && c.dueño === p) {
       c.x = p.x + dir * 8; c.z = 22;
       this.lanzar(team === 0 ? Phaser.Math.Between(400, 560) : this.d.practica ? Phaser.Math.Clamp(this.pat[0].x + Phaser.Math.Between(-50, 50), 70, 280) : Phaser.Math.Between(80, 240), 124);
-      this.golpeAnim(p, 'uppercut');
+      this.golpeAnim(p, 'serve', 'uppercut');
       c.ultimo = p; c.ultimoTiro = 'saque'; c.lado = team; c.toques = 1;
       this.sfx('esquiva', 0.3);
       return;
     }
     const alto = this.alcance(p);
-    this.golpeAnim(p, p.st === 'aire' ? 'jab' : quiere === 'pase' ? 'uppercut' : 'fight_block');
+    if (p.st === 'aire') this.golpeAnim(p, 'spike', 'jab');
+    else if (quiere === 'pase') this.golpeAnim(p, 'vb_set', 'uppercut');
+    else this.golpeAnim(p, 'vb_bump', 'fight_block');
     if (alto === null) { p.golpeT = 0.25; return; }
     // los toques de este lado: al cuarto, punto para el otro
     if (c.lado !== team) { c.lado = team; c.toques = 0; }
@@ -273,9 +281,10 @@ export class Voley extends EventScene {
     efecto(this, 'chispa_golpe_liviano', c.x, PISO + FILA[p.fila] - c.z, { depth: 5001 });
   }
 
-  private golpeAnim(p: Voleador, anim: string) {
+  /** El golpe con la animación de vóley del kit (lote SP, sin la pelota pintada) desde el contacto, o la de antes. */
+  private golpeAnim(p: Voleador, anim: string, respaldo: string) {
     p.golpeT = 0.32;
-    p.fig.set(anim, true, 1.4);
+    p.fig.contacto(anim, respaldo, 1.4);
   }
 
   // ------------------------------------------------------------------ puntos
@@ -346,17 +355,19 @@ export class Voley extends EventScene {
       q.x = Phaser.Math.Clamp(q.x, lim[0], lim[1]);
       if (mx) q.fig.left = mx < 0;
       else if (q.golpeT <= 0) q.fig.left = q.c.team === 1;
-      if (salta && q.st === 'piso' && q.golpeT <= 0) { q.st = 'aire'; q.vz = 270; q.fig.set('jump_rise', true); }
+      // pegado a la red, el salto es el bloqueo con las manos arriba (si el kit lo trae)
+      if (salta && q.st === 'piso' && q.golpeT <= 0) { q.st = 'aire'; q.vz = 270; q.fig.set(Math.abs(q.x - RED_X) < 22 && q.fig.anim.has('block') ? 'block' : 'jump_rise', true); }
       if (q.st === 'aire') {
         q.vz -= 700 * dt;
         q.z += q.vz * dt;
         if (q.z <= 0) { q.z = 0; q.vz = 0; q.st = 'piso'; q.fig.set('land', true); }
-        else if (q.golpeT <= 0 && q.vz < 0 && q.fig.anim.name !== 'jump_fall') q.fig.set('jump_fall');
+        else if (q.golpeT <= 0 && q.vz < 0 && q.fig.anim.name !== 'jump_fall' && q.fig.anim.name !== 'block') q.fig.set('jump_fall');
       }
       // la animación: caminar, correr o quieto, cuando no está pegando ni celebrando (moverse corta la celebración)
       if (q.st === 'piso' && q.golpeT <= 0) {
-        const quiere = mx ? (corre ? 'run' : 'walk') : 'idle';
-        const libre = ['idle', 'walk', 'run'].includes(q.fig.anim.name) || q.fig.anim.done || mx !== 0;
+        // quieto, en guardia de vóley si el kit la trae
+        const quiere = mx ? (corre ? 'run' : 'walk') : q.fig.anim.has('vb_ready') ? 'vb_ready' : 'idle';
+        const libre = ['idle', 'vb_ready', 'walk', 'run'].includes(q.fig.anim.name) || q.fig.anim.done || mx !== 0;
         if (libre && q.fig.anim.name !== quiere) q.fig.set(quiere);
       }
       q.fig.step(dt, Math.abs(mx) * vel * dt);
@@ -391,7 +402,7 @@ export class Voley extends EventScene {
         c.vx *= -0.15;
         c.vz = Math.min(c.vz, 0);
         c.red = true;
-        this.sfx('esquiva', 0.3);
+        this.suena('red_voley', 0.5, () => this.sfx('esquiva', 0.3));
       }
       if (c.z <= 0) { c.z = 0; this.aterriza(); }
     }

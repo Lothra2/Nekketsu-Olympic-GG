@@ -3,7 +3,7 @@ import { Actor, NOTHING, type Intent, type Item, type World } from '../fight/act
 import { DEPTH, FLOOR_TOP } from '../fight/defs';
 import { ajustes } from '../core/nivel';
 import { efecto } from '../core/fx';
-import { chip, PELEA } from '../core/music';
+import { chip } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { kit } from '../core/kit';
 import { EventScene, prueba, type Competidor } from './base';
@@ -99,7 +99,7 @@ export class Tamawari extends EventScene implements World {
     this.relojTxt = this.uiAdd(txt(this, 320, 14, '2:00', 'fuente_ui', 2).setDepth(8001));
     this.uiAdd(txt(this, 18, 12, 'BOLA FAMILIA GG', 'fuente_ui', 1, 0).setDepth(8001).setTint(0x9ac8ff));
     this.uiAdd(txt(this, 622, 12, 'BOLA INSTITUTO', 'fuente_ui', 1, 1).setDepth(8001).setTint(0xffa0a0));
-    chip.play(PELEA);
+    this.tema('hoian_noche');
     if (this.d.practica) void this.entrenar('TAMA-WARI', this.pasos());
     else void this.previa('TAMA-WARI HỘI AN', 'HỘI AN, VIETNAM', 'ROMPE LA BOLA DEL OTRO POSTE · {SALTO} AGARRA EL POSTE · {PUÑO} Y {PATADA} TREPAN Y PEGAN');
   }
@@ -113,14 +113,17 @@ export class Tamawari extends EventScene implements World {
     const palo = this.add.graphics().setDepth(FT + y);
     // el bambú: verde amarillento, con sus nudos, y la base de piedra
     const bx = this.px(x, y);
-    palo.fillStyle(0x3a3440).fillRect(bx - 9, FT + y - 10, 18, 12);
-    palo.fillStyle(0x5a5260).fillRect(bx - 9, FT + y - 10, 18, 2);
-    palo.fillStyle(0x8a9a3a).fillRect(bx - 3, FT + y - alto, 6, alto - 8);
-    palo.fillStyle(0xb8c45a).fillRect(bx - 3, FT + y - alto, 2, alto - 8);
-    palo.fillStyle(0x5a6a2a).fillRect(bx + 2, FT + y - alto, 1, alto - 8);
-    for (let k = FT + y - 20; k > FT + y - alto; k -= 16) palo.fillStyle(0x4a5a22).fillRect(bx - 4, k, 8, 2);
-    // la cuerdita de la bola y el farol del equipo
-    palo.fillStyle(team === 0 ? 0x4a9aff : 0xff5a5a).fillRect(bx - 5, FT + y - alto - 2, 10, 3);
+    // con el arte de Hội An, el poste, su base y el collar del equipo vienen pintados: la bola cuelga de su gancho
+    if (!this.arte) {
+      palo.fillStyle(0x3a3440).fillRect(bx - 9, FT + y - 10, 18, 12);
+      palo.fillStyle(0x5a5260).fillRect(bx - 9, FT + y - 10, 18, 2);
+      palo.fillStyle(0x8a9a3a).fillRect(bx - 3, FT + y - alto, 6, alto - 8);
+      palo.fillStyle(0xb8c45a).fillRect(bx - 3, FT + y - alto, 2, alto - 8);
+      palo.fillStyle(0x5a6a2a).fillRect(bx + 2, FT + y - alto, 1, alto - 8);
+      for (let k = FT + y - 20; k > FT + y - alto; k -= 16) palo.fillStyle(0x4a5a22).fillRect(bx - 4, k, 8, 2);
+      // la cuerdita de la bola y el farol del equipo
+      palo.fillStyle(team === 0 ? 0x4a9aff : 0xff5a5a).fillRect(bx - 5, FT + y - alto - 2, 10, 3);
+    }
     const top = FT + y - alto;
     let bola: Poste['bola'];
     if (this.textures.exists('fx_bola_tama')) {

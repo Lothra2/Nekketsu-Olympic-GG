@@ -128,7 +128,7 @@ await ev(() => { const f = window.game.scene.getScene('Fight'); f.actors[1].burl
 await page.waitForTimeout(200);
 s = await estado();
 await page.screenshot({ path: `${out}/08_burla.png` });
-check(s.r === 'taunt' && ['laugh', 'point', 'taunt'].includes(s.ranim), 'la máquina se burla', `${s.r} ${s.ranim}`);
+check(s.r === 'taunt' && (['laugh', 'point', 'taunt'].includes(s.ranim) || s.ranim.startsWith('burla_')), 'la máquina se burla', `${s.r} ${s.ranim}`);
 
 // golpes seguidos: contador y onomatopeyas
 await pon(300, 318);

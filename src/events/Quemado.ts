@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { Figura } from '../core/figura';
 import { ajustes } from '../core/nivel';
 import { efecto } from '../core/fx';
-import { chip, PELEA } from '../core/music';
+import { chip } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { EventScene, prueba, type Competidor } from './base';
 import { FAMILIA, INSTITUTO } from '../scenes/Select';
@@ -102,7 +102,7 @@ export class Quemado extends EventScene {
         this.caras.push({ j, img });
       });
     }
-    chip.play(PELEA);
+    this.tema('pana_dale');
     this.cameras.main.centerOn(320, 180);
     if (this.d.practica) void this.entrenar('QUEMADO', this.pasos(), 40);
     else void this.previa('QUEMADO NEKKETSU', 'PATIO DEL LICEO, CARACAS', '{PUÑO} LANZA · {PATADA} PASA O ATRAPA · {SALTO} ESQUIVA · {ESPECIAL} CON LA BARRA LLENA');
@@ -440,7 +440,8 @@ export class Quemado extends EventScene {
   private atrapar(j: Jug) {
     j.st = 'atrapa';
     j.catchT = 0.28 + (j.team === 0 ? 0.14 * ajustes().ayuda : 0);
-    j.fig.set('fight_block', true);
+    // la atrapada de béisbol del kit (los brazos al balón) o la guardia de la pelea
+    j.fig.set(j.fig.anim.has('catch') ? 'catch' : 'fight_block', true);
   }
 
   private moverBola(dt: number) {
@@ -588,6 +589,9 @@ export class Quemado extends EventScene {
       const [hx, hy] = o.fig.mirror(mano);
       b.x = o.x; b.y = o.y; b.z = o.z;
       s.setFrame('balon_goma_quieto_0').setOrigin(0.5, 0.5).setPosition(Math.round(this.sx(o.x, o.y) + hx), Math.round(FT + o.y - o.z + hy)).setDepth(FT + o.y + 0.3);
+      // recién atrapado, contra el pecho donde lo pone la atrapada del kit
+      const pe = a.name === 'catch' ? o.fig.pelota() : null;
+      if (pe) s.setPosition(Math.round(pe.x), Math.round(pe.y));
       b.sombra.setVisible(false);
     } else {
       const vuela = b.z > 1;

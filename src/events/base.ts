@@ -1,11 +1,12 @@
 import Phaser from 'phaser';
 import { MAX_W } from '../core/pantalla';
 import { Input, rotular } from '../core/input';
-import { chip, VICTORIA } from '../core/music';
-import { kit } from '../core/kit';
+import { chip, VICTORIA, PELEA } from '../core/music';
+import { kit, bucle } from '../core/kit';
 import { txt, flash } from '../core/ui';
 import { Coach, type Paso } from '../core/coach';
 import { FAMILIA, INSTITUTO } from '../scenes/Select';
+import { hayArte, pintarEscenario } from './escenario';
 
 export interface EventData { jugador: string; gira?: boolean; practica?: boolean }
 export interface Competidor { id: string; team: 0 | 1; human: boolean }
@@ -113,6 +114,48 @@ export abstract class EventScene extends Phaser.Scene {
   /**
    * Fondo con paralaje que se repite sin costura: el cuadro y su espejo, uno al lado del otro.
    */
+  /** el tema del mundo que suena en bucle (lo pone `tema()`) */
+  private temaSonando: Phaser.Sound.BaseSound | null = null;
+
+  /**
+   * El tema del mundo de la prueba (lotes H2 y H3 de PixelForja) en bucle. Si el kit no lo trae, la pelea del chip de
+   * siempre. Se calla solo al llegar a los resultados.
+   */
+  protected tema(n: string | null) {
+    this.temaSonando = null;
+    if (!n || !kit().audio.musica?.[n]) { chip.play(PELEA); return; }
+    chip.stop(0.2);
+    void bucle(this, 'musica', n, 0.4).then((s) => { this.temaSonando = s; if (this.fase === 'fin') this.callarTema(); });
+  }
+
+  private callarTema() {
+    const s = this.temaSonando;
+    this.temaSonando = null;
+    if (s) this.tweens.add({ targets: s, volume: 0, duration: 300, onComplete: () => s.stop() });
+  }
+
+  /** Un efecto del kit, si lo trae; si no, `siNo` (el sonido sintetizado de antes). */
+  protected suena(n: string, volumen = 0.5, siNo?: () => void, rate = 1) {
+    if (this.cache.audio.exists(n)) this.sound.play(n, { volume: volumen, rate });
+    else siNo?.();
+  }
+
+  /** el arte de PixelForja del escenario de la prueba, si llegó (lo pone `escenario()`) */
+  protected arteFondo: ReturnType<typeof pintarEscenario> | null = null;
+
+  /**
+   * El escenario de PixelForja (encolado en el preload con queueEscenario) si llegó, con su vida y sus luces andando
+   * cada cuadro. Si no llegó, el fondo pintado por código de siempre. Devuelve si hay arte.
+   */
+  protected escenario(id: string, respaldo: string): boolean {
+    this.arteFondo = hayArte(this, id) ? pintarEscenario(this, id, 5000) : null;
+    if (!this.arteFondo) { this.add.image(320, 180, respaldo).setDepth(-10); return false; }
+    const tick = (_t: number, dms: number) => this.arteFondo?.tick(Math.min(0.05, dms / 1000), this.cameras.main.scrollX, () => false);
+    this.events.on(Phaser.Scenes.Events.UPDATE, tick);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.events.off(Phaser.Scenes.Events.UPDATE, tick));
+    return true;
+  }
+
   protected fondo(key: string): Phaser.GameObjects.TileSprite {
     const k = `${key}_espejo`;
     if (!this.textures.exists(k)) {
@@ -182,6 +225,7 @@ export abstract class EventScene extends Phaser.Scene {
    */
   protected resultados(titulo: string, orden: { c: Competidor; valor: string }[]) {
     this.fase = 'fin';
+    this.callarTema();
     chip.play(VICTORIA);
     flash(this, 150);
     const g = this.uiAdd(this.add.graphics().setDepth(8400));
@@ -247,6 +291,7 @@ export abstract class EventScene extends Phaser.Scene {
 
   private finPractica() {
     this.fase = 'fin';
+    this.callarTema();
     chip.play(VICTORIA);
     flash(this, 150);
     const g = this.uiAdd(this.add.graphics().setDepth(8400));

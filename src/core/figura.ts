@@ -52,6 +52,33 @@ export class Figura extends Phaser.GameObjects.Sprite {
     return ['right', 'down_right', 'up_right', 'down', 'up'].indexOf(this.row);
   }
 
+  /**
+   * Dónde va la pelota en este cuadro (packs sin pelota pintada), en pixeles de la escena: null si el cuadro no la
+   * trae. `detras` dice si va detrás del cuerpo.
+   */
+  pelota(): { x: number; y: number; detras: boolean } | null {
+    const o = this.anim.data?.objetos?.[this.rowIndex]?.[this.anim.frame]?.[0];
+    if (!o) return null;
+    return { x: this.x + (this.left ? -o.x : o.x) * this.scaleX, y: this.y + o.y * this.scaleY, detras: !!o.detras };
+  }
+
+  /**
+   * Toca `anim` desde su cuadro de contacto (impacto, suelta o atrapa), porque el juego ya resolvió el golpe en ese
+   * instante: se ve el contacto y lo que sigue. Si el kit no la trae, `respaldo` desde el principio.
+   */
+  contacto(anim: string, respaldo: string, speed = 1): this {
+    if (!this.anim.play(anim, true, speed)) return this.set(respaldo, true, speed);
+    const e = this.anim.data.eventos?.find((x) => x.tipo === 'impacto' || x.tipo === 'suelta' || x.tipo === 'atrapa');
+    if (e) this.anim.pos = Math.max(0, e.cuadro - 0.5);
+    this.refresh();
+    return this;
+  }
+
+  /** El cuadro de un evento de la animación que suena (o -1 si no lo trae). */
+  cuadroDe(tipo: Evento['tipo']): number {
+    return this.anim.data?.eventos?.find((e) => e.tipo === tipo)?.cuadro ?? -1;
+  }
+
   /** Un punto de los datos por cuadro, ya espejado si mira a la izquierda. */
   mirror([x, y]: [number, number]): [number, number] {
     return [this.left ? -x : x, y];

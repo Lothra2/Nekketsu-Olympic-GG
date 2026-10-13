@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { MAX_W } from '../core/pantalla';
 import { Actor, HUECO, Item, NOTHING, type Intent, type World } from '../fight/actor';
-import { chip, PELEA } from '../core/music';
+import { chip } from '../core/music';
 import { ajustes, goma } from '../core/nivel';
 import { txt, flash } from '../core/ui';
 import { EventScene, prueba, type Competidor, type EventData } from './base';
@@ -17,7 +17,7 @@ import { kit, npcs, aves, type Ave } from '../core/kit';
 import { Figura } from '../core/figura';
 
 /** El formato de layout de PixelForja (PEDIDO 10.2), la parte que el Cross Country usa. */
-interface Caja { x: number; y: number; w: number; d: number; z: number; tipo?: string }
+interface Caja { x: number; y: number; w: number; d: number; z: number; tipo?: string; subible?: boolean }
 interface Agua { x0: number; x1: number; y0?: number; y1?: number; nivel: number; corriente?: number; nombre?: string }
 interface Entidad {
   tipo: string; x?: number; y?: number; x0?: number; x1?: number; objeto?: string; vehiculo?: string; animal?: string; carril?: number; cada?: number;
@@ -80,7 +80,16 @@ interface Ferry extends Caja { x0: number; x1: number; v: number; espera: number
 interface Jacinto { x: number; y: number; g: Phaser.GameObjects.Graphics; tocados: Set<Actor> }
 interface Fruta { x0: number; x1: number; y0: number; y1: number; t: number; dueño: Actor; g: Phaser.GameObjects.Graphics }
 /** Un perro de la calle que duerme en el camino: si lo pisas, despierta, te tumba y te persigue un poco. */
-interface Perro { x: number; y: number; z: number; x0: number; f: Figura; zz: Phaser.GameObjects.BitmapText; despierto: number; presa: Actor | null }
+/**
+ * Un perro dormido. Con el del kit (lote C7c): al pisarlo se despierta (`wake`) y embiste (`pounce`), y tumba en el
+ * `impacto` si alcanza; sin él, Thor más oscuro que tumba de una.
+ */
+interface Perro {
+  x: number; y: number; z: number; x0: number; f: Figura; zz: Phaser.GameObjects.BitmapText; despierto: number; presa: Actor | null;
+  kitPerro: boolean; fase: 'duerme' | 'despierta' | 'embiste' | 'vuelve';
+}
+/** Un gato al pie de un techo bajo: si alguien se acerca, se sube de un salto (`jump_wall` medido del lote C7c). */
+interface Gato { x: number; y: number; f: Figura; caja: { x: number; z: number }; arriba: boolean; t: number }
 /** Bailarines de break en rueda: el que choca con uno, al piso. */
 interface Rueda { x: number; y: number; z: number; r: number; t: number; g: (Phaser.GameObjects.Graphics | Quieto)[] }
 /** Un NPC del kit en su sitio: lo suyo en bucle (`normal`) y su reacción cuando pasa alguien (`reac`). */
@@ -134,6 +143,7 @@ export class CrossCountry extends EventScene implements World {
   private derrame = new Map<Caja, number>();
   private lluvia: Phaser.GameObjects.TileSprite | null = null;
   private perros: Perro[] = [];
+  private gatos: Gato[] = [];
   private ruedas: Rueda[] = [];
   private quietos: Quieto[] = [];
   private pajaros: Pajaro[] = [];
@@ -196,6 +206,7 @@ export class CrossCountry extends EventScene implements World {
     this.entre = null;
     this.lluvia = null;
     this.perros = [];
+    this.gatos = [];
     this.ruedas = [];
     this.quietos = [];
     this.pajaros = [];
@@ -221,6 +232,7 @@ export class CrossCountry extends EventScene implements World {
     // el primer clima de la lista es el de hoy; los demás son los que el escenario puede tener otro día
     if (L.clima[0] === 'aguacero') this.ponerLluvia();
     this.armarPerros();
+    this.armarGatos();
     this.armarGente();
     this.armarAves();
 
@@ -239,7 +251,7 @@ export class CrossCountry extends EventScene implements World {
     if (!this.d.practica && varios) this.uiAdd(txt(this, 626, 32, `TRAMO ${this.tramo + 1}/${this.tramos.length}`, 'fuente_ui', 1, 1).setDepth(8001).setTint(0xffe080));
     for (const r of this.gente2) this.heads.push({ img: this.uiAdd(this.add.image(0, 22, 'cabecitas', r.c.id).setDepth(8002)), r });
     if (!this.arte) this.uiAdd(txt(this, 14, 326, varios ? `TRAMO ${this.tramo + 1} · ESCENARIO EN GRIS` : 'ESCENARIO EN GRIS', 'fuente_ui', 1, 0).setDepth(8001).setTint(0x8a8ab0));
-    chip.play(PELEA);
+    this.tema(this.L.id.startsWith('medellin') ? 'parce_corra' : this.L.id.startsWith('saigon') ? 'saigon_chay' : null);
     const p = prueba(this.scene.key);
     if (this.d.practica) { void this.entrenar(p.nombre, this.pasos(), 40); return; }
     const titulo = this.suelto ? `${p.nombre} · TRAMO ${this.tramo + 1}` : this.tramo === 0 ? p.nombre : `TRAMO ${this.tramo + 1} DE ${this.tramos.length}`;
@@ -404,6 +416,7 @@ export class CrossCountry extends EventScene implements World {
     if (juego && !this.d.practica) { this.trafico(dt); this.rio(dt); }
     this.fruta(dt);
     this.perrosTick(dt);
+    this.gatosTick(dt);
     this.genteTick(dt);
     this.avesTick(dt);
     this.coach?.tick(dt);
@@ -537,12 +550,13 @@ export class CrossCountry extends EventScene implements World {
       if (e.tipo !== 'animal' || !String(e.animal ?? '').startsWith('perro')) continue;
       const x = e.x ?? 0, y = e.y ?? 60;
       const z = Math.max(0, this.suelo(x, y, 999));
-      // un perro de la calle: Thor más oscuro, echado
-      const f = new Figura(this, this.px(x, y), FT + y - z, 'thor', 'lie').setTint(0x8a7a6a);
-      f.row = 'down_right';
+      // el perro de la calle del kit, enroscado; si no llegó, Thor más oscuro, echado
+      const kitPerro = !!kit().animales.perro_calle_1;
+      const f = kitPerro ? new Figura(this, this.px(x, y), FT + y - z, 'perro_calle_1', 'sleep') : new Figura(this, this.px(x, y), FT + y - z, 'thor', 'lie').setTint(0x8a7a6a);
+      f.row = kitPerro ? 'right' : 'down_right';
       const zz = txt(this, this.px(x, y) + 10, FT + y - z - 30, 'Z z', 'fuente_ui', 1).setTint(0xc8d8ff);
       this.tweens.add({ targets: zz, y: zz.y - 6, alpha: 0.3, duration: 900, yoyo: true, repeat: -1 });
-      this.perros.push({ x, y, z, x0: x, f, zz, despierto: 0, presa: null });
+      this.perros.push({ x, y, z, x0: x, f, zz, despierto: 0, presa: null, kitPerro, fase: 'duerme' });
     }
   }
 
@@ -659,8 +673,9 @@ export class CrossCountry extends EventScene implements World {
       const i = Number(f.textureFrame) - (a.anims[n]?.desde ?? 0);
       for (const ev of a.eventos?.[n] ?? []) {
         if (ev.cuadro !== i || (!this.aveEnVista(p) && !p.oir)) continue;
-        if (ev.tipo === 'canto') chip.kikiriki(this.aveEnVista(p) ? 0.1 : 0.05);
-        else if (ev.tipo === 'aleteo') chip.aleteo(0.1);
+        // el gallo y el aleteo del kit (lote H2); sin ellos, los sintetizados de antes
+        if (ev.tipo === 'canto') { const v = this.aveEnVista(p) ? 0.5 : 0.25; this.suena('gallo', v, () => chip.kikiriki(v / 5)); }
+        else if (ev.tipo === 'aleteo') this.suena('aleteo', 0.4, () => chip.aleteo(0.1));
       }
     });
     this.pajaros.push(p);
@@ -881,29 +896,99 @@ export class CrossCountry extends EventScene implements World {
   /** Quien pisa a un perro dormido lo despierta: ladra, lo tumba y lo persigue un ratito. */
   private perrosTick(dt: number) {
     for (const p of this.perros) {
-      if (p.despierto > 0) {
+      const ev = p.f.step(dt);
+      if (p.kitPerro && (p.fase === 'despierta' || p.fase === 'embiste')) this.perroEmbiste(p, ev);
+      else if (p.despierto > 0) {
         p.despierto -= dt;
         const q = p.presa;
         if (q && p.despierto > 0.6) { p.x += Math.sign(q.x - p.x) * Math.min(150 * dt, Math.abs(q.x - p.x)); p.f.left = q.x < p.x; }
         else { p.x += Math.sign(p.x0 - p.x) * Math.min(90 * dt, Math.abs(p.x0 - p.x)); p.f.left = p.x0 < p.x; }
         p.f.set(Math.abs(p.x - p.x0) > 2 || (q && p.despierto > 0.6) ? 'run' : 'idle');
-        if (p.despierto <= 0) { p.f.set('lie'); p.f.row = 'down_right'; p.zz.setVisible(true); p.presa = null; }
+        if (p.despierto <= 0) {
+          p.f.set(p.kitPerro ? 'sleep' : 'lie'); p.f.row = p.kitPerro ? 'right' : 'down_right';
+          p.zz.setVisible(true); p.presa = null; p.fase = 'duerme';
+        }
       } else {
         for (const r of this.gente2) {
           const a = r.a;
           if (!a.grounded || Math.abs(a.base - p.z) > 2 || Math.abs(a.x - p.x) > 14 || Math.abs(a.y - p.y) > 8 || !a.canBeHit()) continue;
-          p.despierto = 2.2;
           p.presa = a;
           p.zz.setVisible(false);
-          p.f.set('bark', true);
           this.sfx('ladrido', a.human ? 0.7 : 0.25);
-          a.knockdown(a.left ? -1 : 1, 60, 110);
-          if (a.human) this.letrero(a, '¡GUAU! ¡DESPERTASTE AL PERRO!', 0xffa060);
+          if (p.kitPerro) {
+            // se despierta de golpe y embiste: el que lo pisó tiene un ratico para escaparse
+            p.fase = 'despierta';
+            p.f.row = 'right';
+            p.f.left = a.x < p.x;
+            p.f.set('wake', true, 1.8);
+            if (a.human) this.letrero(a, '¡GUAU! ¡DESPERTASTE AL PERRO!', 0xffa060);
+          } else {
+            p.despierto = 2.2;
+            p.f.set('bark', true);
+            a.knockdown(a.left ? -1 : 1, 60, 110);
+            if (a.human) this.letrero(a, '¡GUAU! ¡DESPERTASTE AL PERRO!', 0xffa060);
+          }
           break;
         }
       }
-      p.f.step(dt);
       p.f.setPosition(Math.round(this.px(p.x, p.y)), FT + p.y - p.z).setDepth(FT + p.y + 0.2);
+    }
+  }
+
+  /** El perro del kit: despierta, embiste hacia el que lo pisó entre el despegue y el aterrizaje, y tumba en el impacto. */
+  private perroEmbiste(p: Perro, ev: { tipo: string }[]) {
+    const q = p.presa;
+    if (p.fase === 'despierta') {
+      if (!p.f.anim.done) return;
+      p.fase = 'embiste';
+      if (q) p.f.left = q.x < p.x;
+      p.f.set('pounce', true);
+      return;
+    }
+    // en el aire va hacia la presa (el pounce no avanza solo)
+    const f = p.f.anim.frame;
+    if (q && f >= p.f.cuadroDe('despegue') && f < p.f.cuadroDe('aterriza')) {
+      const dt = this.game.loop.delta / 1000;
+      p.x += Math.sign(q.x - p.x) * Math.min(200 * dt, Math.max(0, Math.abs(q.x - p.x) - 6));
+      p.y += Math.sign(q.y - p.y) * Math.min(60 * dt, Math.abs(q.y - p.y));
+    }
+    if (q && ev.some((e) => e.tipo === 'impacto') && Math.abs(q.x - p.x) < 20 && Math.abs(q.y - p.y) < 10 && q.grounded && q.canBeHit()) {
+      q.knockdown(p.f.left ? -1 : 1, 70, 120);
+      this.sfx('ladrido', q.human ? 0.6 : 0.2);
+    }
+    if (p.f.anim.done) { p.fase = 'vuelve'; p.despierto = 1.4; p.presa = null; }
+  }
+
+  /** Gatos al pie de los techos bajos de la Comuna (los que su salto cubre): uno cada tanto, no todos. */
+  private armarGatos() {
+    const g = kit().animales.gato_1?.anims.jump_wall;
+    if (!g?.subida || !this.L.id.startsWith('medellin')) return;
+    const min = g.muro_min ?? 14, max = g.muro_max ?? 42;
+    const techos = this.L.plataformas.filter((c) => c.z >= min && c.z <= max && c.subible).filter((_c, i) => i % 3 === 0).slice(0, 3);
+    for (const c of techos) {
+      const x = c.x - 10, y = c.y + Math.min(10, c.d / 2);
+      const f = new Figura(this, this.px(x, y), FT + y, 'gato_1', 'sit');
+      f.row = 'right';
+      this.gatos.push({ x, y, f, caja: { x: c.x + 8, z: c.z }, arriba: false, t: Math.random() * 3 });
+    }
+  }
+
+  private gatosTick(dt: number) {
+    for (const g of this.gatos) {
+      g.f.step(dt);
+      let z = g.arriba ? g.caja.z : 0;
+      if (g.f.anim.name === 'jump_wall') {
+        // en cada cuadro sube lo que dice `subida` del alto de este techo, y avanza hasta arriba entre despegue y aterrizaje
+        const d = g.f.anim.data, i = g.f.anim.frame;
+        z = (d.subida?.[i] ?? 0) * g.caja.z;
+        const a = g.f.cuadroDe('despegue'), b = g.f.cuadroDe('aterriza');
+        const u = Phaser.Math.Clamp((g.f.anim.pos - a) / Math.max(1, b - a), 0, 1);
+        g.f.setX(Math.round(this.px(g.x + (g.caja.x - g.x) * u, g.y)));
+        if (g.f.anim.done) { g.arriba = true; g.x = g.caja.x; g.f.set('sit', true); z = g.caja.z; }
+      } else if (!g.arriba && this.gente2.some((r) => Math.abs(r.a.x - g.x) < 40 && Math.abs(r.a.y - g.y) < 24)) {
+        g.f.set('jump_wall', true);
+      } else g.f.setX(Math.round(this.px(g.x, g.y)));
+      g.f.setY(FT + g.y - z).setDepth(FT + g.y + 0.2);
     }
   }
 

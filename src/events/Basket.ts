@@ -1,11 +1,12 @@
 import Phaser from 'phaser';
 import { Figura } from '../core/figura';
+import { pelotaKit } from '../core/kit';
 import { ajustes } from '../core/nivel';
 import { efecto } from '../core/fx';
-import { chip, PELEA } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { Painter, hex } from '../gfx/paint';
 import { EventScene, prueba, type Competidor } from './base';
+import { queueEscenario } from './escenario';
 import { FAMILIA, INSTITUTO } from '../scenes/Select';
 import type { Paso } from '../core/coach';
 import type { Pad } from '../core/input';
@@ -82,6 +83,8 @@ export class Basket extends EventScene {
 
   constructor() { super('Basket'); }
 
+  preload() { queueEscenario(this, 'cancha_maracaibo'); }
+
   create() {
     this.js = [];
     this.ctrl = null;
@@ -96,10 +99,12 @@ export class Basket extends EventScene {
     this.stats = { posesiones: [0, 0], tiros: [0, 0], canastas: [0, 0], tumbadas: [0, 0], tapones: [0, 0] };
     this.setup(1, 640);
     this.texturas();
-    this.add.image(320, 180, 'bg_cancha_maracaibo').setDepth(-10);
+    this.escenario('cancha_maracaibo', 'bg_cancha_maracaibo');
     this.cancha();
     this.armarEquipos();
-    const spr = this.add.image(0, 0, 'balon_basket').setScale(1.2);
+    // la pelota del kit (lote SP2), del tamaño de los atletas; si no llegó, la pintada por código
+    const pk = pelotaKit(this, 'balon_basket');
+    const spr = (pk ? this.add.image(0, 0, 'pelotas', pk) : this.add.image(0, 0, 'balon_basket').setScale(1.2));
     const sombra = this.add.ellipse(0, 0, 9, 3, 0x000000, 0.3);
     this.bola = { x: 300, y: PROF / 2, z: 0, vx: 0, vy: 0, vz: 0, dueño: null, tiro: null, libre: 0, ultimo: null, para: null, spr, sombra };
     this.hud = this.uiAdd(this.add.graphics().setDepth(8000));
@@ -109,7 +114,7 @@ export class Basket extends EventScene {
     this.flecha = this.add.triangle(0, 0, 0, 0, 8, 0, 4, 6, 0xffe040).setDepth(6000);
     this.barra = this.add.graphics().setDepth(6001);
     this.posesion(0, true);
-    chip.play(PELEA);
+    this.tema('gaita_lago');
     this.cameras.main.centerOn(320, 180);
     if (this.d.practica) void this.entrenar('BÁSQUET', this.pasos(), 40);
     else void this.previa('BÁSQUET 3X3', 'MARACAIBO, VENEZUELA', 'MANTÉN {PATADA} Y SUELTA EN LO VERDE · {SALTO} CERCA DEL ARO: CLAVADA · {PUÑO} PASE O EMPUJÓN');
@@ -139,9 +144,10 @@ export class Basket extends EventScene {
     const g = this.add.graphics().setDepth(FT - 20);
     const P = (x: number, y: number) => new Phaser.Math.Vector2(x + K * y, FT + y);
     const linea = (a: Phaser.Math.Vector2, b: Phaser.Math.Vector2) => g.lineBetween(a.x, a.y, b.x, b.y);
-    g.fillStyle(0x2a6ab0, 0.35).fillPoints([P(X0, 0), P(X1, 0), P(X1, PROF), P(X0, PROF)], true);
+    // con el arte, el piso azul y el área naranja vienen pintados: el juego deja solo las rayas
+    if (!this.arteFondo) g.fillStyle(0x2a6ab0, 0.35).fillPoints([P(X0, 0), P(X1, 0), P(X1, PROF), P(X0, PROF)], true);
     // la pintura del área
-    g.fillStyle(0xe8782a, 0.35).fillPoints([P(ARO.x - 70, ARO.y - 20), P(X1, ARO.y - 20), P(X1, ARO.y + 20), P(ARO.x - 70, ARO.y + 20)], true);
+    if (!this.arteFondo) g.fillStyle(0xe8782a, 0.35).fillPoints([P(ARO.x - 70, ARO.y - 20), P(X1, ARO.y - 20), P(X1, ARO.y + 20), P(ARO.x - 70, ARO.y + 20)], true);
     g.lineStyle(2, 0xf4f4ec, 0.85);
     linea(P(X0, 0), P(X1, 0)); linea(P(X0, PROF), P(X1, PROF)); linea(P(X0, 0), P(X0, PROF)); linea(P(X1, 0), P(X1, PROF));
     // el arco de los 2 puntos
@@ -296,10 +302,16 @@ export class Basket extends EventScene {
     }
     if (Math.abs(vx) > 10) j.dir = vx > 0 ? 1 : -1;
     const v = Math.hypot(vx, vy);
-    if (j.z > 0) j.fig.set(j.st === 'tira' ? 'throw_overhead' : j.vz > 0 ? 'jump_rise' : 'jump_fall');
-    else if (j.empuja > 0.5) j.fig.set('punch');
+    if (j.z > 0) {
+      // el tiro y la clavada del kit siguen hasta el final; sin ellos, el lanzamiento de la pelea
+      if (j.st !== 'tira') j.fig.set(j.vz > 0 ? 'jump_rise' : 'jump_fall');
+      else if (j.fig.anim.name !== 'shoot' && j.fig.anim.name !== 'dunk') j.fig.set('throw_overhead');
+    } else if (j.empuja > 0.5) j.fig.set('punch');
+    // parado con el balón, botándolo (el dribble del kit); corriendo, el balón bota a la par
+    else if (v <= 8 && this.bola.dueño === j && j.fig.anim.has('dribble')) j.fig.set('dribble');
     else j.fig.set(v > 8 ? (v > 100 ? 'run' : 'walk') : 'idle');
-    j.fig.step(dt, v > 8 ? v * dt : undefined);
+    const ev = j.fig.step(dt, v > 8 ? v * dt : undefined);
+    if (this.bola.dueño === j && ev.some((e) => e.tipo === 'bote')) this.suena('rebote_balon', 0.2);
   }
 
   /** Lo que haces tú con el que manejas: cargar el tiro, clavar, pasar o empujar. */
@@ -392,6 +404,7 @@ export class Basket extends EventScene {
     if (j.team === 0 && ajustes().nombre === 'PASEO') prob += 0.15;
     if (this.d.practica) prob = verde ? 1 : prob + 0.2;
     j.st = 'tira'; j.vz = 170;
+    j.fig.contacto('shoot', 'throw_overhead');
     this.lanzarTiro(j, Math.random() < prob, d >= ARCO ? 2 : 1, false);
     if (j.team === 0 && verde) this.letrero(j, '¡VERDE!', 0x8aff8a);
   }
@@ -400,6 +413,9 @@ export class Basket extends EventScene {
   private clavar(j: Jug, nekketsu: boolean) {
     if (!this.limpia) { this.aviso('¡SÁCALA DETRÁS DEL ARCO PRIMERO!'); return; }
     j.st = 'tira'; j.vz = 300;
+    // la clavada del kit desde el despegue: se ve el salto y el golpe al aro mientras vuela hasta él
+    if (j.fig.anim.play('dunk', true)) { j.fig.anim.pos = Math.max(0, j.fig.cuadroDe('despegue')); j.fig.refresh(); }
+    else j.fig.set('throw_overhead', true);
     if (nekketsu) {
       this.nek[j.team] = 0;
       efecto(this, 'aura_nekketsu', this.sx(j.x, j.y), FT + j.y, { depth: FT + j.y - 0.1 });
@@ -487,7 +503,7 @@ export class Basket extends EventScene {
       return;
     }
     b.vz -= G * dt; b.z += b.vz * dt;
-    if (b.z <= 0) { b.z = 0; b.vz = Math.abs(b.vz) > 50 ? -b.vz * 0.6 : 0; }
+    if (b.z <= 0) { b.z = 0; if (Math.abs(b.vz) > 50) this.suena('rebote_balon', Math.min(0.5, Math.abs(b.vz) / 400)); b.vz = Math.abs(b.vz) > 50 ? -b.vz * 0.6 : 0; }
     const roce = Math.pow(b.z === 0 ? 0.4 : 0.9, dt);
     b.vx *= roce; b.vy *= roce;
     b.x += b.vx * dt; b.y += b.vy * dt;
@@ -514,7 +530,7 @@ export class Basket extends EventScene {
     const j = t.tirador;
     if (!t.entra) {
       b.vx = -Phaser.Math.Between(40, 100); b.vy = (Math.random() - 0.5) * 110; b.vz = 140; b.libre = 0.2;
-      this.sound.play('golpe', { volume: 0.25, rate: 1.6 });
+      this.suena('aro_fallo', 0.5, () => this.sound.play('golpe', { volume: 0.25, rate: 1.6 }));
       this.letrero(null, t.clavada ? '¡TAPONAZO!' : '¡AL ARO!', 0xffffff);
       return;
     }
@@ -522,7 +538,8 @@ export class Basket extends EventScene {
     this.stats.canastas[j.team]++;
     j.puntos += t.valor;
     b.vx = 0; b.vy = 0; b.vz = -40;
-    this.sound.play('elegir', { volume: 0.45 });
+    this.suena('aro_basket', 0.6);
+    this.sound.play('elegir', { volume: 0.3 });
     if (t.nekketsu) {
       this.roto = 4;
       this.dibujarTablero();
@@ -570,7 +587,10 @@ export class Basket extends EventScene {
     const b = this.bola;
     const sx = Math.round(this.sx(b.x, b.y));
     // el balón va delante del aro mientras baja por la red
-    b.spr.setPosition(sx, Math.round(FT + b.y - b.z - 3)).setDepth(FT + b.y + 0.3);
+    // botándolo parado, el balón va donde lo pone el dribble del kit
+    const mano = b.dueño?.fig.anim.name === 'dribble' ? b.dueño.fig.pelota() : null;
+    if (mano) b.spr.setPosition(Math.round(mano.x), Math.round(mano.y)).setDepth(b.dueño!.fig.depth + (mano.detras ? -0.1 : 0.1));
+    else b.spr.setPosition(sx, Math.round(FT + b.y - b.z - 3)).setDepth(FT + b.y + 0.3);
     b.sombra.setPosition(sx, FT + b.y).setDepth(FT + b.y - 0.6).setScale(Math.max(0.4, 1 - b.z / 100));
     const c = this.ctrl;
     this.flecha.setVisible(!!c && this.fase === 'juego');

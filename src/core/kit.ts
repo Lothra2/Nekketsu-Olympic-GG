@@ -8,7 +8,17 @@ export type Row = (typeof ROWS)[number];
 
 export type Box = [number, number, number, number];
 export type Pt = [number, number];
-export interface Evento { tipo: 'paso' | 'impacto' | 'suelta' | 'despegue' | 'aterriza'; cuadro: number; fase: number; pie?: string; punto?: Pt[] }
+/**
+ * Un evento de una animación. `bote` es la pelota que toca el piso (el dribble), `atrapa` la pelota que llega a la mano
+ * (desde ahí `objetos` vuelve a mandar) y `frase` el gesto fuerte de una burla, donde va el globo.
+ */
+export interface Evento { tipo: 'paso' | 'impacto' | 'suelta' | 'despegue' | 'aterriza' | 'bote' | 'atrapa' | 'frase'; cuadro: number; fase: number; pie?: string; punto?: Pt[] }
+
+/**
+ * Un objeto suelto de un cuadro (packs con `sin_props`): la pelota no viene pintada y va aquí, con su centro desde el
+ * pivote (y hacia abajo), su radio sin contorno y si va detrás del cuerpo. Al espejar, x pasa a -x.
+ */
+export interface ObjetoCuadro { tipo: 'pelota'; clase: string; x: number; y: number; r: number; detras: 0 | 1 }
 
 export interface AnimData {
   cuadros: number;
@@ -26,9 +36,16 @@ export interface AnimData {
   cabeza?: Pt[][];
   carga?: (Pt | null)[][];
   arma?: ([number, number, number, number] | null)[][];
+  /** la pelota de cada cuadro en los packs sin pelota pintada: [fila][cuadro] */
+  objetos?: (ObjetoCuadro[] | null)[][];
+  /** saltos a un muro (el gato): cuánto del alto del muro sube en cada cuadro, y el rango de muros donde se ve bien */
+  subida?: number[];
+  muro_min?: number;
+  muro_max?: number;
 }
 
-export interface PackData { atlas: string; imagen: string; anims: Record<string, AnimData> }
+/** `atlas` es la ruta del JSON del atlas, o el JSON mismo (la copia del artifact los mete en el manifiesto). */
+export interface PackData { atlas: string | object; imagen: string; anims: Record<string, AnimData> }
 
 export interface Atleta {
   nombre: string;
@@ -42,7 +59,7 @@ export interface Atleta {
 
 export interface Objeto { atlas: string; w: number; h: number; agarre: Pt; peso: 'liviano' | 'medio' | 'pesado'; rota: boolean; uso: string; nombre: { es: string; en: string }; anims: Record<string, number> }
 
-export interface Animal { nombre: string; celda: number; pivote: Pt; atlas: string; imagen: string; anims: Record<string, AnimData>; tipo?: string }
+export interface Animal { nombre: string; celda: number; pivote: Pt; atlas: string | object; imagen: string; anims: Record<string, AnimData>; tipo?: string }
 
 /**
  * Un ave del kit (lote C7b): va en `animales` con `tipo: "ave"`, pero en una tira como los NPC y no en atlas.
@@ -65,6 +82,8 @@ export interface Manifest {
   fx?: Record<string, Fx>;
   /** la gente de la calle (lote C6a): una tira por NPC, más la pelota; `notas` es texto */
   npc?: Record<string, Npc | string>;
+  /** las pelotas sueltas (lote SP2): un cuadro por tamaño de celda en objetos/pelotas.png */
+  pelotas?: Record<string, { clase: string; atlas: string; cuadros: Record<string, string> }>;
   /** lo que el kit todavía no trae (llega con un lote futuro) */
   pendiente?: string[];
 }
@@ -134,6 +153,12 @@ export interface Npc {
   grupo?: string[];
 }
 
+/** El cuadro de una pelota suelta del kit (balon_basket, pelota_tenis...) para la celda de 48, o null si no está. */
+export function pelotaKit(scene: Phaser.Scene, id: string): string | null {
+  const f = kit().pelotas?.[id]?.cuadros['48'];
+  return f && scene.textures.exists('pelotas') && scene.textures.get('pelotas').has(f) ? f : null;
+}
+
 /** Los NPC del kit (sin las notas). */
 export const npcs = (): Record<string, Npc> =>
   Object.fromEntries(Object.entries(kit().npc ?? {}).filter((e): e is [string, Npc] => typeof e[1] === 'object' && !!e[1]?.archivo));
@@ -145,15 +170,18 @@ export const aves = (): Record<string, Ave> =>
 /** Pone en la cola de carga todo el kit. Se llama con el manifiesto ya cargado. */
 export function queueKit(scene: Phaser.Scene) {
   const m = kit();
+  const atlas = (a: string | object) => (typeof a === 'string' ? KIT + a : a);
   for (const [id, a] of Object.entries(m.atletas)) {
-    for (const [p, pd] of Object.entries(a.packs)) scene.load.atlas(texKey(id, p), KIT + pd.imagen, KIT + pd.atlas);
+    for (const [p, pd] of Object.entries(a.packs)) scene.load.atlas(texKey(id, p), KIT + pd.imagen, atlas(pd.atlas));
     scene.load.image(`retratos:${id}`, KIT + a.retratos.archivo);
   }
-  for (const [id, a] of Object.entries(m.animales)) if (a.tipo !== 'ave') scene.load.atlas(texKey(id, 'animal'), KIT + a.imagen, KIT + a.atlas);
+  for (const [id, a] of Object.entries(m.animales)) if (a.tipo !== 'ave') scene.load.atlas(texKey(id, 'animal'), KIT + a.imagen, atlas(a.atlas));
   for (const [id, a] of Object.entries(aves())) scene.load.spritesheet(`ave_${id}`, KIT + a.imagen, { frameWidth: a.w, frameHeight: a.h });
   const armas = Object.values(m.objetos)[0];
   if (armas) scene.load.atlas('armas', KIT + armas.atlas.replace('.json', '.png'), KIT + armas.atlas);
   scene.load.image('cabecitas', KIT + m.cabecitas.archivo);
+  const pel = Object.values(m.pelotas ?? {})[0];
+  if (pel) scene.load.atlas('pelotas', KIT + pel.atlas.replace('.json', '.png'), KIT + pel.atlas);
   // solo las fuentes (el manifiesto también trae notas en esa sección)
   for (const [n, f] of Object.entries(m.ui.fuentes)) if (typeof f === 'object' && f?.png) scene.load.bitmapFont(n, KIT + f.png, KIT + f.fnt);
   // los efectos al arrancar; la música y los ambientes pesan y se cargan cuando una escena los pide (bucle())

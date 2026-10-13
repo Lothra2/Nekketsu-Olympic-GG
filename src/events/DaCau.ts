@@ -2,11 +2,12 @@ import Phaser from 'phaser';
 import { Figura } from '../core/figura';
 import { ajustes } from '../core/nivel';
 import { efecto } from '../core/fx';
-import { chip, PELEA } from '../core/music';
+import { chip } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { rotular } from '../core/input';
 import { Painter, hex } from '../gfx/paint';
 import { EventScene, type Competidor } from './base';
+import { queueEscenario } from './escenario';
 import type { Paso } from '../core/coach';
 
 /** el piso de la cancha (vista de lado): los de atrás un poco más arriba que los de adelante */
@@ -62,6 +63,8 @@ export class DaCau extends EventScene {
 
   constructor() { super('DaCau'); }
 
+  preload() { queueEscenario(this, 'tao_dan'); }
+
   create() {
     this.pat = [];
     this.marcador = [0, 0];
@@ -74,7 +77,7 @@ export class DaCau extends EventScene {
     this.llego = false;
     this.setup(ZOOM, 640);
     this.texturas();
-    this.add.image(320, 180, 'bg_taodan').setDepth(-10);
+    this.escenario('tao_dan', 'bg_taodan');
     this.cancha();
     // entrenando: tú solo de este lado y Kenji del otro, que te la devuelve suave
     const gente: Competidor[] = this.d.practica ? [this.gente[0], { id: 'kenji', team: 1, human: false }] : this.gente;
@@ -104,7 +107,7 @@ export class DaCau extends EventScene {
     this.uiAdd(txt(this, 250, 16, 'FAMILIA GG', 'fuente_ui', 1, 1).setDepth(8001).setTint(0x9ac8ff));
     this.uiAdd(txt(this, 390, 16, 'INSTITUTO', 'fuente_ui', 1, 0).setDepth(8001).setTint(0xffa0a0));
     this.toqueTxt = this.uiAdd(txt(this, 320, 34, '', 'fuente_ui', 1).setDepth(8001).setTint(0xffe080));
-    chip.play(PELEA);
+    this.tema('saigon_chay');
     if (this.d.practica) void this.entrenar('ĐÁ CẦU', this.pasos());
     else void this.previa('ĐÁ CẦU', 'PARQUE TAO ĐÀN, SAIGÓN', '{MOVER} AL CÍRCULO · {PATADA} AL OTRO LADO · {PUÑO} LA LEVANTA · {SALTO} Y {PATADA}: CHILENA');
   }
@@ -217,13 +220,16 @@ export class DaCau extends EventScene {
     if (c.en === 'mano' && c.dueño === p) {
       c.x = p.x + dir * 8; c.z = 22;
       this.lanzar(team === 0 ? Phaser.Math.Between(400, 560) : this.d.practica ? Phaser.Math.Clamp(this.pat[0].x + Phaser.Math.Between(-50, 50), 70, 280) : Phaser.Math.Between(80, 240), 96);
-      this.golpeAnim(p, 'low_kick');
+      this.golpeAnim(p, 'volley', 'low_kick');
       c.ultimo = p; c.ultimoTiro = 'saque'; c.lado = team; c.toques = 1;
       this.sfx('esquiva', 0.3);
       return;
     }
     const alto = this.alcance(p);
-    this.golpeAnim(p, p.st === 'aire' ? 'air_kick' : quiere === 'pase' ? 'low_kick' : 'kick_martial');
+    // las del pack de fútbol del kit (sin la pelota pintada: el cầu lo pone el juego), o las patadas de la pelea
+    if (p.st === 'aire') this.golpeAnim(p, 'chilena', 'air_kick');
+    else if (quiere === 'pase') this.golpeAnim(p, 'trap', 'low_kick');
+    else this.golpeAnim(p, 'volley', 'kick_martial');
     if (alto === null) { p.golpeT = 0.25; return; }
     // los toques de este lado: al cuarto, punto para el otro
     if (c.lado !== team) { c.lado = team; c.toques = 0; }
@@ -267,13 +273,14 @@ export class DaCau extends EventScene {
     c.ultimo = p;
     c.ultimoTiro = tiro;
     p.toques++;
-    this.sfx('golpe', p.c.human ? 0.35 : 0.2);
+    this.suena('toque_cau', p.c.human ? 0.5 : 0.3, () => this.sfx('golpe', p.c.human ? 0.35 : 0.2));
     efecto(this, 'chispa_golpe_liviano', c.x, PISO + FILA[p.fila] - c.z, { depth: 5001 });
   }
 
-  private golpeAnim(p: Pateador, anim: string) {
+  /** El toque con la animación del kit desde el contacto, o la patada de antes. */
+  private golpeAnim(p: Pateador, anim: string, respaldo: string) {
     p.golpeT = 0.32;
-    p.fig.set(anim, true, 1.4);
+    p.fig.contacto(anim, respaldo, 1.4);
   }
 
   // ------------------------------------------------------------------ puntos

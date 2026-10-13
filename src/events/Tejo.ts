@@ -2,10 +2,11 @@ import Phaser from 'phaser';
 import { Figura } from '../core/figura';
 import { ajustes } from '../core/nivel';
 import { efecto } from '../core/fx';
-import { chip, PELEA } from '../core/music';
+import { chip } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { Painter, hex } from '../gfx/paint';
 import { EventScene, type Competidor } from './base';
+import { queueEscenario } from './escenario';
 import type { Paso } from '../core/coach';
 
 /** el piso de la cancha (vista de lado) */
@@ -64,6 +65,8 @@ export class Tejo extends EventScene {
 
   constructor() { super('Tejo'); }
 
+  preload() { queueEscenario(this, 'candelaria'); }
+
   create() {
     this.lanz = [];
     this.turno = 0;
@@ -75,9 +78,11 @@ export class Tejo extends EventScene {
     this.apunto = this.lanzo = this.revento = this.embocino = 0;
     this.setup(1, 640);
     this.texturas();
-    this.add.image(320, 180, 'bg_candelaria').setDepth(-10);
-    this.add.bitmapText(440, 205, 'fuente_ui', 'CANCHA DE TEJO').setOrigin(0.5).setTint(0x3a2418).setDepth(-9);
-    this.armarCaja();
+    // con el arte, la caja de greda y el bocín vienen pintados: el juego pone encima las mechas y los tejos
+    const arte = this.escenario('candelaria', 'bg_candelaria');
+    this.add.bitmapText(440, 205, 'fuente_ui', 'CANCHA DE TEJO').setOrigin(0.5).setTint(0x3a2418).setDepth(arte ? -14 : -9);
+    if (arte) this.cara = this.add.graphics().setDepth(PISO + 1);
+    else this.armarCaja();
     // la fila de los que esperan su turno, y el que lanza en la raya
     const gente: Competidor[] = this.d.practica ? [this.gente[0]] : this.gente;
     gente.forEach((c, i) => {
@@ -95,7 +100,7 @@ export class Tejo extends EventScene {
     this.rondaTxt = this.uiAdd(txt(this, 320, 34, '', 'fuente_ui', 1).setDepth(8002).setTint(0xffe080));
     this.ayudaTxt = this.uiAdd(txt(this, TAB.x, TAB.y + TAB.r + 14, '', 'fuente_ui', 1).setDepth(8002));
     this.nuevaRonda();
-    chip.play(PELEA);
+    this.tema('ajiaco_rock');
     if (this.d.practica) void this.entrenar('TEJO', this.pasos(), 40).then(() => this.siguienteTurno());
     else void this.previa('TEJO', 'LA CANDELARIA, BOGOTÁ', 'TOCA UN BOTÓN PARA LA PUNTERÍA Y OTRO PARA LA FUERZA · MECHA 3 · BOCÍN 6 · MOÑONA 9').then(() => this.siguienteTurno());
   }
@@ -128,7 +133,7 @@ export class Tejo extends EventScene {
     g.clear();
     const pt = (v: number) => ({ x: CARA.x + v * CARA.largo * 0.7, y: PISO - CARA.z - v * CARA.largo * 0.7 });
     const b = pt(0);
-    g.lineStyle(2, 0x2a2a30).strokeEllipse(b.x, b.y, 10, 5);
+    if (!this.arteFondo) g.lineStyle(2, 0x2a2a30).strokeEllipse(b.x, b.y, 10, 5);
     MECHAS.forEach(([u, v], i) => {
       if (!this.mechas[i] || u !== 0) return;
       const m = pt(v);
@@ -210,8 +215,7 @@ export class Tejo extends EventScene {
       // ¡BUM! la mecha revienta
       const s = efecto(this, 'mecha_tejo', x, y + 2, { depth: 5003, scale: 1.6 });
       if (!s) this.add.circle(x, y, 18, 0xffe040, 0.8).setDepth(5003);
-      chip.boom(1);
-      this.sfx('critico', 0.6);
+      this.suena('mecha_tejo', 0.8, () => { chip.boom(1); this.sfx('critico', 0.6); });
       flash(this, 120);
       this.cameras.main.shake(260, 0.012);
       if (l.c.human) this.revento++;
