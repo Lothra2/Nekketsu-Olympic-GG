@@ -949,6 +949,43 @@ function barranquilla(): HTMLCanvasElement {
   return p.done();
 }
 
+/**
+ * La cancha de Maracaibo de noche: el cielo con estrellas, los relámpagos del Catatumbo como un resplandor morado en
+ * el horizonte, el puente sobre el lago con sus luces, la reja de la cancha, los postes de luz y un carro con la
+ * maleta abierta tocando gaita. Abajo, el piso de cemento pintado.
+ */
+function canchaMaracaibo(): HTMLCanvasElement {
+  const p = new Painter(W, H, M);
+  const r = rng(71);
+  p.vgrad(0, 170, [C('#0a0a24'), C('#141640'), C('#2a2058'), C('#4a2a6a')]);
+  stars(p, 130, 90, 7);
+  // el resplandor del Catatumbo y una nube cargada
+  for (let i = 0; i < 40; i++) p.circle(60 + r() * 220, 120 + r() * 40, 10 + r() * 16, C('#6a3a9a'), 60);
+  for (let k = 0; k < 14; k++) p.rect(150 + Math.round(Math.sin(k) * 6), 110 + k * 4, 2, 4, C('#e8d8ff'), 180);
+  // el lago y el puente con sus luces
+  p.vgrad(170, 214, [C('#14183a'), C('#0e1230')]);
+  p.rect(X0, 166, AW, 3, C('#2a2a40'));
+  for (let x = desde(0, 26); x < X1; x += 26) p.rect(x, 169, 3, 14, C('#2a2a40'));
+  for (const tx of [240, 420, 600]) { p.rect(tx - 3, 120, 6, 48, C('#3a3a52')); for (let k = 1; k <= 5; k++) { p.line(tx, 122 + k * 3, tx - k * 14, 166, C('#5a5a7a')); p.line(tx, 122 + k * 3, tx + k * 14, 166, C('#5a5a7a')); } }
+  for (let x = desde(0, 12); x < X1; x += 12) { p.rect(x, 164, 2, 2, C('#ffe08a')); p.rect(x, 176 + (x % 5), 2, 6, C('#ffe08a'), 70); }
+  // la reja de la cancha
+  p.rect(X0, 150, AW, 2, C('#6a6a7a'));
+  for (let x = desde(0, 60); x < X1; x += 60) p.rect(x, 150, 2, 58, C('#6a6a7a'));
+  for (let y = 152; y < 208; y += 4) for (let x = desde(0, 4); x < X1; x += 4) p.px(x + ((y / 4) % 2) * 2, y, C('#4a4a5a'));
+  // los postes de luz con su halo
+  for (const lx of [80, 330, 560]) { p.rect(lx, 90, 3, 118, C('#3a3a48')); p.rect(lx - 8, 90, 16, 4, C('#3a3a48')); p.circle(lx + 1, 96, 14, C('#fff4c0'), 50); p.rect(lx - 6, 94, 12, 3, C('#fffbe0')); }
+  // el carro con la maleta abierta y el parlante (la gaita)
+  p.rect(470, 186, 60, 16, C('#c8302a')); p.rect(482, 176, 34, 12, C('#a8282a')); p.rect(486, 178, 12, 8, C('#6a8ab0')); p.rect(500, 178, 12, 8, C('#6a8ab0'));
+  p.circle(484, 203, 5, C('#1a1a1a')); p.circle(518, 203, 5, C('#1a1a1a'));
+  p.rect(520, 180, 10, 10, C('#2a2a2a')); p.circle(525, 185, 3, C('#5a5a5a'));
+  for (let k = 0; k < 3; k++) p.rect(534 + k * 4, 178 - k * 3, 2, 2, C('#f2c230'));
+  // el piso de cemento
+  p.rect(X0, 206, AW, 4, C('#2a2a38'));
+  p.vgrad(210, 360, [C('#3a4258'), C('#323a4e'), C('#2a3044')]);
+  for (let i = 0; i < 1400; i++) p.px(X0 + r() * AW, 210 + r() * 150, r() < 0.5 ? C('#3e4660') : C('#2a3042'));
+  return p.done();
+}
+
 /** Registra todos los fondos como texturas. */
 export function makeBackdrops(scene: Phaser.Scene) {
   const add = (k: string, c: HTMLCanvasElement) => { if (!scene.textures.exists(k)) scene.textures.addCanvas(k, c); };
@@ -973,6 +1010,7 @@ export function makeBackdrops(scene: Phaser.Scene) {
   add('bg_margarita', margarita());
   add('bg_dalat', dalat());
   add('bg_barranquilla', barranquilla());
+  add('bg_cancha_maracaibo', canchaMaracaibo());
   // banderas sueltas
   for (const k of ['jp', 'vn', 'co', 've'] as const) {
     const p = new Painter(38, 26);
