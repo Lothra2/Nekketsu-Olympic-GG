@@ -7,7 +7,7 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
 - **Intro épica** de casi un minuto: "Familia GG presenta" con Thor, Kenji en la azotea de Japón con rayo y aura, el jet de la Nekketsu Air con el Instituto en las ventanillas, la ruta en un mapa del Pacífico en pixel art con pines y sellos de pasaporte, la Familia GG en Saigón, un montaje estilo anime de las pruebas (vallas, natación, jabalina y pelea, y los cuatro juntos con "¡A COMPETIR!"), los rivales en silueta en Bogotá, Maracaibo y Caracas, el VS, el puñetazo a la cámara y el logo con la Marcha Nekketsu.
 - **Entrenamiento** para cada prueba y para la pelea: sin rivales ni reloj, un cartel dice qué hacer, espera a que lo hagas y los botones táctiles del paso laten en pantalla. Los carteles nombran el botón de lo que estés usando: J y K en teclado, A y B en la tablet, X y A en un control. Al final te ofrece jugar de verdad.
 - **Niveles** en el menú (se recuerdan): PASEO (la máquina va suave, tu equipo aguanta el doble y pega más, en jabalina no hay nulo y en natación no hay salida en falso), NORMAL (un poco de ventaja) y NEKKETSU (sin ayuda). En PASEO y NORMAL hay una "goma" invisible: si vas muy atrás la máquina afloja, y si vas muy adelante aprieta un poco. Los números están todos en `src/core/nivel.ts`.
-- **Olimpiada Express**: Familia GG contra el Instituto. Cada gira sortea 5 de las 12 pruebas (al menos una de Vietnam y una de Colombia) y cierra con el Kachinuki en Caracas. Medallero por equipos (10, 6, 4 y 2 puntos por puesto, el judo da 10 y 6) y la final vale 20. Termina con podio y fuegos artificiales.
+- **Olimpiada Express**: Familia GG contra el Instituto. Cada gira sortea 5 de las 16 pruebas (al menos una de Vietnam y una de Colombia) y cierra con el Kachinuki en Caracas. Medallero por equipos (10, 6, 4 y 2 puntos por puesto, el judo da 10 y 6) y la final vale 20. Termina con podio y fuegos artificiales.
 - **Pruebas sueltas**:
   - *Cross Country Saigón*: la prueba estrella del original, en cinco tramos seguidos con el tiempo sumado.
     1. El hẻm: canales, muros, la calle inundada y las motos. Ya tiene el arte de PixelForja.
@@ -52,6 +52,18 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
     - Un botón fija la puntería (la línea que recorre la caja, vista desde arriba) y otro la fuerza (la barra con su raya).
     - Mecha que revienta: 3. Embocinada, adentro del bocín: 6. Moñona, las dos a la vez: 9, con fuegos artificiales.
     - Si en una ronda nadie suma, el tejo más cerca del bocín se lleva la mano: 1. Empatados al final, desempate.
+  - *Vóley playa* (Playa El Agua, Margarita): 2 contra 2 con la red alta, a 7 puntos.
+    - El círculo amarillo marca dónde cae. Puño la pasa al otro lado, patada la levanta para tu compañera.
+    - Cerca de la red, salto y puño es el remate. Si el rival salta a tiempo, te bloquea.
+  - *Tenis de dobles* (Đà Lạt, entre pinos): 2 contra 2 con raqueta, a 7 puntos.
+    - Aquí la bola pica una vez antes de pegarle. El círculo amarillo marca dónde la vas a alcanzar.
+    - Puño le pega con la raqueta, patada es el globo alto y al fondo. Si viene alta cerca de la red, salto y puño: el smash.
+  - *Fútbol callejero* (Carnaval de Barranquilla): 4 contra 4 (tres en la cancha y un arquero) con arcos de piedra, 2 minutos y medio y gol de oro si hay empate.
+    - Pasas por encima del balón y es tuyo. Puño pasa, patada tira (la flecha apunta arriba o abajo). Sin el balón, patada es la barrida.
+    - El arquero se lanza y al arquero no se le barre. Cada tanto la Marimonda cruza la cancha y el balón le rebota.
+  - *Básquet 3x3* (Maracaibo, con el relámpago del Catatumbo de fondo): 3 contra 3 a un aro, gana el primero a 11 o el que vaya ganando a los 3 minutos.
+    - Mantén patada para llenar la barra y suéltala en lo verde. Cerca del aro, salto es la clavada. La clavada Nekketsu rompe el tablero.
+    - Aquí los golpes valen: sin balón, puño empuja. El que empuja queda un momento quieto y el que tiene el balón aguanta un segundo. Saltando frente al que tira, tapón.
   - *Judo y Vovinam Hà Nội* (tatami frente al lago Hoàn Kiếm): 1 contra 1 con el motor de la pelea y otras reglas.
     - Agarrar y lanzar con patada: ¡IPPON!, 2 puntos. Tumbar de un golpe: ¡WAZA-ARI!, 1. Gana el primero a 3.
     - 1:30 de reloj. Si se acaba empatado, punto de oro. Después de cada punto, ¡HAJIME! de nuevo.
@@ -137,6 +149,10 @@ node scripts/prueba-gira.mjs http://localhost:4173/ capturas/gira   # la Olimpia
 node scripts/prueba-azoteas.mjs http://localhost:4173/ capturas/azoteas   # el entrenamiento con un bot y tres rondas con el techo alejándose, con caídas
 node scripts/prueba-quemado.mjs http://localhost:4173/ capturas/quemado [partido] [nivel]   # entrenamiento con un bot y un partido 4 contra 4; imprime tiros, golpes, atrapadas y esquivas de cada equipo
 node scripts/prueba-chapita.mjs http://localhost:4173/ capturas/chapita [juego] [nivel]   # entrenamiento con un bot (batear, curvas, lanzar) y un juego de tres innings
+node scripts/prueba-voley.mjs http://localhost:4173/ capturas/voley   # entrenamiento con un bot (pasar, levantar, rematar) y un partido contra la máquina
+node scripts/prueba-tenis.mjs http://localhost:4173/ capturas/tenis   # entrenamiento con un bot (pique, smash, globo) y un partido de dobles
+node scripts/prueba-futbol.mjs http://localhost:4173/ capturas/futbol [partido] [nivel]   # entrenamiento con un bot y un partido 4 contra 4; imprime tiros, atajadas y robos
+node scripts/prueba-basket.mjs http://localhost:4173/ capturas/basket [partido] [nivel]   # entrenamiento con un bot y un partido a 11; imprime posesiones, tiros, canastas, tumbadas y tapones
 node scripts/prueba-borde.mjs http://localhost:5173/   # pegada al borde de arriba o de abajo, los muros y los huecos siguen valiendo
 node scripts/prueba-kachinuki.mjs http://localhost:5173/ capturas/kachinuki   # el borde, el rescate de Thor, lo que cae del cielo y la azotea que se achica
 node scripts/prueba-pruebas.mjs http://localhost:5173/ capturas/pruebas  # vallas, natación, jabalina y medallero
