@@ -13,7 +13,7 @@ import estadio from '../../data/stages/saigon_estadio.layout.json';
 import type { Paso } from '../core/coach';
 import { hayArte, pintarEscenario, queueEscenario } from './escenario';
 import { efecto, talla } from '../core/fx';
-import { kit } from '../core/kit';
+import { kit, npcs } from '../core/kit';
 import { Figura } from '../core/figura';
 
 /** El formato de layout de PixelForja (PEDIDO 10.2), la parte que el Cross Country usa. */
@@ -82,9 +82,11 @@ interface Fruta { x0: number; x1: number; y0: number; y1: number; t: number; due
 /** Un perro de la calle que duerme en el camino: si lo pisas, despierta, te tumba y te persigue un poco. */
 interface Perro { x: number; y: number; z: number; x0: number; f: Figura; zz: Phaser.GameObjects.BitmapText; despierto: number; presa: Actor | null }
 /** Bailarines de break en rueda: el que choca con uno, al piso. */
-interface Rueda { x: number; y: number; z: number; r: number; t: number; g: Phaser.GameObjects.Graphics[] }
+interface Rueda { x: number; y: number; z: number; r: number; t: number; g: (Phaser.GameObjects.Graphics | Quieto)[] }
+/** Un NPC del kit en su sitio: lo suyo en bucle (`normal`) y su reacción cuando pasa alguien (`reac`). */
+interface Quieto { s: Phaser.GameObjects.Sprite; id: string; normal: string; reac: string; espera: number; x: number; y: number }
 /** Los pelados que juegan fútbol: cada tanto la pelota cruza el callejón de lado a lado. */
-interface Pelados { x: number; cada: number; t: number; bola: { x: number; y: number; g: Phaser.GameObjects.Graphics } | null }
+interface Pelados { x: number; cada: number; t: number; bola: { x: number; y: number; g: Phaser.GameObjects.Graphics | Phaser.GameObjects.Sprite } | null; chicos: Quieto[]; patea: boolean }
 
 /** Para pasar de un tramo al siguiente: los mismos cuatro y lo que llevan acumulado. */
 interface CrossData extends EventData { tramo?: number; suelto?: boolean; cross?: { gente: Competidor[]; acum: Record<string, number> } }
@@ -127,6 +129,7 @@ export class CrossCountry extends EventScene implements World {
   private lluvia: Phaser.GameObjects.TileSprite | null = null;
   private perros: Perro[] = [];
   private ruedas: Rueda[] = [];
+  private quietos: Quieto[] = [];
   private pelados: Pelados[] = [];
   /** el metrocable del fondo, en gris: las cabinas que cruzan el cielo */
   private cabinas: { g: Phaser.GameObjects.Graphics; u: number }[] = [];
@@ -186,6 +189,7 @@ export class CrossCountry extends EventScene implements World {
     this.lluvia = null;
     this.perros = [];
     this.ruedas = [];
+    this.quietos = [];
     this.pelados = [];
     this.cabinas = [];
     this.limites = { xmin: 12, xmax: L.largo - 12, depth: DEPTH - 0.5 };
@@ -466,15 +470,17 @@ export class CrossCountry extends EventScene implements World {
   }
 
   /** Al piso sin daño: solo el susto y el tiempo perdido. */
-  private resbalar(r: Corredor, s: string) {
+  /** Tumba al que pisó algo resbaloso o chocó con alguien. Dice si de verdad lo tumbó. */
+  private resbalar(r: Corredor, s: string): boolean {
     const a = r.a;
-    if (r.resbalo > 0 || !a.canBeHit() || a.carrying) return;
+    if (r.resbalo > 0 || !a.canBeHit() || a.carrying) return false;
     r.resbalo = 2.5;
     a.knockdown(a.left ? -1 : 1, 70, 90);
     // el resbalón mojado del kit: los pies para arriba y de nalgas
     if (a.tiene('slip_wet')) a.play('slip_wet', true);
     this.sfx('esquiva', a.human ? 0.45 : 0.15);
     if (a.human) this.letrero(a, s, 0x9ad8ff);
+    return true;
   }
 
   // ------------------------------------------------------------------ mercado: frutas al piso
@@ -539,27 +545,72 @@ export class CrossCountry extends EventScene implements World {
     return g;
   }
 
-  /** La gente de la calle según el layout: bailarines de break, pelados con su pelota y el resto de adorno. */
+  /** Un NPC del kit parado en (x, y) del mundo, con sus pies en el ancla, tocando `anim` en bucle (null si no llegó). */
+  private npc(id: string, anim: string, x: number, y: number) {
+    const n = npcs()[id];
+    if (!n || !this.textures.exists(`npc_${id}`) || !this.anims.exists(`npc_${id}_${anim}`)) return null;
+    const z = Math.max(0, this.suelo(x, y, 999));
+    const s = this.add.sprite(Math.round(this.px(x, y)), FT + y - z, `npc_${id}`, n.anims[anim].desde)
+      .setOrigin((n.ancla[0] + 0.5) / n.w, (n.ancla[1] + 0.5) / n.h).setDepth(this.profundidadEn(x, y, z));
+    s.play(`npc_${id}_${anim}`);
+    return s;
+  }
+
+  /** La profundidad de algo parado en (x, y, z): sobre una caja, después de esa caja; en el piso, por su y. */
+  private profundidadEn(x: number, y: number, z: number) {
+    if (z > 0) {
+      const c = this.cajas.find((b) => x >= b.x && x < b.x + b.w && y >= b.y && y < b.y + b.d && Math.abs(b.z - z) < 1);
+      if (c) return FT + this.ordenCaja(c) + 0.5;
+    }
+    return FT + y;
+  }
+
+  /** Toca una reacción y después vuelve a lo suyo. Mientras reacciona (y un ratito después) no vuelve a reaccionar. */
+  private reaccion(q: Quieto) {
+    if (q.espera > 0 || !this.anims.exists(`npc_${q.id}_${q.reac}`)) return;
+    q.espera = 2.2;
+    q.s.play(`npc_${q.id}_${q.reac}`);
+    q.s.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => { if (q.s.active) q.s.play(`npc_${q.id}_${q.normal}`); });
+  }
+
+  /** La gente de la calle según el layout: bailarines de break, pelados con su pelota y el resto, que reacciona al pasar. */
   private armarGente() {
     for (const e of this.L.entidades) {
       if (e.tipo !== 'npc') continue;
       const x = e.x ?? 0, y = e.y ?? 60, z = Math.max(0, this.suelo(x, y, 999));
       const npc = String((e as { npc?: string }).npc ?? '');
       if (npc === 'bailarines_break') {
+        // con el arte del kit, tres bailarines distintos: uno en el piso con el molino y dos de pie
+        const g: Rueda['g'] = [];
+        for (let i = 0; i < 3; i++) {
+          const s = this.npc(`bailarin_${i + 1}`, i === 0 ? 'molino' : 'toprock', x, y);
+          if (s) g.push({ s, id: `bailarin_${i + 1}`, normal: i === 0 ? 'molino' : 'toprock', reac: 'reclama', espera: 0, x, y });
+        }
         const col = [0xff4fa0, 0x40d0ff, 0xffd040];
-        this.ruedas.push({ x, y, z, r: (e as { radio?: number }).radio ?? 26, t: 0, g: col.map((c) => this.monito(c)) });
-        if (!this.arte) this.rotulo(this.px(x, y) - 30, FT + y - z - 50, 'BAILARINES DE BREAK');
+        this.ruedas.push({ x, y, z, r: (e as { radio?: number }).radio ?? 26, t: 0, g: g.length === 3 ? g : col.map((c) => this.monito(c)) });
+        if (g.length < 3 && !this.arte) this.rotulo(this.px(x, y) - 30, FT + y - z - 50, 'BAILARINES DE BREAK');
       } else if (npc === 'pelados_futbol') {
-        this.pelados.push({ x, cada: e.cada ?? 3, t: 1, bola: null });
-        if (!this.arte) {
-          // los pelados al fondo del callejón, esperando el pase
-          for (const [k, c] of [0x40c060, 0xe0e0e8].entries()) this.monito(c).setPosition(this.px(x - 20 + k * 40, 2), FT + 2 - Math.max(0, this.suelo(x, 2, 999))).setDepth(FT + 2);
+        // los pelados al fondo del callejón, esperando el pase
+        const chicos: Quieto[] = [];
+        for (const [k, id] of ['pelado_1', 'pelado_2'].entries()) {
+          const s = this.npc(id, 'espera', x - 20 + k * 40, 2);
+          if (s) chicos.push({ s, id, normal: 'espera', reac: 'perdon', espera: 0, x: x - 20 + k * 40, y: 2 });
+        }
+        this.pelados.push({ x, cada: e.cada ?? 3, t: 1, bola: null, chicos, patea: false });
+        if (!chicos.length && !this.arte) {
+          for (const [k, c] of [0x40c060, 0xe0e0e8].entries()) { const zz = Math.max(0, this.suelo(x - 20 + k * 40, 2, 999)); this.monito(c).setPosition(this.px(x - 20 + k * 40, 2), FT + 2 - zz).setDepth(this.profundidadEn(x - 20 + k * 40, 2, zz)); }
           this.rotulo(this.px(x, 2) - 30, FT - Math.max(0, this.suelo(x, 2, 999)) - 40, 'LOS PELADOS JUEGAN FÚTBOL');
         }
-      } else if (!this.arte) {
-        // los demás son adorno en el gris: grafitero, músicos, vendedor
-        this.monito(npc === 'grafitero' ? 0xb04ad0 : npc === 'musicos' ? 0xf2a03a : 0x6a9ad0).setPosition(this.px(x, y), FT + y - z).setDepth(FT + y);
-        this.rotulo(this.px(x, y) - 24, FT + y - z - 40, npc.toUpperCase().replace(/_/g, ' '));
+      } else {
+        // el grafitero pinta, los músicos tocan y el vendedor llama; cuando pasa alguien cerca, reaccionan
+        const que: Record<string, [string, string]> = { grafitero: ['pintar', 'mirar'], musicos: ['tocar', 'animar'], vendedor_paletas: ['llamar', 'ofrecer'] };
+        const [normal, reac] = que[npc] ?? ['', ''];
+        const s = normal ? this.npc(npc, normal, x, y) : null;
+        if (s) this.quietos.push({ s, id: npc, normal, reac, espera: 0, x, y });
+        else if (!this.arte) {
+          this.monito(npc === 'grafitero' ? 0xb04ad0 : npc === 'musicos' ? 0xf2a03a : 0x6a9ad0).setPosition(this.px(x, y), FT + y - z).setDepth(this.profundidadEn(x, y, z));
+          this.rotulo(this.px(x, y) - 24, FT + y - z - 40, npc.toUpperCase().replace(/_/g, ' '));
+        }
       }
     }
     for (const e of this.L.entidades) if (e.tipo === 'animal' && e.animal === 'gallo' && !this.arte) {
@@ -570,39 +621,89 @@ export class CrossCountry extends EventScene implements World {
     }
   }
 
+  /** La pelota que sale de la patada: la del kit girando, o una dibujada si no llegó. */
+  private pelota() {
+    const n = npcs().pelota;
+    if (n && this.textures.exists('npc_pelota') && this.anims.exists('npc_pelota_girar')) {
+      return this.add.sprite(0, 0, 'npc_pelota').setOrigin((n.ancla[0] + 0.5) / n.w, (n.ancla[1] + 0.5) / n.h).play('npc_pelota_girar');
+    }
+    const g = this.add.graphics();
+    g.fillStyle(0xf4f4f4).fillCircle(0, -4, 4).fillStyle(0x202020).fillRect(-1, -6, 2, 2).fillRect(-3, -3, 2, 2).fillRect(2, -3, 2, 2);
+    return g;
+  }
+
   private genteTick(dt: number) {
+    // alguien corriendo a menos de 40 px de un NPC lo hace reaccionar
+    const cerca = (x: number, y: number, d = 40) => this.gente2.some((r) => Math.hypot(r.a.x - x, r.a.y - y) < d);
+    for (const q of this.quietos) {
+      q.espera = Math.max(0, q.espera - dt);
+      if (cerca(q.x, q.y)) this.reaccion(q);
+    }
     for (const w of this.ruedas) {
       w.t += dt;
-      w.g.forEach((g, i) => {
+      w.g.forEach((d, i) => {
         const a = w.t * 1.8 + (i * Math.PI * 2) / w.g.length;
         const x = w.x + Math.cos(a) * w.r, y = w.y + Math.sin(a) * w.r * 0.5;
-        // uno hace el molino de cabeza, los otros bailan de pie
-        g.setPosition(Math.round(this.px(x, y)), Math.round(FT + y - w.z)).setDepth(FT + y).setAngle(i === 0 ? (w.t * 720) % 360 : Math.sin(w.t * 8 + i) * 12);
+        if ('s' in d) {
+          // los del kit: el molino ya gira en su dibujo
+          d.x = x; d.y = y;
+          d.espera = Math.max(0, d.espera - dt);
+          d.s.setPosition(Math.round(this.px(x, y)), Math.round(FT + y - w.z)).setDepth(this.profundidadEn(x, y, w.z));
+        } else {
+          // uno hace el molino de cabeza, los otros bailan de pie
+          d.setPosition(Math.round(this.px(x, y)), Math.round(FT + y - w.z)).setDepth(this.profundidadEn(x, y, w.z)).setAngle(i === 0 ? (w.t * 720) % 360 : Math.sin(w.t * 8 + i) * 12);
+        }
         for (const r of this.gente2) {
           const a2 = r.a;
           if (a2.z > w.z + 10 || Math.abs(a2.x - x) > 12 || Math.abs(a2.y - y) > 7) continue;
-          this.resbalar(r, '¡CUIDADO CON EL BREAK!');
+          if (this.resbalar(r, '¡CUIDADO CON EL BREAK!') && 's' in d) this.reaccion(d);
         }
       });
     }
     for (const p of this.pelados) {
+      for (const q of p.chicos) q.espera = Math.max(0, q.espera - dt);
       if (!p.bola) {
         p.t -= dt;
-        if (p.t > 0) continue;
+        if (p.t > 0 || p.patea) continue;
         p.t = p.cada * (0.8 + Math.random() * 0.4);
-        const g = this.add.graphics();
-        g.fillStyle(0xf4f4f4).fillCircle(0, -4, 4).fillStyle(0x202020).fillRect(-1, -6, 2, 2).fillRect(-3, -3, 2, 2).fillRect(2, -3, 2, 2);
-        p.bola = { x: p.x + Phaser.Math.Between(-24, 24), y: -4, g };
-        this.sfx('golpe', 0.15);
+        const sale = (bx: number) => {
+          p.patea = false;
+          p.bola = { x: bx, y: -4, g: this.pelota() };
+          this.sfx('golpe', 0.15);
+        };
+        // con el arte, uno de los pelados patea y la pelota sale en el cuadro del impacto
+        const q = p.chicos.length ? p.chicos[Phaser.Math.Between(0, p.chicos.length - 1)] : null;
+        const imp = q ? npcs()[q.id]?.eventos?.patear?.find((e) => e.tipo === 'impacto')?.cuadro : undefined;
+        if (q && imp !== undefined && this.anims.exists(`npc_${q.id}_patear`)) {
+          p.patea = true;
+          q.espera = 9;
+          q.s.play(`npc_${q.id}_patear`);
+          const ver = (_a: Phaser.Animations.Animation, f: Phaser.Animations.AnimationFrame) => {
+            if (f.index - 1 !== imp) return;
+            q.s.off(Phaser.Animations.Events.ANIMATION_UPDATE, ver);
+            sale(q.x + 6);
+          };
+          q.s.on(Phaser.Animations.Events.ANIMATION_UPDATE, ver);
+          q.s.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+            q.s.off(Phaser.Animations.Events.ANIMATION_UPDATE, ver);
+            if (p.patea) sale(q.x + 6);
+            q.espera = 0;
+            if (q.s.active) q.s.play(`npc_${q.id}_${q.normal}`);
+          });
+        } else sale(p.x + Phaser.Math.Between(-24, 24));
+        continue;
       }
       const b = p.bola;
       b.y += 120 * dt;
       const z = Math.max(0, this.suelo(b.x, Math.min(DEPTH - 1, Math.max(0, b.y)), 999));
-      b.g.setPosition(Math.round(this.px(b.x, b.y)), Math.round(FT + b.y - z - Math.abs(Math.sin(b.y / 9)) * 6)).setAngle(b.y * 8).setDepth(FT + b.y);
+      // la del kit gira sola; la dibujada se gira aquí
+      b.g.setPosition(Math.round(this.px(b.x, b.y)), Math.round(FT + b.y - z - Math.abs(Math.sin(b.y / 9)) * 6)).setDepth(this.profundidadEn(b.x, Math.max(0, b.y), z));
+      if (b.g instanceof Phaser.GameObjects.Graphics) b.g.setAngle(b.y * 8);
       for (const r of this.gente2) {
         const a = r.a;
         if (a.z > z + 8 || Math.abs(a.x - b.x) > 9 || Math.abs(a.y - b.y) > 6) continue;
-        this.resbalar(r, '¡LA PELOTA! ¡PERDÓN, SEÑOR!');
+        // ¡perdón, señor!: los pelados se encogen
+        if (this.resbalar(r, '¡LA PELOTA! ¡PERDÓN, SEÑOR!')) for (const q of p.chicos) { q.espera = 0; this.reaccion(q); }
       }
       if (b.y > DEPTH + 8) { b.g.destroy(); p.bola = null; }
     }

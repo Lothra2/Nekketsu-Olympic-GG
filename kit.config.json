@@ -185,5 +185,49 @@
     "musica": [
       "marcha_nekketsu"
     ]
+  },
+  "npc": {
+    "fichas": "npc/",
+    "pelota": true,
+    "personajes": {
+      "bailarin_1": {
+        "anims": ["toprock", "molino", "reclama"]
+      },
+      "bailarin_2": {
+        "anims": ["toprock", "molino", "reclama"]
+      },
+      "bailarin_3": {
+        "anims": ["toprock", "molino", "reclama"]
+      },
+      "pelado_1": {
+        "anims": ["espera", "patear", "perdon"]
+      },
+      "pelado_2": {
+        "anims": ["espera", "patear", "perdon"]
+      },
+      "grafitero": {
+        "anims": ["pintar", "mirar"],
+        "vistas": {
+          "pintar": "espalda_tres_cuartos"
+        }
+      },
+      "musicos": {
+        "grupo": {
+          "rapero": {
+            "tocar": "rapear",
+            "animar": "animar"
+          },
+          "percusionista": {
+            "tocar": "tamborear",
+            "animar": "animar"
+          }
+        },
+        "parlante": true
+      },
+      "vendedor_paletas": {
+        "anims": ["llamar", "ofrecer"],
+        "vista": "tres_cuartos"
+      }
+    }
   }
 }

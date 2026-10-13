@@ -52,6 +52,8 @@ export interface Manifest {
   ui: { fuentes: Record<string, { png: string; fnt: string; alto_linea: number; base: number }> };
   audio: Partial<Record<'sfx' | 'musica' | 'ambientes', Record<string, Sonido>>>;
   fx?: Record<string, Fx>;
+  /** la gente de la calle (lote C6a): una tira por NPC, más la pelota; `notas` es texto */
+  npc?: Record<string, Npc | string>;
   /** lo que el kit todavía no trae (llega con un lote futuro) */
   pendiente?: string[];
 }
@@ -104,6 +106,22 @@ export interface Sonido { archivo: string | string[]; duracion: number; bucle?: 
 
 const rutas = (a: Sonido) => [a.archivo].flat().map((f) => KIT + f);
 
+/**
+ * Un NPC del kit: una tira de cuadros de w x h (el cuadro i en x = i * w), con el ancla en los pies. Cada animación
+ * es un tramo de la tira. `eventos` va como en el resto del kit (la patada de los pelados: impacto en el cuadro 2).
+ * Los músicos son un grupo en un solo sprite (rapero y percusionista, con el parlante).
+ */
+export interface Npc {
+  archivo: string; w: number; h: number; ancla: Pt; cuadros: number;
+  anims: Record<string, { desde: number; cuadros: number; fps: number; loop: boolean; vista?: string }>;
+  eventos?: Record<string, { tipo: string; cuadro: number }[]>;
+  grupo?: string[];
+}
+
+/** Los NPC del kit (sin las notas). */
+export const npcs = (): Record<string, Npc> =>
+  Object.fromEntries(Object.entries(kit().npc ?? {}).filter((e): e is [string, Npc] => typeof e[1] === 'object' && !!e[1]?.archivo));
+
 /** Pone en la cola de carga todo el kit. Se llama con el manifiesto ya cargado. */
 export function queueKit(scene: Phaser.Scene) {
   const m = kit();
@@ -120,6 +138,7 @@ export function queueKit(scene: Phaser.Scene) {
   // los efectos al arrancar; la música y los ambientes pesan y se cargan cuando una escena los pide (bucle())
   for (const [n, a] of Object.entries(m.audio.sfx ?? {})) scene.load.audio(n, rutas(a));
   for (const [id, e] of Object.entries(m.fx ?? {})) scene.load.spritesheet(`fx_${id}`, KIT + e.archivo, { frameWidth: e.w, frameHeight: e.h });
+  for (const [id, n] of Object.entries(npcs())) scene.load.spritesheet(`npc_${id}`, KIT + n.archivo, { frameWidth: n.w, frameHeight: n.h });
 }
 
 /** Crea una animación por efecto (los de estados, como la bola del Tama-wari, no se animan solos). */
@@ -127,6 +146,17 @@ export function makeFxAnims(scene: Phaser.Scene) {
   for (const [id, e] of Object.entries(kit().fx ?? {})) {
     if (!e.fps || e.estados || scene.anims.exists(`fx_${id}`)) continue;
     scene.anims.create({ key: `fx_${id}`, frames: scene.anims.generateFrameNumbers(`fx_${id}`, { start: 0, end: e.cuadros - 1 }), frameRate: e.fps, repeat: e.loop ? -1 : 0 });
+  }
+}
+
+/** Una animación por cada tramo de la tira de cada NPC: `npc_<id>_<anim>`. */
+export function makeNpcAnims(scene: Phaser.Scene) {
+  for (const [id, n] of Object.entries(npcs())) {
+    for (const [a, d] of Object.entries(n.anims)) {
+      const key = `npc_${id}_${a}`;
+      if (scene.anims.exists(key) || !scene.textures.exists(`npc_${id}`)) continue;
+      scene.anims.create({ key, frames: scene.anims.generateFrameNumbers(`npc_${id}`, { start: d.desde, end: d.desde + d.cuadros - 1 }), frameRate: d.fps, repeat: d.loop ? -1 : 0 });
+    }
   }
 }
 

@@ -26,6 +26,14 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 
 ## Lo último del lado del juego
 
+- **Listo para C6a, la gente de la Comuna 13 ([pixel_forja#23](https://github.com/Lothra2/pixel_forja/pull/23)).** Probado con el kit de la rama C6a generado en local, sobre el arte de E3a.
+  - Las 9 fichas en `npc/` y la sección `npc` en `kit.config.json`, copiadas del ejemplo.
+  - Cada NPC es una tira (`npc_<id>`) con una animación por tramo (`npc_<id>_<anim>`), con el ancla en los pies en el (x, y) de su entidad y ordenado como los atletas, también sobre una caja.
+  - Bailarines: uno con el molino y dos con toprock, en ronda. El que atropellan reclama.
+  - Pelados: cada `cada` segundos uno patea y la pelota del kit sale en el `impacto` de `eventos.patear`. Si la pelota tumba a alguien, los dos piden perdón.
+  - Grafitero, músicos y vendedor: lo suyo en bucle y su reacción cuando pasa alguien a menos de 40 px (mirar, animar, ofrecer).
+  - Sin la sección `npc` en el kit, siguen los monitos grises de antes.
+
 - **Listo para E3a (Comuna 13, [pixel_forja#22](https://github.com/Lothra2/pixel_forja/pull/22)) y H1b (audio comprimido, [pixel_forja#21](https://github.com/Lothra2/pixel_forja/pull/21)).** Probado con el arte de la rama E3a generado en local: 9 de 9 pruebas, la carrera de punta a punta sin atascos.
   - Vida en la capa `lejos` (el metrocable): pegada a lejos.png, con su paralaje, repetida cada su ancho y moviéndose por su `recorrido`.
   - Vida en la capa `objeto` (los peldaños que corren, la bandera): `setDepth(FT + orden)`.
