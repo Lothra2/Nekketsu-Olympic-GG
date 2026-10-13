@@ -198,6 +198,8 @@ export class CrossCountry extends EventScene implements World {
     this.perros = [];
     this.ruedas = [];
     this.quietos = [];
+    this.pajaros = [];
+    this.cantoInicio = false;
     this.pelados = [];
     this.cabinas = [];
     this.limites = { xmin: 12, xmax: L.largo - 12, depth: DEPTH - 0.5 };
