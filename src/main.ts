@@ -17,6 +17,7 @@ import { Quemado } from './events/Quemado';
 import { Chapita } from './events/Chapita';
 import { Voley } from './events/Voley';
 import { Tenis } from './events/Tenis';
+import { Futbol } from './events/Futbol';
 import { CrossCountry } from './events/CrossCountry';
 import { Obstaculos } from './events/Obstaculos';
 import { BASE_H, BASE_W, instalarPantalla } from './core/pantalla';
@@ -32,7 +33,7 @@ const game = new Phaser.Game({
   // el ancho lo ajusta core/pantalla según la pantalla (de 640 a 800); FIT lo escala sin deformar
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
   input: { gamepad: true, activePointers: 4 },
-  scene: [Boot, Tap, Intro, Title, Select, Fight, Medallero, Vallas, Natacion, Jabalina, CrossCountry, Obstaculos, Tamawari, DaCau, Tejo, Azoteas, Quemado, Chapita, Voley, Tenis],
+  scene: [Boot, Tap, Intro, Title, Select, Fight, Medallero, Vallas, Natacion, Jabalina, CrossCountry, Obstaculos, Tamawari, DaCau, Tejo, Azoteas, Quemado, Chapita, Voley, Tenis, Futbol],
 });
 
 instalarPantalla(game);

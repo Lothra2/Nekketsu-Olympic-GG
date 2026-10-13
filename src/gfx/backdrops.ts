@@ -895,6 +895,60 @@ function dalat(): HTMLCanvasElement {
   return p.done();
 }
 
+/**
+ * Barranquilla en Carnaval: casas de colores con balcones, las banderitas de colores cruzando la calle, la gente
+ * en la acera con sus máscaras y las comparsas pasando al fondo, con un cielo de tarde caribeña. Abajo, la calle.
+ */
+function barranquilla(): HTMLCanvasElement {
+  const p = new Painter(W, H, M);
+  const r = rng(29);
+  p.vgrad(0, 160, [C('#4aa8e8'), C('#7ac4f0'), C('#c8e8f8'), C('#f8e8c8')]);
+  const PAREDES = ['#f2d26a', '#e86a8a', '#5ac0e0', '#8ad070', '#f2a04a', '#b88ae0', '#f4f0e2'].map(C);
+  let x = X0 - 6;
+  while (x < X1) {
+    const w = 46 + Math.floor(r() * 30), top = 70 + Math.floor(r() * 40);
+    const pared = PAREDES[Math.floor(r() * PAREDES.length)];
+    p.rect(x, top, w, 196 - top, pared);
+    p.rect(x + w - 3, top, 3, 196 - top, [pared[0] * 0.8, pared[1] * 0.8, pared[2] * 0.8]);
+    p.rect(x - 2, top - 4, w + 4, 4, C('#f4f4ec'));
+    for (let wx = x + 6; wx < x + w - 12; wx += 16) { p.rect(wx, top + 10, 9, 14, C('#3a4a5a')); p.rect(wx - 2, top + 24, 13, 2, C('#f4f4ec')); }
+    p.rect(x + Math.floor(w / 2) - 6, 172, 12, 24, C('#6a3a1a'));
+    x += w + 1;
+  }
+  // las banderitas del Carnaval cruzando la calle
+  const COLS = ['#e83a3a', '#f2c230', '#3ac06a', '#2a8ad0', '#e870b0'].map(C);
+  for (const [y0, y1] of [[60, 70], [92, 84]] as [number, number][]) {
+    p.cable(X0, y0, X1, y1, 18, C('#3a3a3a'));
+    for (let fx = X0 + 4; fx < X1; fx += 9) {
+      const u = (fx - X0) / AW, fy = Math.round(y0 + (y1 - y0) * u + 18 * 4 * u * (1 - u)) + 1;
+      const col = COLS[Math.floor((fx - X0) / 9) % COLS.length];
+      for (let k = 0; k < 6; k++) p.rect(fx - 3 + Math.floor(k / 2), fy + k, 6 - k, 1, col);
+    }
+  }
+  // la comparsa pasando al fondo: bailarinas con faldas de colores y tambores
+  for (let fx = desde(10, 26); fx < X1; fx += 26) {
+    const col = COLS[Math.floor(r() * COLS.length)];
+    p.circle(fx, 176, 3, C('#8a5a3a'));
+    p.rect(fx - 6, 168, 12, 3, COLS[Math.floor(r() * COLS.length)]);
+    p.rect(fx - 2, 179, 4, 7, col);
+    for (let k = 0; k < 5; k++) p.rect(fx - 4 - k, 186 + k, 8 + 2 * k, 1, k % 2 ? col : C('#f4f4ec'));
+    if (r() < 0.3) { p.rect(fx + 5, 182, 6, 7, C('#c8a070')); p.rect(fx + 5, 182, 6, 1, C('#f4f4ec')); }
+  }
+  // la acera con la gente mirando
+  p.rect(X0, 196, AW, 14, C('#c8c0b0'));
+  for (let fx = X0 + 4; fx < X1; fx += 7 + Math.floor(r() * 6)) {
+    p.circle(fx, 196, 3, [C('#8a5a3a'), C('#c08a5a'), C('#5a3a2a')][Math.floor(r() * 3)]);
+    p.rect(fx - 3, 199, 6, 8, PAREDES[Math.floor(r() * PAREDES.length)]);
+  }
+  p.rect(X0, 208, AW, 3, C('#8a8478'));
+  // la calle
+  p.vgrad(211, 360, [C('#6a6a70'), C('#5a5a60'), C('#4e4e54')]);
+  for (let i = 0; i < 1600; i++) p.px(X0 + r() * AW, 211 + r() * 149, r() < 0.5 ? C('#727278') : C('#48484e'));
+  // serpentinas y confeti regados
+  for (let i = 0; i < 220; i++) p.px(X0 + r() * AW, 214 + r() * 140, COLS[Math.floor(r() * COLS.length)]);
+  return p.done();
+}
+
 /** Registra todos los fondos como texturas. */
 export function makeBackdrops(scene: Phaser.Scene) {
   const add = (k: string, c: HTMLCanvasElement) => { if (!scene.textures.exists(k)) scene.textures.addCanvas(k, c); };
@@ -918,6 +972,7 @@ export function makeBackdrops(scene: Phaser.Scene) {
   add('bg_barrio', barrio());
   add('bg_margarita', margarita());
   add('bg_dalat', dalat());
+  add('bg_barranquilla', barranquilla());
   // banderas sueltas
   for (const k of ['jp', 'vn', 'co', 've'] as const) {
     const p = new Painter(38, 26);

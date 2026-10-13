@@ -31,6 +31,7 @@ export const PRUEBAS_GIRA: PruebaGira[] = [
   { id: 'Chapita', scene: 'Chapita', nombre: 'CHAPITA', lugar: 'BARRIO DE CARACAS, VENEZUELA', bandera: 'flag_ve' },
   { id: 'Voley', scene: 'Voley', nombre: 'VÓLEY PLAYA MARGARITA', lugar: 'PLAYA EL AGUA, MARGARITA', bandera: 'flag_ve' },
   { id: 'Tenis', scene: 'Tenis', nombre: 'TENIS DE DOBLES', lugar: 'ĐÀ LẠT, VIETNAM', bandera: 'flag_vn' },
+  { id: 'Futbol', scene: 'Futbol', nombre: 'FÚTBOL CALLEJERO', lugar: 'CARNAVAL DE BARRANQUILLA, COLOMBIA', bandera: 'flag_co' },
   { id: 'Judo', scene: 'Fight', nombre: 'JUDO Y VOVINAM', lugar: 'HÀ NỘI, VIETNAM', bandera: 'flag_vn', datos: { modo: 'judo' } },
   { id: 'Fight', scene: 'Fight', nombre: 'KACHINUKI FINAL', lugar: 'AZOTEA DE CARACAS, VENEZUELA', bandera: 'flag_ve', datos: { modo: '4v4', rival: 'kenji' } },
 ];

@@ -31,6 +31,7 @@ const MENUS: Record<string, { id: string; label: string }[]> = {
     { id: 'Chapita', label: 'CHAPITA CARACAS' },
     { id: 'Voley', label: 'VÓLEY MARGARITA' },
     { id: 'Tenis', label: 'TENIS ĐÀ LẠT' },
+    { id: 'Futbol', label: 'FÚTBOL BARRANQUILLA' },
     { id: '<', label: 'ATRÁS' },
   ],
   // el Cross completo son cinco tramos; para una partida corta se puede correr uno solo
@@ -57,6 +58,7 @@ const MENUS: Record<string, { id: string; label: string }[]> = {
     { id: 'practica:Chapita', label: 'CHAPITA' },
     { id: 'practica:Voley', label: 'VÓLEY' },
     { id: 'practica:Tenis', label: 'TENIS' },
+    { id: 'practica:Futbol', label: 'FÚTBOL' },
     { id: 'practica:Fight', label: 'PELEA' },
     { id: '<', label: 'ATRÁS' },
   ],
