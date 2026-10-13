@@ -3,11 +3,9 @@ import { Figura } from '../core/figura';
 import { Input } from '../core/input';
 import { chip, MARCHA, VICTORIA } from '../core/music';
 import { txt, panel, flash } from '../core/ui';
-import { PRUEBAS_GIRA, type Gira } from '../events/base';
+import { pruebasDe, type Gira, type PruebaGira } from '../events/base';
 import { FAMILIA, INSTITUTO } from './Select';
 import { fireworks } from './logo';
-
-const BANDERA: Record<string, string> = { CrossCountry: 'flag_vn', Obstaculos: 'flag_co', Vallas: 'flag_co', Natacion: 'flag_vn', Jabalina: 'flag_ve', Fight: 'flag_ve' };
 
 /**
  * Entre prueba y prueba de la Olimpiada Express: el marcador por equipos, lo que va de gira y la que viene.
@@ -16,6 +14,7 @@ const BANDERA: Record<string, string> = { CrossCountry: 'flag_vn', Obstaculos: '
 export class Medallero extends Phaser.Scene {
   private pad!: Input;
   private gira!: Gira;
+  private lista: PruebaGira[] = [];
   private figs: Figura[] = [];
   private listo = false;
   private fin = false;
@@ -26,7 +25,8 @@ export class Medallero extends Phaser.Scene {
     this.gira = this.registry.get('gira') as Gira;
     this.figs = [];
     this.listo = false;
-    this.fin = this.gira.idx >= PRUEBAS_GIRA.length;
+    this.lista = pruebasDe(this.gira);
+    this.fin = this.gira.idx >= this.lista.length;
     this.cameras.main.fadeIn(300);
     this.pad = new Input(this, false);
     if (this.fin) this.final(); else this.tablero();
@@ -52,12 +52,12 @@ export class Medallero extends Phaser.Scene {
     // las pruebas: hechas con su oro, la que viene parpadeando
     // la lista de pruebas: el panel crece con las que haya, y cada una lleva su nombre y su lugar
     const fila = 27;
-    panel(this, 60, 114, 520, PRUEBAS_GIRA.length * fila + 12);
-    PRUEBAS_GIRA.forEach((p, i) => {
+    panel(this, 60, 114, 520, this.lista.length * fila + 12);
+    this.lista.forEach((p, i) => {
       const y = 130 + i * fila;
       const hecha = g.resultados[i];
       const viene = i === g.idx;
-      this.add.image(88, y, BANDERA[p.scene]).setScale(0.75);
+      this.add.image(88, y, p.bandera).setScale(0.75);
       const n = txt(this, 112, y - 5, p.nombre, 'fuente_ui', 2, 0).setTint(hecha ? 0x8a8aa8 : viene ? 0xffe040 : 0xffffff);
       txt(this, 112, y + 9, p.lugar, 'fuente_ui', 1, 0).setTint(0x8a8ab0);
       if (hecha) {
@@ -67,13 +67,13 @@ export class Medallero extends Phaser.Scene {
         txt(this, 512, y, oro.toUpperCase(), 'fuente_ui', 1, 0);
       } else if (viene) {
         this.tweens.add({ targets: n, alpha: 0.3, duration: 400, yoyo: true, repeat: -1 });
-        txt(this, 560, y, i === PRUEBAS_GIRA.length - 1 ? 'X2 PTS' : '', 'fuente_ui', 1, 1).setTint(0xff8040);
+        txt(this, 560, y, i === this.lista.length - 1 ? 'X2 PTS' : '', 'fuente_ui', 1, 1).setTint(0xff8040);
       }
     });
-    const p = PRUEBAS_GIRA[g.idx];
-    const msg = g.idx === 0 ? '¡ARRANCA LA GIRA! 10 · 6 · 4 · 2 PUNTOS POR PUESTO' : g.idx === PRUEBAS_GIRA.length - 1 ? 'LA FINAL VALE 20 PUNTOS PARA EL EQUIPO QUE GANE' : `PRÓXIMA: ${p.nombre}`;
-    txt(this, 320, 136 + PRUEBAS_GIRA.length * fila, msg, 'fuente_ui', 1).setTint(0xffe080);
-    const go = txt(this, 320, 158 + PRUEBAS_GIRA.length * fila, 'PRESIONA START', 'fuente_ui', 2);
+    const p = this.lista[g.idx];
+    const msg = g.idx === 0 ? '¡ARRANCA LA GIRA! 10 · 6 · 4 · 2 PUNTOS POR PUESTO' : g.idx === this.lista.length - 1 ? 'LA FINAL VALE 20 PUNTOS PARA EL EQUIPO QUE GANE' : `PRÓXIMA: ${p.nombre}`;
+    txt(this, 320, 136 + this.lista.length * fila, msg, 'fuente_ui', 1).setTint(0xffe080);
+    const go = txt(this, 320, 158 + this.lista.length * fila, 'PRESIONA START', 'fuente_ui', 2);
     this.tweens.add({ targets: go, alpha: 0.2, duration: 450, yoyo: true, repeat: -1 });
     // la familia y el jugador, animados abajo
     const f = new Figura(this, 40, 340, g.jugador, 'idle').setScale(1.2);
@@ -134,9 +134,10 @@ export class Medallero extends Phaser.Scene {
         this.scene.start('Title');
         return;
       }
-      const p = PRUEBAS_GIRA[this.gira.idx];
-      if (p.scene === 'Fight') this.scene.start('Fight', { modo: '4v4', jugador: this.gira.jugador, rival: 'kenji', gira: true });
-      else this.scene.start(p.scene, { jugador: this.gira.jugador, gira: true });
+      const p = this.lista[this.gira.idx];
+      // el judo es contra uno del Instituto, al azar
+      const rival = p.id === 'Judo' ? INSTITUTO[Math.floor(Math.random() * INSTITUTO.length)] : undefined;
+      this.scene.start(p.scene, { ...p.datos, ...(rival ? { rival } : {}), jugador: this.gira.jugador, gira: true });
     });
   }
 

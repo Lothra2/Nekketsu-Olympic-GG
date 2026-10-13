@@ -10,20 +10,50 @@ import { FAMILIA, INSTITUTO } from '../scenes/Select';
 export interface EventData { jugador: string; gira?: boolean; practica?: boolean }
 export interface Competidor { id: string; team: 0 | 1; human: boolean }
 
-/** Estado de la Olimpiada Express (vive en el registro de Phaser). */
-export interface Gira { jugador: string; idx: number; puntos: [number, number]; resultados: { prueba: string; podio: string[] }[] }
-export const PRUEBAS_GIRA = [
-  { scene: 'CrossCountry', nombre: 'CROSS COUNTRY', lugar: 'SAIGÓN, VIETNAM' },
-  { scene: 'Obstaculos', nombre: 'OBSTÁCULOS COMUNA 13', lugar: 'MEDELLÍN, COLOMBIA' },
-  { scene: 'Vallas', nombre: 'VALLAS DEL CAFÉ', lugar: 'EJE CAFETERO, COLOMBIA' },
-  { scene: 'Natacion', nombre: 'NATACIÓN HẠ LONG', lugar: 'BAHÍA DE HẠ LONG, VIETNAM' },
-  { scene: 'Jabalina', nombre: 'JABALINA LLANERA', lugar: 'LLANOS DE APURE, VENEZUELA' },
-  { scene: 'Fight', nombre: 'KACHINUKI FINAL', lugar: 'AZOTEA DE CARACAS, VENEZUELA' },
+/** Estado de la Olimpiada Express (vive en el registro de Phaser). `pruebas`: los ids sorteados para esta gira. */
+export interface Gira { jugador: string; idx: number; puntos: [number, number]; resultados: { prueba: string; podio: string[] }[]; pruebas?: string[] }
+
+/** Una prueba que puede tocar en la gira: su escena, con qué datos arranca y su bandera en el medallero. */
+export interface PruebaGira { id: string; scene: string; nombre: string; lugar: string; bandera: string; datos?: Record<string, unknown> }
+
+/** Todas las pruebas jugables. La final (el Kachinuki) va siempre de última. */
+export const PRUEBAS_GIRA: PruebaGira[] = [
+  { id: 'CrossCountry', scene: 'CrossCountry', nombre: 'CROSS COUNTRY', lugar: 'SAIGÓN, VIETNAM', bandera: 'flag_vn' },
+  { id: 'Obstaculos', scene: 'Obstaculos', nombre: 'OBSTÁCULOS COMUNA 13', lugar: 'MEDELLÍN, COLOMBIA', bandera: 'flag_co' },
+  { id: 'Vallas', scene: 'Vallas', nombre: 'VALLAS DEL CAFÉ', lugar: 'EJE CAFETERO, COLOMBIA', bandera: 'flag_co' },
+  { id: 'Natacion', scene: 'Natacion', nombre: 'NATACIÓN HẠ LONG', lugar: 'BAHÍA DE HẠ LONG, VIETNAM', bandera: 'flag_vn' },
+  { id: 'Jabalina', scene: 'Jabalina', nombre: 'JABALINA LLANERA', lugar: 'LLANOS DE APURE, VENEZUELA', bandera: 'flag_ve' },
+  { id: 'Tamawari', scene: 'Tamawari', nombre: 'TAMA-WARI HỘI AN', lugar: 'HỘI AN, VIETNAM', bandera: 'flag_vn' },
+  { id: 'DaCau', scene: 'DaCau', nombre: 'ĐÁ CẦU TAO ĐÀN', lugar: 'SAIGÓN, VIETNAM', bandera: 'flag_vn' },
+  { id: 'Tejo', scene: 'Tejo', nombre: 'TEJO LA CANDELARIA', lugar: 'BOGOTÁ, COLOMBIA', bandera: 'flag_co' },
+  { id: 'Judo', scene: 'Fight', nombre: 'JUDO Y VOVINAM', lugar: 'HÀ NỘI, VIETNAM', bandera: 'flag_vn', datos: { modo: 'judo' } },
+  { id: 'Fight', scene: 'Fight', nombre: 'KACHINUKI FINAL', lugar: 'AZOTEA DE CARACAS, VENEZUELA', bandera: 'flag_ve', datos: { modo: '4v4', rival: 'kenji' } },
 ];
+/** Cuántas pruebas sortea la gira antes de la final. */
+export const SORTEO = 5;
+
+/** Los datos de una prueba por su escena (o por su id). */
+export const prueba = (scene: string) => PRUEBAS_GIRA.find((p) => p.id === scene) ?? PRUEBAS_GIRA.find((p) => p.scene === scene)!;
+
+/**
+ * Sortea la gira: cinco pruebas al azar, con al menos una de Vietnam y una de Colombia (Venezuela ya tiene la
+ * final), en el orden del catálogo, y el Kachinuki al final.
+ */
+export function sortearGira(): string[] {
+  const pool = PRUEBAS_GIRA.filter((p) => p.id !== 'Fight');
+  for (let intento = 0; intento < 50; intento++) {
+    const elegidas = [...pool].sort(() => Math.random() - 0.5).slice(0, SORTEO);
+    if (!elegidas.some((p) => p.bandera === 'flag_vn') || !elegidas.some((p) => p.bandera === 'flag_co')) continue;
+    return [...pool.filter((p) => elegidas.includes(p)).map((p) => p.id), 'Fight'];
+  }
+  return ['CrossCountry', 'Obstaculos', 'Vallas', 'Natacion', 'Jabalina', 'Fight'];
+}
+
+/** Las pruebas de esta gira (las de siempre si viene de antes del sorteo). */
+export const pruebasDe = (g: Gira): PruebaGira[] =>
+  (g.pruebas ?? ['CrossCountry', 'Obstaculos', 'Vallas', 'Natacion', 'Jabalina', 'Fight']).map((id) => prueba(id));
 export const PUNTOS = [10, 6, 4, 2];
 
-/** Los datos de una prueba de la gira por su escena. */
-export const prueba = (scene: string) => PRUEBAS_GIRA.find((p) => p.scene === scene)!;
 
 /** Los 4 de una prueba individual: tú, un compañero de la familia y dos del Instituto. */
 export function lineup(jugador: string): Competidor[] {

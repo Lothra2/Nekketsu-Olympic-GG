@@ -9,7 +9,7 @@ import { Input, rotular } from '../core/input';
 import { chip, PELEA, VICTORIA } from '../core/music';
 import { txt, flash, speedLines } from '../core/ui';
 import { FAMILIA, INSTITUTO, INFO } from './Select';
-import type { Gira } from '../events/base';
+import { PUNTOS, type Gira } from '../events/base';
 import { Coach, type Paso } from '../core/coach';
 import azotea from '../../data/stages/caracas_azotea.layout.json';
 import { hayArte, pintarEscenario, queueEscenario } from '../events/escenario';
@@ -627,16 +627,28 @@ export class Fight extends Phaser.Scene implements World {
     this.endMenu(['SÍ, DALE', 'MENÚ'], () => ev.remove());
   }
 
-  /** La final de la Olimpiada: 20 puntos al equipo que gane y al medallero. */
+  /**
+   * Cierra la prueba en la Olimpiada. La final: 20 puntos al equipo que gane. El judo es una prueba más:
+   * 10 al que gana y 6 al otro, como el primero y el segundo.
+   */
   private cierraGira(team: 0 | 1) {
     const gira = this.registry.get('gira') as Gira | undefined;
+    const equipo = (t: number) => (t === 0 ? 'FAMILIA GG' : 'INSTITUTO');
     if (gira) {
-      gira.puntos[team] += 20;
-      const vivos = this.actors.filter((a) => a.team === team).sort((a, b) => Number(b.alive) - Number(a.alive));
-      gira.resultados.push({ prueba: 'KACHINUKI FINAL', podio: vivos.map((a) => a.id) });
+      if (this.judo) {
+        gira.puntos[team] += PUNTOS[0];
+        gira.puntos[1 - team] += PUNTOS[1];
+        const orden = [...this.actors].sort((a, b) => Number(b.team === team) - Number(a.team === team));
+        gira.resultados.push({ prueba: 'JUDO Y VOVINAM', podio: orden.map((a) => a.id) });
+      } else {
+        gira.puntos[team] += 20;
+        const vivos = this.actors.filter((a) => a.team === team).sort((a, b) => Number(b.alive) - Number(a.alive));
+        gira.resultados.push({ prueba: 'KACHINUKI FINAL', podio: vivos.map((a) => a.id) });
+      }
       this.registry.set('gira', gira);
     }
-    this.uiAdd(txt(this, 320, 152, `+20 PTS ${team === 0 ? 'FAMILIA GG' : 'INSTITUTO'}`, 'fuente_ui', 2).setDepth(8500).setTint(0x8ae08a));
+    const msg = this.judo ? `+${PUNTOS[0]} ${equipo(team)} · +${PUNTOS[1]} ${equipo(1 - team)}` : `+20 PTS ${equipo(team)}`;
+    this.uiAdd(txt(this, 320, 152, msg, 'fuente_ui', 2).setDepth(8500).setTint(0x8ae08a));
     this.endMenu(['SIGUIENTE'], undefined, () => {
       if (gira) { gira.idx++; this.registry.set('gira', gira); }
       chip.stop(0.2);

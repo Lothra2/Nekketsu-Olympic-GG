@@ -4,7 +4,7 @@ import { Input } from '../core/input';
 import { chip } from '../core/music';
 import { kit } from '../core/kit';
 import { txt } from '../core/ui';
-import type { Gira } from '../events/base';
+import { sortearGira, type Gira } from '../events/base';
 
 export const FAMILIA = ['rick', 'steph', 'sophie', 'alana'];
 export const INSTITUTO = ['kenji', 'ryu', 'goro', 'tetsu'];
@@ -100,7 +100,7 @@ export class Select extends Phaser.Scene {
       this.jugador = id;
       if (this.modo === '4v4') { this.go({ modo: '4v4', jugador: id, rival: 'kenji' }); return; }
       if (this.modo === 'gira') {
-        const gira: Gira = { jugador: id, idx: 0, puntos: [0, 0], resultados: [] };
+        const gira: Gira = { jugador: id, idx: 0, puntos: [0, 0], resultados: [], pruebas: sortearGira() };
         this.registry.set('gira', gira);
         this.fadeTo('Medallero');
         return;
