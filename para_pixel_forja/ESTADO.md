@@ -26,6 +26,9 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 
 ## Lo último del lado del juego
 
+- **Pedido para el próximo lote de motor: exportar un pack sin la pelota pintada.** Las animaciones de vóley (`vb_bump`, `vb_set`, `spike`, `block`, `serve`, `vb_dive`) y de fútbol (`trap`, `header`, `volley`, `chilena`) traen la pelota dibujada en los cuadros. En el juego la pelota la mueve la física, así que se verían dos. Propuesta: en `kit.config.json`, por pack, `"sin_props": true`. El pack sale sin la pelota en los cuadros y la posición de la pelota de cada cuadro va en los datos por cuadro (`objetos`, como el arma en la mano). Con eso entran Vóley Playa Margarita y Fútbol Callejero, y Đá cầu usa `volley`, `header` y `chilena` de verdad.
+- **Pruebas nuevas en el juego, con fondos pintados por código mientras llega el arte:** Tama-wari Hội An (usa el layout `hoian` y la bola `bola_tama` del kit, con una copia azul para la Familia) y Đá cầu en el parque Tao Đàn.
+
 - **Listo para E3b, la azotea de Caracas ([pixel_forja#24](https://github.com/Lothra2/pixel_forja/pull/24)).** Probado con el arte de la rama E3b generado en local: 9 de 9 pruebas, la pelea 1 contra 1 y 4 contra 4, el Kachinuki completo y el borde hasta x 420.
   - La pelea pinta el escenario de PixelForja cuando está (si no, el fondo de antes), con la vista inclinada de 0.35 en los atletas, las armas y cada efecto del piso (chispas, polvo, arepas, sombras, textos).
   - Con el arte, la cámara se acerca menos (1.35 en 1 contra 1, 1.25 en 4 contra 4): los neones, las torres y el Ávila se ven enteros debajo del marcador.
