@@ -1,13 +1,16 @@
 // Tama-wari: el entrenamiento jugado con el teclado, paso a paso (llegar, agarrarse, trepar, pegarle a la bola,
 // bajar a patear el poste donde trepa Kenji y romper la bola).
-//   node scripts/prueba-tamawari.mjs [carpeta]
+//   node scripts/prueba-tamawari.mjs [url] [carpeta]
 import { chromium } from '@playwright/test';
-const out = process.argv[2] ?? 'capturas/tamawari';
-import('node:fs').then((fs) => fs.mkdirSync(out, { recursive: true }));
+import { mkdirSync } from 'node:fs';
+
+const url = process.argv[2] ?? 'http://localhost:5173/';
+const out = process.argv[3] ?? 'capturas/tamawari';
+mkdirSync(out, { recursive: true });
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader'] });
 const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
 const logs = []; p.on('pageerror', (e) => logs.push(e.message));
-await p.goto('http://localhost:4173/');
+await p.goto(url);
 await p.waitForFunction(() => window.game?.scene.isActive('Tap'), null, { timeout: 60000 });
 await p.mouse.click(400, 200);
 await p.evaluate(() => { const g = window.game; g.scene.getScenes(true).forEach((x) => g.scene.stop(x.scene.key)); g.scene.start('Tamawari', { jugador: 'alana', practica: true }); });
@@ -53,5 +56,9 @@ for (let i = 0; i < 20; i++) { await tecla('j', 30); await p.waitForTimeout(260)
 await p.waitForTimeout(1500);
 console.log('fin', JSON.stringify(await st()));
 await p.screenshot({ path: `${out}/5_fin.png` });
+const final = await st();
+const ok = final.fase === 'fin' && final.bolas.endsWith('/0');
+console.log(ok ? 'ok    el entrenamiento se termina con la bola rota' : `FALLA el entrenamiento no terminó (${JSON.stringify(final)})`);
 console.log(logs.length ? logs : 'sin errores');
 await b.close();
+process.exit(ok && !logs.length ? 0 : 1);

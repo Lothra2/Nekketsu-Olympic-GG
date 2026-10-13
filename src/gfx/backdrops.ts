@@ -458,6 +458,66 @@ function hoianCalle(): HTMLCanvasElement {
   return p.done();
 }
 
+
+/**
+ * Parque Tao Đàn en Saigón, de mañana: los árboles dầu gigantes, la reja del parque con las motos pasando detrás,
+ * las torres de la ciudad a lo lejos, gente haciendo tai chi y la cancha de tierra apisonada de đá cầu.
+ */
+function taodan(): HTMLCanvasElement {
+  const p = new Painter(W, H, M);
+  const r = rng(81);
+  p.vgrad(0, 200, [C('#8cc4e8'), C('#b4dcf0'), C('#e2f0f0'), C('#f6eedc')]);
+  // la ciudad a lo lejos: Landmark 81 y Bitexco entre las torres
+  buildings(p, { x0: X0, x1: X1, base: 196, minH: 16, maxH: 54, minW: 14, maxW: 30, cols: [C('#9ab0c4'), C('#a8bccc'), C('#8ca4b8')], win: C('#d8e4ec'), winOff: C('#7a92a8'), lit: 0.4, seed: 82 });
+  for (let y = 60; y < 196; y++) { const half = Math.round(3 + ((y - 60) / 136) * 11); p.rect(520 - half, y, half * 2, 1, C('#8aa0b6')); }
+  p.rect(519, 50, 2, 10, C('#8aa0b6'));
+  for (let y = 104; y < 196; y++) { const half = Math.round(5 + ((y - 104) / 92) * 5); p.rect(120 - half, y, half * 2, 1, C('#94aabe')); }
+  p.rect(108, 126, 20, 3, C('#94aabe'));
+  // la calle detrás de la reja, con motos
+  p.rect(X0, 196, AW, 22, C('#7a7a84'));
+  for (let x = desde(0, 30); x < X1; x += 30) p.rect(x, 207, 14, 1, C('#e8e8e0'));
+  const motos: [number, number, string][] = [[60, 204, '#d03a3a'], [190, 210, '#3a6ad0'], [300, 203, '#2a2a2a'], [450, 211, '#e8c030'], [590, 205, '#3aa060']];
+  for (const [x, y, c] of motos) {
+    p.rect(x - 7, y + 3, 14, 3, C(c));
+    p.circle(x - 5, y + 7, 2, C('#1a1a1a')); p.circle(x + 5, y + 7, 2, C('#1a1a1a'));
+    p.rect(x - 2, y - 4, 4, 7, C('#3a5aa0'));
+    p.circle(x, y - 6, 2, C(['#f2c230', '#e83a3a', '#ffffff'][x % 3]));
+  }
+  // la reja amarilla del parque
+  p.rect(X0, 222, AW, 2, C('#c8a040'));
+  p.rect(X0, 236, AW, 2, C('#c8a040'));
+  for (let x = desde(0, 6); x < X1; x += 6) p.rect(x, 218, 1, 26, C('#b89030'));
+  // los árboles dầu: troncos altísimos y copas anchas que tapan el cielo de arriba
+  const copa = (cx: number, cy: number, rad: number) => {
+    for (let i = 0; i < rad * 9; i++) { const a = r() * Math.PI * 2, d = Math.sqrt(r()) * rad; p.circle(cx + Math.cos(a) * d * 1.4, cy + Math.sin(a) * d * 0.7, 3 + r() * 4, r() < 0.5 ? C('#2e6a3a') : r() < 0.6 ? C('#3e7a44') : C('#5a9a4e')); }
+  };
+  for (const [x, top] of [[-30, 58], [175, 70], [465, 62], [690, 66]] as [number, number][]) {
+    // el tronco grueso y claro de los dầu, con sus raíces abiertas al pie
+    for (let y = top; y < 262; y++) {
+      const w = 14 + Math.max(0, (y - 236) * 0.9);
+      p.rect(x - w / 2, y, w, 1, C('#8a7a68'));
+      p.rect(x - w / 2, y, 3, 1, C('#5e5044'));
+      p.rect(x + w / 2 - 3, y, 3, 1, C('#a89a86'));
+      if (y % 11 === 0) p.rect(x - w / 2 + 3, y, w - 6, 1, C('#6e6050'));
+    }
+    copa(x, top - 6, 58);
+    copa(x - 40, top + 14, 30);
+    copa(x + 42, top + 10, 32);
+  }
+  // gente haciendo tai chi y una señora barriendo, chiquitos al fondo
+  for (const [x, c] of [[150, '#e8e0d0'], [168, '#f2c2c2'], [186, '#e8e0d0'], [470, '#a8c8e8'], [488, '#e8e0d0']] as [number, string][]) {
+    p.rect(x - 2, 240, 4, 9, C(c)); p.circle(x, 237, 2, C('#e0b090')); p.rect(x - 5, 242, 10, 1, C(c)); p.rect(x - 2, 249, 1, 5, C('#3a3a4a')); p.rect(x + 1, 249, 1, 5, C('#3a3a4a'));
+  }
+  // el pasto y la cancha de tierra apisonada
+  p.rect(X0, 244, AW, 26, C('#5a9a4e'));
+  for (let i = 0; i < 500; i++) p.px(X0 + r() * AW, 244 + r() * 26, r() < 0.5 ? C('#4a8a40') : C('#6aaa5a'));
+  p.vgrad(270, 340, [C('#c8a070'), C('#b88e5e'), C('#a87e50')]);
+  for (let i = 0; i < 1600; i++) p.px(X0 + r() * AW, 270 + r() * 70, r() < 0.5 ? C('#a07848') : C('#d4b080'));
+  p.rect(X0, 340, AW, 20, C('#5a9a4e'));
+  for (let i = 0; i < 300; i++) p.px(X0 + r() * AW, 340 + r() * 20, r() < 0.5 ? C('#4a8a40') : C('#6aaa5a'));
+  return p.done();
+}
+
 /** Registra todos los fondos como texturas. */
 export function makeBackdrops(scene: Phaser.Scene) {
   const add = (k: string, c: HTMLCanvasElement) => { if (!scene.textures.exists(k)) scene.textures.addCanvas(k, c); };
@@ -473,6 +533,7 @@ export function makeBackdrops(scene: Phaser.Scene) {
   add('bg_llanos', llanos());
   add('bg_hoian_lejos', hoianLejos());
   add('bg_hoian', hoianCalle());
+  add('bg_taodan', taodan());
   // banderas sueltas
   for (const k of ['jp', 'vn', 'co', 've'] as const) {
     const p = new Painter(38, 26);

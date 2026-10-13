@@ -26,6 +26,15 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
   - *Vallas del Café* (Eje Cafetero): alterna puño y patada para correr, salta las vallas, codazo con ★. Si tocas una valla, se cae y te frena.
   - *Natación Hạ Long* (bahía de Hạ Long): sales con salto, si te tiras antes del ¡YA! te quedas un segundo. Alterna puño y patada para nadar, ★ es la patada de delfín.
   - *Jabalina Llanera* (Llanos de Apure): carrerita alternando botones, mantén salto para el ángulo y suelta para lanzar. Si pisas la raya es nulo. Dos intentos.
+  - *Tama-wari Hội An* (de noche, entre faroles): cada equipo tiene un poste de bambú con una bola de papel arriba. Gana el primero que rompe la bola del otro.
+    - Al pie del poste del otro, salto o arriba lo agarra. Machacar puño y patada trepa rápido; mantener arriba trepa despacio.
+    - Arriba, puño a la bola, que se raja en 4 estados.
+    - Desde abajo, la patada sacude el poste y el puño le jala el pie al que va empezando a trepar.
+    - En el piso, a los golpes como en la pelea.
+  - *Đá cầu* (parque Tao Đàn, Saigón): el volante de plumas que se juega con los pies, 2 contra 2 con red baja, a 5 puntos.
+    - El círculo amarillo marca dónde va a caer (en Nekketsu no hay ayuda).
+    - Patada la pasa al otro lado, puño la levanta para tu compañero, y saltando cerca de la red con patada sale la chilena, que vale doble si es punto.
+    - Hasta 3 toques por lado. El toque perfecto, a media pierna, va al hueco del rival.
 - **Kachinuki Caracas**, la pelea final en una azotea de Parque Central de noche, en 1 contra 1 o 4 contra 4: Familia GG contra el Instituto Nekketsu.
   - Un borde sin baranda: caminando no te sales, pero si te tumban o te lanzan por ahí, quedas fuera.
   - Cada 30 s cae algo pesado del cielo. Antes aparece su sombra con un aro rojo.
@@ -106,6 +115,8 @@ node scripts/prueba-borde.mjs http://localhost:5173/   # pegada al borde de arri
 node scripts/prueba-kachinuki.mjs http://localhost:5173/ capturas/kachinuki   # el borde, el rescate de Thor, lo que cae del cielo y la azotea que se achica
 node scripts/prueba-pruebas.mjs http://localhost:5173/ capturas/pruebas  # vallas, natación, jabalina y medallero
 node scripts/prueba-entrenamiento.mjs http://localhost:5173/ capturas/entrenamiento  # completa los 4 entrenamientos
+node scripts/prueba-tamawari.mjs http://localhost:5173/ capturas/tamawari   # el entrenamiento de Tama-wari jugado con el teclado
+node scripts/prueba-dacau.mjs http://localhost:5173/ capturas/dacau   # el entrenamiento de Đá cầu con un bot y un partido entero
 node scripts/prueba-cross.mjs http://localhost:5173/ capturas/cross     # los cinco tramos con piloto automático, de punta a punta
 node scripts/prueba-cross.mjs http://localhost:5173/ capturas/cross 3   # solo un tramo (1 a 5)
 node scripts/prueba-teclas.mjs http://localhost:5173/   # cada tecla que nombra el juego hace lo que dice

@@ -50,6 +50,8 @@ await ir('Obstaculos', { jugador: 'sophie' }, 7000, '15_comuna');
 await ir('Vallas', { jugador: 'sophie' }, 6000, '16_vallas');
 await ir('Natacion', { jugador: 'sophie' }, 6000, '17_natacion');
 await ir('Jabalina', { jugador: 'rick' }, 6000, '18_jabalina');
+await ir('Tamawari', { jugador: 'alana' }, 7000, '18b_tamawari');
+await ir('DaCau', { jugador: 'sophie' }, 7000, '18c_dacau');
 // el medallero necesita una olimpiada en curso
 await page.evaluate(() => window.game.registry.set('gira', { idx: 2, puntos: [34, 21], resultados: [{ prueba: 'VALLAS DEL CAFÉ', podio: ['sophie', 'kenji', 'steph', 'ryu'] }, { prueba: 'NATACIÓN HẠ LONG', podio: ['alana', 'tetsu', 'rick', 'goro'] }], jugador: 'sophie', modo: 'gira' }));
 await ir('Medallero', {}, 3000, '19_medallero');

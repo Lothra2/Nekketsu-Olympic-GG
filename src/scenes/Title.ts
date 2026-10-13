@@ -23,6 +23,7 @@ const MENUS: Record<string, { id: string; label: string }[]> = {
     { id: 'Natacion', label: 'NATACIÓN HẠ LONG' },
     { id: 'Jabalina', label: 'JABALINA LLANERA' },
     { id: 'Tamawari', label: 'TAMA-WARI HỘI AN' },
+    { id: 'DaCau', label: 'ĐÁ CẦU SAIGÓN' },
     { id: '<', label: 'ATRÁS' },
   ],
   // el Cross completo son cinco tramos; para una partida corta se puede correr uno solo
@@ -42,6 +43,7 @@ const MENUS: Record<string, { id: string; label: string }[]> = {
     { id: 'practica:Natacion', label: 'NATACIÓN' },
     { id: 'practica:Jabalina', label: 'JABALINA' },
     { id: 'practica:Tamawari', label: 'TAMA-WARI' },
+    { id: 'practica:DaCau', label: 'ĐÁ CẦU' },
     { id: 'practica:Fight', label: 'PELEA' },
     { id: '<', label: 'ATRÁS' },
   ],
@@ -113,13 +115,14 @@ export class Title extends Phaser.Scene {
     this.menu.removeAll(true);
     const g = this.add.graphics();
     const n = this.opciones.length;
-    // el cuadro crece hacia arriba, sin tapar la línea de teclas de abajo
-    const top = 338 - (n * 21 + 10);
-    g.fillStyle(0x08081a, 0.78).fillRect(206, top, 228, n * 21 + 10);
-    g.lineStyle(1, 0xf2c230, 0.8).strokeRect(206.5, top + 0.5, 227, n * 21 + 9);
+    // el cuadro crece hacia arriba, sin tapar la línea de teclas de abajo; las listas largas van más juntas
+    const lh = n >= 8 ? 18 : 21;
+    const top = 338 - (n * lh + 10);
+    g.fillStyle(0x08081a, 0.78).fillRect(206, top, 228, n * lh + 10);
+    g.lineStyle(1, 0xf2c230, 0.8).strokeRect(206.5, top + 0.5, 227, n * lh + 9);
     this.menu.add(g);
     this.items = this.opciones.map((o, i) => {
-      const t = txt(this, 320, top + 15 + i * 21, o.id === 'nivel' ? `NIVEL: ${ajustes().nombre}` : o.label, 'fuente_ui', 2);
+      const t = txt(this, 320, top + 5 + lh / 2 + i * lh, o.id === 'nivel' ? `NIVEL: ${ajustes().nombre}` : o.label, 'fuente_ui', 2);
       t.setInteractive().on('pointerdown', () => { if (this.started) { this.sel = i; this.choose(); } });
       this.menu.add(t);
       return t;
