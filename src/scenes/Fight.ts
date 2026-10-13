@@ -12,9 +12,11 @@ import { FAMILIA, INSTITUTO, INFO } from './Select';
 import type { Gira } from '../events/base';
 import { Coach, type Paso } from '../core/coach';
 import azotea from '../../data/stages/caracas_azotea.layout.json';
+import { hayArte, pintarEscenario, queueEscenario } from '../events/escenario';
 
 /** acercamiento de la cámara en la pelea: más cerca en 1 contra 1 */
 const ZOOMS: Record<string, number> = { '1v1': 1.75, '4v4': 1.45 };
+const ZOOMS_ARTE: Record<string, number> = { '1v1': 1.35, '4v4': 1.25 };
 
 const ARMAS_PISO = ['chancleta', 'tubo', 'pote_basura', 'silla_plastica', 'coco', 'paraguas', 'escoba', 'chancleta_rosada', 'cono', 'llanta'];
 
@@ -69,7 +71,7 @@ export class Fight extends Phaser.Scene implements World {
   /** entrenamiento: con qué animación pegó la persona cada golpe */
   private golpes: string[] = [];
   private thorFan: Figura | null = null;
-  private thorRun: { f: Figura; owner: Actor; hit: Set<Actor>; dir: number } | null = null;
+  private thorRun: { f: Figura; x: number; owner: Actor; hit: Set<Actor>; dir: number } | null = null;
   private specials = new Map<Actor, { kind: string; n: number; t: number }>();
   private fullMeter = new Set<Actor>();
   private ui!: Phaser.GameObjects.Layer;
@@ -87,6 +89,13 @@ export class Fight extends Phaser.Scene implements World {
   private caidos = new Set<Actor>();
   private rescates = 0;
   private bordeG: Phaser.GameObjects.Graphics | null = null;
+  /** el arte de PixelForja de la azotea, si llegó (si no, el fondo pintado de antes) */
+  private arte: ReturnType<typeof pintarEscenario> | null = null;
+  /** la vista inclinada del arte: lo del fondo queda a la izquierda (px = x + inclinacion * y) */
+  inclinacion = 0;
+  /** con el arte: la ciudad allá abajo que se ve donde el piso se cayó, y el filo que se desmorona */
+  private vacio: { img: Phaser.GameObjects.TileSprite; mascara: Phaser.GameObjects.Graphics } | null = null;
+  private filo: Phaser.GameObjects.Sprite | null = null;
   private relojTxt: Phaser.GameObjects.BitmapText | null = null;
   private pesado: { it: Item; sombra: Phaser.GameObjects.Ellipse } | null = null;
   /** la arepa que cae de vez en cuando: quien la pisa recupera vida */
@@ -136,7 +145,7 @@ export class Fight extends Phaser.Scene implements World {
 
   /** Un cartelito de cómic chiquito sobre alguien. */
   aviso(a: Actor, s: string, color: number) {
-    const t = txt(this, a.x, FLOOR_TOP + a.y - a.z - 58, s, 'fuente_ui', 1).setTint(color).setDepth(6000);
+    const t = txt(this, this.px(a.x, a.y), FLOOR_TOP + a.y - a.z - 58, s, 'fuente_ui', 1).setTint(color).setDepth(6000);
     this.tweens.add({ targets: t, y: t.y - 14, alpha: 0, delay: 350, duration: 550, onComplete: () => t.destroy() });
   }
 
@@ -180,7 +189,8 @@ export class Fight extends Phaser.Scene implements World {
     }
     this.caidos.add(a);
     const fig = a.fig;
-    fig.setDepth(-7.9);
+    // delante del vacío y del filo, detrás de lo que sigue en la azotea
+    fig.setDepth(this.arte ? FLOOR_TOP - 0.2 : -7.9);
     chip.blip(1320, 0.7, 'sq50', 0.14, 110);
     this.tweens.add({ targets: fig, y: fig.y + 220, angle: a.left ? -200 : 200, duration: 900, ease: 'Quad.in', onComplete: () => fig.setVisible(false) });
     this.letrero(a, '¡FUERA!', 0xff8080);
@@ -189,30 +199,43 @@ export class Fight extends Phaser.Scene implements World {
   }
 
   private letrero(a: Actor, s: string, color: number) {
-    const t = txt(this, Math.min(a.x, this.borde - 40), FLOOR_TOP + a.y - 64, s, 'fuente_titulo', 1).setTint(color).setDepth(6000);
+    const t = txt(this, this.px(Math.min(a.x, this.borde - 40), a.y), FLOOR_TOP + a.y - 64, s, 'fuente_titulo', 1).setTint(color).setDepth(6000);
     this.tweens.add({ targets: t, y: t.y - 16, alpha: 0, delay: 500, duration: 600, onComplete: () => t.destroy() });
   }
+
+  preload() { queueEscenario(this, 'caracas_azotea'); }
+
+  /** La x de pantalla de un punto del piso, con la vista inclinada del arte. */
+  px(x: number, y: number) { return x + this.inclinacion * y; }
 
   create() {
     this.cameras.main.fadeIn(250);
     // el mundo se ve de cerca y sigue la acción; el marcador va en su propia capa, sin acercar
     this.ui = this.add.layer().setDepth(10000);
     // entrenando, un poco más lejos: el cartel de arriba no tapa a nadie
-    this.zoom = this.data0.practica ? 1.45 : ZOOMS[this.data0.modo] ?? 1.45;
-    this.cameras.main.setZoom(this.zoom).setBounds(0, 0, 640, 360).centerOn(320, this.camY);
+    this.arte = hayArte(this, 'caracas_azotea') ? pintarEscenario(this, 'caracas_azotea', 5000) : null;
+    // con el arte, un poco más lejos: los neones, las torres y el Ávila se ven enteros debajo del marcador
+    this.zoom = this.arte ? (this.data0.practica ? 1.25 : ZOOMS_ARTE[this.data0.modo] ?? 1.25) : this.data0.practica ? 1.45 : ZOOMS[this.data0.modo] ?? 1.45;
+    this.inclinacion = this.arte?.inclinacion ?? 0;
+    this.vacio = null;
+    this.filo = null;
+    this.cameras.main.setZoom(this.zoom).setBounds(0, 0, this.arte?.ancho ?? 640, 360).centerOn(320, this.camY);
     this.cameras.main.ignore(this.ui);
     this.uiCam = this.cameras.add(0, 0, 640, 360).setName('ui');
     this.camLock = false;
-    this.add.image(320, 180, 'bg_caracas').setDepth(-10).setScrollFactor(0.45, 1);
-    this.add.image(320, 280, 'bg_azotea').setDepth(-9);
-    // en los edificios, más abajo que el marcador: se ven enteros con cualquier acercamiento
-    this.neon('AREPERA LA CHAMA', 470, 194, 0xff4fa0);
-    this.neon('CARACAS', 160, 190, 0x40e0ff);
-    // Thor mira desde el fondo, lejos del borde
+    if (!this.arte) {
+      this.add.image(320, 180, 'bg_caracas').setDepth(-10).setScrollFactor(0.45, 1);
+      this.add.image(320, 280, 'bg_azotea').setDepth(-9);
+      // en los edificios, más abajo que el marcador: se ven enteros con cualquier acercamiento
+      this.neon('AREPERA LA CHAMA', 470, 194, 0xff4fa0);
+      this.neon('CARACAS', 160, 190, 0x40e0ff);
+    }
+    // Thor mira desde el fondo, lejos del borde (con el arte, en su lugar del layout: delante de los tanques)
     const npc = azotea.entidades.find((e) => e.tipo === 'npc');
-    this.thorFan = new Figura(this, npc?.x ?? 40, FLOOR_TOP - 2, 'thor', 'sit').setDepth(FLOOR_TOP - 2);
+    const ty = this.arte ? (npc?.y ?? 2) : -2;
+    this.thorFan = new Figura(this, this.px(npc?.x ?? 40, Math.max(0, ty)), FLOOR_TOP + ty, 'thor', 'sit').setDepth(FLOOR_TOP + ty);
     this.thorFan.row = 'down_right';
-    this.bordeG = this.data0.practica ? null : this.add.graphics().setDepth(-8);
+    this.bordeG = this.data0.practica || this.arte ? null : this.add.graphics().setDepth(-8);
     this.dibujarBorde();
 
     this.sparks = this.add.particles(0, 0, 'px', { speed: { min: 60, max: 180 }, lifespan: 260, scale: { start: 0.9, end: 0 }, tint: [0xffffff, 0xffe040, 0xffa020], emitting: false }).setDepth(5000);
@@ -312,21 +335,22 @@ export class Fight extends Phaser.Scene implements World {
   sfx(name: string, vol = 0.5) { if (this.cache.audio.exists(name)) this.sound.play(name, { volume: vol }); }
   spark(x: number, y: number, z: number, big: boolean) {
     // la chispa del kit en el punto del golpe; las partículas quedan de relleno
-    efecto(this, big ? 'chispa_golpe_pesado' : 'chispa_golpe_medio', x, FLOOR_TOP + y - z, { depth: 5002 });
-    this.sparks.explode(big ? 8 : 4, x, FLOOR_TOP + y - z);
-    const ring = this.add.circle(x, FLOOR_TOP + y - z, 3, 0xffffff, 0).setStrokeStyle(2, 0xffffff).setDepth(5001);
+    const sx = this.px(x, y);
+    efecto(this, big ? 'chispa_golpe_pesado' : 'chispa_golpe_medio', sx, FLOOR_TOP + y - z, { depth: 5002 });
+    this.sparks.explode(big ? 8 : 4, sx, FLOOR_TOP + y - z);
+    const ring = this.add.circle(sx, FLOOR_TOP + y - z, 3, 0xffffff, 0).setStrokeStyle(2, 0xffffff).setDepth(5001);
     this.tweens.add({ targets: ring, scale: big ? 5 : 3, alpha: 0, duration: 160, onComplete: () => ring.destroy() });
   }
   dust(x: number, y: number) {
-    if (!efecto(this, 'polvo_caer_medio', x, FLOOR_TOP + y)) this.dusts.explode(7, x, FLOOR_TOP + y);
+    if (!efecto(this, 'polvo_caer_medio', this.px(x, y), FLOOR_TOP + y)) this.dusts.explode(7, this.px(x, y), FLOOR_TOP + y);
   }
   /** Al correr, una nubecita en cada paso; la persona además suena. */
   paso(a: Actor) {
-    if (a.st === 'run') efecto(this, `polvo_correr_${talla(a.fig.celda)}`, a.x, FLOOR_TOP + a.y, { flip: a.left });
+    if (a.st === 'run') efecto(this, `polvo_correr_${talla(a.fig.celda)}`, this.px(a.x, a.y), FLOOR_TOP + a.y, { flip: a.left });
     if (a.human) this.sfx(`paso_piedra_${Math.floor(Math.random() * 3)}`, 0.25);
   }
   number(x: number, y: number, n: number) {
-    const t = txt(this, x, FLOOR_TOP + y - 52, `${n}`, 'fuente_ui', 1).setTint(0xff6060).setDepth(6000);
+    const t = txt(this, this.px(x, y), FLOOR_TOP + y - 52, `${n}`, 'fuente_ui', 1).setTint(0xff6060).setDepth(6000);
     this.tweens.add({ targets: t, y: t.y - 16, alpha: 0, duration: 650, onComplete: () => t.destroy() });
   }
   onHit(from: Actor | null, v: Actor, _dmg: number, kd: boolean) {
@@ -344,13 +368,13 @@ export class Fight extends Phaser.Scene implements World {
       if (this.racha.n >= 2) this.mostrarRacha();
     }
     const cabeza = FLOOR_TOP + v.y - v.z - 40;
-    if (kd) this.onomatopeya(v.x + (from ? from.dir * 10 : 0), cabeza, Phaser.Utils.Array.GetRandom(PUM), true);
-    else if (from === this.player && this.racha.n % 3 === 0) this.onomatopeya(v.x, cabeza, Phaser.Utils.Array.GetRandom(PAF), false);
+    if (kd) this.onomatopeya(this.px(v.x, v.y) + (from ? from.dir * 10 : 0), cabeza, Phaser.Utils.Array.GetRandom(PUM), true);
+    else if (from === this.player && this.racha.n % 3 === 0) this.onomatopeya(this.px(v.x, v.y), cabeza, Phaser.Utils.Array.GetRandom(PAF), false);
     // el Instituto se burla cuando te tumba (y si le pegas mientras se ríe, se lo merece)
     if (kd && v.human && from && from.team === 1 && this.phase === 'play' && Math.random() < 0.65) {
       this.time.delayedCall(520, () => {
         if (!from.alive || this.phase !== 'play' || !from.burla(1.1)) return;
-        const t = txt(this, from.x, FLOOR_TOP + from.y - 62, Phaser.Utils.Array.GetRandom(BURLAS), 'fuente_ui', 1).setDepth(6000).setTint(0xffa0a0);
+        const t = txt(this, this.px(from.x, from.y), FLOOR_TOP + from.y - 62, Phaser.Utils.Array.GetRandom(BURLAS), 'fuente_ui', 1).setDepth(6000).setTint(0xffa0a0);
         this.tweens.add({ targets: t, y: t.y - 8, alpha: 0, delay: 700, duration: 400, onComplete: () => t.destroy() });
       });
     }
@@ -369,7 +393,7 @@ export class Fight extends Phaser.Scene implements World {
   }
   onKO(a: Actor) {
     this.sfx('enemigo_muere', 0.5);
-    const t = txt(this, a.x, FLOOR_TOP + a.y - 60, 'K.O.', 'fuente_titulo', 1).setDepth(6000);
+    const t = txt(this, this.px(a.x, a.y), FLOOR_TOP + a.y - 60, 'K.O.', 'fuente_titulo', 1).setDepth(6000);
     this.tweens.add({ targets: t, y: t.y - 20, alpha: 0, delay: 600, duration: 700, onComplete: () => t.destroy() });
     const vivos = this.actors.filter((x) => x.team === a.team && x.alive);
     if (!vivos.length && this.phase === 'play') {
@@ -377,7 +401,7 @@ export class Fight extends Phaser.Scene implements World {
       this.slow = 1.3;
       this.camLock = true;
       this.cameras.main.zoomTo(this.zoom * 1.3, 250);
-      this.cameras.main.pan(a.x, FLOOR_TOP + a.y - 30, 250);
+      this.cameras.main.pan(this.px(a.x, a.y), FLOOR_TOP + a.y - 30, 250);
       flash(this, 200);
       // el K.O. grande, de pantalla completa
       this.shake(380, 0.014);
@@ -448,6 +472,8 @@ export class Fight extends Phaser.Scene implements World {
   }
 
   private renderAll() {
+    // el escenario: paralaje, neones, luces, el helicóptero y el público
+    this.arte?.tick(this.game.loop.delta / 1000, this.cameras.main.scrollX, () => false);
     // los que se cayeron de la azotea ya no se dibujan donde estaban: van cayendo solos
     for (const a of this.actors) if (!this.caidos.has(a)) a.render();
     for (const i of this.items) i.render();
@@ -468,7 +494,7 @@ export class Fight extends Phaser.Scene implements World {
     const p = this.player;
     const foes = this.actors.filter((a) => a.team !== p.team && a.alive);
     const near = foes.sort((a, b) => Math.abs(a.x - p.x) - Math.abs(b.x - p.x))[0];
-    const tx = near && Math.abs(near.x - p.x) < 260 ? p.x * 0.6 + near.x * 0.4 : p.x;
+    const tx = near && Math.abs(near.x - p.x) < 260 ? this.px(p.x, p.y) * 0.6 + this.px(near.x, near.y) * 0.4 : this.px(p.x, p.y);
     const cur = cam.midPoint.x || 320;
     cam.centerOn(cur + (tx - cur) * 0.08, this.camY);
   }
@@ -527,7 +553,27 @@ export class Fight extends Phaser.Scene implements World {
     });
   }
 
+  /**
+   * Fuegos artificiales al ganar: los del kit, en el cielo que se ve con el acercamiento de la pelea (los del
+   * escenario vienen más arriba, fuera de cuadro). Uno cada medio segundo, de colores, por unos segundos.
+   */
+  private fuegosArtificiales() {
+    const colores = ['rojo', 'dorado', 'azul', 'verde'].filter((c) => this.textures.exists(`fx_fuegos_artificiales_${c}`));
+    if (!colores.length) return;
+    this.time.addEvent({
+      delay: 450, repeat: 10, callback: () => {
+        const v = this.cameras.main.worldView;
+        const x = Phaser.Math.Between(Math.round(v.x + 40), Math.round(v.right - 40)), y = Phaser.Math.Between(Math.round(v.y + 55), Math.round(v.y + 100));
+        // grandes y que sumen luz: sobre la ciudad encendida, los chiquitos se pierden
+        efecto(this, `fuegos_artificiales_${Phaser.Utils.Array.GetRandom(colores)}`, x, y, { depth: -17, scale: 2 })?.setBlendMode(Phaser.BlendModes.ADD);
+        chip.boom(0.25);
+      },
+    });
+  }
+
   private victory() {
+    // fuegos artificiales sobre Caracas
+    this.fuegosArtificiales();
     this.phase = 'end';
     chip.play(VICTORIA);
     for (const a of this.actors) if (a.team === 0 && a.alive) { a.fig.row = 'down'; a.setSt('win', 'victory'); }
@@ -619,7 +665,7 @@ export class Fight extends Phaser.Scene implements World {
   private cutIn(a: Actor) {
     this.cut = 1.0;
     // el aura Nekketsu detrás de quien lanza la técnica
-    const aura = efecto(this, 'aura_nekketsu', a.x, FLOOR_TOP + a.y, { depth: FLOOR_TOP + a.y - 0.5 });
+    const aura = efecto(this, 'aura_nekketsu', this.px(a.x, a.y), FLOOR_TOP + a.y, { depth: FLOOR_TOP + a.y - 0.5 });
     if (aura) this.time.delayedCall(1700, () => this.tweens.add({ targets: aura, alpha: 0, duration: 250, onComplete: () => aura.destroy() }));
     if (a.id === 'alana') this.sfx('thor_rescate', 0.6);
     const side = a.team === 0 ? 1 : -1;
@@ -653,9 +699,10 @@ export class Fight extends Phaser.Scene implements World {
     if (kind === 'thor') {
       a.play('taunt', true);
       const dir = a.dir;
-      const f = new Figura(this, dir > 0 ? XMIN - 30 : XMAX + 30, FLOOR_TOP + a.y, 'thor', 'run').setScale(1.4);
+      const x = dir > 0 ? XMIN - 30 : XMAX + 30;
+      const f = new Figura(this, this.px(x, a.y), FLOOR_TOP + a.y, 'thor', 'run').setScale(1.4);
       f.left = dir < 0;
-      this.thorRun = { f, owner: a, hit: new Set(), dir };
+      this.thorRun = { f, x, owner: a, hit: new Set(), dir };
       if (this.thorFan) this.thorFan.setVisible(false);
       this.sfx('ladrido', 0.7);
     }
@@ -700,20 +747,21 @@ export class Fight extends Phaser.Scene implements World {
   private thorTick(dt: number) {
     const r = this.thorRun;
     if (!r) return;
-    r.f.x += r.dir * 300 * dt;
+    r.x += r.dir * 300 * dt;
+    r.f.x = this.px(r.x, r.owner.y);
     r.f.y = FLOOR_TOP + r.owner.y;
     r.f.setDepth(FLOOR_TOP + r.owner.y + 0.3);
     r.f.step(dt, 300 * dt);
     for (const v of this.actors) {
       if (v.team === r.owner.team || r.hit.has(v) || !v.canBeHit()) continue;
-      if (Math.abs(v.y - r.owner.y) > 16 || Math.abs(v.x - r.f.x) > 22) continue;
+      if (Math.abs(v.y - r.owner.y) > 16 || Math.abs(v.x - r.x) > 22) continue;
       r.hit.add(v);
       v.takeHit(r.owner, { dmg: 15, kd: true, push: 200, launch: 220 }, r.dir);
       this.spark(v.x, v.y, 18, true);
       this.sfx('ladrido', 0.5);
       this.hitstop(0.07);
     }
-    if (r.f.x < XMIN - 60 || r.f.x > XMAX + 60) {
+    if (r.x < XMIN - 60 || r.x > XMAX + 60) {
       r.f.destroy();
       this.thorRun = null;
       if (this.thorFan) this.thorFan.setVisible(true);
@@ -729,7 +777,7 @@ export class Fight extends Phaser.Scene implements World {
     if (this.arepaT <= 0 && this.arepas.length === 0) {
       this.arepaT = 22 + Math.random() * 12;
       const x = Phaser.Math.Between(XMIN + 50, Math.min(XMAX, this.borde) - 70), y = Phaser.Math.Between(12, DEPTH - 12);
-      const g = this.add.graphics().setPosition(x, FLOOR_TOP + y).setDepth(FLOOR_TOP + y - 0.5);
+      const g = this.add.graphics().setPosition(this.px(x, y), FLOOR_TOP + y).setDepth(FLOOR_TOP + y - 0.5);
       // la arepa rellena: la masa dorada, el relleno asomado y las marcas del budare
       g.fillStyle(0x000000, 0.3).fillEllipse(0, 1, 18, 5);
       g.fillStyle(0xc8903a).fillEllipse(0, -3, 16, 9);
@@ -741,7 +789,7 @@ export class Fight extends Phaser.Scene implements World {
       g.setScale(0).setY(FLOOR_TOP + y - 60);
       this.tweens.add({ targets: g, scale: 1.5, y: FLOOR_TOP + y, duration: 420, ease: 'Bounce.out' });
       this.arepas.push({ x, y, g, t: 14 });
-      const t = txt(this, x, FLOOR_TOP + y - 26, '¡UNA AREPA!', 'fuente_ui', 1).setDepth(6000).setTint(0xffd080);
+      const t = txt(this, this.px(x, y), FLOOR_TOP + y - 26, '¡UNA AREPA!', 'fuente_ui', 1).setDepth(6000).setTint(0xffd080);
       this.tweens.add({ targets: t, y: t.y - 10, alpha: 0, delay: 900, duration: 500, onComplete: () => t.destroy() });
       chip.blip(988, 0.1, 'sq25', 0.12, 1318);
     }
@@ -780,7 +828,8 @@ export class Fight extends Phaser.Scene implements World {
       this.derrumbe -= dt;
       if (this.derrumbe <= 0) {
         this.derrumbe = 0.35;
-        efecto(this, 'polvo_caer_grande', this.borde + 4, FLOOR_TOP + Math.random() * DEPTH, { depth: FLOOR_TOP + DEPTH });
+        const yy = Math.random() * DEPTH;
+        efecto(this, 'polvo_caer_grande', this.px(this.borde + 4, yy), FLOOR_TOP + yy, { depth: FLOOR_TOP + DEPTH });
         if (Math.random() < 0.4) this.sfx('romper', 0.15);
       }
       this.dibujarBorde();
@@ -795,8 +844,8 @@ export class Fight extends Phaser.Scene implements World {
     const x = Phaser.Math.Clamp(objetivo.x + Phaser.Math.Between(-30, 30), XMIN + 30, this.borde - 30);
     const y = Phaser.Math.Clamp(objetivo.y + Phaser.Math.Between(-10, 10), 8, DEPTH - 8);
     // la sombra crece y un aro rojo titila: ahí va a caer
-    const sombra = this.add.ellipse(x, FLOOR_TOP + y, 12, 5, 0x000000, 0.55).setDepth(FLOOR_TOP + y - 1);
-    const aro = this.add.ellipse(x, FLOOR_TOP + y, 44, 16).setStrokeStyle(2, 0xff4040).setDepth(FLOOR_TOP + y - 0.9);
+    const sombra = this.add.ellipse(this.px(x, y), FLOOR_TOP + y, 12, 5, 0x000000, 0.55).setDepth(FLOOR_TOP + y - 1);
+    const aro = this.add.ellipse(this.px(x, y), FLOOR_TOP + y, 44, 16).setStrokeStyle(2, 0xff4040).setDepth(FLOOR_TOP + y - 0.9);
     sombra.once('destroy', () => aro.destroy());
     this.tweens.add({ targets: sombra, scaleX: 3.6, scaleY: 3.6, duration: 1500 });
     this.tweens.add({ targets: aro, alpha: 0.15, duration: 130, yoyo: true, repeat: -1 });
@@ -820,7 +869,7 @@ export class Fight extends Phaser.Scene implements World {
     p.sombra.destroy();
     this.shake(260, 0.016);
     this.sfx('jefe_pisoton', 0.6);
-    efecto(this, 'polvo_caer_grande', p.it.x, FLOOR_TOP + p.it.y, { depth: FLOOR_TOP + p.it.y + 1 });
+    efecto(this, 'polvo_caer_grande', this.px(p.it.x, p.it.y), FLOOR_TOP + p.it.y, { depth: FLOOR_TOP + p.it.y + 1 });
     for (const a of this.actors) {
       if (!a.alive || !a.canBeHit() || Math.abs(a.x - p.it.x) > 24 || Math.abs(a.y - p.it.y) > 12) continue;
       a.takeHit(null, { dmg: 14, kd: true, push: 90, launch: 180 }, a.x < p.it.x ? -1 : 1);
@@ -828,8 +877,45 @@ export class Fight extends Phaser.Scene implements World {
     }
   }
 
+  /**
+   * El borde que avanza con el arte de PixelForja: la ciudad allá abajo (borde_vacio, repetido) desde el canto nuevo
+   * hacia la derecha, inclinado como el piso, y el filo que se desmorona encima (6 cuadros, se queda en el último).
+   * Las antenas que quedan del otro lado se van con el pedazo.
+   */
+  private bordeArte() {
+    const B = this.arte?.borde;
+    if (!B || this.data0.practica || this.borde >= BORDE - 0.5) return;
+    const k = this.inclinacion, abajo = 360 - FLOOR_TOP;
+    if (!this.vacio) {
+      const mascara = this.make.graphics({}, false);
+      const img = this.add.tileSprite(0, FLOOR_TOP, (this.arte?.ancho ?? 640) + 40, abajo, B.tex.vacio).setOrigin(0).setDepth(FLOOR_TOP - 0.5);
+      img.setMask(mascara.createGeometryMask());
+      this.vacio = { img, mascara };
+      this.filo = this.add.sprite(0, FLOOR_TOP, B.tex.filo, 0).setOrigin(0).setDepth(FLOOR_TOP - 0.3);
+      if (!this.anims.exists('borde_filo')) this.anims.create({ key: 'borde_filo', frames: this.anims.generateFrameNumbers(B.tex.filo, { start: 0, end: B.filo.cuadros - 1 }), frameRate: B.filo.fps, repeat: 0 });
+    }
+    const b = this.borde;
+    // el vacío: del canto inclinado (lo de atrás queda a la izquierda) hasta el final de lo pintado
+    const m = this.vacio.mascara.clear().fillStyle(0xffffff);
+    m.fillPoints([{ x: b, y: FLOOR_TOP }, { x: 2000, y: FLOOR_TOP }, { x: 2000, y: 360 }, { x: b + k * abajo, y: 360 }], true);
+    // el filo cae cada vez que el canto avanza un trozo, y se queda roto en su último cuadro
+    const f = this.filo!;
+    const x = Math.round(b - B.filo.ancla[0]);
+    if (Math.abs(f.x - x) >= 6 || !f.anims.isPlaying) {
+      if (Math.abs(f.x - x) >= 6) { f.setX(x); f.play('borde_filo'); }
+    }
+    for (const { o, img } of this.arte?.objetos ?? []) {
+      // la antena sigue parada mientras su pie (al fondo de la franja) quede de este lado del canto
+      if (img.getData('cae') || o.x + img.width / 2 - k * 2 < b) continue;
+      img.setData('cae', true);
+      this.tweens.add({ targets: img, y: img.y + 260, angle: 25, alpha: 0, duration: 1100, ease: 'Quad.in' });
+      this.sfx('romper', 0.3);
+    }
+  }
+
   /** El vacío después del borde, con la franja de peligro y el letrero. */
   private dibujarBorde() {
+    this.bordeArte();
     const g = this.bordeG;
     if (!g) return;
     const b = Math.round(this.borde);

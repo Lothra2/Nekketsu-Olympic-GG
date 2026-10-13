@@ -26,6 +26,14 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 
 ## Lo último del lado del juego
 
+- **Listo para E3b, la azotea de Caracas ([pixel_forja#24](https://github.com/Lothra2/pixel_forja/pull/24)).** Probado con el arte de la rama E3b generado en local: 9 de 9 pruebas, la pelea 1 contra 1 y 4 contra 4, el Kachinuki completo y el borde hasta x 420.
+  - La pelea pinta el escenario de PixelForja cuando está (si no, el fondo de antes), con la vista inclinada de 0.35 en los atletas, las armas y cada efecto del piso (chispas, polvo, arepas, sombras, textos).
+  - Con el arte, la cámara se acerca menos (1.35 en 1 contra 1, 1.25 en 4 contra 4): los neones, las torres y el Ávila se ven enteros debajo del marcador.
+  - Thor en x 40, y 2, delante de los tanques.
+  - El borde que avanza: `borde_vacio` repetido desde el canto inclinado y `borde_filo` que se desmorona a cada trozo. Las antenas que quedan del otro lado se caen con el pedazo.
+  - Las luces con `parpadeo` prenden y apagan con ese período, con un brillo redondo suave en vez de un disco plano.
+  - `helicoptero_reflector`, `publico` y `fuegos_artificiales` en la vida del layout. Los fuegos del escenario esperan a que la escena los pida; en la pelea salen al ganar, dentro de lo que ve la cámara.
+
 - **Listo para C6a, la gente de la Comuna 13 ([pixel_forja#23](https://github.com/Lothra2/pixel_forja/pull/23)).** Probado con el kit de la rama C6a generado en local, sobre el arte de E3a.
   - Las 9 fichas en `npc/` y la sección `npc` en `kit.config.json`, copiadas del ejemplo.
   - Cada NPC es una tira (`npc_<id>`) con una animación por tramo (`npc_<id>_<anim>`), con el ancla en los pies en el (x, y) de su entidad y ordenado como los atletas, también sobre una caja.

@@ -27,13 +27,18 @@ interface Pieza {
   recorrido?: { desde: [number, number]; hasta: [number, number]; segundos: number; desfase?: number };
 }
 interface Objeto { id: string; tipo: string; cuadro: Cuadro; x: number; y: number; orden: number }
+/** Una luz: `latido` respira suave; `parpadeo` prende y apaga con ese período en segundos (las luces rojas, los neones). */
 interface Luz { x: number; y: number; color: string; radio: number; latido?: number; parpadeo?: number; encendida: boolean }
 interface Particula { tipo: string; fx?: string; x0: number; x1: number; y0: number; y1: number; color?: string[]; cada: number; sube?: number; vida?: number }
 export interface EscenarioJson {
   id: string; franja: { atras: number; adelante: number }; largo: number; clima: string[];
   /** la vista inclinada con que PixelForja pintó el piso (px = x + inclinacion * y); sin el campo, derecho */
   inclinacion?: number;
+  /** lo ancho que viene pintado (largo + inclinación por el fondo de la franja) */
+  ancho?: number;
   capas: Record<string, Capa>;
+  /** el filo que se desmorona y el vacío de abajo, para cuando el borde avanza (la azotea que se achica) */
+  borde?: { filo: { archivo: string; w: number; h: number; cuadros: number; fps: number; ancla: [number, number] }; vacio: { archivo: string; w: number; h: number } };
   vida: { imagen: string; piezas: Pieza[] };
 }
 
@@ -55,6 +60,10 @@ export function queueEscenario(scene: Phaser.Scene, id: string) {
       c.archivos?.forEach((a, i) => { if (a.endsWith('.png')) scene.load.image(k(id, `${n}_${i}`), dir + a); });
     }
     scene.load.image(k(id, 'objetos'), dir + 'objetos.png');
+    if (e.borde) {
+      scene.load.spritesheet(k(id, 'filo'), dir + e.borde.filo.archivo, { frameWidth: e.borde.filo.w, frameHeight: e.borde.filo.h });
+      scene.load.image(k(id, 'vacio'), dir + e.borde.vacio.archivo);
+    }
     scene.load.image(k(id, 'vida'), dir + e.vida.imagen);
   });
 }
@@ -79,8 +88,9 @@ export function pintarEscenario(scene: Phaser.Scene, id: string, depthFrente: nu
   const W = scene.scale.width;
   // cielo quieto y ciudad lejana con su paralaje
   // (el cielo cierra el ciclo a lo ancho: se repite para cubrir la pantalla más ancha)
-  scene.add.tileSprite(0, C.cielo.y, MAX_W, scene.textures.get(k(id, 'cielo')).getSourceImage().height, k(id, 'cielo')).setOrigin(0).setScrollFactor(0).setDepth(-40);
-  const lejos = scene.add.tileSprite(0, C.lejos.y, MAX_W, scene.textures.get(k(id, 'lejos')).getSourceImage().height, k(id, 'lejos')).setOrigin(0).setScrollFactor(0).setDepth(-35);
+  // (quietos a lo ancho pero siguiendo a la cámara en vertical: en la pelea la cámara sube y baja con la acción)
+  scene.add.tileSprite(0, C.cielo.y, MAX_W, scene.textures.get(k(id, 'cielo')).getSourceImage().height, k(id, 'cielo')).setOrigin(0).setScrollFactor(0, 1).setDepth(-40);
+  const lejos = scene.add.tileSprite(0, C.lejos.y, MAX_W, scene.textures.get(k(id, 'lejos')).getSourceImage().height, k(id, 'lejos')).setOrigin(0).setScrollFactor(0, 1).setDepth(-35);
   // trozos de 1280: casas, piso y primer plano
   const trozos = (n: string, depth: number) => C[n]?.archivos?.forEach((_a, i) => scene.add.image(i * (C[n].trozo ?? 1280), C[n].y, k(id, `${n}_${i}`)).setOrigin(0).setDepth(depth));
   trozos('cerca', -20);
@@ -88,7 +98,7 @@ export function pintarEscenario(scene: Phaser.Scene, id: string, depthFrente: nu
   trozos('frente', depthFrente);
   // objetos ordenados con los atletas
   const obj = scene.cache.json.get(k(id, 'objetos_json')) as { objetos: Objeto[] };
-  for (const o of obj.objetos) scene.add.image(o.x, o.y, k(id, 'objetos'), cuadro(scene, k(id, 'objetos'), o.id, o.cuadro)).setOrigin(0).setDepth(FT + o.orden);
+  const objetos = obj.objetos.map((o) => ({ o, img: scene.add.image(o.x, o.y, k(id, 'objetos'), cuadro(scene, k(id, 'objetos'), o.id, o.cuadro)).setOrigin(0).setDepth(FT + o.orden) }));
   // vida: la de la capa lejos va aparte (pegada a la ciudad lejana, con su paralaje)
   const anchoLejos = scene.textures.get(k(id, 'lejos')).getSourceImage().width;
   const profundidad = (p: Pieza) => (p.capa === 'tras_cerca' ? -22 : p.capa === 'objeto' ? FT + (p.orden ?? 0) : -19);
@@ -101,17 +111,31 @@ export function pintarEscenario(scene: Phaser.Scene, id: string, depthFrente: nu
   const copias = Math.ceil(MAX_W / anchoLejos) + 1;
   const lejana = e.vida.piezas.filter((p) => p.capa === 'lejos' && p.recorrido).map((p) => {
     const frames = p.cuadros.map((c, i) => cuadro(scene, k(id, 'vida'), `${p.id}_${i}`, c));
-    const imgs = Array.from({ length: copias }, () => scene.add.image(0, C.lejos.y + p.recorrido!.desde[1], k(id, 'vida'), frames[0]).setOrigin(0).setScrollFactor(0).setDepth(-34));
+    const imgs = Array.from({ length: copias }, () => scene.add.image(0, C.lejos.y + p.recorrido!.desde[1], k(id, 'vida'), frames[0]).setOrigin(0).setScrollFactor(0, 1).setDepth(-34));
     return { p, imgs, frames };
   });
   // luces que laten y partículas sencillas (las que piden un efecto del kit esperan al lote F)
+  // un brillo redondo que se apaga hacia afuera (un disco plano se ve como una mancha)
+  if (!scene.textures.exists('luz_suave')) {
+    const t = scene.textures.createCanvas('luz_suave', 128, 128)!;
+    const ctx = t.getContext();
+    const gr = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+    gr.addColorStop(0, 'rgba(255,255,255,1)');
+    gr.addColorStop(0.35, 'rgba(255,255,255,0.45)');
+    gr.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = gr;
+    ctx.fillRect(0, 0, 128, 128);
+    t.refresh();
+  }
   const luces = ((scene.cache.json.get(k(id, 'luces')) as { luces: Luz[] }).luces ?? []).filter((l) => l.encendida).map((l) => {
     const c = Phaser.Display.Color.HexStringToColor(l.color).color;
-    const g = scene.add.circle(l.x, l.y, l.radio, c, 0.18).setBlendMode(Phaser.BlendModes.ADD).setDepth(l.y < FT ? -18 : FT + (l.y - FT));
+    const g = scene.add.image(l.x, l.y, 'luz_suave').setScale((l.radio * 2) / 128).setTint(c).setAlpha(0.22).setBlendMode(Phaser.BlendModes.ADD).setDepth(l.y < FT ? -18 : FT + (l.y - FT));
     return { l, g };
   });
   // partículas: las que piden un efecto del kit lo usan; las demás son puntitos que suben o brillan
   const conFx = ((scene.cache.json.get(k(id, 'particulas')) as { particulas: Particula[] }).particulas ?? []).filter((p) => p.fx && hayFx(p.fx)).map((p) => ({ p, t: Math.random() * p.cada }));
+  // los fuegos artificiales esperan a que la escena los pida (al final de la pelea, cuando alguien llega)
+  let fuegos = false;
   const parts = ((scene.cache.json.get(k(id, 'particulas')) as { particulas: Particula[] }).particulas ?? []).filter((p) => !p.fx).map((p) => {
     const tint = (p.color ?? ['#ffffff']).map((s) => Phaser.Display.Color.HexStringToColor(s).color);
     const em = scene.add.particles(0, 0, 'px', {
@@ -124,6 +148,14 @@ export function pintarEscenario(scene: Phaser.Scene, id: string, depthFrente: nu
   return {
     /** con cuánto se inclinó el dibujo: el juego corre a los atletas igual */
     inclinacion: e.inclinacion ?? 0,
+    /** lo ancho que viene pintado */
+    ancho: e.ancho ?? e.largo,
+    /** prende (o apaga) los fuegos artificiales del escenario, si los trae */
+    fuegos(on: boolean) { fuegos = on; for (const q of conFx) if (q.p.tipo === 'fuegos') q.t = Math.random() * 0.4; },
+    /** los objetos pintados (las antenas), para que la escena los tumbe si hace falta */
+    objetos,
+    /** las texturas del borde que avanza, si el escenario las trae */
+    borde: e.borde && scene.textures.exists(k(id, 'filo')) ? { tex: { filo: k(id, 'filo'), vacio: k(id, 'vacio') }, ...e.borde } : null,
     /** Paralaje, vida y luces. `cerca(x, y)` dice si hay un atleta a mano (para espantar palomas). */
     tick(dt: number, camX: number, cerca: (x: number, y: number) => boolean) {
       const lejosX = camX * (C.lejos.paralaje ?? 0.25);
@@ -164,10 +196,11 @@ export function pintarEscenario(scene: Phaser.Scene, id: string, depthFrente: nu
       }
       const now = scene.time.now / 1000;
       for (const { l, g } of luces) {
-        if (l.latido) g.setAlpha(0.12 + 0.1 * (0.5 + 0.5 * Math.sin(now * Math.PI * 2 * l.latido)));
-        if (l.parpadeo) g.setVisible(Math.sin(now * 37 * l.parpadeo) > -0.7);
+        if (l.latido) g.setAlpha(0.14 + 0.12 * (0.5 + 0.5 * Math.sin(now * Math.PI * 2 * l.latido)));
+        if (l.parpadeo) g.setVisible(now % l.parpadeo < l.parpadeo / 2);
       }
       for (const q of conFx) {
+        if (q.p.tipo === 'fuegos' && !fuegos) continue;
         q.t -= dt;
         if (q.t > 0) continue;
         q.t = q.p.cada;

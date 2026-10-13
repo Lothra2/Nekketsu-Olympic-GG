@@ -120,6 +120,9 @@
  "vida": [
   "letreros_neon",
   "luces_ciudad",
-  "avion_lejos"
+  "avion_lejos",
+  "helicoptero_reflector",
+  "publico",
+  "fuegos_artificiales"
  ]
 }
