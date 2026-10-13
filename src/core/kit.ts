@@ -115,7 +115,12 @@ export function findAnim(id: string, anim: string, prefer?: string): { pack: str
  */
 export interface Sonido { archivo: string | string[]; duracion: number; bucle?: boolean; muestras?: number; frecuencia?: number }
 
-const rutas = (a: Sonido) => [a.archivo].flat().map((f) => KIT + f);
+// el M4A también puede venir con extensión .mp4 (algunos hosts no sirven .m4a): es el mismo audio
+const rutas = (a: Sonido): Phaser.Types.Loader.FileTypes.AudioFileURLConfig[] =>
+  [a.archivo].flat().map((f) => {
+    const ext = f.split('.').pop()!.toLowerCase();
+    return { url: KIT + f, type: ext === 'mp4' ? 'm4a' : ext };
+  });
 
 /**
  * Un NPC del kit: una tira de cuadros de w x h (el cuadro i en x = i * w), con el ancla en los pies. Cada animación
