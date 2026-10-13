@@ -855,6 +855,46 @@ function margarita(): HTMLCanvasElement {
   return p.done();
 }
 
+/**
+ * Đà Lạt, en las montañas de Vietnam: los cerros cubiertos de pinos, el lago Xuân Hương con su neblina, una villa
+ * francesa amarilla de techo rojo, las hortensias y la cancha de arcilla roja con su malla verde.
+ */
+function dalat(): HTMLCanvasElement {
+  const p = new Painter(W, H, M);
+  const r = rng(47);
+  p.vgrad(0, 150, [C('#7ab0d8'), C('#a8cce4'), C('#d0e4ec'), C('#e8f0ec')]);
+  // los cerros de pinos, en capas de lejos a cerca
+  for (const [base, alto, col, seed] of [[130, 60, '#6a9a8a', 3], [150, 50, '#3e7a5a', 5]] as [number, number, string, number][]) {
+    p.ridge(base, base - alto, seed, C(col), C(col));
+    for (let x = desde(0, 9); x < X1; x += 9 + Math.floor(r() * 6)) {
+      const h = 10 + Math.floor(r() * 12), y = base - Math.floor(r() * 20);
+      for (let k = 0; k < h; k++) p.rect(x - Math.floor(k / 2.6), y - h + k, Math.floor(k / 1.3) + 1, 1, k % 3 ? C('#2a5a3e') : C('#336a48'));
+    }
+  }
+  // el lago con neblina y el reflejo
+  p.vgrad(152, 196, [C('#8ab8c8'), C('#6aa0b8')]);
+  for (let y = 154; y < 196; y += 4) p.rect(X0, y, AW, 1, C('#b8d8e0'), 90);
+  p.rect(X0, 150, AW, 6, C('#e8f0f0'), 140);
+  // la villa francesa amarilla con su techo rojo y sus ventanas altas
+  p.rect(400, 120, 110, 76, C('#f2d27a'));
+  p.rect(506, 120, 4, 76, C('#d8b860'));
+  for (let k = 0; k < 14; k++) p.rect(396 + k * 2, 106 + k, 118 - k * 4, 1, k % 2 ? C('#b8402e') : C('#c8503a'));
+  p.rect(440, 96, 10, 14, C('#c8503a'));
+  for (const wx of [412, 436, 460, 484]) { p.rect(wx, 134, 10, 18, C('#3a5a6a')); p.rect(wx, 134, 10, 2, C('#f4f0e2')); p.rect(wx + 4, 134, 2, 18, C('#f4f0e2')); p.rect(wx, 162, 10, 18, C('#3a5a6a')); }
+  // los jardines con hortensias azules y moradas
+  p.rect(X0, 196, AW, 26, C('#4a8a4a'));
+  for (let i = 0; i < 260; i++) p.circle(X0 + r() * AW, 200 + r() * 18, 1.5 + r() * 1.5, [C('#7a8ae0'), C('#a87ad8'), C('#e8a0c8'), C('#f4f4f4')][Math.floor(r() * 4)]);
+  // la malla verde de la cancha, con sus postes
+  p.rect(X0, 222, AW, 40, C('#2a6a4a'), 120);
+  for (let x = desde(0, 64); x < X1; x += 64) p.rect(x, 222, 2, 40, C('#2a3a32'));
+  for (let x = desde(0, 4); x < X1; x += 4) p.rect(x, 222, 1, 40, C('#3a7a5a'), 70);
+  p.rect(X0, 222, AW, 2, C('#2a3a32'));
+  // la arcilla roja
+  p.vgrad(262, 360, [C('#c8643e'), C('#b85a36'), C('#a8502e')]);
+  for (let i = 0; i < 1800; i++) p.px(X0 + r() * AW, 262 + r() * 98, r() < 0.5 ? C('#b04e2c') : C('#d4724a'));
+  return p.done();
+}
+
 /** Registra todos los fondos como texturas. */
 export function makeBackdrops(scene: Phaser.Scene) {
   const add = (k: string, c: HTMLCanvasElement) => { if (!scene.textures.exists(k)) scene.textures.addCanvas(k, c); };
@@ -877,6 +917,7 @@ export function makeBackdrops(scene: Phaser.Scene) {
   add('bg_liceo', liceo());
   add('bg_barrio', barrio());
   add('bg_margarita', margarita());
+  add('bg_dalat', dalat());
   // banderas sueltas
   for (const k of ['jp', 'vn', 'co', 've'] as const) {
     const p = new Painter(38, 26);
