@@ -1,0 +1,39 @@
+{
+ "nota": "x e y en pixeles de pantalla a escala 1 (y de pantalla = franja.atras + y del mundo). fx: nombre del efecto del catálogo (manifest.fx).",
+ "particulas": [
+  {
+   "tipo": "onda",
+   "fx": "onda_charco",
+   "x0": 1514,
+   "x1": 2346,
+   "y0": 240,
+   "y1": 330,
+   "cada": 0.7,
+   "nota": "río: se cruza nadando, con jacintos: ondas sueltas, y salpicadura_piso a cada paso"
+  },
+  {
+   "tipo": "onda",
+   "fx": "onda_charco",
+   "x0": 1700,
+   "x1": 2214,
+   "y0": 200,
+   "y1": 240,
+   "cada": 0.7,
+   "nota": "canal del ferry: ondas sueltas, y salpicadura_piso a cada paso"
+  },
+  {
+   "tipo": "brillo",
+   "x0": 3200,
+   "x1": 3302,
+   "y0": 218,
+   "y1": 330,
+   "color": [
+    "#fffbee",
+    "#bfe1f6"
+   ],
+   "cada": 0.9,
+   "vida": 0.4,
+   "nota": "canal: brillitos en el agua"
+  }
+ ]
+}

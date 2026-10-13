@@ -1,0 +1,918 @@
+{
+ "imagen": "objetos.png",
+ "nota": "x, y: esquina de arriba a la izquierda en pantalla a escala 1 (con la inclinación ya puesta). orden: la profundidad para ordenar con los atletas (se dibuja después de todo atleta con y menor). En Phaser: setDepth(franja.atras + orden). Las caras izquierdas de las cajas (tipo *_cara) van con orden y + 0.1: detrás de quien pasa a su lado.",
+ "objetos": [
+  {
+   "id": "puesto_frutas_0_cara",
+   "tipo": "puesto_frutas_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 0,
+    "y": 0,
+    "w": 14,
+    "h": 59
+   },
+   "x": 1100,
+   "y": 178,
+   "orden": 0.1
+  },
+  {
+   "id": "cajas_1_cara",
+   "tipo": "cajas_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 15,
+    "y": 0,
+    "w": 14,
+    "h": 53
+   },
+   "x": 1760,
+   "y": 184,
+   "orden": 0.1
+  },
+  {
+   "id": "puesto_frutas_2_cara",
+   "tipo": "puesto_frutas_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 30,
+    "y": 0,
+    "w": 14,
+    "h": 59
+   },
+   "x": 2440,
+   "y": 178,
+   "orden": 0.1
+  },
+  {
+   "id": "canastas_3_cara",
+   "tipo": "canastas_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 45,
+    "y": 0,
+    "w": 14,
+    "h": 51
+   },
+   "x": 2860,
+   "y": 186,
+   "orden": 0.1
+  },
+  {
+   "id": "poste_luz_0",
+   "tipo": "poste_luz",
+   "origen": "postes",
+   "cuadro": {
+    "x": 60,
+    "y": 0,
+    "w": 44,
+    "h": 166
+   },
+   "x": 181,
+   "y": 39,
+   "orden": 4
+  },
+  {
+   "id": "poste_luz_1",
+   "tipo": "poste_luz",
+   "origen": "postes",
+   "cuadro": {
+    "x": 105,
+    "y": 0,
+    "w": 44,
+    "h": 166
+   },
+   "x": 3481,
+   "y": 39,
+   "orden": 4
+  },
+  {
+   "id": "puesto_frutas_0",
+   "tipo": "puesto_frutas",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 150,
+    "y": 0,
+    "w": 57,
+    "h": 58
+   },
+   "x": 1100,
+   "y": 178,
+   "orden": 36,
+   "superficie": "piedra"
+  },
+  {
+   "id": "cajas_1",
+   "tipo": "cajas",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 208,
+    "y": 0,
+    "w": 43,
+    "h": 52
+   },
+   "x": 1760,
+   "y": 184,
+   "orden": 36,
+   "superficie": "plastico"
+  },
+  {
+   "id": "lamparas_colgantes_0",
+   "tipo": "lamparas_colgantes",
+   "origen": "bajo",
+   "cuadro": {
+    "x": 252,
+    "y": 0,
+    "w": 228,
+    "h": 134
+   },
+   "x": 1990,
+   "y": 66,
+   "orden": 36
+  },
+  {
+   "id": "puesto_frutas_2",
+   "tipo": "puesto_frutas",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 481,
+    "y": 0,
+    "w": 57,
+    "h": 58
+   },
+   "x": 2440,
+   "y": 178,
+   "orden": 36,
+   "superficie": "piedra"
+  },
+  {
+   "id": "canastas_3",
+   "tipo": "canastas",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 539,
+    "y": 0,
+    "w": 43,
+    "h": 50
+   },
+   "x": 2860,
+   "y": 186,
+   "orden": 36,
+   "superficie": "piedra"
+  },
+  {
+   "id": "porton_mercado_4_cara",
+   "tipo": "porton_mercado_cara",
+   "origen": "muros",
+   "cuadro": {
+    "x": 583,
+    "y": 0,
+    "w": 6,
+    "h": 81
+   },
+   "x": 613,
+   "y": 172,
+   "orden": 36.1
+  },
+  {
+   "id": "puesto_ropa_5_cara",
+   "tipo": "puesto_ropa_cara",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 590,
+    "y": 0,
+    "w": 6,
+    "h": 63
+   },
+   "x": 793,
+   "y": 190,
+   "orden": 36.1
+  },
+  {
+   "id": "puesto_flores_6_cara",
+   "tipo": "puesto_flores_cara",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 597,
+    "y": 0,
+    "w": 6,
+    "h": 63
+   },
+   "x": 1013,
+   "y": 190,
+   "orden": 36.1
+  },
+  {
+   "id": "puesto_telas_7_cara",
+   "tipo": "puesto_telas_cara",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 604,
+    "y": 0,
+    "w": 6,
+    "h": 63
+   },
+   "x": 1333,
+   "y": 190,
+   "orden": 36.1
+  },
+  {
+   "id": "puesto_comida_8_cara",
+   "tipo": "puesto_comida_cara",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 611,
+    "y": 0,
+    "w": 6,
+    "h": 63
+   },
+   "x": 1673,
+   "y": 190,
+   "orden": 36.1
+  },
+  {
+   "id": "puesto_recuerdos_9_cara",
+   "tipo": "puesto_recuerdos_cara",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 618,
+    "y": 0,
+    "w": 6,
+    "h": 63
+   },
+   "x": 1993,
+   "y": 190,
+   "orden": 36.1
+  },
+  {
+   "id": "puesto_cafe_10_cara",
+   "tipo": "puesto_cafe_cara",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 625,
+    "y": 0,
+    "w": 6,
+    "h": 63
+   },
+   "x": 2333,
+   "y": 190,
+   "orden": 36.1
+  },
+  {
+   "id": "puesto_ropa_11_cara",
+   "tipo": "puesto_ropa_cara",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 632,
+    "y": 0,
+    "w": 6,
+    "h": 63
+   },
+   "x": 2653,
+   "y": 190,
+   "orden": 36.1
+  },
+  {
+   "id": "puesto_flores_12_cara",
+   "tipo": "puesto_flores_cara",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 639,
+    "y": 0,
+    "w": 6,
+    "h": 63
+   },
+   "x": 2973,
+   "y": 190,
+   "orden": 36.1
+  },
+  {
+   "id": "porton_mercado_17_cara",
+   "tipo": "porton_mercado_cara",
+   "origen": "muros",
+   "cuadro": {
+    "x": 646,
+    "y": 0,
+    "w": 18,
+    "h": 115
+   },
+   "x": 3234,
+   "y": 176,
+   "orden": 40.1
+  },
+  {
+   "id": "porton_mercado_4",
+   "tipo": "porton_mercado",
+   "origen": "muros",
+   "cuadro": {
+    "x": 665,
+    "y": 0,
+    "w": 45,
+    "h": 88
+   },
+   "x": 613,
+   "y": 164,
+   "orden": 52,
+   "superficie": "piedra"
+  },
+  {
+   "id": "puesto_ropa_5",
+   "tipo": "puesto_ropa",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 711,
+    "y": 0,
+    "w": 185,
+    "h": 62
+   },
+   "x": 793,
+   "y": 190,
+   "orden": 52,
+   "superficie": "piedra"
+  },
+  {
+   "id": "puesto_flores_6",
+   "tipo": "puesto_flores",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 897,
+    "y": 0,
+    "w": 285,
+    "h": 62
+   },
+   "x": 1013,
+   "y": 190,
+   "orden": 52,
+   "superficie": "piedra"
+  },
+  {
+   "id": "puesto_telas_7",
+   "tipo": "puesto_telas",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 1183,
+    "y": 0,
+    "w": 305,
+    "h": 62
+   },
+   "x": 1333,
+   "y": 190,
+   "orden": 52,
+   "superficie": "piedra"
+  },
+  {
+   "id": "puesto_comida_8",
+   "tipo": "puesto_comida",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 1489,
+    "y": 0,
+    "w": 285,
+    "h": 62
+   },
+   "x": 1673,
+   "y": 190,
+   "orden": 52,
+   "superficie": "piedra"
+  },
+  {
+   "id": "puesto_recuerdos_9",
+   "tipo": "puesto_recuerdos",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 0,
+    "y": 167,
+    "w": 305,
+    "h": 62
+   },
+   "x": 1993,
+   "y": 190,
+   "orden": 52,
+   "superficie": "piedra"
+  },
+  {
+   "id": "puesto_cafe_10",
+   "tipo": "puesto_cafe",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 306,
+    "y": 167,
+    "w": 285,
+    "h": 62
+   },
+   "x": 2333,
+   "y": 190,
+   "orden": 52,
+   "superficie": "piedra"
+  },
+  {
+   "id": "puesto_ropa_11",
+   "tipo": "puesto_ropa",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 592,
+    "y": 167,
+    "w": 285,
+    "h": 62
+   },
+   "x": 2653,
+   "y": 190,
+   "orden": 52,
+   "superficie": "piedra"
+  },
+  {
+   "id": "puesto_flores_12",
+   "tipo": "puesto_flores",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 878,
+    "y": 167,
+    "w": 85,
+    "h": 62
+   },
+   "x": 2973,
+   "y": 190,
+   "orden": 52,
+   "superficie": "piedra"
+  },
+  {
+   "id": "sacos_arroz_13_cara",
+   "tipo": "sacos_arroz_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 964,
+    "y": 167,
+    "w": 10,
+    "h": 39
+   },
+   "x": 1478,
+   "y": 240,
+   "orden": 52.1
+  },
+  {
+   "id": "sacos_arroz_14_cara",
+   "tipo": "sacos_arroz_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 975,
+    "y": 167,
+    "w": 10,
+    "h": 39
+   },
+   "x": 2168,
+   "y": 240,
+   "orden": 52.1
+  },
+  {
+   "id": "sacos_arroz_15_cara",
+   "tipo": "sacos_arroz_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 986,
+    "y": 167,
+    "w": 10,
+    "h": 39
+   },
+   "x": 2798,
+   "y": 240,
+   "orden": 52.1
+  },
+  {
+   "id": "arco_0",
+   "tipo": "arco",
+   "origen": "muros",
+   "cuadro": {
+    "x": 997,
+    "y": 167,
+    "w": 49,
+    "h": 46
+   },
+   "x": 618,
+   "y": 169,
+   "orden": 78
+  },
+  {
+   "id": "sacos_arroz_13",
+   "tipo": "sacos_arroz",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 1047,
+    "y": 167,
+    "w": 35,
+    "h": 38
+   },
+   "x": 1478,
+   "y": 240,
+   "orden": 78,
+   "superficie": "piedra"
+  },
+  {
+   "id": "sacos_arroz_14",
+   "tipo": "sacos_arroz",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 1083,
+    "y": 167,
+    "w": 35,
+    "h": 38
+   },
+   "x": 2168,
+   "y": 240,
+   "orden": 78,
+   "superficie": "piedra"
+  },
+  {
+   "id": "sacos_arroz_15",
+   "tipo": "sacos_arroz",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 1119,
+    "y": 167,
+    "w": 35,
+    "h": 38
+   },
+   "x": 2798,
+   "y": 240,
+   "orden": 78,
+   "superficie": "piedra"
+  },
+  {
+   "id": "porton_mercado_18_cara",
+   "tipo": "porton_mercado_cara",
+   "origen": "muros",
+   "cuadro": {
+    "x": 1155,
+    "y": 167,
+    "w": 7,
+    "h": 81
+   },
+   "x": 627,
+   "y": 214,
+   "orden": 78.1
+  },
+  {
+   "id": "puesto_comida_19_cara",
+   "tipo": "puesto_comida_cara",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 1163,
+    "y": 167,
+    "w": 7,
+    "h": 63
+   },
+   "x": 827,
+   "y": 232,
+   "orden": 78.1
+  },
+  {
+   "id": "puesto_recuerdos_20_cara",
+   "tipo": "puesto_recuerdos_cara",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 1171,
+    "y": 167,
+    "w": 7,
+    "h": 63
+   },
+   "x": 1067,
+   "y": 232,
+   "orden": 78.1
+  },
+  {
+   "id": "puesto_ropa_21_cara",
+   "tipo": "puesto_ropa_cara",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 1179,
+    "y": 167,
+    "w": 7,
+    "h": 63
+   },
+   "x": 1407,
+   "y": 232,
+   "orden": 78.1
+  },
+  {
+   "id": "puesto_telas_22_cara",
+   "tipo": "puesto_telas_cara",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 1187,
+    "y": 167,
+    "w": 7,
+    "h": 63
+   },
+   "x": 1727,
+   "y": 232,
+   "orden": 78.1
+  },
+  {
+   "id": "puesto_flores_23_cara",
+   "tipo": "puesto_flores_cara",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 1195,
+    "y": 167,
+    "w": 7,
+    "h": 63
+   },
+   "x": 2067,
+   "y": 232,
+   "orden": 78.1
+  },
+  {
+   "id": "puesto_comida_24_cara",
+   "tipo": "puesto_comida_cara",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 1203,
+    "y": 167,
+    "w": 7,
+    "h": 63
+   },
+   "x": 2387,
+   "y": 232,
+   "orden": 78.1
+  },
+  {
+   "id": "puesto_cafe_25_cara",
+   "tipo": "puesto_cafe_cara",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 1211,
+    "y": 167,
+    "w": 7,
+    "h": 63
+   },
+   "x": 2727,
+   "y": 232,
+   "orden": 78.1
+  },
+  {
+   "id": "puesto_telas_26_cara",
+   "tipo": "puesto_telas_cara",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 1219,
+    "y": 167,
+    "w": 7,
+    "h": 63
+   },
+   "x": 3027,
+   "y": 232,
+   "orden": 78.1
+  },
+  {
+   "id": "carrito_cafe_16",
+   "tipo": "carrito_cafe",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 1227,
+    "y": 167,
+    "w": 60,
+    "h": 62
+   },
+   "x": 321,
+   "y": 226,
+   "orden": 88,
+   "superficie": "piedra"
+  },
+  {
+   "id": "porton_mercado_17",
+   "tipo": "porton_mercado",
+   "origen": "muros",
+   "cuadro": {
+    "x": 1288,
+    "y": 167,
+    "w": 57,
+    "h": 122
+   },
+   "x": 3234,
+   "y": 168,
+   "orden": 90,
+   "superficie": "piedra"
+  },
+  {
+   "id": "porton_mercado_18",
+   "tipo": "porton_mercado",
+   "origen": "muros",
+   "cuadro": {
+    "x": 1346,
+    "y": 167,
+    "w": 46,
+    "h": 88
+   },
+   "x": 627,
+   "y": 206,
+   "orden": 94,
+   "superficie": "piedra"
+  },
+  {
+   "id": "puesto_comida_19",
+   "tipo": "puesto_comida",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 1393,
+    "y": 167,
+    "w": 206,
+    "h": 62
+   },
+   "x": 827,
+   "y": 232,
+   "orden": 94,
+   "superficie": "piedra"
+  },
+  {
+   "id": "puesto_recuerdos_20",
+   "tipo": "puesto_recuerdos",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 1600,
+    "y": 167,
+    "w": 306,
+    "h": 62
+   },
+   "x": 1067,
+   "y": 232,
+   "orden": 94,
+   "superficie": "piedra"
+  },
+  {
+   "id": "puesto_ropa_21",
+   "tipo": "puesto_ropa",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 0,
+    "y": 290,
+    "w": 286,
+    "h": 62
+   },
+   "x": 1407,
+   "y": 232,
+   "orden": 94,
+   "superficie": "piedra"
+  },
+  {
+   "id": "puesto_telas_22",
+   "tipo": "puesto_telas",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 287,
+    "y": 290,
+    "w": 306,
+    "h": 62
+   },
+   "x": 1727,
+   "y": 232,
+   "orden": 94,
+   "superficie": "piedra"
+  },
+  {
+   "id": "puesto_flores_23",
+   "tipo": "puesto_flores",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 594,
+    "y": 290,
+    "w": 286,
+    "h": 62
+   },
+   "x": 2067,
+   "y": 232,
+   "orden": 94,
+   "superficie": "piedra"
+  },
+  {
+   "id": "puesto_comida_24",
+   "tipo": "puesto_comida",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 881,
+    "y": 290,
+    "w": 306,
+    "h": 62
+   },
+   "x": 2387,
+   "y": 232,
+   "orden": 94,
+   "superficie": "piedra"
+  },
+  {
+   "id": "puesto_cafe_25",
+   "tipo": "puesto_cafe",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 1188,
+    "y": 290,
+    "w": 266,
+    "h": 62
+   },
+   "x": 2727,
+   "y": 232,
+   "orden": 94,
+   "superficie": "piedra"
+  },
+  {
+   "id": "puesto_telas_26",
+   "tipo": "puesto_telas",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 1455,
+    "y": 290,
+    "w": 46,
+    "h": 62
+   },
+   "x": 3027,
+   "y": 232,
+   "orden": 94,
+   "superficie": "piedra"
+  },
+  {
+   "id": "puesto_frutas_27_cara",
+   "tipo": "puesto_frutas_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 1502,
+    "y": 290,
+    "w": 14,
+    "h": 61
+   },
+   "x": 1233,
+   "y": 270,
+   "orden": 94.1
+  },
+  {
+   "id": "cubos_flores_28_cara",
+   "tipo": "cubos_flores_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 1517,
+    "y": 290,
+    "w": 14,
+    "h": 53
+   },
+   "x": 1893,
+   "y": 278,
+   "orden": 94.1
+  },
+  {
+   "id": "puesto_frutas_29_cara",
+   "tipo": "puesto_frutas_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 1532,
+    "y": 290,
+    "w": 14,
+    "h": 61
+   },
+   "x": 2593,
+   "y": 270,
+   "orden": 94.1
+  },
+  {
+   "id": "puesto_frutas_27",
+   "tipo": "puesto_frutas",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 1547,
+    "y": 290,
+    "w": 61,
+    "h": 60
+   },
+   "x": 1233,
+   "y": 270,
+   "orden": 130,
+   "superficie": "piedra"
+  },
+  {
+   "id": "cubos_flores_28",
+   "tipo": "cubos_flores",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 1609,
+    "y": 290,
+    "w": 47,
+    "h": 52
+   },
+   "x": 1893,
+   "y": 278,
+   "orden": 130,
+   "superficie": "piedra"
+  },
+  {
+   "id": "puesto_frutas_29",
+   "tipo": "puesto_frutas",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 1657,
+    "y": 290,
+    "w": 61,
+    "h": 60
+   },
+   "x": 2593,
+   "y": 270,
+   "orden": 130,
+   "superficie": "piedra"
+  }
+ ]
+}

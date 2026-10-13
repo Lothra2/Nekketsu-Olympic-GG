@@ -1,0 +1,282 @@
+{
+ "imagen": "objetos.png",
+ "nota": "x, y: esquina de arriba a la izquierda en pantalla a escala 1 (con la inclinación ya puesta). orden: la profundidad para ordenar con los atletas (se dibuja después de todo atleta con y menor). En Phaser: setDepth(franja.atras + orden). Las caras izquierdas de las cajas (tipo *_cara) van con orden y + 0.1: detrás de quien pasa a su lado.",
+ "objetos": [
+  {
+   "id": "escalon_2_cara",
+   "tipo": "escalon_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 0,
+    "y": 0,
+    "w": 15,
+    "h": 47
+   },
+   "x": 1384,
+   "y": 194,
+   "orden": 0.1
+  },
+  {
+   "id": "muelle_3_cara",
+   "tipo": "muelle_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 16,
+    "y": 0,
+    "w": 15,
+    "h": 53
+   },
+   "x": 1400,
+   "y": 188,
+   "orden": 0.1
+  },
+  {
+   "id": "muelle_4_cara",
+   "tipo": "muelle_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 32,
+    "y": 0,
+    "w": 15,
+    "h": 53
+   },
+   "x": 2200,
+   "y": 188,
+   "orden": 0.1
+  },
+  {
+   "id": "farol_rio_0",
+   "tipo": "farol_rio",
+   "origen": "postes",
+   "cuadro": {
+    "x": 48,
+    "y": 0,
+    "w": 30,
+    "h": 156
+   },
+   "x": 288,
+   "y": 49,
+   "orden": 4
+  },
+  {
+   "id": "farol_rio_1",
+   "tipo": "farol_rio",
+   "origen": "postes",
+   "cuadro": {
+    "x": 79,
+    "y": 0,
+    "w": 30,
+    "h": 156
+   },
+   "x": 1288,
+   "y": 49,
+   "orden": 4
+  },
+  {
+   "id": "farol_rio_2",
+   "tipo": "farol_rio",
+   "origen": "postes",
+   "cuadro": {
+    "x": 110,
+    "y": 0,
+    "w": 30,
+    "h": 156
+   },
+   "x": 2608,
+   "y": 49,
+   "orden": 4
+  },
+  {
+   "id": "farol_rio_3",
+   "tipo": "farol_rio",
+   "origen": "postes",
+   "cuadro": {
+    "x": 141,
+    "y": 0,
+    "w": 30,
+    "h": 156
+   },
+   "x": 3488,
+   "y": 49,
+   "orden": 4
+  },
+  {
+   "id": "banca_0",
+   "tipo": "banca",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 172,
+    "y": 0,
+    "w": 66,
+    "h": 28
+   },
+   "x": 500,
+   "y": 188,
+   "orden": 16,
+   "superficie": "piedra"
+  },
+  {
+   "id": "banca_1",
+   "tipo": "banca",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 239,
+    "y": 0,
+    "w": 66,
+    "h": 28
+   },
+   "x": 1100,
+   "y": 188,
+   "orden": 16,
+   "superficie": "piedra"
+  },
+  {
+   "id": "cajas_pescado_7_cara",
+   "tipo": "cajas_pescado_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 306,
+    "y": 0,
+    "w": 15,
+    "h": 61
+   },
+   "x": 3467,
+   "y": 200,
+   "orden": 20.1
+  },
+  {
+   "id": "escalon_2",
+   "tipo": "escalon",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 322,
+    "y": 0,
+    "w": 30,
+    "h": 46
+   },
+   "x": 1384,
+   "y": 194,
+   "orden": 40,
+   "superficie": "piedra"
+  },
+  {
+   "id": "muelle_3",
+   "tipo": "muelle",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 353,
+    "y": 0,
+    "w": 314,
+    "h": 52
+   },
+   "x": 1400,
+   "y": 188,
+   "orden": 40,
+   "superficie": "piedra"
+  },
+  {
+   "id": "muelle_4",
+   "tipo": "muelle",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 668,
+    "y": 0,
+    "w": 314,
+    "h": 52
+   },
+   "x": 2200,
+   "y": 188,
+   "orden": 40,
+   "superficie": "piedra"
+  },
+  {
+   "id": "escalon_5",
+   "tipo": "escalon",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 983,
+    "y": 0,
+    "w": 30,
+    "h": 46
+   },
+   "x": 2500,
+   "y": 194,
+   "orden": 40,
+   "superficie": "piedra"
+  },
+  {
+   "id": "redes_pesca_0",
+   "tipo": "redes_pesca",
+   "origen": "bajo",
+   "cuadro": {
+    "x": 1014,
+    "y": 0,
+    "w": 175,
+    "h": 92
+   },
+   "x": 2880,
+   "y": 150,
+   "orden": 40
+  },
+  {
+   "id": "bote_bambu_6",
+   "tipo": "bote_bambu",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 1190,
+    "y": 0,
+    "w": 51,
+    "h": 46
+   },
+   "x": 2707,
+   "y": 204,
+   "orden": 50,
+   "superficie": "piedra"
+  },
+  {
+   "id": "cajas_pescado_7",
+   "tipo": "cajas_pescado",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 1242,
+    "y": 0,
+    "w": 64,
+    "h": 60
+   },
+   "x": 3467,
+   "y": 200,
+   "orden": 60,
+   "superficie": "piedra"
+  },
+  {
+   "id": "carrito_che_8",
+   "tipo": "carrito_che",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 1307,
+    "y": 0,
+    "w": 60,
+    "h": 66
+   },
+   "x": 821,
+   "y": 222,
+   "orden": 88,
+   "superficie": "piedra"
+  },
+  {
+   "id": "bote_bambu_9",
+   "tipo": "bote_bambu",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 1368,
+    "y": 0,
+    "w": 50,
+    "h": 46
+   },
+   "x": 2665,
+   "y": 254,
+   "orden": 100,
+   "superficie": "piedra"
+  }
+ ]
+}

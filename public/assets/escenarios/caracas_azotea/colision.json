@@ -1,0 +1,61 @@
+{
+ "id": "caracas_azotea",
+ "largo": 640,
+ "franja": {
+  "atras": 246,
+  "adelante": 344
+ },
+ "piso": [
+  {
+   "x0": 0,
+   "x1": 640,
+   "tipo": "baldosa",
+   "nombre": "azotea"
+  }
+ ],
+ "huecos": [
+  {
+   "x0": 618,
+   "x1": 640,
+   "y0": 0,
+   "y1": 98,
+   "caida": "vacio",
+   "nombre": "borde sin baranda",
+   "nota": "quien sale volando por aquí queda fuera. A los 90 s el borde avanza hasta x 420: la azotea se achica"
+  }
+ ],
+ "plataformas": [],
+ "muros": [],
+ "escaleras": [],
+ "postes": [
+  {
+   "x": 120,
+   "y": 2,
+   "alto": 120,
+   "tipo": "antena"
+  },
+  {
+   "x": 460,
+   "y": 2,
+   "alto": 96,
+   "tipo": "antena"
+  }
+ ],
+ "agua": [],
+ "bajo": [],
+ "solidos": [],
+ "carriles": [
+  {
+   "y": 20
+  },
+  {
+   "y": 42
+  },
+  {
+   "y": 64
+  },
+  {
+   "y": 86
+  }
+ ]
+}

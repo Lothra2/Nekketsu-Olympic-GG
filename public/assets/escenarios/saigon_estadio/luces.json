@@ -1,0 +1,21 @@
+{
+ "hora": "atardecer",
+ "luces": [
+  {
+   "x": 603,
+   "y": 15,
+   "color": "#fff2d8",
+   "radio": 90,
+   "encendida": true,
+   "nota": "focos de la torre del estadio"
+  },
+  {
+   "x": 1703,
+   "y": 15,
+   "color": "#fff2d8",
+   "radio": 90,
+   "encendida": true,
+   "nota": "focos de la torre del estadio"
+  }
+ ]
+}

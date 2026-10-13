@@ -1,0 +1,45 @@
+{
+ "nota": "x e y en pixeles de pantalla a escala 1 (y de pantalla = franja.atras + y del mundo). fx: nombre del efecto del catálogo (manifest.fx).",
+ "particulas": [
+  {
+   "tipo": "fuegos",
+   "fx": "fuegos_artificiales_rojo",
+   "x0": 200,
+   "x1": 400,
+   "y0": 20,
+   "y1": 80,
+   "cada": 1.6,
+   "nota": "fuegos artificiales sobre el estadio cuando alguien llega"
+  },
+  {
+   "tipo": "fuegos",
+   "fx": "fuegos_artificiales_dorado",
+   "x0": 600,
+   "x1": 800,
+   "y0": 20,
+   "y1": 80,
+   "cada": 1.9000000000000001,
+   "nota": "fuegos artificiales sobre el estadio cuando alguien llega"
+  },
+  {
+   "tipo": "fuegos",
+   "fx": "fuegos_artificiales_azul",
+   "x0": 1000,
+   "x1": 1200,
+   "y0": 20,
+   "y1": 80,
+   "cada": 2.2,
+   "nota": "fuegos artificiales sobre el estadio cuando alguien llega"
+  },
+  {
+   "tipo": "fuegos",
+   "fx": "fuegos_artificiales_verde",
+   "x0": 1400,
+   "x1": 1600,
+   "y0": 20,
+   "y1": 80,
+   "cada": 2.5,
+   "nota": "fuegos artificiales sobre el estadio cuando alguien llega"
+  }
+ ]
+}

@@ -1,0 +1,151 @@
+{
+ "imagen": "objetos.png",
+ "nota": "x, y: esquina de arriba a la izquierda en pantalla a escala 1 (con la inclinación ya puesta). orden: la profundidad para ordenar con los atletas (se dibuja después de todo atleta con y menor). En Phaser: setDepth(franja.atras + orden). Las caras izquierdas de las cajas (tipo *_cara) van con orden y + 0.1: detrás de quien pasa a su lado.",
+ "objetos": [
+  {
+   "id": "porton_estadio_0_cara",
+   "tipo": "porton_estadio_cara",
+   "origen": "muros",
+   "cuadro": {
+    "x": 0,
+    "y": 0,
+    "w": 17,
+    "h": 106
+   },
+   "x": 280,
+   "y": 140,
+   "orden": 0.1
+  },
+  {
+   "id": "torre_luz_0",
+   "tipo": "torre_luz",
+   "origen": "postes",
+   "cuadro": {
+    "x": 18,
+    "y": 0,
+    "w": 48,
+    "h": 206
+   },
+   "x": 579,
+   "y": -3,
+   "orden": 2
+  },
+  {
+   "id": "torre_luz_1",
+   "tipo": "torre_luz",
+   "origen": "postes",
+   "cuadro": {
+    "x": 67,
+    "y": 0,
+    "w": 48,
+    "h": 206
+   },
+   "x": 1679,
+   "y": -3,
+   "orden": 2
+  },
+  {
+   "id": "porton_estadio_0",
+   "tipo": "porton_estadio",
+   "origen": "muros",
+   "cuadro": {
+    "x": 116,
+    "y": 0,
+    "w": 32,
+    "h": 111
+   },
+   "x": 280,
+   "y": 134,
+   "orden": 45,
+   "superficie": "piedra"
+  },
+  {
+   "id": "arco_0",
+   "tipo": "arco",
+   "origen": "muros",
+   "cuadro": {
+    "x": 149,
+    "y": 0,
+    "w": 31,
+    "h": 60
+   },
+   "x": 296,
+   "y": 166,
+   "orden": 85
+  },
+  {
+   "id": "porton_estadio_1_cara",
+   "tipo": "porton_estadio_cara",
+   "origen": "muros",
+   "cuadro": {
+    "x": 181,
+    "y": 0,
+    "w": 17,
+    "h": 106
+   },
+   "x": 310,
+   "y": 225,
+   "orden": 85.1
+  },
+  {
+   "id": "porton_estadio_1",
+   "tipo": "porton_estadio",
+   "origen": "muros",
+   "cuadro": {
+    "x": 199,
+    "y": 0,
+    "w": 32,
+    "h": 111
+   },
+   "x": 310,
+   "y": 219,
+   "orden": 130,
+   "superficie": "piedra"
+  },
+  {
+   "id": "valla_2",
+   "tipo": "valla",
+   "origen": "muros",
+   "cuadro": {
+    "x": 232,
+    "y": 0,
+    "w": 52,
+    "h": 144
+   },
+   "x": 800,
+   "y": 186,
+   "orden": 130,
+   "superficie": "piedra"
+  },
+  {
+   "id": "valla_3",
+   "tipo": "valla",
+   "origen": "muros",
+   "cuadro": {
+    "x": 285,
+    "y": 0,
+    "w": 52,
+    "h": 144
+   },
+   "x": 1100,
+   "y": 186,
+   "orden": 130,
+   "superficie": "piedra"
+  },
+  {
+   "id": "valla_4",
+   "tipo": "valla",
+   "origen": "muros",
+   "cuadro": {
+    "x": 338,
+    "y": 0,
+    "w": 52,
+    "h": 144
+   },
+   "x": 1400,
+   "y": 186,
+   "orden": 130,
+   "superficie": "piedra"
+  }
+ ]
+}

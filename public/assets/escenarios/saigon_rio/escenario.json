@@ -1,0 +1,1475 @@
+{
+ "generado_con": "PixelForja",
+ "id": "saigon_rio",
+ "nombre": "RÍO SAIGÓN",
+ "escala": 1,
+ "resolucion": [
+  640,
+  360
+ ],
+ "franja": {
+  "atras": 200,
+  "adelante": 330
+ },
+ "largo": 3840,
+ "hora": "mediodia",
+ "clima": [
+  "despejado"
+ ],
+ "inclinacion": 0.35,
+ "ancho": 3886,
+ "nota_inclinacion": "vista inclinada: px = x + 0.35 * y (lo del fondo queda a la izquierda). Las capas largas miden 3886 px (largo + 0.35 * fondo de la franja). Los objetos ya vienen corridos: corre a los atletas igual.",
+ "capas": {
+  "cielo": {
+   "archivo": "cielo_mediodia.png",
+   "y": 0,
+   "paralaje": 0,
+   "repetir_x": true
+  },
+  "lejos": {
+   "archivo": "lejos.png",
+   "y": 0,
+   "paralaje": 0.25,
+   "repetir_x": true
+  },
+  "tras_cerca": {
+   "nota": "la vida con capa tras_cerca va aquí: se ve por los callejones"
+  },
+  "cerca": {
+   "archivos": [
+    "cerca_0.png",
+    "cerca_1.png",
+    "cerca_2.png",
+    "cerca_3.png"
+   ],
+   "trozo": 1280,
+   "y": 0,
+   "paralaje": 1
+  },
+  "piso": {
+   "archivos": [
+    "piso_0.png",
+    "piso_1.png",
+    "piso_2.png",
+    "piso_3.png"
+   ],
+   "trozo": 1280,
+   "y": 200,
+   "paralaje": 1,
+   "nota": "las primeras 130 filas son la franja (inclinada), las de abajo el bordillo: la cara del piso que da a la cámara"
+  },
+  "objetos": {
+   "archivo": "objetos.json",
+   "nota": "entre el piso y el frente, ordenados con los atletas"
+  },
+  "frente": {
+   "archivos": [
+    "frente_0.png",
+    "frente_1.png",
+    "frente_2.png",
+    "frente_3.png"
+   ],
+   "trozo": 1280,
+   "y": 316,
+   "paralaje": 1
+  }
+ },
+ "vida": {
+  "imagen": "vida.png",
+  "piezas": [
+   {
+    "id": "brillos_0_0",
+    "tipo": "agua_animada",
+    "capa": "cerca",
+    "x": 0,
+    "y": 156,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 65,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 130,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     }
+    ]
+   },
+   {
+    "id": "brillos_0_1",
+    "tipo": "agua_animada",
+    "capa": "cerca",
+    "x": 128,
+    "y": 156,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 195,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 260,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 325,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     }
+    ]
+   },
+   {
+    "id": "brillos_0_2",
+    "tipo": "agua_animada",
+    "capa": "cerca",
+    "x": 256,
+    "y": 156,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 390,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 455,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 520,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     }
+    ]
+   },
+   {
+    "id": "brillos_0_3",
+    "tipo": "agua_animada",
+    "capa": "cerca",
+    "x": 384,
+    "y": 156,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 585,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 650,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 715,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     }
+    ]
+   },
+   {
+    "id": "brillos_0_4",
+    "tipo": "agua_animada",
+    "capa": "cerca",
+    "x": 512,
+    "y": 156,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 780,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 845,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 910,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     }
+    ]
+   },
+   {
+    "id": "brillos_0_5",
+    "tipo": "agua_animada",
+    "capa": "cerca",
+    "x": 640,
+    "y": 156,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 975,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 1040,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 1105,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     }
+    ]
+   },
+   {
+    "id": "brillos_0_6",
+    "tipo": "agua_animada",
+    "capa": "cerca",
+    "x": 768,
+    "y": 156,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 1170,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 1235,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 1300,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     }
+    ]
+   },
+   {
+    "id": "brillos_0_7",
+    "tipo": "agua_animada",
+    "capa": "cerca",
+    "x": 896,
+    "y": 156,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 1365,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 1430,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 1495,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     }
+    ]
+   },
+   {
+    "id": "brillos_0_8",
+    "tipo": "agua_animada",
+    "capa": "cerca",
+    "x": 1024,
+    "y": 156,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 1560,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 1625,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 1690,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     }
+    ]
+   },
+   {
+    "id": "brillos_0_9",
+    "tipo": "agua_animada",
+    "capa": "cerca",
+    "x": 1152,
+    "y": 156,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 1755,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 1820,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 1885,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     }
+    ]
+   },
+   {
+    "id": "brillos_0_10",
+    "tipo": "agua_animada",
+    "capa": "cerca",
+    "x": 1280,
+    "y": 156,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 1950,
+      "y": 0,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 0,
+      "y": 33,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 65,
+      "y": 33,
+      "w": 64,
+      "h": 32
+     }
+    ]
+   },
+   {
+    "id": "jacinto_0_0",
+    "tipo": "jacintos_flotando",
+    "capa": "cerca",
+    "x": 405,
+    "y": 168,
+    "fps": 1,
+    "velocidad": -8,
+    "cada": 0,
+    "cuadros": [
+     {
+      "x": 130,
+      "y": 33,
+      "w": 20,
+      "h": 8
+     },
+     {
+      "x": 151,
+      "y": 33,
+      "w": 20,
+      "h": 8
+     }
+    ]
+   },
+   {
+    "id": "jacinto_0_1",
+    "tipo": "jacintos_flotando",
+    "capa": "cerca",
+    "x": 475,
+    "y": 174,
+    "fps": 1,
+    "velocidad": -8,
+    "cada": 0,
+    "cuadros": [
+     {
+      "x": 172,
+      "y": 33,
+      "w": 20,
+      "h": 8
+     },
+     {
+      "x": 193,
+      "y": 33,
+      "w": 20,
+      "h": 8
+     }
+    ]
+   },
+   {
+    "id": "jacinto_0_2",
+    "tipo": "jacintos_flotando",
+    "capa": "cerca",
+    "x": 419,
+    "y": 177,
+    "fps": 1,
+    "velocidad": -8,
+    "cada": 0,
+    "cuadros": [
+     {
+      "x": 214,
+      "y": 33,
+      "w": 20,
+      "h": 8
+     },
+     {
+      "x": 235,
+      "y": 33,
+      "w": 20,
+      "h": 8
+     }
+    ]
+   },
+   {
+    "id": "jacinto_0_3",
+    "tipo": "jacintos_flotando",
+    "capa": "cerca",
+    "x": 413,
+    "y": 167,
+    "fps": 1,
+    "velocidad": -8,
+    "cada": 0,
+    "cuadros": [
+     {
+      "x": 256,
+      "y": 33,
+      "w": 20,
+      "h": 8
+     },
+     {
+      "x": 277,
+      "y": 33,
+      "w": 20,
+      "h": 8
+     }
+    ]
+   },
+   {
+    "id": "jacinto_0_4",
+    "tipo": "jacintos_flotando",
+    "capa": "cerca",
+    "x": 1305,
+    "y": 169,
+    "fps": 1,
+    "velocidad": -8,
+    "cada": 0,
+    "cuadros": [
+     {
+      "x": 298,
+      "y": 33,
+      "w": 20,
+      "h": 8
+     },
+     {
+      "x": 319,
+      "y": 33,
+      "w": 20,
+      "h": 8
+     }
+    ]
+   },
+   {
+    "id": "thung_chai_0_0",
+    "tipo": "botes_bambu",
+    "capa": "cerca",
+    "x": 647,
+    "y": 176,
+    "fps": 1,
+    "cuadros": [
+     {
+      "x": 340,
+      "y": 33,
+      "w": 18,
+      "h": 10
+     },
+     {
+      "x": 359,
+      "y": 33,
+      "w": 18,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "thung_chai_0_1",
+    "tipo": "botes_bambu",
+    "capa": "cerca",
+    "x": 814,
+    "y": 176,
+    "fps": 1,
+    "cuadros": [
+     {
+      "x": 378,
+      "y": 33,
+      "w": 18,
+      "h": 10
+     },
+     {
+      "x": 397,
+      "y": 33,
+      "w": 18,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ferry_lejos",
+    "tipo": "ferry",
+    "capa": "cerca",
+    "x": 1300,
+    "y": 148,
+    "fps": 1,
+    "velocidad": -14,
+    "cada": 0,
+    "cuadros": [
+     {
+      "x": 416,
+      "y": 33,
+      "w": 70,
+      "h": 26
+     },
+     {
+      "x": 487,
+      "y": 33,
+      "w": 70,
+      "h": 26
+     }
+    ]
+   },
+   {
+    "id": "brillos_1_0",
+    "tipo": "agua_animada",
+    "capa": "cerca",
+    "x": 1400,
+    "y": 166,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 558,
+      "y": 33,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 623,
+      "y": 33,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 688,
+      "y": 33,
+      "w": 64,
+      "h": 32
+     }
+    ]
+   },
+   {
+    "id": "brillos_1_1",
+    "tipo": "agua_animada",
+    "capa": "cerca",
+    "x": 1528,
+    "y": 166,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 753,
+      "y": 33,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 818,
+      "y": 33,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 883,
+      "y": 33,
+      "w": 64,
+      "h": 32
+     }
+    ]
+   },
+   {
+    "id": "brillos_1_2",
+    "tipo": "agua_animada",
+    "capa": "cerca",
+    "x": 1656,
+    "y": 166,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 948,
+      "y": 33,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 1013,
+      "y": 33,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 1078,
+      "y": 33,
+      "w": 64,
+      "h": 32
+     }
+    ]
+   },
+   {
+    "id": "brillos_1_3",
+    "tipo": "agua_animada",
+    "capa": "cerca",
+    "x": 1784,
+    "y": 166,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 1143,
+      "y": 33,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 1208,
+      "y": 33,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 1273,
+      "y": 33,
+      "w": 64,
+      "h": 32
+     }
+    ]
+   },
+   {
+    "id": "brillos_1_4",
+    "tipo": "agua_animada",
+    "capa": "cerca",
+    "x": 1912,
+    "y": 166,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 1338,
+      "y": 33,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 1403,
+      "y": 33,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 1468,
+      "y": 33,
+      "w": 64,
+      "h": 32
+     }
+    ]
+   },
+   {
+    "id": "brillos_1_5",
+    "tipo": "agua_animada",
+    "capa": "cerca",
+    "x": 2040,
+    "y": 166,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 1533,
+      "y": 33,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 1598,
+      "y": 33,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 1663,
+      "y": 33,
+      "w": 64,
+      "h": 32
+     }
+    ]
+   },
+   {
+    "id": "brillos_1_6",
+    "tipo": "agua_animada",
+    "capa": "cerca",
+    "x": 2168,
+    "y": 166,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 1728,
+      "y": 33,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 1793,
+      "y": 33,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 1858,
+      "y": 33,
+      "w": 64,
+      "h": 32
+     }
+    ]
+   },
+   {
+    "id": "brillos_1_7",
+    "tipo": "agua_animada",
+    "capa": "cerca",
+    "x": 2296,
+    "y": 166,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 1923,
+      "y": 33,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 0,
+      "y": 66,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 65,
+      "y": 66,
+      "w": 64,
+      "h": 32
+     }
+    ]
+   },
+   {
+    "id": "brillos_1_8",
+    "tipo": "agua_animada",
+    "capa": "cerca",
+    "x": 2424,
+    "y": 166,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 130,
+      "y": 66,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 195,
+      "y": 66,
+      "w": 64,
+      "h": 32
+     },
+     {
+      "x": 260,
+      "y": 66,
+      "w": 64,
+      "h": 32
+     }
+    ]
+   },
+   {
+    "id": "jacinto_1_0",
+    "tipo": "jacintos_flotando",
+    "capa": "cerca",
+    "x": 2103,
+    "y": 176,
+    "fps": 1,
+    "velocidad": -8,
+    "cada": 0,
+    "cuadros": [
+     {
+      "x": 325,
+      "y": 66,
+      "w": 20,
+      "h": 8
+     },
+     {
+      "x": 346,
+      "y": 66,
+      "w": 20,
+      "h": 8
+     }
+    ]
+   },
+   {
+    "id": "jacinto_1_1",
+    "tipo": "jacintos_flotando",
+    "capa": "cerca",
+    "x": 1632,
+    "y": 186,
+    "fps": 1,
+    "velocidad": -8,
+    "cada": 0,
+    "cuadros": [
+     {
+      "x": 367,
+      "y": 66,
+      "w": 20,
+      "h": 8
+     },
+     {
+      "x": 388,
+      "y": 66,
+      "w": 20,
+      "h": 8
+     }
+    ]
+   },
+   {
+    "id": "jacinto_1_2",
+    "tipo": "jacintos_flotando",
+    "capa": "cerca",
+    "x": 2305,
+    "y": 181,
+    "fps": 1,
+    "velocidad": -8,
+    "cada": 0,
+    "cuadros": [
+     {
+      "x": 409,
+      "y": 66,
+      "w": 20,
+      "h": 8
+     },
+     {
+      "x": 430,
+      "y": 66,
+      "w": 20,
+      "h": 8
+     }
+    ]
+   },
+   {
+    "id": "jacinto_1_3",
+    "tipo": "jacintos_flotando",
+    "capa": "cerca",
+    "x": 2195,
+    "y": 180,
+    "fps": 1,
+    "velocidad": -8,
+    "cada": 0,
+    "cuadros": [
+     {
+      "x": 451,
+      "y": 66,
+      "w": 20,
+      "h": 8
+     },
+     {
+      "x": 472,
+      "y": 66,
+      "w": 20,
+      "h": 8
+     }
+    ]
+   },
+   {
+    "id": "thung_chai_1_0",
+    "tipo": "botes_bambu",
+    "capa": "cerca",
+    "x": 1493,
+    "y": 186,
+    "fps": 1,
+    "cuadros": [
+     {
+      "x": 493,
+      "y": 66,
+      "w": 18,
+      "h": 10
+     },
+     {
+      "x": 512,
+      "y": 66,
+      "w": 18,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "thung_chai_1_1",
+    "tipo": "botes_bambu",
+    "capa": "cerca",
+    "x": 1760,
+    "y": 186,
+    "fps": 1,
+    "cuadros": [
+     {
+      "x": 531,
+      "y": 66,
+      "w": 18,
+      "h": 10
+     },
+     {
+      "x": 550,
+      "y": 66,
+      "w": 18,
+      "h": 10
+     }
+    ]
+   }
+  ]
+ },
+ "callejones": [
+  {
+   "x0": 420,
+   "x1": 446,
+   "tipo": "callejon"
+  },
+  {
+   "x0": 1060,
+   "x1": 1086,
+   "tipo": "callejon"
+  },
+  {
+   "x0": 1760,
+   "x1": 1786,
+   "tipo": "callejon"
+  },
+  {
+   "x0": 2700,
+   "x1": 2726,
+   "tipo": "callejon"
+  },
+  {
+   "x0": 3100,
+   "x1": 3126,
+   "tipo": "callejon"
+  },
+  {
+   "x0": 3200,
+   "x1": 3256,
+   "tipo": "canal"
+  },
+  {
+   "x0": 3620,
+   "x1": 3646,
+   "tipo": "callejon"
+  }
+ ],
+ "superficie": {
+  "archivo": "superficie.png",
+  "y": 200,
+  "leyenda": [
+   {
+    "id": "acera",
+    "color": "#d0d0d0",
+    "paso": "paso_piedra",
+    "resbala": false
+   },
+   {
+    "id": "madera",
+    "color": "#a06030",
+    "paso": "paso_madera",
+    "resbala": false
+   },
+   {
+    "id": "agua",
+    "color": "#3060ff",
+    "paso": "paso_agua",
+    "resbala": true
+   },
+   {
+    "id": "hueco",
+    "color": "#000000",
+    "paso": "",
+    "resbala": false
+   },
+   {
+    "id": "tierra",
+    "color": "#c09050",
+    "paso": "paso_tierra",
+    "resbala": false
+   }
+  ]
+ },
+ "colision": "colision.json",
+ "luces": "luces.json",
+ "particulas": "particulas.json",
+ "paleta": [
+  {
+   "nombre": "tinta",
+   "hex": "#1f1a22"
+  },
+  {
+   "nombre": "sombra",
+   "hex": "#3a3340"
+  },
+  {
+   "nombre": "asfalto",
+   "hex": "#5a525a"
+  },
+  {
+   "nombre": "asfalto_claro",
+   "hex": "#857c80"
+  },
+  {
+   "nombre": "cemento",
+   "hex": "#b0a8a2"
+  },
+  {
+   "nombre": "cemento_claro",
+   "hex": "#ddd5c8"
+  },
+  {
+   "nombre": "crema",
+   "hex": "#f4ead2"
+  },
+  {
+   "nombre": "luz",
+   "hex": "#fffbee"
+  },
+  {
+   "nombre": "amarillo",
+   "hex": "#f6d35a"
+  },
+  {
+   "nombre": "ocre",
+   "hex": "#c8963a"
+  },
+  {
+   "nombre": "terracota",
+   "hex": "#b05a36"
+  },
+  {
+   "nombre": "rojo",
+   "hex": "#e0372a"
+  },
+  {
+   "nombre": "vino",
+   "hex": "#86242a"
+  },
+  {
+   "nombre": "salmon",
+   "hex": "#e65d93"
+  },
+  {
+   "nombre": "menta",
+   "hex": "#8fd0b0"
+  },
+  {
+   "nombre": "verde",
+   "hex": "#45974f"
+  },
+  {
+   "nombre": "verde_oscuro",
+   "hex": "#275a3a"
+  },
+  {
+   "nombre": "celeste",
+   "hex": "#6fb3e6"
+  },
+  {
+   "nombre": "cielo",
+   "hex": "#bfe1f6"
+  },
+  {
+   "nombre": "azul",
+   "hex": "#2f6fb0"
+  },
+  {
+   "nombre": "azul_noche",
+   "hex": "#213a5e"
+  },
+  {
+   "nombre": "canal",
+   "hex": "#6b7a52"
+  },
+  {
+   "nombre": "oro",
+   "hex": "#f7b928"
+  },
+  {
+   "nombre": "bruma",
+   "hex": "#e6e8d8"
+  }
+ ],
+ "verificacion": "verificacion.md",
+ "layout": {
+  "pais": "vietnam",
+  "prueba": "crosscountry",
+  "franja": {
+   "atras": 200,
+   "adelante": 330
+  },
+  "id": "saigon_rio",
+  "tramo": 3,
+  "nombre": "RÍO SAIGÓN",
+  "largo": 3840,
+  "hora": "mediodia",
+  "clima": [
+   "despejado"
+  ],
+  "paralaje": {
+   "cielo": "auto",
+   "lejos": "saigon_landmark81",
+   "cerca": "rio"
+  },
+  "piso": [
+   {
+    "x0": 0,
+    "x1": 3840,
+    "tipo": "baldosa"
+   },
+   {
+    "x0": 0,
+    "x1": 1400,
+    "y0": 0,
+    "y1": 24,
+    "tipo": "acera"
+   },
+   {
+    "x0": 1400,
+    "x1": 1500,
+    "y0": 40,
+    "y1": 130,
+    "tipo": "tierra",
+    "nombre": "orilla"
+   },
+   {
+    "x0": 1500,
+    "x1": 2300,
+    "tipo": "agua",
+    "nombre": "río"
+   },
+   {
+    "x0": 1400,
+    "x1": 1700,
+    "y0": 0,
+    "y1": 40,
+    "tipo": "madera",
+    "nombre": "muelle"
+   },
+   {
+    "x0": 2200,
+    "x1": 2500,
+    "y0": 0,
+    "y1": 40,
+    "tipo": "madera",
+    "nombre": "muelle"
+   },
+   {
+    "x0": 2300,
+    "x1": 2400,
+    "y0": 40,
+    "y1": 130,
+    "tipo": "tierra",
+    "nombre": "orilla"
+   }
+  ],
+  "huecos": [
+   {
+    "x0": 3200,
+    "x1": 3256,
+    "y0": 0,
+    "y1": 130,
+    "caida": "agua",
+    "nombre": "canal"
+   }
+  ],
+  "plataformas": [
+   {
+    "x": 500,
+    "y": 0,
+    "w": 60,
+    "d": 16,
+    "z": 12,
+    "tipo": "banca",
+    "subible": true
+   },
+   {
+    "x": 800,
+    "y": 60,
+    "w": 50,
+    "d": 28,
+    "z": 26,
+    "tipo": "carrito_che",
+    "subible": true
+   },
+   {
+    "x": 1100,
+    "y": 0,
+    "w": 60,
+    "d": 16,
+    "z": 12,
+    "tipo": "banca",
+    "subible": true
+   },
+   {
+    "x": 1384,
+    "y": 0,
+    "w": 16,
+    "d": 40,
+    "z": 6,
+    "tipo": "escalon"
+   },
+   {
+    "x": 1400,
+    "y": 0,
+    "w": 300,
+    "d": 40,
+    "z": 12,
+    "tipo": "muelle",
+    "subible": true,
+    "nota": "muelle del ferry; el ferry sale de x 1700"
+   },
+   {
+    "x": 2200,
+    "y": 0,
+    "w": 300,
+    "d": 40,
+    "z": 12,
+    "tipo": "muelle",
+    "subible": true,
+    "nota": "muelle de llegada del ferry"
+   },
+   {
+    "x": 2500,
+    "y": 0,
+    "w": 16,
+    "d": 40,
+    "z": 6,
+    "tipo": "escalon"
+   },
+   {
+    "x": 2640,
+    "y": 70,
+    "w": 40,
+    "d": 30,
+    "z": 16,
+    "tipo": "bote_bambu",
+    "subible": true
+   },
+   {
+    "x": 2700,
+    "y": 20,
+    "w": 40,
+    "d": 30,
+    "z": 16,
+    "tipo": "bote_bambu",
+    "subible": true
+   },
+   {
+    "x": 3460,
+    "y": 20,
+    "w": 50,
+    "d": 40,
+    "z": 20,
+    "tipo": "cajas_pescado",
+    "subible": true
+   }
+  ],
+  "muros": [],
+  "escaleras": [],
+  "postes": [
+   {
+    "x": 300,
+    "y": 4,
+    "alto": 150,
+    "tipo": "farol_rio"
+   },
+   {
+    "x": 1300,
+    "y": 4,
+    "alto": 150,
+    "tipo": "farol_rio"
+   },
+   {
+    "x": 2620,
+    "y": 4,
+    "alto": 150,
+    "tipo": "farol_rio"
+   },
+   {
+    "x": 3500,
+    "y": 4,
+    "alto": 150,
+    "tipo": "farol_rio"
+   }
+  ],
+  "agua": [
+   {
+    "x0": 1500,
+    "x1": 2300,
+    "y0": 40,
+    "y1": 130,
+    "nivel": 28,
+    "corriente": -12,
+    "nombre": "río: se cruza nadando, con jacintos"
+   },
+   {
+    "x0": 1700,
+    "x1": 2200,
+    "y0": 0,
+    "y1": 40,
+    "nivel": 28,
+    "corriente": -12,
+    "nombre": "canal del ferry"
+   }
+  ],
+  "bajo": [
+   {
+    "x0": 2880,
+    "x1": 3040,
+    "y0": 0,
+    "y1": 40,
+    "z": 48,
+    "tipo": "redes_pesca"
+   }
+  ],
+  "solidos": [],
+  "carriles": [
+   {
+    "y": 20
+   },
+   {
+    "y": 50
+   },
+   {
+    "y": 80
+   },
+   {
+    "y": 110
+   }
+  ],
+  "entidades": [
+   {
+    "tipo": "salida",
+    "x": 40
+   },
+   {
+    "tipo": "meta",
+    "x": 3790
+   },
+   {
+    "tipo": "vehiculo",
+    "vehiculo": "ferry",
+    "x0": 1700,
+    "x1": 2200,
+    "y": 0,
+    "w": 110,
+    "d": 40,
+    "z": 12,
+    "velocidad": 80,
+    "espera": 2.2,
+    "nota": "va y viene entre los muelles; quien se sube cruza sin mojarse"
+   },
+   {
+    "tipo": "vehiculo",
+    "vehiculo": "xich_lo",
+    "carril": 3,
+    "cada": 7,
+    "desde": "derecha",
+    "x0": 2500,
+    "x1": 3840
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "non_la",
+    "x": 640,
+    "y": 100
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "paraguas",
+    "x": 1250,
+    "y": 60
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "tubo",
+    "x": 2900,
+    "y": 100
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "coco",
+    "x": 3600,
+    "y": 60
+   }
+  ],
+  "ranuras_deco": [
+   {
+    "x0": 0,
+    "x1": 1400,
+    "capa": "cerca",
+    "tema": "malecon_bach_dang"
+   },
+   {
+    "x0": 1400,
+    "x1": 2500,
+    "capa": "lejos",
+    "tema": "rio_landmark81"
+   },
+   {
+    "x0": 2500,
+    "x1": 3840,
+    "capa": "cerca",
+    "tema": "orilla_thu_thiem"
+   }
+  ],
+  "vida": [
+   "jacintos_flotando",
+   "agua_animada",
+   "ferry",
+   "botes_bambu"
+  ]
+ }
+}

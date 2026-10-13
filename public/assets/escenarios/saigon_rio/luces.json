@@ -1,0 +1,37 @@
+{
+ "hora": "mediodia",
+ "luces": [
+  {
+   "x": 303,
+   "y": 66,
+   "color": "#fffbee",
+   "radio": 30,
+   "encendida": false,
+   "nota": "globos del farol del malecón"
+  },
+  {
+   "x": 1303,
+   "y": 66,
+   "color": "#fffbee",
+   "radio": 30,
+   "encendida": false,
+   "nota": "globos del farol del malecón"
+  },
+  {
+   "x": 2623,
+   "y": 66,
+   "color": "#fffbee",
+   "radio": 30,
+   "encendida": false,
+   "nota": "globos del farol del malecón"
+  },
+  {
+   "x": 3503,
+   "y": 66,
+   "color": "#fffbee",
+   "radio": 30,
+   "encendida": false,
+   "nota": "globos del farol del malecón"
+  }
+ ]
+}

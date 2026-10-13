@@ -1,0 +1,1409 @@
+{
+ "generado_con": "PixelForja",
+ "id": "saigon_benthanh",
+ "nombre": "MERCADO BẾN THÀNH",
+ "escala": 1,
+ "resolucion": [
+  640,
+  360
+ ],
+ "franja": {
+  "atras": 200,
+  "adelante": 330
+ },
+ "largo": 3840,
+ "hora": "manana",
+ "clima": [
+  "despejado"
+ ],
+ "inclinacion": 0.35,
+ "ancho": 3886,
+ "nota_inclinacion": "vista inclinada: px = x + 0.35 * y (lo del fondo queda a la izquierda). Las capas largas miden 3886 px (largo + 0.35 * fondo de la franja). Los objetos ya vienen corridos: corre a los atletas igual.",
+ "capas": {
+  "cielo": {
+   "archivo": "cielo_manana.png",
+   "y": 0,
+   "paralaje": 0,
+   "repetir_x": true
+  },
+  "lejos": {
+   "archivo": "lejos.png",
+   "y": 0,
+   "paralaje": 0.25,
+   "repetir_x": true
+  },
+  "tras_cerca": {
+   "nota": "la vida con capa tras_cerca va aquí: se ve por los callejones"
+  },
+  "cerca": {
+   "archivos": [
+    "cerca_0.png",
+    "cerca_1.png",
+    "cerca_2.png",
+    "cerca_3.png"
+   ],
+   "trozo": 1280,
+   "y": 0,
+   "paralaje": 1
+  },
+  "piso": {
+   "archivos": [
+    "piso_0.png",
+    "piso_1.png",
+    "piso_2.png",
+    "piso_3.png"
+   ],
+   "trozo": 1280,
+   "y": 200,
+   "paralaje": 1,
+   "nota": "las primeras 130 filas son la franja (inclinada), las de abajo el bordillo: la cara del piso que da a la cámara"
+  },
+  "objetos": {
+   "archivo": "objetos.json",
+   "nota": "entre el piso y el frente, ordenados con los atletas"
+  },
+  "frente": {
+   "archivos": [
+    "frente_0.png",
+    "frente_1.png",
+    "frente_2.png",
+    "frente_3.png"
+   ],
+   "trozo": 1280,
+   "y": 316,
+   "paralaje": 1
+  }
+ },
+ "vida": {
+  "imagen": "vida.png",
+  "piezas": [
+   {
+    "id": "palomas_0",
+    "tipo": "palomas",
+    "capa": "cerca",
+    "x": 111,
+    "y": 56,
+    "fps": 4,
+    "cuadros": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 34,
+      "h": 10
+     },
+     {
+      "x": 35,
+      "y": 0,
+      "w": 34,
+      "h": 10
+     },
+     {
+      "x": 70,
+      "y": 0,
+      "w": 34,
+      "h": 10
+     },
+     {
+      "x": 105,
+      "y": 0,
+      "w": 34,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "palomas_2",
+    "tipo": "palomas",
+    "capa": "cerca",
+    "x": 3674,
+    "y": 57,
+    "fps": 4,
+    "cuadros": [
+     {
+      "x": 140,
+      "y": 0,
+      "w": 34,
+      "h": 10
+     },
+     {
+      "x": 175,
+      "y": 0,
+      "w": 34,
+      "h": 10
+     },
+     {
+      "x": 210,
+      "y": 0,
+      "w": 34,
+      "h": 10
+     },
+     {
+      "x": 245,
+      "y": 0,
+      "w": 34,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "toldo_0",
+    "tipo": "toldos_viento",
+    "capa": "cerca",
+    "x": 660,
+    "y": 100,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 280,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 325,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 370,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     }
+    ]
+   },
+   {
+    "id": "toldo_1",
+    "tipo": "toldos_viento",
+    "capa": "cerca",
+    "x": 820,
+    "y": 100,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 415,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 460,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 505,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     }
+    ]
+   },
+   {
+    "id": "toldo_2",
+    "tipo": "toldos_viento",
+    "capa": "cerca",
+    "x": 980,
+    "y": 100,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 550,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 595,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 640,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     }
+    ]
+   },
+   {
+    "id": "toldo_3",
+    "tipo": "toldos_viento",
+    "capa": "cerca",
+    "x": 1140,
+    "y": 100,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 685,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 730,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 775,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     }
+    ]
+   },
+   {
+    "id": "toldo_4",
+    "tipo": "toldos_viento",
+    "capa": "cerca",
+    "x": 1300,
+    "y": 100,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 820,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 865,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 910,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     }
+    ]
+   },
+   {
+    "id": "toldo_5",
+    "tipo": "toldos_viento",
+    "capa": "cerca",
+    "x": 1460,
+    "y": 100,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 955,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 1000,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 1045,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     }
+    ]
+   },
+   {
+    "id": "toldo_6",
+    "tipo": "toldos_viento",
+    "capa": "cerca",
+    "x": 1620,
+    "y": 100,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 1090,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 1135,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 1180,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     }
+    ]
+   },
+   {
+    "id": "toldo_7",
+    "tipo": "toldos_viento",
+    "capa": "cerca",
+    "x": 1780,
+    "y": 100,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 1225,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 1270,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 1315,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     }
+    ]
+   },
+   {
+    "id": "toldo_8",
+    "tipo": "toldos_viento",
+    "capa": "cerca",
+    "x": 1940,
+    "y": 100,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 1360,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 1405,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 1450,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     }
+    ]
+   },
+   {
+    "id": "toldo_9",
+    "tipo": "toldos_viento",
+    "capa": "cerca",
+    "x": 2100,
+    "y": 100,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 1495,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 1540,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 1585,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     }
+    ]
+   },
+   {
+    "id": "toldo_10",
+    "tipo": "toldos_viento",
+    "capa": "cerca",
+    "x": 2260,
+    "y": 100,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 1630,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 1675,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 1720,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     }
+    ]
+   },
+   {
+    "id": "toldo_11",
+    "tipo": "toldos_viento",
+    "capa": "cerca",
+    "x": 2420,
+    "y": 100,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 1765,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 1810,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 1855,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     }
+    ]
+   },
+   {
+    "id": "toldo_12",
+    "tipo": "toldos_viento",
+    "capa": "cerca",
+    "x": 2580,
+    "y": 100,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 1900,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 1945,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 1990,
+      "y": 0,
+      "w": 44,
+      "h": 9
+     }
+    ]
+   },
+   {
+    "id": "toldo_13",
+    "tipo": "toldos_viento",
+    "capa": "cerca",
+    "x": 2740,
+    "y": 100,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 0,
+      "y": 11,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 45,
+      "y": 11,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 90,
+      "y": 11,
+      "w": 44,
+      "h": 9
+     }
+    ]
+   },
+   {
+    "id": "toldo_14",
+    "tipo": "toldos_viento",
+    "capa": "cerca",
+    "x": 2900,
+    "y": 100,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 135,
+      "y": 11,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 180,
+      "y": 11,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 225,
+      "y": 11,
+      "w": 44,
+      "h": 9
+     }
+    ]
+   },
+   {
+    "id": "toldo_15",
+    "tipo": "toldos_viento",
+    "capa": "cerca",
+    "x": 3060,
+    "y": 100,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 270,
+      "y": 11,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 315,
+      "y": 11,
+      "w": 44,
+      "h": 9
+     },
+     {
+      "x": 360,
+      "y": 11,
+      "w": 44,
+      "h": 9
+     }
+    ]
+   },
+   {
+    "id": "vendedora_0",
+    "tipo": "vendedoras_pregonando",
+    "capa": "cerca",
+    "x": 780,
+    "y": 170,
+    "fps": 4,
+    "cuadros": [
+     {
+      "x": 405,
+      "y": 11,
+      "w": 20,
+      "h": 30
+     },
+     {
+      "x": 426,
+      "y": 11,
+      "w": 20,
+      "h": 30
+     },
+     {
+      "x": 447,
+      "y": 11,
+      "w": 20,
+      "h": 30
+     },
+     {
+      "x": 468,
+      "y": 11,
+      "w": 20,
+      "h": 30
+     }
+    ]
+   },
+   {
+    "id": "vendedora_1",
+    "tipo": "vendedoras_pregonando",
+    "capa": "cerca",
+    "x": 1235,
+    "y": 170,
+    "fps": 4,
+    "cuadros": [
+     {
+      "x": 489,
+      "y": 11,
+      "w": 20,
+      "h": 30
+     },
+     {
+      "x": 510,
+      "y": 11,
+      "w": 20,
+      "h": 30
+     },
+     {
+      "x": 531,
+      "y": 11,
+      "w": 20,
+      "h": 30
+     },
+     {
+      "x": 552,
+      "y": 11,
+      "w": 20,
+      "h": 30
+     }
+    ]
+   },
+   {
+    "id": "vendedora_2",
+    "tipo": "vendedoras_pregonando",
+    "capa": "cerca",
+    "x": 1689,
+    "y": 170,
+    "fps": 4,
+    "cuadros": [
+     {
+      "x": 573,
+      "y": 11,
+      "w": 20,
+      "h": 30
+     },
+     {
+      "x": 594,
+      "y": 11,
+      "w": 20,
+      "h": 30
+     },
+     {
+      "x": 615,
+      "y": 11,
+      "w": 20,
+      "h": 30
+     },
+     {
+      "x": 636,
+      "y": 11,
+      "w": 20,
+      "h": 30
+     }
+    ]
+   },
+   {
+    "id": "vendedora_3",
+    "tipo": "vendedoras_pregonando",
+    "capa": "cerca",
+    "x": 2150,
+    "y": 170,
+    "fps": 4,
+    "cuadros": [
+     {
+      "x": 657,
+      "y": 11,
+      "w": 20,
+      "h": 30
+     },
+     {
+      "x": 678,
+      "y": 11,
+      "w": 20,
+      "h": 30
+     },
+     {
+      "x": 699,
+      "y": 11,
+      "w": 20,
+      "h": 30
+     },
+     {
+      "x": 720,
+      "y": 11,
+      "w": 20,
+      "h": 30
+     }
+    ]
+   },
+   {
+    "id": "vendedora_4",
+    "tipo": "vendedoras_pregonando",
+    "capa": "cerca",
+    "x": 2649,
+    "y": 170,
+    "fps": 4,
+    "cuadros": [
+     {
+      "x": 741,
+      "y": 11,
+      "w": 20,
+      "h": 30
+     },
+     {
+      "x": 762,
+      "y": 11,
+      "w": 20,
+      "h": 30
+     },
+     {
+      "x": 783,
+      "y": 11,
+      "w": 20,
+      "h": 30
+     },
+     {
+      "x": 804,
+      "y": 11,
+      "w": 20,
+      "h": 30
+     }
+    ]
+   },
+   {
+    "id": "vendedora_5",
+    "tipo": "vendedoras_pregonando",
+    "capa": "cerca",
+    "x": 3105,
+    "y": 170,
+    "fps": 4,
+    "cuadros": [
+     {
+      "x": 825,
+      "y": 11,
+      "w": 20,
+      "h": 30
+     },
+     {
+      "x": 846,
+      "y": 11,
+      "w": 20,
+      "h": 30
+     },
+     {
+      "x": 867,
+      "y": 11,
+      "w": 20,
+      "h": 30
+     },
+     {
+      "x": 888,
+      "y": 11,
+      "w": 20,
+      "h": 30
+     }
+    ]
+   }
+  ]
+ },
+ "callejones": [
+  {
+   "x0": 420,
+   "x1": 446,
+   "tipo": "callejon"
+  },
+  {
+   "x0": 1060,
+   "x1": 1086,
+   "tipo": "callejon"
+  },
+  {
+   "x0": 1700,
+   "x1": 1726,
+   "tipo": "callejon"
+  },
+  {
+   "x0": 2340,
+   "x1": 2366,
+   "tipo": "callejon"
+  },
+  {
+   "x0": 2980,
+   "x1": 3006,
+   "tipo": "callejon"
+  },
+  {
+   "x0": 3620,
+   "x1": 3646,
+   "tipo": "callejon"
+  }
+ ],
+ "superficie": {
+  "archivo": "superficie.png",
+  "y": 200,
+  "leyenda": [
+   {
+    "id": "acera",
+    "color": "#d0d0d0",
+    "paso": "paso_piedra",
+    "resbala": false
+   },
+   {
+    "id": "asfalto",
+    "color": "#808080",
+    "paso": "paso_piedra",
+    "resbala": false
+   }
+  ]
+ },
+ "colision": "colision.json",
+ "luces": "luces.json",
+ "particulas": "particulas.json",
+ "paleta": [
+  {
+   "nombre": "tinta",
+   "hex": "#231c28"
+  },
+  {
+   "nombre": "sombra",
+   "hex": "#3d3442"
+  },
+  {
+   "nombre": "asfalto",
+   "hex": "#57505a"
+  },
+  {
+   "nombre": "asfalto_claro",
+   "hex": "#7a7178"
+  },
+  {
+   "nombre": "cemento",
+   "hex": "#a39a98"
+  },
+  {
+   "nombre": "cemento_claro",
+   "hex": "#cdc3b8"
+  },
+  {
+   "nombre": "crema",
+   "hex": "#efe4cb"
+  },
+  {
+   "nombre": "luz",
+   "hex": "#fff8e6"
+  },
+  {
+   "nombre": "amarillo",
+   "hex": "#f0cc66"
+  },
+  {
+   "nombre": "ocre",
+   "hex": "#c4913f"
+  },
+  {
+   "nombre": "terracota",
+   "hex": "#a8553a"
+  },
+  {
+   "nombre": "rojo",
+   "hex": "#d93a2e"
+  },
+  {
+   "nombre": "vino",
+   "hex": "#82242c"
+  },
+  {
+   "nombre": "salmon",
+   "hex": "#e2588f"
+  },
+  {
+   "nombre": "menta",
+   "hex": "#93cdb0"
+  },
+  {
+   "nombre": "verde",
+   "hex": "#4f8f55"
+  },
+  {
+   "nombre": "verde_oscuro",
+   "hex": "#2d5a3e"
+  },
+  {
+   "nombre": "celeste",
+   "hex": "#8fbfdc"
+  },
+  {
+   "nombre": "cielo",
+   "hex": "#d4e8f0"
+  },
+  {
+   "nombre": "azul",
+   "hex": "#3f71a3"
+  },
+  {
+   "nombre": "azul_noche",
+   "hex": "#283d5e"
+  },
+  {
+   "nombre": "canal",
+   "hex": "#5b7a68"
+  },
+  {
+   "nombre": "oro",
+   "hex": "#f5b52e"
+  },
+  {
+   "nombre": "bruma",
+   "hex": "#e9cfae"
+  }
+ ],
+ "verificacion": "verificacion.md",
+ "layout": {
+  "pais": "vietnam",
+  "prueba": "crosscountry",
+  "franja": {
+   "atras": 200,
+   "adelante": 330
+  },
+  "id": "saigon_benthanh",
+  "tramo": 2,
+  "nombre": "MERCADO BẾN THÀNH",
+  "largo": 3840,
+  "hora": "manana",
+  "clima": [
+   "despejado"
+  ],
+  "paralaje": {
+   "cielo": "auto",
+   "lejos": "saigon_skyline",
+   "cerca": "benthanh"
+  },
+  "piso": [
+   {
+    "x0": 0,
+    "x1": 3840,
+    "tipo": "asfalto"
+   },
+   {
+    "x0": 0,
+    "x1": 3840,
+    "y0": 0,
+    "y1": 24,
+    "tipo": "acera"
+   },
+   {
+    "x0": 640,
+    "x1": 3260,
+    "tipo": "baldosa",
+    "nombre": "piso del mercado"
+   }
+  ],
+  "huecos": [],
+  "plataformas": [
+   {
+    "x": 300,
+    "y": 60,
+    "w": 50,
+    "d": 28,
+    "z": 24,
+    "tipo": "carrito_cafe",
+    "subible": true
+   },
+   {
+    "x": 1100,
+    "y": 0,
+    "w": 44,
+    "d": 36,
+    "z": 22,
+    "tipo": "puesto_frutas",
+    "subible": true
+   },
+   {
+    "x": 1760,
+    "y": 0,
+    "w": 30,
+    "d": 36,
+    "z": 16,
+    "tipo": "cajas",
+    "subible": true
+   },
+   {
+    "x": 2440,
+    "y": 0,
+    "w": 44,
+    "d": 36,
+    "z": 22,
+    "tipo": "puesto_frutas",
+    "subible": true
+   },
+   {
+    "x": 2860,
+    "y": 0,
+    "w": 30,
+    "d": 36,
+    "z": 14,
+    "tipo": "canastas",
+    "subible": true
+   },
+   {
+    "x": 1460,
+    "y": 52,
+    "w": 26,
+    "d": 26,
+    "z": 12,
+    "tipo": "sacos_arroz",
+    "subible": true
+   },
+   {
+    "x": 2150,
+    "y": 52,
+    "w": 26,
+    "d": 26,
+    "z": 12,
+    "tipo": "sacos_arroz",
+    "subible": true
+   },
+   {
+    "x": 2780,
+    "y": 52,
+    "w": 26,
+    "d": 26,
+    "z": 12,
+    "tipo": "sacos_arroz",
+    "subible": true
+   },
+   {
+    "x": 1200,
+    "y": 94,
+    "w": 48,
+    "d": 36,
+    "z": 24,
+    "tipo": "puesto_frutas",
+    "subible": true
+   },
+   {
+    "x": 1860,
+    "y": 94,
+    "w": 34,
+    "d": 36,
+    "z": 16,
+    "tipo": "cubos_flores",
+    "subible": true
+   },
+   {
+    "x": 2560,
+    "y": 94,
+    "w": 48,
+    "d": 36,
+    "z": 24,
+    "tipo": "puesto_frutas",
+    "subible": true
+   }
+  ],
+  "muros": [
+   {
+    "x": 600,
+    "y": 36,
+    "w": 40,
+    "d": 16,
+    "z": 64,
+    "tipo": "porton_mercado",
+    "nota": "la fachada del mercado: tres puertas, una por pasillo (y 0 a 36, 52 a 78 y 94 a 130)"
+   },
+   {
+    "x": 600,
+    "y": 78,
+    "w": 40,
+    "d": 16,
+    "z": 64,
+    "tipo": "porton_mercado"
+   },
+   {
+    "x": 3220,
+    "y": 40,
+    "w": 40,
+    "d": 50,
+    "z": 64,
+    "tipo": "porton_mercado",
+    "nota": "salida: se pasa por arriba (y 0 a 40) o por abajo (y 90 a 130)"
+   }
+  ],
+  "escaleras": [],
+  "postes": [
+   {
+    "x": 200,
+    "y": 4,
+    "alto": 160,
+    "tipo": "poste_luz"
+   },
+   {
+    "x": 3500,
+    "y": 4,
+    "alto": 160,
+    "tipo": "poste_luz"
+   }
+  ],
+  "agua": [],
+  "bajo": [
+   {
+    "x0": 1990,
+    "x1": 2200,
+    "y0": 0,
+    "y1": 36,
+    "z": 50,
+    "tipo": "lamparas_colgantes"
+   }
+  ],
+  "solidos": [
+   {
+    "x": 780,
+    "y": 36,
+    "w": 180,
+    "d": 16,
+    "z": 46,
+    "tipo": "puesto_ropa",
+    "nombre": "fila de puestos de arriba"
+   },
+   {
+    "x": 1000,
+    "y": 36,
+    "w": 280,
+    "d": 16,
+    "z": 46,
+    "tipo": "puesto_flores",
+    "nombre": "fila de puestos de arriba"
+   },
+   {
+    "x": 1320,
+    "y": 36,
+    "w": 300,
+    "d": 16,
+    "z": 46,
+    "tipo": "puesto_telas",
+    "nombre": "fila de puestos de arriba"
+   },
+   {
+    "x": 1660,
+    "y": 36,
+    "w": 280,
+    "d": 16,
+    "z": 46,
+    "tipo": "puesto_comida",
+    "nombre": "fila de puestos de arriba"
+   },
+   {
+    "x": 1980,
+    "y": 36,
+    "w": 300,
+    "d": 16,
+    "z": 46,
+    "tipo": "puesto_recuerdos",
+    "nombre": "fila de puestos de arriba"
+   },
+   {
+    "x": 2320,
+    "y": 36,
+    "w": 280,
+    "d": 16,
+    "z": 46,
+    "tipo": "puesto_cafe",
+    "nombre": "fila de puestos de arriba"
+   },
+   {
+    "x": 2640,
+    "y": 36,
+    "w": 280,
+    "d": 16,
+    "z": 46,
+    "tipo": "puesto_ropa",
+    "nombre": "fila de puestos de arriba"
+   },
+   {
+    "x": 2960,
+    "y": 36,
+    "w": 80,
+    "d": 16,
+    "z": 46,
+    "tipo": "puesto_flores",
+    "nombre": "fila de puestos de arriba"
+   },
+   {
+    "x": 800,
+    "y": 78,
+    "w": 200,
+    "d": 16,
+    "z": 46,
+    "tipo": "puesto_comida",
+    "nombre": "fila de puestos de abajo"
+   },
+   {
+    "x": 1040,
+    "y": 78,
+    "w": 300,
+    "d": 16,
+    "z": 46,
+    "tipo": "puesto_recuerdos",
+    "nombre": "fila de puestos de abajo"
+   },
+   {
+    "x": 1380,
+    "y": 78,
+    "w": 280,
+    "d": 16,
+    "z": 46,
+    "tipo": "puesto_ropa",
+    "nombre": "fila de puestos de abajo"
+   },
+   {
+    "x": 1700,
+    "y": 78,
+    "w": 300,
+    "d": 16,
+    "z": 46,
+    "tipo": "puesto_telas",
+    "nombre": "fila de puestos de abajo"
+   },
+   {
+    "x": 2040,
+    "y": 78,
+    "w": 280,
+    "d": 16,
+    "z": 46,
+    "tipo": "puesto_flores",
+    "nombre": "fila de puestos de abajo"
+   },
+   {
+    "x": 2360,
+    "y": 78,
+    "w": 300,
+    "d": 16,
+    "z": 46,
+    "tipo": "puesto_comida",
+    "nombre": "fila de puestos de abajo"
+   },
+   {
+    "x": 2700,
+    "y": 78,
+    "w": 260,
+    "d": 16,
+    "z": 46,
+    "tipo": "puesto_cafe",
+    "nombre": "fila de puestos de abajo"
+   },
+   {
+    "x": 3000,
+    "y": 78,
+    "w": 40,
+    "d": 16,
+    "z": 46,
+    "tipo": "puesto_telas",
+    "nombre": "fila de puestos de abajo"
+   }
+  ],
+  "carriles": [
+   {
+    "y": 12
+   },
+   {
+    "y": 28
+   },
+   {
+    "y": 65
+   },
+   {
+    "y": 112
+   }
+  ],
+  "entidades": [
+   {
+    "tipo": "salida",
+    "x": 40
+   },
+   {
+    "tipo": "meta",
+    "x": 3790
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "non_la",
+    "x": 900,
+    "y": 18
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "coco",
+    "x": 1560,
+    "y": 65
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "abanico",
+    "x": 2100,
+    "y": 112
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "termo",
+    "x": 2700,
+    "y": 18
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "chancleta",
+    "x": 3400,
+    "y": 60
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "silla_plastica",
+    "x": 3620,
+    "y": 100
+   },
+   {
+    "tipo": "vehiculo",
+    "vehiculo": "moto",
+    "carril": 4,
+    "cada": 5,
+    "desde": "derecha",
+    "x0": 3260,
+    "x1": 3840
+   },
+   {
+    "tipo": "animal",
+    "animal": "paloma",
+    "x": 430,
+    "y": 104
+   },
+   {
+    "tipo": "animal",
+    "animal": "paloma",
+    "x": 446,
+    "y": 112
+   },
+   {
+    "tipo": "animal",
+    "animal": "paloma",
+    "x": 462,
+    "y": 100
+   }
+  ],
+  "ranuras_deco": [
+   {
+    "x0": 0,
+    "x1": 640,
+    "capa": "cerca",
+    "tema": "calle_le_loi"
+   },
+   {
+    "x0": 640,
+    "x1": 3260,
+    "capa": "cerca",
+    "tema": "mercado_interior"
+   },
+   {
+    "x0": 3260,
+    "x1": 3840,
+    "capa": "cerca",
+    "tema": "calle"
+   }
+  ],
+  "vida": [
+   "vendedoras_pregonando",
+   "toldos_viento",
+   "palomas"
+  ]
+ }
+}

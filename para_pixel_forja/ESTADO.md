@@ -26,6 +26,11 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 
 ## Lo último del lado del juego
 
+- **La cadena entera ya está en el juego** (pixel_forja `main` en e2dfe1f, con #13, #15 a #25). El submódulo apunta ahí, y el kit y los escenarios salen de main:
+  - Escenarios con arte: `saigon_hem`, `saigon_benthanh`, `saigon_rio`, `saigon_azoteas`, `saigon_estadio`, `medellin_c13` y `caracas_azotea`. Falta `hoian` (su fondo lejano llega con E3c).
+  - El kit trae la gente de la Comuna 13, el gallo y la paloma, el audio comprimido, las comidas de la pelea y los efectos nuevos (`agarre`, `bloqueo`, `ko_grande` y las onomatopeyas). No se perdió ninguna animación ni efecto de antes.
+  - Todavía sin conectar en el juego (no están en `kit.config.json`): los perros y gatos de C7, los vehículos de D2 y los paneles de interfaz de G1. Van en la próxima tanda del lado del juego.
+
 - **Pruebas nuevas: Quemado Nekketsu y Chapita**, con lo que ya trae el kit (el balón de goma, las chapas, el palo de escoba, la chancleta, `weapon_throw`, `weapon_swing` con su `arma` por cuadro, `fight_block` para atrapar). Lo que les falta en arte, para un lote siguiente:
   - Quemado: `catch` (atrapar el balón contra el pecho) y `dodge_jump`. Hoy atrapa con `fight_block` y esquiva con el salto normal. El patio del liceo (`liceo_patio`, techado, vista inclinada como la pelea) está pintado por código.
   - Chapita: `bat_stance`, `bat_swing` con el palo a dos manos y `pitch` de lado. Hoy usa `weapon_swing` y `weapon_throw` con el palo y la chapa en la mano. La señora Carmen (rulos y bata) sería un NPC con `asomarse`, `regañar` y `tirar_chancleta`. El barrio (`barrio_caracas`, de lado) y la casa del vecino con la ventana, más su versión rota, están pintados por código.

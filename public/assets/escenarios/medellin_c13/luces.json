@@ -1,0 +1,21 @@
+{
+ "hora": "manana",
+ "luces": [
+  {
+   "x": 219,
+   "y": 76,
+   "color": "#f5862a",
+   "radio": 40,
+   "encendida": false,
+   "nota": "lámpara del poste: de día va apagada"
+  },
+  {
+   "x": 1519,
+   "y": 50,
+   "color": "#f5862a",
+   "radio": 40,
+   "encendida": false,
+   "nota": "lámpara del poste: de día va apagada"
+  }
+ ]
+}

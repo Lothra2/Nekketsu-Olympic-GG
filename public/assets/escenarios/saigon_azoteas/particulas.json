@@ -1,0 +1,95 @@
+{
+ "nota": "x e y en pixeles de pantalla a escala 1 (y de pantalla = franja.atras + y del mundo). fx: nombre del efecto del catálogo (manifest.fx).",
+ "particulas": [
+  {
+   "tipo": "onda",
+   "fx": "onda_charco",
+   "x0": 1118,
+   "x1": 1231,
+   "y0": 250,
+   "y1": 290,
+   "cada": 0.7,
+   "nota": "charco: ondas sueltas, y salpicadura_piso a cada paso"
+  },
+  {
+   "tipo": "onda",
+   "fx": "onda_charco",
+   "x0": 1678,
+   "x1": 1792,
+   "y0": 280,
+   "y1": 320,
+   "cada": 0.7,
+   "nota": "charco: ondas sueltas, y salpicadura_piso a cada paso"
+  },
+  {
+   "tipo": "onda",
+   "fx": "onda_charco",
+   "x0": 2857,
+   "x1": 2975,
+   "y0": 220,
+   "y1": 270,
+   "cada": 0.7,
+   "nota": "charco: ondas sueltas, y salpicadura_piso a cada paso"
+  },
+  {
+   "tipo": "onda",
+   "fx": "onda_charco",
+   "x0": 3514,
+   "x1": 3631,
+   "y0": 240,
+   "y1": 290,
+   "cada": 0.7,
+   "nota": "charco: ondas sueltas, y salpicadura_piso a cada paso"
+  },
+  {
+   "tipo": "lluvia",
+   "fx": "lluvia",
+   "x0": 0,
+   "x1": 3886,
+   "y0": 10,
+   "y1": 300,
+   "cada": 0.12,
+   "nota": "el aguacero: parches de lluvia en mosaico que caen sobre toda la pantalla"
+  },
+  {
+   "tipo": "gota",
+   "fx": "salpicadura_piso",
+   "x0": 1118,
+   "x1": 1231,
+   "y0": 250,
+   "y1": 290,
+   "cada": 0.25,
+   "nota": "charco: la lluvia que cae en el charco"
+  },
+  {
+   "tipo": "gota",
+   "fx": "salpicadura_piso",
+   "x0": 1678,
+   "x1": 1792,
+   "y0": 280,
+   "y1": 320,
+   "cada": 0.25,
+   "nota": "charco: la lluvia que cae en el charco"
+  },
+  {
+   "tipo": "gota",
+   "fx": "salpicadura_piso",
+   "x0": 2857,
+   "x1": 2975,
+   "y0": 220,
+   "y1": 270,
+   "cada": 0.25,
+   "nota": "charco: la lluvia que cae en el charco"
+  },
+  {
+   "tipo": "gota",
+   "fx": "salpicadura_piso",
+   "x0": 3514,
+   "x1": 3631,
+   "y0": 240,
+   "y1": 290,
+   "cada": 0.25,
+   "nota": "charco: la lluvia que cae en el charco"
+  }
+ ]
+}

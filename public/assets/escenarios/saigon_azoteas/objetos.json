@@ -1,0 +1,296 @@
+{
+ "imagen": "objetos.png",
+ "nota": "x, y: esquina de arriba a la izquierda en pantalla a escala 1 (con la inclinación ya puesta). orden: la profundidad para ordenar con los atletas (se dibuja después de todo atleta con y menor). En Phaser: setDepth(franja.atras + orden). Las caras izquierdas de las cajas (tipo *_cara) van con orden y + 0.1: detrás de quien pasa a su lado.",
+ "objetos": [
+  {
+   "id": "caseta_escalera_4_cara",
+   "tipo": "caseta_escalera_cara",
+   "origen": "muros",
+   "cuadro": {
+    "x": 0,
+    "y": 0,
+    "w": 26,
+    "h": 127
+   },
+   "x": 1800,
+   "y": 144,
+   "orden": 0.1
+  },
+  {
+   "id": "antena_1",
+   "tipo": "antena",
+   "origen": "postes",
+   "cuadro": {
+    "x": 27,
+    "y": 0,
+    "w": 40,
+    "h": 116
+   },
+   "x": 2935,
+   "y": 93,
+   "orden": 8
+  },
+  {
+   "id": "antena_0",
+   "tipo": "antena",
+   "origen": "postes",
+   "cuadro": {
+    "x": 68,
+    "y": 0,
+    "w": 40,
+    "h": 96
+   },
+   "x": 886,
+   "y": 115,
+   "orden": 10
+  },
+  {
+   "id": "antena_2",
+   "tipo": "antena",
+   "origen": "postes",
+   "cuadro": {
+    "x": 109,
+    "y": 0,
+    "w": 40,
+    "h": 96
+   },
+   "x": 3586,
+   "y": 115,
+   "orden": 10
+  },
+  {
+   "id": "tanque_agua_0",
+   "tipo": "tanque_agua",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 150,
+    "y": 0,
+    "w": 43,
+    "h": 70
+   },
+   "x": 300,
+   "y": 156,
+   "orden": 26,
+   "superficie": "metal"
+  },
+  {
+   "id": "tanque_agua_1",
+   "tipo": "tanque_agua",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 194,
+    "y": 0,
+    "w": 43,
+    "h": 70
+   },
+   "x": 2600,
+   "y": 156,
+   "orden": 26,
+   "superficie": "metal"
+  },
+  {
+   "id": "aire_acondicionado_3_cara",
+   "tipo": "aire_acondicionado_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 238,
+    "y": 0,
+    "w": 9,
+    "h": 43
+   },
+   "x": 1014,
+   "y": 222,
+   "orden": 40.1
+  },
+  {
+   "id": "mesas_plasticas_2",
+   "tipo": "mesas_plasticas",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 248,
+    "y": 0,
+    "w": 59,
+    "h": 50
+   },
+   "x": 2007,
+   "y": 200,
+   "orden": 50,
+   "superficie": "plastico"
+  },
+  {
+   "id": "macetas_5_cara",
+   "tipo": "macetas_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 308,
+    "y": 0,
+    "w": 11,
+    "h": 45
+   },
+   "x": 2718,
+   "y": 236,
+   "orden": 50.1
+  },
+  {
+   "id": "aire_acondicionado_3",
+   "tipo": "aire_acondicionado",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 320,
+    "y": 0,
+    "w": 38,
+    "h": 42
+   },
+   "x": 1014,
+   "y": 222,
+   "orden": 64,
+   "superficie": "piedra"
+  },
+  {
+   "id": "caseta_escalera_4",
+   "tipo": "caseta_escalera",
+   "origen": "muros",
+   "cuadro": {
+    "x": 359,
+    "y": 0,
+    "w": 85,
+    "h": 126
+   },
+   "x": 1800,
+   "y": 144,
+   "orden": 70,
+   "superficie": "piedra"
+  },
+  {
+   "id": "macetas_5",
+   "tipo": "macetas",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 445,
+    "y": 0,
+    "w": 50,
+    "h": 44
+   },
+   "x": 2718,
+   "y": 236,
+   "orden": 80,
+   "superficie": "piedra"
+  },
+  {
+   "id": "aire_acondicionado_7_cara",
+   "tipo": "aire_acondicionado_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 496,
+    "y": 0,
+    "w": 9,
+    "h": 43
+   },
+   "x": 3428,
+   "y": 262,
+   "orden": 80.1
+  },
+  {
+   "id": "ropa_tendida_0",
+   "tipo": "ropa_tendida",
+   "origen": "bajo",
+   "cuadro": {
+    "x": 506,
+    "y": 0,
+    "w": 150,
+    "h": 90
+   },
+   "x": 571,
+   "y": 168,
+   "orden": 90
+  },
+  {
+   "id": "aire_acondicionado_8_cara",
+   "tipo": "aire_acondicionado_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 657,
+    "y": 0,
+    "w": 10,
+    "h": 43
+   },
+   "x": 1281,
+   "y": 272,
+   "orden": 90.1
+  },
+  {
+   "id": "mesas_plasticas_6",
+   "tipo": "mesas_plasticas",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 668,
+    "y": 0,
+    "w": 58,
+    "h": 50
+   },
+   "x": 505,
+   "y": 250,
+   "orden": 100,
+   "superficie": "plastico"
+  },
+  {
+   "id": "aire_acondicionado_7",
+   "tipo": "aire_acondicionado",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 727,
+    "y": 0,
+    "w": 38,
+    "h": 42
+   },
+   "x": 3428,
+   "y": 262,
+   "orden": 104,
+   "superficie": "piedra"
+  },
+  {
+   "id": "aire_acondicionado_8",
+   "tipo": "aire_acondicionado",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 766,
+    "y": 0,
+    "w": 39,
+    "h": 42
+   },
+   "x": 1281,
+   "y": 272,
+   "orden": 114,
+   "superficie": "piedra"
+  },
+  {
+   "id": "tanque_agua_9",
+   "tipo": "tanque_agua",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 806,
+    "y": 0,
+    "w": 45,
+    "h": 74
+   },
+   "x": 2131,
+   "y": 246,
+   "orden": 120,
+   "superficie": "metal"
+  },
+  {
+   "id": "ropa_tendida_1",
+   "tipo": "ropa_tendida",
+   "origen": "bajo",
+   "cuadro": {
+    "x": 852,
+    "y": 0,
+    "w": 206,
+    "h": 160
+   },
+   "x": 2400,
+   "y": 138,
+   "orden": 130
+  }
+ ]
+}

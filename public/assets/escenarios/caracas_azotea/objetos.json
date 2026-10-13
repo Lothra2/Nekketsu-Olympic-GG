@@ -1,0 +1,34 @@
+{
+ "imagen": "objetos.png",
+ "nota": "x, y: esquina de arriba a la izquierda en pantalla a escala 1 (con la inclinación ya puesta). orden: la profundidad para ordenar con los atletas (se dibuja después de todo atleta con y menor). En Phaser: setDepth(franja.atras + orden). Las caras izquierdas de las cajas (tipo *_cara) van con orden y + 0.1: detrás de quien pasa a su lado.",
+ "objetos": [
+  {
+   "id": "antena_0",
+   "tipo": "antena",
+   "origen": "postes",
+   "cuadro": {
+    "x": 0,
+    "y": 0,
+    "w": 30,
+    "h": 126
+   },
+   "x": 108,
+   "y": 123,
+   "orden": 2
+  },
+  {
+   "id": "antena_1",
+   "tipo": "antena",
+   "origen": "postes",
+   "cuadro": {
+    "x": 31,
+    "y": 0,
+    "w": 30,
+    "h": 102
+   },
+   "x": 448,
+   "y": 147,
+   "orden": 2
+  }
+ ]
+}

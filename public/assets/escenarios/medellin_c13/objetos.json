@@ -1,0 +1,643 @@
+{
+ "imagen": "objetos.png",
+ "nota": "x, y: esquina de arriba a la izquierda en pantalla a escala 1 (con la inclinación ya puesta). orden: la profundidad para ordenar con los atletas (se dibuja después de todo atleta con y menor). En Phaser: setDepth(franja.atras + orden). Las caras izquierdas de las cajas (tipo *_cara) van con orden y + 0.1: detrás de quien pasa a su lado.",
+ "objetos": [
+  {
+   "id": "escalon_15_cara",
+   "tipo": "escalon_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 0,
+    "y": 0,
+    "w": 47,
+    "h": 137
+   },
+   "x": 520,
+   "y": 194,
+   "orden": 0.1
+  },
+  {
+   "id": "escalon_16_cara",
+   "tipo": "escalon_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 48,
+    "y": 0,
+    "w": 47,
+    "h": 143
+   },
+   "x": 534,
+   "y": 188,
+   "orden": 0.1
+  },
+  {
+   "id": "escalon_17_cara",
+   "tipo": "escalon_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 96,
+    "y": 0,
+    "w": 47,
+    "h": 149
+   },
+   "x": 548,
+   "y": 182,
+   "orden": 0.1
+  },
+  {
+   "id": "escalon_18_cara",
+   "tipo": "escalon_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 144,
+    "y": 0,
+    "w": 47,
+    "h": 155
+   },
+   "x": 562,
+   "y": 176,
+   "orden": 0.1
+  },
+  {
+   "id": "escalera_electrica_2_cara",
+   "tipo": "escalera_electrica_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 192,
+    "y": 0,
+    "w": 22,
+    "h": 91
+   },
+   "x": 1150,
+   "y": 170,
+   "orden": 0.1
+  },
+  {
+   "id": "terraza_24_cara",
+   "tipo": "terraza_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 215,
+    "y": 0,
+    "w": 47,
+    "h": 197
+   },
+   "x": 1248,
+   "y": 134,
+   "orden": 0.1
+  },
+  {
+   "id": "escalones_9_cara",
+   "tipo": "escalones_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 263,
+    "y": 0,
+    "w": 26,
+    "h": 149
+   },
+   "x": 1950,
+   "y": 122,
+   "orden": 0.1
+  },
+  {
+   "id": "techo_lata_32_cara",
+   "tipo": "techo_lata_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 290,
+    "y": 0,
+    "w": 47,
+    "h": 239
+   },
+   "x": 2048,
+   "y": 92,
+   "orden": 0.1
+  },
+  {
+   "id": "techo_lata_33_cara",
+   "tipo": "techo_lata_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 338,
+    "y": 0,
+    "w": 47,
+    "h": 239
+   },
+   "x": 2400,
+   "y": 92,
+   "orden": 0.1
+  },
+  {
+   "id": "techo_lata_34_cara",
+   "tipo": "techo_lata_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 386,
+    "y": 0,
+    "w": 47,
+    "h": 239
+   },
+   "x": 2680,
+   "y": 92,
+   "orden": 0.1
+  },
+  {
+   "id": "escalera_pintada_35_cara",
+   "tipo": "escalera_pintada_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 434,
+    "y": 0,
+    "w": 47,
+    "h": 251
+   },
+   "x": 2820,
+   "y": 80,
+   "orden": 0.1
+  },
+  {
+   "id": "poste_luz_0",
+   "tipo": "poste_luz",
+   "origen": "postes",
+   "cuadro": {
+    "x": 482,
+    "y": 0,
+    "w": 44,
+    "h": 156
+   },
+   "x": 181,
+   "y": 49,
+   "orden": 4
+  },
+  {
+   "id": "escalera_electrica_2_tramo",
+   "tipo": "escalera_electrica",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 527,
+    "y": 0,
+    "w": 119,
+    "h": 127
+   },
+   "x": 1150,
+   "y": 134,
+   "orden": 60,
+   "superficie": "piedra"
+  },
+  {
+   "id": "escalones_21_cara",
+   "tipo": "escalones_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 647,
+    "y": 0,
+    "w": 26,
+    "h": 107
+   },
+   "x": 1171,
+   "y": 224,
+   "orden": 60.1
+  },
+  {
+   "id": "techo_escalera_0",
+   "tipo": "techo_escalera",
+   "origen": "bajo",
+   "cuadro": {
+    "x": 674,
+    "y": 0,
+    "w": 125,
+    "h": 214
+   },
+   "x": 1148,
+   "y": 48,
+   "orden": 60.6
+  },
+  {
+   "id": "escalones_9_tramo",
+   "tipo": "escalones",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 800,
+    "y": 0,
+    "w": 124,
+    "h": 183
+   },
+   "x": 1950,
+   "y": 88,
+   "orden": 70,
+   "superficie": "piedra"
+  },
+  {
+   "id": "escalera_electrica_25_cara",
+   "tipo": "escalera_electrica_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 925,
+    "y": 0,
+    "w": 22,
+    "h": 133
+   },
+   "x": 1975,
+   "y": 198,
+   "orden": 70.1
+  },
+  {
+   "id": "baranda_12",
+   "tipo": "baranda",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 948,
+    "y": 0,
+    "w": 65,
+    "h": 132
+   },
+   "x": 2641,
+   "y": 142,
+   "orden": 74,
+   "superficie": "piedra"
+  },
+  {
+   "id": "carrito_paletas_13",
+   "tipo": "carrito_paletas",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 1014,
+    "y": 0,
+    "w": 55,
+    "h": 78
+   },
+   "x": 322,
+   "y": 216,
+   "orden": 94,
+   "superficie": "piedra"
+  },
+  {
+   "id": "escalon_15",
+   "tipo": "escalon",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 1070,
+    "y": 0,
+    "w": 60,
+    "h": 136
+   },
+   "x": 520,
+   "y": 194,
+   "orden": 130,
+   "superficie": "piedra"
+  },
+  {
+   "id": "escalon_16",
+   "tipo": "escalon",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 1131,
+    "y": 0,
+    "w": 60,
+    "h": 142
+   },
+   "x": 534,
+   "y": 188,
+   "orden": 130,
+   "superficie": "piedra"
+  },
+  {
+   "id": "escalon_17",
+   "tipo": "escalon",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 1192,
+    "y": 0,
+    "w": 60,
+    "h": 148
+   },
+   "x": 548,
+   "y": 182,
+   "orden": 130,
+   "superficie": "piedra"
+  },
+  {
+   "id": "escalon_18",
+   "tipo": "escalon",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 1253,
+    "y": 0,
+    "w": 60,
+    "h": 154
+   },
+   "x": 562,
+   "y": 176,
+   "orden": 130,
+   "superficie": "piedra"
+  },
+  {
+   "id": "terraza_19",
+   "tipo": "terraza",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 1314,
+    "y": 0,
+    "w": 620,
+    "h": 166
+   },
+   "x": 576,
+   "y": 164,
+   "orden": 130,
+   "superficie": "piedra"
+  },
+  {
+   "id": "escalones_21_tramo",
+   "tipo": "escalones",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 0,
+    "y": 252,
+    "w": 124,
+    "h": 141
+   },
+   "x": 1171,
+   "y": 190,
+   "orden": 130,
+   "superficie": "piedra"
+  },
+  {
+   "id": "terraza_24",
+   "tipo": "terraza",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 125,
+    "y": 252,
+    "w": 748,
+    "h": 208
+   },
+   "x": 1248,
+   "y": 122,
+   "orden": 130,
+   "superficie": "piedra"
+  },
+  {
+   "id": "escalera_electrica_25_tramo",
+   "tipo": "escalera_electrica",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 874,
+    "y": 252,
+    "w": 119,
+    "h": 169
+   },
+   "x": 1975,
+   "y": 162,
+   "orden": 130,
+   "superficie": "piedra"
+  },
+  {
+   "id": "techo_lata_32",
+   "tipo": "techo_lata",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 994,
+    "y": 252,
+    "w": 348,
+    "h": 238
+   },
+   "x": 2048,
+   "y": 92,
+   "orden": 130,
+   "superficie": "piedra"
+  },
+  {
+   "id": "techo_lata_33",
+   "tipo": "techo_lata",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 1343,
+    "y": 252,
+    "w": 266,
+    "h": 238
+   },
+   "x": 2400,
+   "y": 92,
+   "orden": 130,
+   "superficie": "piedra"
+  },
+  {
+   "id": "techo_lata_34",
+   "tipo": "techo_lata",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 1610,
+    "y": 252,
+    "w": 186,
+    "h": 238
+   },
+   "x": 2680,
+   "y": 92,
+   "orden": 130,
+   "superficie": "piedra"
+  },
+  {
+   "id": "escalera_pintada_35_tramo",
+   "tipo": "escalera_pintada",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 1797,
+    "y": 252,
+    "w": 166,
+    "h": 275
+   },
+   "x": 2820,
+   "y": 56,
+   "orden": 130,
+   "superficie": "piedra"
+  },
+  {
+   "id": "mirador_38",
+   "tipo": "mirador",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 0,
+    "y": 528,
+    "w": 706,
+    "h": 286
+   },
+   "x": 2940,
+   "y": 44,
+   "orden": 130,
+   "superficie": "piedra"
+  },
+  {
+   "id": "poste_luz_1",
+   "tipo": "poste_luz",
+   "origen": "postes",
+   "cuadro": {
+    "x": 707,
+    "y": 528,
+    "w": 44,
+    "h": 116
+   },
+   "x": 1481,
+   "y": 23,
+   "orden": 130.2
+  },
+  {
+   "id": "antena_2",
+   "tipo": "antena",
+   "origen": "postes",
+   "cuadro": {
+    "x": 752,
+    "y": 528,
+    "w": 40,
+    "h": 72
+   },
+   "x": 2543,
+   "y": 21,
+   "orden": 130.2
+  },
+  {
+   "id": "asta_bandera_3",
+   "tipo": "asta_bandera",
+   "origen": "postes",
+   "cuadro": {
+    "x": 793,
+    "y": 528,
+    "w": 6,
+    "h": 35
+   },
+   "x": 3080,
+   "y": 25,
+   "orden": 130.2
+  },
+  {
+   "id": "muro_grafiti_20_cara",
+   "tipo": "muro_grafiti_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 800,
+    "y": 528,
+    "w": 47,
+    "h": 185
+   },
+   "x": 1060,
+   "y": 146,
+   "orden": 130.20000000000002
+  },
+  {
+   "id": "aire_acondicionado_14_cara",
+   "tipo": "aire_acondicionado_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 848,
+    "y": 528,
+    "w": 9,
+    "h": 151
+   },
+   "x": 2528,
+   "y": 154,
+   "orden": 130.20000000000002
+  },
+  {
+   "id": "muro_grafiti_20",
+   "tipo": "muro_grafiti",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 858,
+    "y": 528,
+    "w": 62,
+    "h": 160
+   },
+   "x": 1060,
+   "y": 146,
+   "orden": 130.3,
+   "superficie": "piedra"
+  },
+  {
+   "id": "tanque_agua_1",
+   "tipo": "tanque_agua",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 921,
+    "y": 528,
+    "w": 38,
+    "h": 44
+   },
+   "x": 1624,
+   "y": 124,
+   "orden": 130.3,
+   "superficie": "metal"
+  },
+  {
+   "id": "aire_acondicionado_14",
+   "tipo": "aire_acondicionado",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 960,
+    "y": 528,
+    "w": 38,
+    "h": 42
+   },
+   "x": 2528,
+   "y": 154,
+   "orden": 130.3,
+   "superficie": "piedra"
+  },
+  {
+   "id": "letras_comuna13_0",
+   "tipo": "letras_comuna13",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 999,
+    "y": 528,
+    "w": 177,
+    "h": 60
+   },
+   "x": 3150,
+   "y": 16,
+   "orden": 130.3,
+   "superficie": "piedra"
+  },
+  {
+   "id": "tendedero_1",
+   "tipo": "tendedero",
+   "origen": "bajo",
+   "cuadro": {
+    "x": 1177,
+    "y": 528,
+    "w": 170,
+    "h": 178
+   },
+   "x": 1780,
+   "y": 88,
+   "orden": 130.6
+  },
+  {
+   "id": "techo_escalera_2",
+   "tipo": "techo_escalera",
+   "origen": "bajo",
+   "cuadro": {
+    "x": 1348,
+    "y": 528,
+    "w": 125,
+    "h": 254
+   },
+   "x": 1973,
+   "y": 78,
+   "orden": 130.6
+  },
+  {
+   "id": "pancarta_META",
+   "tipo": "pancarta",
+   "origen": "postes",
+   "cuadro": {
+    "x": 1474,
+    "y": 528,
+    "w": 54,
+    "h": 66
+   },
+   "x": 3557,
+   "y": 118,
+   "orden": 130.6
+  }
+ ]
+}

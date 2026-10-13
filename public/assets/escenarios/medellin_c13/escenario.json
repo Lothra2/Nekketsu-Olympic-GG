@@ -1,0 +1,1213 @@
+{
+ "generado_con": "PixelForja",
+ "id": "medellin_c13",
+ "nombre": "COMUNA 13",
+ "escala": 1,
+ "resolucion": [
+  640,
+  360
+ ],
+ "franja": {
+  "atras": 200,
+  "adelante": 330
+ },
+ "largo": 3600,
+ "hora": "manana",
+ "clima": [
+  "despejado"
+ ],
+ "inclinacion": 0.35,
+ "ancho": 3646,
+ "nota_inclinacion": "vista inclinada: px = x + 0.35 * y (lo del fondo queda a la izquierda). Las capas largas miden 3646 px (largo + 0.35 * fondo de la franja). Los objetos ya vienen corridos: corre a los atletas igual.",
+ "capas": {
+  "cielo": {
+   "archivo": "cielo_manana.png",
+   "y": 0,
+   "paralaje": 0,
+   "repetir_x": true
+  },
+  "lejos": {
+   "archivo": "lejos.png",
+   "y": 0,
+   "paralaje": 0.25,
+   "repetir_x": true
+  },
+  "tras_cerca": {
+   "nota": "la vida con capa tras_cerca va aquí: se ve por los callejones"
+  },
+  "cerca": {
+   "archivos": [
+    "cerca_0.png",
+    "cerca_1.png",
+    "cerca_2.png"
+   ],
+   "trozo": 1280,
+   "y": 0,
+   "paralaje": 1
+  },
+  "piso": {
+   "archivos": [
+    "piso_0.png",
+    "piso_1.png",
+    "piso_2.png"
+   ],
+   "trozo": 1280,
+   "y": 200,
+   "paralaje": 1,
+   "nota": "las primeras 130 filas son la franja (inclinada), las de abajo el bordillo: la cara del piso que da a la cámara"
+  },
+  "objetos": {
+   "archivo": "objetos.json",
+   "nota": "entre el piso y el frente, ordenados con los atletas"
+  },
+  "frente": {
+   "archivos": [
+    "frente_0.png",
+    "frente_1.png",
+    "frente_2.png"
+   ],
+   "trozo": 1280,
+   "y": 316,
+   "paralaje": 1
+  }
+ },
+ "vida": {
+  "imagen": "vida.png",
+  "piezas": [
+   {
+    "id": "metrocable_0",
+    "tipo": "metrocable",
+    "capa": "lejos",
+    "x": -12,
+    "y": 43,
+    "fps": 1,
+    "recorrido": {
+     "desde": [
+      -12,
+      43
+     ],
+     "hasta": [
+      1280,
+      43
+     ],
+     "segundos": 60,
+     "desfase": 0
+    },
+    "cuadros": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 12,
+      "h": 14
+     }
+    ]
+   },
+   {
+    "id": "metrocable_1",
+    "tipo": "metrocable",
+    "capa": "lejos",
+    "x": -12,
+    "y": 43,
+    "fps": 1,
+    "recorrido": {
+     "desde": [
+      -12,
+      43
+     ],
+     "hasta": [
+      1280,
+      43
+     ],
+     "segundos": 60,
+     "desfase": 0.3333333333333333
+    },
+    "cuadros": [
+     {
+      "x": 13,
+      "y": 0,
+      "w": 12,
+      "h": 14
+     }
+    ]
+   },
+   {
+    "id": "metrocable_2",
+    "tipo": "metrocable",
+    "capa": "lejos",
+    "x": -12,
+    "y": 43,
+    "fps": 1,
+    "recorrido": {
+     "desde": [
+      -12,
+      43
+     ],
+     "hasta": [
+      1280,
+      43
+     ],
+     "segundos": 60,
+     "desfase": 0.6666666666666666
+    },
+    "cuadros": [
+     {
+      "x": 26,
+      "y": 0,
+      "w": 12,
+      "h": 14
+     }
+    ]
+   },
+   {
+    "id": "metrocable_3",
+    "tipo": "metrocable",
+    "capa": "lejos",
+    "x": 1280,
+    "y": 48,
+    "fps": 1,
+    "recorrido": {
+     "desde": [
+      1280,
+      48
+     ],
+     "hasta": [
+      -12,
+      48
+     ],
+     "segundos": 60,
+     "desfase": 0.16
+    },
+    "cuadros": [
+     {
+      "x": 39,
+      "y": 0,
+      "w": 12,
+      "h": 14
+     }
+    ]
+   },
+   {
+    "id": "metrocable_4",
+    "tipo": "metrocable",
+    "capa": "lejos",
+    "x": 1280,
+    "y": 48,
+    "fps": 1,
+    "recorrido": {
+     "desde": [
+      1280,
+      48
+     ],
+     "hasta": [
+      -12,
+      48
+     ],
+     "segundos": 60,
+     "desfase": 0.4933333333333333
+    },
+    "cuadros": [
+     {
+      "x": 52,
+      "y": 0,
+      "w": 12,
+      "h": 14
+     }
+    ]
+   },
+   {
+    "id": "metrocable_5",
+    "tipo": "metrocable",
+    "capa": "lejos",
+    "x": 1280,
+    "y": 48,
+    "fps": 1,
+    "recorrido": {
+     "desde": [
+      1280,
+      48
+     ],
+     "hasta": [
+      -12,
+      48
+     ],
+     "segundos": 60,
+     "desfase": 0.8266666666666667
+    },
+    "cuadros": [
+     {
+      "x": 65,
+      "y": 0,
+      "w": 12,
+      "h": 14
+     }
+    ]
+   },
+   {
+    "id": "banderines_640",
+    "tipo": "banderines",
+    "capa": "cerca",
+    "x": 640,
+    "y": 98,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 78,
+      "y": 0,
+      "w": 127,
+      "h": 15
+     },
+     {
+      "x": 206,
+      "y": 0,
+      "w": 127,
+      "h": 15
+     }
+    ]
+   },
+   {
+    "id": "banderines_1220",
+    "tipo": "banderines",
+    "capa": "cerca",
+    "x": 1220,
+    "y": 60,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 334,
+      "y": 0,
+      "w": 133,
+      "h": 15
+     },
+     {
+      "x": 468,
+      "y": 0,
+      "w": 133,
+      "h": 15
+     }
+    ]
+   },
+   {
+    "id": "banderines_1909",
+    "tipo": "banderines",
+    "capa": "cerca",
+    "x": 1909,
+    "y": 23,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 602,
+      "y": 0,
+      "w": 121,
+      "h": 15
+     },
+     {
+      "x": 724,
+      "y": 0,
+      "w": 121,
+      "h": 15
+     }
+    ]
+   },
+   {
+    "id": "banderines_2533",
+    "tipo": "banderines",
+    "capa": "cerca",
+    "x": 2533,
+    "y": 19,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 846,
+      "y": 0,
+      "w": 107,
+      "h": 15
+     },
+     {
+      "x": 954,
+      "y": 0,
+      "w": 107,
+      "h": 15
+     }
+    ]
+   },
+   {
+    "id": "ropa_1300",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 1300,
+    "y": 88,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 1062,
+      "y": 0,
+      "w": 52,
+      "h": 12
+     },
+     {
+      "x": 1115,
+      "y": 0,
+      "w": 52,
+      "h": 12
+     }
+    ]
+   },
+   {
+    "id": "ropa_2035",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 2035,
+    "y": 46,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 1168,
+      "y": 0,
+      "w": 52,
+      "h": 12
+     },
+     {
+      "x": 1221,
+      "y": 0,
+      "w": 52,
+      "h": 12
+     }
+    ]
+   },
+   {
+    "id": "bandera_3080",
+    "tipo": "bandera",
+    "capa": "objeto",
+    "x": 3084,
+    "y": 26,
+    "fps": 4,
+    "orden": 204,
+    "cuadros": [
+     {
+      "x": 1274,
+      "y": 0,
+      "w": 30,
+      "h": 22
+     },
+     {
+      "x": 1305,
+      "y": 0,
+      "w": 30,
+      "h": 22
+     },
+     {
+      "x": 1336,
+      "y": 0,
+      "w": 30,
+      "h": 22
+     },
+     {
+      "x": 1367,
+      "y": 0,
+      "w": 30,
+      "h": 22
+     }
+    ]
+   },
+   {
+    "id": "escalera_electrica_1150",
+    "tipo": "escalera_electrica",
+    "capa": "objeto",
+    "x": 1150,
+    "y": 134,
+    "fps": 6,
+    "orden": 60.05,
+    "cuadros": [
+     {
+      "x": 1398,
+      "y": 0,
+      "w": 120,
+      "h": 96
+     },
+     {
+      "x": 1519,
+      "y": 0,
+      "w": 120,
+      "h": 96
+     },
+     {
+      "x": 1640,
+      "y": 0,
+      "w": 120,
+      "h": 96
+     }
+    ]
+   },
+   {
+    "id": "escalera_electrica_1950",
+    "tipo": "escalera_electrica",
+    "capa": "objeto",
+    "x": 1975,
+    "y": 162,
+    "fps": 6,
+    "orden": 130.05,
+    "cuadros": [
+     {
+      "x": 1761,
+      "y": 0,
+      "w": 120,
+      "h": 96
+     },
+     {
+      "x": 1882,
+      "y": 0,
+      "w": 120,
+      "h": 96
+     },
+     {
+      "x": 0,
+      "y": 97,
+      "w": 120,
+      "h": 96
+     }
+    ]
+   }
+  ],
+  "nota": "capa cerca y tras_cerca: x, y de pantalla, como siempre. capa lejos: x, y en pixeles de la imagen lejos (que se repite cada su ancho y corre con su paralaje); va de recorrido.desde a recorrido.hasta en recorrido.segundos y vuelve a empezar, adelantada por desfase (0 a 1). capa objeto: va encima de un objeto, con setDepth(franja.atras + orden), como los objetos."
+ },
+ "callejones": [
+  {
+   "x0": 420,
+   "x1": 446,
+   "tipo": "callejon"
+  },
+  {
+   "x0": 2640,
+   "x1": 2666,
+   "tipo": "callejon"
+  }
+ ],
+ "superficie": {
+  "archivo": "superficie.png",
+  "y": 200,
+  "leyenda": [
+   {
+    "id": "asfalto",
+    "color": "#808080",
+    "paso": "paso_piedra",
+    "resbala": false
+   },
+   {
+    "id": "acera",
+    "color": "#d0d0d0",
+    "paso": "paso_piedra",
+    "resbala": false
+   },
+   {
+    "id": "hueco",
+    "color": "#000000",
+    "paso": "",
+    "resbala": false
+   },
+   {
+    "id": "puente",
+    "color": "#f0f0f0",
+    "paso": "paso_piedra",
+    "resbala": false
+   }
+  ]
+ },
+ "colision": "colision.json",
+ "luces": "luces.json",
+ "particulas": "particulas.json",
+ "paleta": [
+  {
+   "nombre": "tinta",
+   "hex": "#221a22"
+  },
+  {
+   "nombre": "sombra",
+   "hex": "#3d3138"
+  },
+  {
+   "nombre": "asfalto",
+   "hex": "#59525a"
+  },
+  {
+   "nombre": "asfalto_claro",
+   "hex": "#807880"
+  },
+  {
+   "nombre": "cemento",
+   "hex": "#a8a09c"
+  },
+  {
+   "nombre": "cemento_claro",
+   "hex": "#d4cdc4"
+  },
+  {
+   "nombre": "crema",
+   "hex": "#f2e8d2"
+  },
+  {
+   "nombre": "luz",
+   "hex": "#fffaf0"
+  },
+  {
+   "nombre": "amarillo",
+   "hex": "#f6c93c"
+  },
+  {
+   "nombre": "ocre",
+   "hex": "#d98d48"
+  },
+  {
+   "nombre": "terracota",
+   "hex": "#b55c38"
+  },
+  {
+   "nombre": "rojo",
+   "hex": "#d83a30"
+  },
+  {
+   "nombre": "vino",
+   "hex": "#7e3226"
+  },
+  {
+   "nombre": "salmon",
+   "hex": "#ec6a9e"
+  },
+  {
+   "nombre": "menta",
+   "hex": "#58c6aa"
+  },
+  {
+   "nombre": "verde",
+   "hex": "#4c9a46"
+  },
+  {
+   "nombre": "verde_oscuro",
+   "hex": "#2b5c36"
+  },
+  {
+   "nombre": "celeste",
+   "hex": "#5aa8e8"
+  },
+  {
+   "nombre": "cielo",
+   "hex": "#b8def8"
+  },
+  {
+   "nombre": "azul",
+   "hex": "#2c5cba"
+  },
+  {
+   "nombre": "azul_noche",
+   "hex": "#2a3c66"
+  },
+  {
+   "nombre": "canal",
+   "hex": "#8a58c4"
+  },
+  {
+   "nombre": "oro",
+   "hex": "#f5862a"
+  },
+  {
+   "nombre": "bruma",
+   "hex": "#d2e2ea"
+  }
+ ],
+ "verificacion": "verificacion.md",
+ "layout": {
+  "id": "medellin_c13",
+  "pais": "colombia",
+  "prueba": "obstaculos",
+  "nombre": "COMUNA 13",
+  "version": 2,
+  "nota": "Subida por tramos con identidad: estación San Javier, subida de los grafitis, escalera eléctrica 1, callejón de los perros, escalera eléctrica 2, techos de zinc, escalera pintada y el mirador.",
+  "largo": 3600,
+  "franja": {
+   "atras": 200,
+   "adelante": 330
+  },
+  "hora": "manana",
+  "clima": [
+   "despejado"
+  ],
+  "paralaje": {
+   "cielo": "auto",
+   "lejos": "valle_de_aburra",
+   "cerca": "c13_casas_ladrillo"
+  },
+  "piso": [
+   {
+    "x0": 0,
+    "x1": 3600,
+    "tipo": "acera"
+   },
+   {
+    "x0": 0,
+    "x1": 520,
+    "tipo": "asfalto",
+    "nombre": "estación San Javier"
+   }
+  ],
+  "huecos": [
+   {
+    "x0": 2350,
+    "x1": 2400,
+    "y0": 0,
+    "y1": 130,
+    "caida": "vacio",
+    "nombre": "entre dos casas: se salta corriendo"
+   },
+   {
+    "x0": 2620,
+    "x1": 2680,
+    "y0": 0,
+    "y1": 60,
+    "caida": "vacio",
+    "nombre": "hueco (la baranda cruza en y 60 a 74)"
+   },
+   {
+    "x0": 2620,
+    "x1": 2680,
+    "y0": 74,
+    "y1": 130,
+    "caida": "vacio",
+    "nombre": "hueco"
+   }
+  ],
+  "plataformas": [
+   {
+    "x": 300,
+    "y": 64,
+    "w": 44,
+    "d": 30,
+    "z": 22,
+    "tipo": "carrito_paletas",
+    "nombre": "paletas de mango biche",
+    "subible": true
+   },
+   {
+    "x": 520,
+    "y": 0,
+    "w": 14,
+    "d": 130,
+    "z": 6,
+    "tipo": "escalon"
+   },
+   {
+    "x": 534,
+    "y": 0,
+    "w": 14,
+    "d": 130,
+    "z": 12,
+    "tipo": "escalon"
+   },
+   {
+    "x": 548,
+    "y": 0,
+    "w": 14,
+    "d": 130,
+    "z": 18,
+    "tipo": "escalon"
+   },
+   {
+    "x": 562,
+    "y": 0,
+    "w": 14,
+    "d": 130,
+    "z": 24,
+    "tipo": "escalon"
+   },
+   {
+    "x": 576,
+    "y": 0,
+    "w": 574,
+    "d": 130,
+    "z": 24,
+    "tipo": "terraza",
+    "nombre": "la subida de los grafitis"
+   },
+   {
+    "x": 1060,
+    "y": 0,
+    "w": 16,
+    "d": 130,
+    "z": 54,
+    "tipo": "muro_grafiti",
+    "nombre": "muro pintado: se salta con impulso"
+   },
+   {
+    "x": 1150,
+    "y": 0,
+    "w": 14,
+    "d": 60,
+    "z": 30,
+    "tipo": "escalera_electrica",
+    "nota": "al revés: empuja para atrás"
+   },
+   {
+    "x": 1164,
+    "y": 0,
+    "w": 14,
+    "d": 60,
+    "z": 36,
+    "tipo": "escalera_electrica"
+   },
+   {
+    "x": 1178,
+    "y": 0,
+    "w": 14,
+    "d": 60,
+    "z": 42,
+    "tipo": "escalera_electrica"
+   },
+   {
+    "x": 1192,
+    "y": 0,
+    "w": 14,
+    "d": 60,
+    "z": 48,
+    "tipo": "escalera_electrica"
+   },
+   {
+    "x": 1206,
+    "y": 0,
+    "w": 14,
+    "d": 60,
+    "z": 54,
+    "tipo": "escalera_electrica"
+   },
+   {
+    "x": 1220,
+    "y": 0,
+    "w": 14,
+    "d": 60,
+    "z": 60,
+    "tipo": "escalera_electrica"
+   },
+   {
+    "x": 1234,
+    "y": 0,
+    "w": 14,
+    "d": 60,
+    "z": 66,
+    "tipo": "escalera_electrica"
+   },
+   {
+    "x": 1150,
+    "y": 60,
+    "w": 33,
+    "d": 70,
+    "z": 36,
+    "tipo": "escalones"
+   },
+   {
+    "x": 1183,
+    "y": 60,
+    "w": 33,
+    "d": 70,
+    "z": 48,
+    "tipo": "escalones"
+   },
+   {
+    "x": 1216,
+    "y": 60,
+    "w": 33,
+    "d": 70,
+    "z": 60,
+    "tipo": "escalones"
+   },
+   {
+    "x": 1248,
+    "y": 0,
+    "w": 702,
+    "d": 130,
+    "z": 66,
+    "tipo": "terraza",
+    "nombre": "el callejón de los perros"
+   },
+   {
+    "x": 1620,
+    "y": 10,
+    "w": 30,
+    "d": 24,
+    "z": 84,
+    "tipo": "tanque_agua",
+    "nombre": "tanque negro"
+   },
+   {
+    "x": 1950,
+    "y": 70,
+    "w": 14,
+    "d": 60,
+    "z": 72,
+    "tipo": "escalera_electrica"
+   },
+   {
+    "x": 1964,
+    "y": 70,
+    "w": 14,
+    "d": 60,
+    "z": 78,
+    "tipo": "escalera_electrica"
+   },
+   {
+    "x": 1978,
+    "y": 70,
+    "w": 14,
+    "d": 60,
+    "z": 84,
+    "tipo": "escalera_electrica"
+   },
+   {
+    "x": 1992,
+    "y": 70,
+    "w": 14,
+    "d": 60,
+    "z": 90,
+    "tipo": "escalera_electrica"
+   },
+   {
+    "x": 2006,
+    "y": 70,
+    "w": 14,
+    "d": 60,
+    "z": 96,
+    "tipo": "escalera_electrica"
+   },
+   {
+    "x": 2020,
+    "y": 70,
+    "w": 14,
+    "d": 60,
+    "z": 102,
+    "tipo": "escalera_electrica"
+   },
+   {
+    "x": 2034,
+    "y": 70,
+    "w": 14,
+    "d": 60,
+    "z": 108,
+    "tipo": "escalera_electrica"
+   },
+   {
+    "x": 1950,
+    "y": 0,
+    "w": 33,
+    "d": 70,
+    "z": 78,
+    "tipo": "escalones"
+   },
+   {
+    "x": 1983,
+    "y": 0,
+    "w": 33,
+    "d": 70,
+    "z": 90,
+    "tipo": "escalones"
+   },
+   {
+    "x": 2016,
+    "y": 0,
+    "w": 33,
+    "d": 70,
+    "z": 102,
+    "tipo": "escalones"
+   },
+   {
+    "x": 2048,
+    "y": 0,
+    "w": 302,
+    "d": 130,
+    "z": 108,
+    "tipo": "techo_lata",
+    "nombre": "techos de zinc"
+   },
+   {
+    "x": 2400,
+    "y": 0,
+    "w": 220,
+    "d": 130,
+    "z": 108,
+    "tipo": "techo_lata"
+   },
+   {
+    "x": 2620,
+    "y": 60,
+    "w": 60,
+    "d": 14,
+    "z": 108,
+    "tipo": "baranda",
+    "nombre": "baranda: se cruza en equilibrio"
+   },
+   {
+    "x": 2680,
+    "y": 0,
+    "w": 140,
+    "d": 130,
+    "z": 108,
+    "tipo": "techo_lata"
+   },
+   {
+    "x": 2500,
+    "y": 80,
+    "w": 30,
+    "d": 24,
+    "z": 126,
+    "tipo": "aire_acondicionado"
+   },
+   {
+    "x": 2820,
+    "y": 0,
+    "w": 40,
+    "d": 130,
+    "z": 120,
+    "tipo": "escalera_pintada"
+   },
+   {
+    "x": 2860,
+    "y": 0,
+    "w": 40,
+    "d": 130,
+    "z": 132,
+    "tipo": "escalera_pintada"
+   },
+   {
+    "x": 2900,
+    "y": 0,
+    "w": 40,
+    "d": 130,
+    "z": 144,
+    "tipo": "escalera_pintada"
+   },
+   {
+    "x": 2940,
+    "y": 0,
+    "w": 660,
+    "d": 130,
+    "z": 144,
+    "tipo": "mirador",
+    "nombre": "el mirador"
+   },
+   {
+    "x": 3150,
+    "y": 0,
+    "w": 170,
+    "d": 20,
+    "z": 184,
+    "tipo": "letras_comuna13",
+    "nombre": "COMUNA 13"
+   }
+  ],
+  "muros": [],
+  "escaleras": [],
+  "postes": [
+   {
+    "x": 200,
+    "y": 4,
+    "alto": 150,
+    "tipo": "poste_luz"
+   },
+   {
+    "x": 1500,
+    "y": 4,
+    "alto": 110,
+    "tipo": "poste_luz"
+   },
+   {
+    "x": 2560,
+    "y": 4,
+    "alto": 70,
+    "tipo": "antena"
+   },
+   {
+    "x": 3080,
+    "y": 4,
+    "alto": 30,
+    "tipo": "asta_bandera",
+    "nota": "la bandera de Colombia del mirador"
+   }
+  ],
+  "agua": [],
+  "bajo": [
+   {
+    "x0": 1150,
+    "x1": 1248,
+    "y0": 0,
+    "y1": 60,
+    "z": 150,
+    "tipo": "techo_escalera",
+    "nota": "techo naranja de la escalera eléctrica"
+   },
+   {
+    "x0": 1780,
+    "x1": 1900,
+    "y0": 0,
+    "y1": 130,
+    "z": 112,
+    "tipo": "tendedero"
+   },
+   {
+    "x0": 1950,
+    "x1": 2048,
+    "y0": 70,
+    "y1": 130,
+    "z": 190,
+    "tipo": "techo_escalera"
+   }
+  ],
+  "solidos": [],
+  "carriles": [
+   {
+    "y": 20
+   },
+   {
+    "y": 50
+   },
+   {
+    "y": 80
+   },
+   {
+    "y": 110
+   }
+  ],
+  "entidades": [
+   {
+    "tipo": "salida",
+    "x": 40
+   },
+   {
+    "tipo": "meta",
+    "x": 3540
+   },
+   {
+    "tipo": "npc",
+    "npc": "vendedor_paletas",
+    "x": 350,
+    "y": 60,
+    "nota": "junto al carrito de paletas de mango biche"
+   },
+   {
+    "tipo": "animal",
+    "animal": "perro_calle",
+    "x": 440,
+    "y": 30,
+    "nota": "duerme; si lo pisas, despierta y te tumba"
+   },
+   {
+    "tipo": "npc",
+    "npc": "bailarines_break",
+    "x": 820,
+    "y": 64,
+    "radio": 26,
+    "nota": "bailan en rueda en medio de la subida: si chocas con uno, te tumba"
+   },
+   {
+    "tipo": "npc",
+    "npc": "grafitero",
+    "x": 960,
+    "y": 6,
+    "nota": "pintando el mural"
+   },
+   {
+    "tipo": "animal",
+    "animal": "perro_calle",
+    "x": 1420,
+    "y": 96
+   },
+   {
+    "tipo": "npc",
+    "npc": "pelados_futbol",
+    "x": 1560,
+    "y": 0,
+    "cada": 3.2,
+    "nota": "los pelados juegan fútbol en el callejón: la pelota cruza de lado a lado"
+   },
+   {
+    "tipo": "animal",
+    "animal": "perro_calle",
+    "x": 1720,
+    "y": 40
+   },
+   {
+    "tipo": "animal",
+    "animal": "gallo",
+    "x": 2200,
+    "y": 20,
+    "nota": "en el techo de zinc"
+   },
+   {
+    "tipo": "npc",
+    "npc": "musicos",
+    "x": 3260,
+    "y": 100,
+    "nota": "parlante y rap en el mirador"
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "cono",
+    "x": 640,
+    "y": 100
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "balon_goma",
+    "x": 1350,
+    "y": 30
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "chancleta_amarilla",
+    "x": 2740,
+    "y": 100
+   }
+  ],
+  "ranuras_deco": [
+   {
+    "x0": 0,
+    "x1": 520,
+    "capa": "cerca",
+    "tema": "estacion_san_javier"
+   },
+   {
+    "x0": 520,
+    "x1": 1150,
+    "capa": "cerca",
+    "tema": "grafitis_murales"
+   },
+   {
+    "x0": 1150,
+    "x1": 2048,
+    "capa": "cerca",
+    "tema": "casas_ladrillo_apiladas"
+   },
+   {
+    "x0": 2048,
+    "x1": 2820,
+    "capa": "cerca",
+    "tema": "techos_zinc_tanques"
+   },
+   {
+    "x0": 2820,
+    "x1": 3600,
+    "capa": "cerca",
+    "tema": "mirador_grafitis"
+   },
+   {
+    "x0": 0,
+    "x1": 3600,
+    "capa": "lejos",
+    "tema": "metrocable_valle"
+   }
+  ],
+  "vida": [
+   "metrocable",
+   "bailarines_break",
+   "musicos",
+   "perros",
+   "gallos",
+   "banderines",
+   "ropa_tendida"
+  ]
+ }
+}

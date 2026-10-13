@@ -1,0 +1,1178 @@
+{
+ "generado_con": "PixelForja",
+ "id": "saigon_estadio",
+ "nombre": "ESTADIO DE LA META",
+ "escala": 1,
+ "resolucion": [
+  640,
+  360
+ ],
+ "franja": {
+  "atras": 200,
+  "adelante": 330
+ },
+ "largo": 1920,
+ "hora": "atardecer",
+ "clima": [
+  "despejado"
+ ],
+ "inclinacion": 0.35,
+ "ancho": 1966,
+ "nota_inclinacion": "vista inclinada: px = x + 0.35 * y (lo del fondo queda a la izquierda). Las capas largas miden 1966 px (largo + 0.35 * fondo de la franja). Los objetos ya vienen corridos: corre a los atletas igual.",
+ "capas": {
+  "cielo": {
+   "archivo": "cielo_atardecer.png",
+   "y": 0,
+   "paralaje": 0,
+   "repetir_x": true
+  },
+  "lejos": {
+   "archivo": "lejos.png",
+   "y": 0,
+   "paralaje": 0.25,
+   "repetir_x": true
+  },
+  "tras_cerca": {
+   "nota": "la vida con capa tras_cerca va aquí: se ve por los callejones"
+  },
+  "cerca": {
+   "archivos": [
+    "cerca_0.png",
+    "cerca_1.png"
+   ],
+   "trozo": 1280,
+   "y": 0,
+   "paralaje": 1
+  },
+  "piso": {
+   "archivos": [
+    "piso_0.png",
+    "piso_1.png"
+   ],
+   "trozo": 1280,
+   "y": 200,
+   "paralaje": 1,
+   "nota": "las primeras 130 filas son la franja (inclinada), las de abajo el bordillo: la cara del piso que da a la cámara"
+  },
+  "objetos": {
+   "archivo": "objetos.json",
+   "nota": "entre el piso y el frente, ordenados con los atletas"
+  },
+  "frente": {
+   "archivos": [
+    "frente_0.png",
+    "frente_1.png"
+   ],
+   "trozo": 1280,
+   "y": 316,
+   "paralaje": 1
+  }
+ },
+ "vida": {
+  "imagen": "vida.png",
+  "piezas": [
+   {
+    "id": "ola_0",
+    "tipo": "publico_ondeando",
+    "capa": "cerca",
+    "x": 330,
+    "y": 102,
+    "fps": 6,
+    "cuadros": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 41,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 82,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 123,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ola_1",
+    "tipo": "publico_ondeando",
+    "capa": "cerca",
+    "x": 426,
+    "y": 111,
+    "fps": 6,
+    "cuadros": [
+     {
+      "x": 164,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 205,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 246,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 287,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ola_2",
+    "tipo": "publico_ondeando",
+    "capa": "cerca",
+    "x": 522,
+    "y": 120,
+    "fps": 6,
+    "cuadros": [
+     {
+      "x": 328,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 369,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 410,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 451,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ola_3",
+    "tipo": "publico_ondeando",
+    "capa": "cerca",
+    "x": 618,
+    "y": 129,
+    "fps": 6,
+    "cuadros": [
+     {
+      "x": 492,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 533,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 574,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 615,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ola_4",
+    "tipo": "publico_ondeando",
+    "capa": "cerca",
+    "x": 714,
+    "y": 138,
+    "fps": 6,
+    "cuadros": [
+     {
+      "x": 656,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 697,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 738,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 779,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ola_5",
+    "tipo": "publico_ondeando",
+    "capa": "cerca",
+    "x": 810,
+    "y": 102,
+    "fps": 6,
+    "cuadros": [
+     {
+      "x": 820,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 861,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 902,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 943,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ola_6",
+    "tipo": "publico_ondeando",
+    "capa": "cerca",
+    "x": 906,
+    "y": 111,
+    "fps": 6,
+    "cuadros": [
+     {
+      "x": 984,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 1025,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 1066,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 1107,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ola_7",
+    "tipo": "publico_ondeando",
+    "capa": "cerca",
+    "x": 1002,
+    "y": 120,
+    "fps": 6,
+    "cuadros": [
+     {
+      "x": 1148,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 1189,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 1230,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 1271,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ola_8",
+    "tipo": "publico_ondeando",
+    "capa": "cerca",
+    "x": 1098,
+    "y": 129,
+    "fps": 6,
+    "cuadros": [
+     {
+      "x": 1312,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 1353,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 1394,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 1435,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ola_9",
+    "tipo": "publico_ondeando",
+    "capa": "cerca",
+    "x": 1194,
+    "y": 138,
+    "fps": 6,
+    "cuadros": [
+     {
+      "x": 1476,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 1517,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 1558,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 1599,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ola_10",
+    "tipo": "publico_ondeando",
+    "capa": "cerca",
+    "x": 1290,
+    "y": 102,
+    "fps": 6,
+    "cuadros": [
+     {
+      "x": 1640,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 1681,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 1722,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 1763,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ola_11",
+    "tipo": "publico_ondeando",
+    "capa": "cerca",
+    "x": 1386,
+    "y": 111,
+    "fps": 6,
+    "cuadros": [
+     {
+      "x": 1804,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 1845,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 1886,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 1927,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ola_12",
+    "tipo": "publico_ondeando",
+    "capa": "cerca",
+    "x": 1482,
+    "y": 120,
+    "fps": 6,
+    "cuadros": [
+     {
+      "x": 1968,
+      "y": 0,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 0,
+      "y": 11,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 41,
+      "y": 11,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 82,
+      "y": 11,
+      "w": 40,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ola_13",
+    "tipo": "publico_ondeando",
+    "capa": "cerca",
+    "x": 1578,
+    "y": 129,
+    "fps": 6,
+    "cuadros": [
+     {
+      "x": 123,
+      "y": 11,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 164,
+      "y": 11,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 205,
+      "y": 11,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 246,
+      "y": 11,
+      "w": 40,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ola_14",
+    "tipo": "publico_ondeando",
+    "capa": "cerca",
+    "x": 1674,
+    "y": 138,
+    "fps": 6,
+    "cuadros": [
+     {
+      "x": 287,
+      "y": 11,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 328,
+      "y": 11,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 369,
+      "y": 11,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 410,
+      "y": 11,
+      "w": 40,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ola_15",
+    "tipo": "publico_ondeando",
+    "capa": "cerca",
+    "x": 1770,
+    "y": 102,
+    "fps": 6,
+    "cuadros": [
+     {
+      "x": 451,
+      "y": 11,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 492,
+      "y": 11,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 533,
+      "y": 11,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 574,
+      "y": 11,
+      "w": 40,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "ola_16",
+    "tipo": "publico_ondeando",
+    "capa": "cerca",
+    "x": 1866,
+    "y": 111,
+    "fps": 6,
+    "cuadros": [
+     {
+      "x": 615,
+      "y": 11,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 656,
+      "y": 11,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 697,
+      "y": 11,
+      "w": 40,
+      "h": 10
+     },
+     {
+      "x": 738,
+      "y": 11,
+      "w": 40,
+      "h": 10
+     }
+    ]
+   },
+   {
+    "id": "bandera_0",
+    "tipo": "banderas",
+    "capa": "cerca",
+    "x": 380,
+    "y": 99,
+    "fps": 5,
+    "cuadros": [
+     {
+      "x": 779,
+      "y": 11,
+      "w": 24,
+      "h": 22
+     },
+     {
+      "x": 804,
+      "y": 11,
+      "w": 24,
+      "h": 22
+     },
+     {
+      "x": 829,
+      "y": 11,
+      "w": 24,
+      "h": 22
+     }
+    ]
+   },
+   {
+    "id": "bandera_1",
+    "tipo": "banderas",
+    "capa": "cerca",
+    "x": 547,
+    "y": 100,
+    "fps": 5,
+    "cuadros": [
+     {
+      "x": 854,
+      "y": 11,
+      "w": 24,
+      "h": 22
+     },
+     {
+      "x": 879,
+      "y": 11,
+      "w": 24,
+      "h": 22
+     },
+     {
+      "x": 904,
+      "y": 11,
+      "w": 24,
+      "h": 22
+     }
+    ]
+   },
+   {
+    "id": "bandera_2",
+    "tipo": "banderas",
+    "capa": "cerca",
+    "x": 736,
+    "y": 99,
+    "fps": 5,
+    "cuadros": [
+     {
+      "x": 929,
+      "y": 11,
+      "w": 24,
+      "h": 22
+     },
+     {
+      "x": 954,
+      "y": 11,
+      "w": 24,
+      "h": 22
+     },
+     {
+      "x": 979,
+      "y": 11,
+      "w": 24,
+      "h": 22
+     }
+    ]
+   },
+   {
+    "id": "bandera_3",
+    "tipo": "banderas",
+    "capa": "cerca",
+    "x": 936,
+    "y": 99,
+    "fps": 5,
+    "cuadros": [
+     {
+      "x": 1004,
+      "y": 11,
+      "w": 24,
+      "h": 22
+     },
+     {
+      "x": 1029,
+      "y": 11,
+      "w": 24,
+      "h": 22
+     },
+     {
+      "x": 1054,
+      "y": 11,
+      "w": 24,
+      "h": 22
+     }
+    ]
+   },
+   {
+    "id": "bandera_4",
+    "tipo": "banderas",
+    "capa": "cerca",
+    "x": 1098,
+    "y": 116,
+    "fps": 5,
+    "cuadros": [
+     {
+      "x": 1079,
+      "y": 11,
+      "w": 24,
+      "h": 22
+     },
+     {
+      "x": 1104,
+      "y": 11,
+      "w": 24,
+      "h": 22
+     },
+     {
+      "x": 1129,
+      "y": 11,
+      "w": 24,
+      "h": 22
+     }
+    ]
+   },
+   {
+    "id": "bandera_5",
+    "tipo": "banderas",
+    "capa": "cerca",
+    "x": 1269,
+    "y": 103,
+    "fps": 5,
+    "cuadros": [
+     {
+      "x": 1154,
+      "y": 11,
+      "w": 24,
+      "h": 22
+     },
+     {
+      "x": 1179,
+      "y": 11,
+      "w": 24,
+      "h": 22
+     },
+     {
+      "x": 1204,
+      "y": 11,
+      "w": 24,
+      "h": 22
+     }
+    ]
+   },
+   {
+    "id": "bandera_6",
+    "tipo": "banderas",
+    "capa": "cerca",
+    "x": 1454,
+    "y": 108,
+    "fps": 5,
+    "cuadros": [
+     {
+      "x": 1229,
+      "y": 11,
+      "w": 24,
+      "h": 22
+     },
+     {
+      "x": 1254,
+      "y": 11,
+      "w": 24,
+      "h": 22
+     },
+     {
+      "x": 1279,
+      "y": 11,
+      "w": 24,
+      "h": 22
+     }
+    ]
+   },
+   {
+    "id": "bandera_7",
+    "tipo": "banderas",
+    "capa": "cerca",
+    "x": 1612,
+    "y": 97,
+    "fps": 5,
+    "cuadros": [
+     {
+      "x": 1304,
+      "y": 11,
+      "w": 24,
+      "h": 22
+     },
+     {
+      "x": 1329,
+      "y": 11,
+      "w": 24,
+      "h": 22
+     },
+     {
+      "x": 1354,
+      "y": 11,
+      "w": 24,
+      "h": 22
+     }
+    ]
+   },
+   {
+    "id": "bandera_8",
+    "tipo": "banderas",
+    "capa": "cerca",
+    "x": 1809,
+    "y": 113,
+    "fps": 5,
+    "cuadros": [
+     {
+      "x": 1379,
+      "y": 11,
+      "w": 24,
+      "h": 22
+     },
+     {
+      "x": 1404,
+      "y": 11,
+      "w": 24,
+      "h": 22
+     },
+     {
+      "x": 1429,
+      "y": 11,
+      "w": 24,
+      "h": 22
+     }
+    ]
+   }
+  ]
+ },
+ "callejones": [
+  {
+   "x0": 420,
+   "x1": 446,
+   "tipo": "callejon"
+  },
+  {
+   "x0": 1180,
+   "x1": 1206,
+   "tipo": "callejon"
+  }
+ ],
+ "superficie": {
+  "archivo": "superficie.png",
+  "y": 200,
+  "leyenda": [
+   {
+    "id": "asfalto",
+    "color": "#808080",
+    "paso": "paso_piedra",
+    "resbala": false
+   },
+   {
+    "id": "acera",
+    "color": "#d0d0d0",
+    "paso": "paso_piedra",
+    "resbala": false
+   }
+  ]
+ },
+ "colision": "colision.json",
+ "luces": "luces.json",
+ "particulas": "particulas.json",
+ "paleta": [
+  {
+   "nombre": "tinta",
+   "hex": "#1d1424"
+  },
+  {
+   "nombre": "sombra",
+   "hex": "#3b2640"
+  },
+  {
+   "nombre": "asfalto",
+   "hex": "#54404f"
+  },
+  {
+   "nombre": "asfalto_claro",
+   "hex": "#7d6270"
+  },
+  {
+   "nombre": "cemento",
+   "hex": "#a8848a"
+  },
+  {
+   "nombre": "cemento_claro",
+   "hex": "#d4b4a8"
+  },
+  {
+   "nombre": "crema",
+   "hex": "#f2d8bc"
+  },
+  {
+   "nombre": "luz",
+   "hex": "#fff2d8"
+  },
+  {
+   "nombre": "amarillo",
+   "hex": "#ffd166"
+  },
+  {
+   "nombre": "ocre",
+   "hex": "#d98c3a"
+  },
+  {
+   "nombre": "terracota",
+   "hex": "#b9472f"
+  },
+  {
+   "nombre": "rojo",
+   "hex": "#e63b2e"
+  },
+  {
+   "nombre": "vino",
+   "hex": "#8a2433"
+  },
+  {
+   "nombre": "salmon",
+   "hex": "#f49a7a"
+  },
+  {
+   "nombre": "menta",
+   "hex": "#88c4a8"
+  },
+  {
+   "nombre": "verde",
+   "hex": "#3f8f4e"
+  },
+  {
+   "nombre": "verde_oscuro",
+   "hex": "#24553a"
+  },
+  {
+   "nombre": "celeste",
+   "hex": "#7a6fb0"
+  },
+  {
+   "nombre": "cielo",
+   "hex": "#f6b08a"
+  },
+  {
+   "nombre": "azul",
+   "hex": "#3d5ea8"
+  },
+  {
+   "nombre": "azul_noche",
+   "hex": "#262c5c"
+  },
+  {
+   "nombre": "canal",
+   "hex": "#5a6b8a"
+  },
+  {
+   "nombre": "oro",
+   "hex": "#ffb52e"
+  },
+  {
+   "nombre": "bruma",
+   "hex": "#f58a5a"
+  }
+ ],
+ "verificacion": "verificacion.md",
+ "layout": {
+  "pais": "vietnam",
+  "prueba": "crosscountry",
+  "franja": {
+   "atras": 200,
+   "adelante": 330
+  },
+  "id": "saigon_estadio",
+  "tramo": 5,
+  "nombre": "ESTADIO DE LA META",
+  "largo": 1920,
+  "hora": "atardecer",
+  "clima": [
+   "despejado"
+  ],
+  "paralaje": {
+   "cielo": "auto",
+   "lejos": "saigon_skyline",
+   "cerca": "gradas"
+  },
+  "piso": [
+   {
+    "x0": 0,
+    "x1": 300,
+    "tipo": "asfalto"
+   },
+   {
+    "x0": 300,
+    "x1": 1920,
+    "tipo": "cancha",
+    "nombre": "pista roja"
+   }
+  ],
+  "huecos": [],
+  "plataformas": [],
+  "muros": [
+   {
+    "x": 280,
+    "y": 0,
+    "w": 16,
+    "d": 45,
+    "z": 60,
+    "tipo": "porton_estadio",
+    "nota": "se entra por el medio (y 45 a 85)"
+   },
+   {
+    "x": 280,
+    "y": 85,
+    "w": 16,
+    "d": 45,
+    "z": 60,
+    "tipo": "porton_estadio"
+   },
+   {
+    "x": 800,
+    "y": 0,
+    "w": 6,
+    "d": 130,
+    "z": 14,
+    "tipo": "valla"
+   },
+   {
+    "x": 1100,
+    "y": 0,
+    "w": 6,
+    "d": 130,
+    "z": 14,
+    "tipo": "valla"
+   },
+   {
+    "x": 1400,
+    "y": 0,
+    "w": 6,
+    "d": 130,
+    "z": 14,
+    "tipo": "valla"
+   }
+  ],
+  "escaleras": [],
+  "postes": [
+   {
+    "x": 600,
+    "y": 2,
+    "alto": 200,
+    "tipo": "torre_luz"
+   },
+   {
+    "x": 1700,
+    "y": 2,
+    "alto": 200,
+    "tipo": "torre_luz"
+   }
+  ],
+  "agua": [],
+  "bajo": [],
+  "solidos": [],
+  "carriles": [
+   {
+    "y": 20
+   },
+   {
+    "y": 50
+   },
+   {
+    "y": 80
+   },
+   {
+    "y": 110
+   }
+  ],
+  "entidades": [
+   {
+    "tipo": "salida",
+    "x": 40
+   },
+   {
+    "tipo": "meta",
+    "x": 1860
+   }
+  ],
+  "ranuras_deco": [
+   {
+    "x0": 300,
+    "x1": 1920,
+    "capa": "cerca",
+    "tema": "gradas_llenas"
+   },
+   {
+    "x0": 1700,
+    "x1": 1920,
+    "capa": "cerca",
+    "tema": "marcador"
+   }
+  ],
+  "vida": [
+   "publico_ondeando",
+   "banderas",
+   "fuegos_artificiales"
+  ]
+ }
+}

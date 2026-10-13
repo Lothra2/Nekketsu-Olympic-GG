@@ -1,6 +1,30 @@
 {
  "saigon_hem": {
   "nombre": "HẺM DE SAIGÓN",
-  "generado": "2026-10-12"
+  "generado": "2026-10-13"
+ },
+ "caracas_azotea": {
+  "nombre": "AZOTEA DE PARQUE CENTRAL",
+  "generado": "2026-10-13"
+ },
+ "medellin_c13": {
+  "nombre": "COMUNA 13",
+  "generado": "2026-10-13"
+ },
+ "saigon_azoteas": {
+  "nombre": "AZOTEAS DE SAIGÓN",
+  "generado": "2026-10-13"
+ },
+ "saigon_benthanh": {
+  "nombre": "MERCADO BẾN THÀNH",
+  "generado": "2026-10-13"
+ },
+ "saigon_estadio": {
+  "nombre": "ESTADIO DE LA META",
+  "generado": "2026-10-13"
+ },
+ "saigon_rio": {
+  "nombre": "RÍO SAIGÓN",
+  "generado": "2026-10-13"
  }
 }

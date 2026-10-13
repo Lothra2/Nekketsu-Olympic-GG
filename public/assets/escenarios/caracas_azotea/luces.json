@@ -1,0 +1,75 @@
+{
+ "hora": "noche",
+ "luces": [
+  {
+   "x": 448,
+   "y": 128,
+   "color": "#ff4aa6",
+   "radio": 90,
+   "parpadeo": 1.3,
+   "encendida": true,
+   "nota": "el neón de AREPERA LA CHAMA: tiñe el piso y a los atletas que pasan cerca. Parpadea con su vida"
+  },
+  {
+   "x": 547,
+   "y": 132,
+   "color": "#38e6e4",
+   "radio": 90,
+   "parpadeo": 2,
+   "encendida": true,
+   "nota": "el neón de CARACAS: tiñe el piso y a los atletas que pasan cerca. Parpadea con su vida"
+  },
+  {
+   "x": 428,
+   "y": 171,
+   "color": "#ffd23c",
+   "radio": 36,
+   "encendida": true,
+   "nota": "bombillo de la caseta"
+  },
+  {
+   "x": 511,
+   "y": 171,
+   "color": "#ffd23c",
+   "radio": 36,
+   "encendida": true,
+   "nota": "bombillo de la caseta"
+  },
+  {
+   "x": 101,
+   "y": -1,
+   "color": "#ef2d3c",
+   "radio": 10,
+   "parpadeo": 1,
+   "encendida": true,
+   "nota": "luz roja de la torre: prende y apaga cada segundo"
+  },
+  {
+   "x": 233,
+   "y": 7,
+   "color": "#ef2d3c",
+   "radio": 10,
+   "parpadeo": 1,
+   "encendida": true,
+   "nota": "luz roja de la torre: prende y apaga cada segundo"
+  },
+  {
+   "x": 123,
+   "y": 124,
+   "color": "#ef2d3c",
+   "radio": 8,
+   "parpadeo": 1,
+   "encendida": true,
+   "nota": "luz roja de la antena"
+  },
+  {
+   "x": 463,
+   "y": 148,
+   "color": "#ef2d3c",
+   "radio": 8,
+   "parpadeo": 1,
+   "encendida": true,
+   "nota": "luz roja de la antena"
+  }
+ ]
+}

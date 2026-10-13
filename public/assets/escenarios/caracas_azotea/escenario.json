@@ -1,0 +1,617 @@
+{
+ "generado_con": "PixelForja",
+ "id": "caracas_azotea",
+ "nombre": "AZOTEA DE PARQUE CENTRAL",
+ "escala": 1,
+ "resolucion": [
+  640,
+  360
+ ],
+ "franja": {
+  "atras": 246,
+  "adelante": 344
+ },
+ "largo": 640,
+ "hora": "noche",
+ "clima": [
+  "despejado"
+ ],
+ "inclinacion": 0.35,
+ "ancho": 674,
+ "nota_inclinacion": "vista inclinada: px = x + 0.35 * y (lo del fondo queda a la izquierda). Las capas largas miden 674 px (largo + 0.35 * fondo de la franja). Los objetos ya vienen corridos: corre a los atletas igual.",
+ "capas": {
+  "cielo": {
+   "archivo": "cielo_noche.png",
+   "y": 0,
+   "paralaje": 0,
+   "repetir_x": true
+  },
+  "lejos": {
+   "archivo": "lejos.png",
+   "y": 46,
+   "paralaje": 0.25,
+   "repetir_x": true
+  },
+  "tras_cerca": {
+   "nota": "la vida con capa tras_cerca va aquí: se ve por los callejones"
+  },
+  "cerca": {
+   "archivos": [
+    "cerca_0.png"
+   ],
+   "trozo": 1280,
+   "y": 0,
+   "paralaje": 1
+  },
+  "piso": {
+   "archivos": [
+    "piso_0.png"
+   ],
+   "trozo": 1280,
+   "y": 246,
+   "paralaje": 1,
+   "nota": "las primeras 98 filas son la franja (inclinada), las de abajo el bordillo: la cara del piso que da a la cámara"
+  },
+  "objetos": {
+   "archivo": "objetos.json",
+   "nota": "entre el piso y el frente, ordenados con los atletas"
+  },
+  "frente": {
+   "archivos": [
+    "frente_0.png"
+   ],
+   "trozo": 1280,
+   "y": 330,
+   "paralaje": 1
+  }
+ },
+ "vida": {
+  "imagen": "vida.png",
+  "piezas": [
+   {
+    "id": "neon_arepera",
+    "tipo": "letreros_neon",
+    "capa": "cerca",
+    "x": 396,
+    "y": 104,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 104,
+      "h": 58
+     },
+     {
+      "x": 105,
+      "y": 0,
+      "w": 104,
+      "h": 58
+     },
+     {
+      "x": 210,
+      "y": 0,
+      "w": 104,
+      "h": 58
+     },
+     {
+      "x": 315,
+      "y": 0,
+      "w": 104,
+      "h": 58
+     }
+    ]
+   },
+   {
+    "id": "neon_caracas",
+    "tipo": "letreros_neon",
+    "capa": "cerca",
+    "x": 506,
+    "y": 112,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 420,
+      "y": 0,
+      "w": 82,
+      "h": 50
+     },
+     {
+      "x": 503,
+      "y": 0,
+      "w": 82,
+      "h": 50
+     },
+     {
+      "x": 586,
+      "y": 0,
+      "w": 82,
+      "h": 50
+     },
+     {
+      "x": 669,
+      "y": 0,
+      "w": 82,
+      "h": 50
+     }
+    ]
+   },
+   {
+    "id": "luz_torre_0",
+    "tipo": "luces_ciudad",
+    "capa": "cerca",
+    "x": 99,
+    "y": -3,
+    "fps": 1,
+    "cuadros": [
+     {
+      "x": 752,
+      "y": 0,
+      "w": 5,
+      "h": 5
+     },
+     {
+      "x": 758,
+      "y": 0,
+      "w": 5,
+      "h": 5
+     }
+    ]
+   },
+   {
+    "id": "luz_torre_1",
+    "tipo": "luces_ciudad",
+    "capa": "cerca",
+    "x": 231,
+    "y": 5,
+    "fps": 1,
+    "cuadros": [
+     {
+      "x": 764,
+      "y": 0,
+      "w": 5,
+      "h": 5
+     },
+     {
+      "x": 770,
+      "y": 0,
+      "w": 5,
+      "h": 5
+     }
+    ]
+   },
+   {
+    "id": "trafico_618",
+    "tipo": "luces_ciudad",
+    "capa": "objeto",
+    "x": 622,
+    "y": 246,
+    "fps": 6,
+    "orden": -1,
+    "cuadros": [
+     {
+      "x": 776,
+      "y": 0,
+      "w": 52,
+      "h": 114
+     },
+     {
+      "x": 829,
+      "y": 0,
+      "w": 52,
+      "h": 114
+     },
+     {
+      "x": 882,
+      "y": 0,
+      "w": 52,
+      "h": 114
+     },
+     {
+      "x": 935,
+      "y": 0,
+      "w": 52,
+      "h": 114
+     }
+    ]
+   },
+   {
+    "id": "avion",
+    "tipo": "avion_lejos",
+    "capa": "lejos",
+    "x": -10,
+    "y": 96,
+    "fps": 2,
+    "recorrido": {
+     "desde": [
+      -10,
+      96
+     ],
+     "hasta": [
+      1280,
+      90
+     ],
+     "segundos": 80,
+     "desfase": 0.3
+    },
+    "cuadros": [
+     {
+      "x": 988,
+      "y": 0,
+      "w": 9,
+      "h": 4
+     },
+     {
+      "x": 998,
+      "y": 0,
+      "w": 9,
+      "h": 4
+     }
+    ]
+   },
+   {
+    "id": "helicoptero",
+    "tipo": "helicoptero_reflector",
+    "capa": "lejos",
+    "x": 1280,
+    "y": 86,
+    "fps": 8,
+    "recorrido": {
+     "desde": [
+      1280,
+      86
+     ],
+     "hasta": [
+      -104,
+      96
+     ],
+     "segundos": 60,
+     "desfase": 0.62
+    },
+    "cuadros": [
+     {
+      "x": 1008,
+      "y": 0,
+      "w": 104,
+      "h": 96
+     },
+     {
+      "x": 1113,
+      "y": 0,
+      "w": 104,
+      "h": 96
+     },
+     {
+      "x": 1218,
+      "y": 0,
+      "w": 104,
+      "h": 96
+     },
+     {
+      "x": 1323,
+      "y": 0,
+      "w": 104,
+      "h": 96
+     }
+    ]
+   },
+   {
+    "id": "publico_0",
+    "tipo": "publico",
+    "capa": "cerca",
+    "x": 136,
+    "y": 172,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 1428,
+      "y": 0,
+      "w": 60,
+      "h": 34
+     },
+     {
+      "x": 1489,
+      "y": 0,
+      "w": 60,
+      "h": 34
+     }
+    ]
+   },
+   {
+    "id": "publico_1",
+    "tipo": "publico",
+    "capa": "cerca",
+    "x": 286,
+    "y": 168,
+    "fps": 3,
+    "cuadros": [
+     {
+      "x": 1550,
+      "y": 0,
+      "w": 88,
+      "h": 34
+     },
+     {
+      "x": 1639,
+      "y": 0,
+      "w": 88,
+      "h": 34
+     }
+    ]
+   }
+  ],
+  "nota": "capa cerca y tras_cerca: x, y de pantalla, como siempre. capa lejos: x, y en pixeles de la imagen lejos (que se repite cada su ancho y corre con su paralaje); va de recorrido.desde a recorrido.hasta en recorrido.segundos y vuelve a empezar, adelantada por desfase (0 a 1). capa objeto: va encima de un objeto, con setDepth(franja.atras + orden), como los objetos."
+ },
+ "callejones": [],
+ "borde": {
+  "nota": "Para cuando el borde avanza (la azotea se achica). borde_filo.png: 6 cuadros del canto con la franja, en tira; el 0 entero y del 1 al 5 se desmorona. Va con su esquina de arriba a la izquierda en (x del borde nuevo - 10, franja.atras), corrido como el piso. Lo de la derecha del canto es transparente: ahí va borde_vacio.png, la ciudad allá abajo, que se repite cada 128 x 128.",
+  "filo": {
+   "archivo": "borde_filo.png",
+   "w": 84,
+   "h": 114,
+   "cuadros": 6,
+   "fps": 8,
+   "ancla": [
+    10,
+    0
+   ]
+  },
+  "vacio": {
+   "archivo": "borde_vacio.png",
+   "w": 128,
+   "h": 128,
+   "repetir": true
+  },
+  "hoy": [
+   618
+  ]
+ },
+ "superficie": {
+  "archivo": "superficie.png",
+  "y": 246,
+  "leyenda": [
+   {
+    "id": "acera",
+    "color": "#d0d0d0",
+    "paso": "paso_piedra",
+    "resbala": false
+   },
+   {
+    "id": "hueco",
+    "color": "#000000",
+    "paso": "",
+    "resbala": false
+   }
+  ]
+ },
+ "colision": "colision.json",
+ "luces": "luces.json",
+ "particulas": "particulas.json",
+ "paleta": [
+  {
+   "nombre": "tinta",
+   "hex": "#0e0b18"
+  },
+  {
+   "nombre": "sombra",
+   "hex": "#1f1a30"
+  },
+  {
+   "nombre": "asfalto",
+   "hex": "#332d48"
+  },
+  {
+   "nombre": "asfalto_claro",
+   "hex": "#4f4866"
+  },
+  {
+   "nombre": "cemento",
+   "hex": "#686180"
+  },
+  {
+   "nombre": "cemento_claro",
+   "hex": "#8a83a0"
+  },
+  {
+   "nombre": "crema",
+   "hex": "#b6aec6"
+  },
+  {
+   "nombre": "luz",
+   "hex": "#fff4dc"
+  },
+  {
+   "nombre": "amarillo",
+   "hex": "#ffd23c"
+  },
+  {
+   "nombre": "ocre",
+   "hex": "#e8902c"
+  },
+  {
+   "nombre": "terracota",
+   "hex": "#9c5434"
+  },
+  {
+   "nombre": "rojo",
+   "hex": "#ef2d3c"
+  },
+  {
+   "nombre": "vino",
+   "hex": "#6c2240"
+  },
+  {
+   "nombre": "salmon",
+   "hex": "#ff4aa6"
+  },
+  {
+   "nombre": "menta",
+   "hex": "#38e6e4"
+  },
+  {
+   "nombre": "verde",
+   "hex": "#2c5446"
+  },
+  {
+   "nombre": "verde_oscuro",
+   "hex": "#172a2c"
+  },
+  {
+   "nombre": "celeste",
+   "hex": "#3f6cc4"
+  },
+  {
+   "nombre": "cielo",
+   "hex": "#26356e"
+  },
+  {
+   "nombre": "azul",
+   "hex": "#18245a"
+  },
+  {
+   "nombre": "azul_noche",
+   "hex": "#10173a"
+  },
+  {
+   "nombre": "canal",
+   "hex": "#8a3cc0"
+  },
+  {
+   "nombre": "oro",
+   "hex": "#ffac2a"
+  },
+  {
+   "nombre": "bruma",
+   "hex": "#3a4478"
+  }
+ ],
+ "verificacion": "verificacion.md",
+ "layout": {
+  "id": "caracas_azotea",
+  "pais": "venezuela",
+  "prueba": "kachinuki",
+  "nombre": "AZOTEA DE PARQUE CENTRAL",
+  "largo": 640,
+  "franja": {
+   "atras": 246,
+   "adelante": 344
+  },
+  "hora": "noche",
+  "clima": [
+   "despejado"
+  ],
+  "paralaje": {
+   "cielo": "auto",
+   "lejos": "avila_noche",
+   "cerca": "torres_parque_central"
+  },
+  "piso": [
+   {
+    "x0": 0,
+    "x1": 640,
+    "tipo": "baldosa",
+    "nombre": "azotea"
+   }
+  ],
+  "huecos": [
+   {
+    "x0": 618,
+    "x1": 640,
+    "y0": 0,
+    "y1": 98,
+    "caida": "vacio",
+    "nombre": "borde sin baranda",
+    "nota": "quien sale volando por aquí queda fuera. A los 90 s el borde avanza hasta x 420: la azotea se achica"
+   }
+  ],
+  "plataformas": [],
+  "muros": [],
+  "escaleras": [],
+  "postes": [
+   {
+    "x": 120,
+    "y": 2,
+    "alto": 120,
+    "tipo": "antena"
+   },
+   {
+    "x": 460,
+    "y": 2,
+    "alto": 96,
+    "tipo": "antena"
+   }
+  ],
+  "agua": [],
+  "bajo": [],
+  "solidos": [],
+  "carriles": [
+   {
+    "y": 20
+   },
+   {
+    "y": 42
+   },
+   {
+    "y": 64
+   },
+   {
+    "y": 86
+   }
+  ],
+  "entidades": [
+   {
+    "tipo": "npc",
+    "npc": "thor",
+    "x": 40,
+    "y": 2,
+    "nota": "Thor mira la pelea sentado al fondo"
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "chancleta",
+    "x": 260,
+    "y": 40
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "tubo",
+    "x": 380,
+    "y": 70
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "pote_basura",
+    "x": 300,
+    "y": 20
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "silla_plastica",
+    "x": 420,
+    "y": 60
+   }
+  ],
+  "ranuras_deco": [
+   {
+    "x0": 0,
+    "x1": 640,
+    "capa": "lejos",
+    "tema": "avila_de_noche"
+   },
+   {
+    "x0": 380,
+    "x1": 640,
+    "capa": "cerca",
+    "tema": "letreros_neon"
+   }
+  ],
+  "vida": [
+   "letreros_neon",
+   "luces_ciudad",
+   "avion_lejos",
+   "helicoptero_reflector",
+   "publico",
+   "fuegos_artificiales"
+  ]
+ }
+}

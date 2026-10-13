@@ -1,0 +1,57 @@
+{
+ "hora": "manana",
+ "luces": [
+  {
+   "x": -12,
+   "y": 190,
+   "color": "#d93a2e",
+   "radio": 12,
+   "latido": 0.5,
+   "encendida": true,
+   "nota": "bombillo rojo del altar"
+  },
+  {
+   "x": 3496,
+   "y": 190,
+   "color": "#d93a2e",
+   "radio": 12,
+   "latido": 0.5,
+   "encendida": true,
+   "nota": "bombillo rojo del altar"
+  },
+  {
+   "x": 3600,
+   "y": 190,
+   "color": "#d93a2e",
+   "radio": 12,
+   "latido": 0.5,
+   "encendida": true,
+   "nota": "bombillo rojo del altar"
+  },
+  {
+   "x": 3899,
+   "y": 190,
+   "color": "#d93a2e",
+   "radio": 12,
+   "latido": 0.5,
+   "encendida": true,
+   "nota": "bombillo rojo del altar"
+  },
+  {
+   "x": 219,
+   "y": 66,
+   "color": "#f5b52e",
+   "radio": 40,
+   "encendida": false,
+   "nota": "lámpara del poste: de día va apagada"
+  },
+  {
+   "x": 3519,
+   "y": 66,
+   "color": "#f5b52e",
+   "radio": 40,
+   "encendida": false,
+   "nota": "lámpara del poste: de día va apagada"
+  }
+ ]
+}

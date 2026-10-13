@@ -1,18 +1,60 @@
 {
  "imagen": "objetos.png",
- "nota": "x, y: esquina de arriba a la izquierda en el mundo a escala 1. orden: la profundidad para ordenar con los atletas (se dibuja después de todo atleta con y menor). En Phaser: setDepth(franja.atras + orden).",
+ "nota": "x, y: esquina de arriba a la izquierda en pantalla a escala 1 (con la inclinación ya puesta). orden: la profundidad para ordenar con los atletas (se dibuja después de todo atleta con y menor). En Phaser: setDepth(franja.atras + orden). Las caras izquierdas de las cajas (tipo *_cara) van con orden y + 0.1: detrás de quien pasa a su lado.",
  "objetos": [
+  {
+   "id": "muro_bajo_10_cara",
+   "tipo": "muro_bajo_cara",
+   "origen": "muros",
+   "cuadro": {
+    "x": 0,
+    "y": 0,
+    "w": 47,
+    "h": 159
+   },
+   "x": 1400,
+   "y": 172,
+   "orden": 0.1
+  },
+  {
+   "id": "muro_alto_7_cara",
+   "tipo": "muro_alto_cara",
+   "origen": "muros",
+   "cuadro": {
+    "x": 48,
+    "y": 0,
+    "w": 33,
+    "h": 145
+   },
+   "x": 1700,
+   "y": 148,
+   "orden": 0.1
+  },
+  {
+   "id": "kiosco_1_cara",
+   "tipo": "kiosco_cara",
+   "origen": "solidos",
+   "cuadro": {
+    "x": 82,
+    "y": 0,
+    "w": 9,
+    "h": 67
+   },
+   "x": 2600,
+   "y": 156,
+   "orden": 0.1
+  },
   {
    "id": "poste_luz_0",
    "tipo": "poste_luz",
    "origen": "postes",
    "cuadro": {
-    "x": 0,
+    "x": 92,
     "y": 0,
     "w": 44,
     "h": 166
    },
-   "x": 620,
+   "x": 621,
    "y": 39,
    "orden": 4
   },
@@ -21,12 +63,12 @@
    "tipo": "poste_luz",
    "origen": "postes",
    "cuadro": {
-    "x": 45,
+    "x": 137,
     "y": 0,
     "w": 44,
     "h": 166
    },
-   "x": 1900,
+   "x": 1901,
    "y": 39,
    "orden": 4
   },
@@ -35,12 +77,12 @@
    "tipo": "poste_luz",
    "origen": "postes",
    "cuadro": {
-    "x": 90,
+    "x": 182,
     "y": 0,
     "w": 44,
     "h": 166
    },
-   "x": 3180,
+   "x": 3181,
    "y": 39,
    "orden": 4
   },
@@ -49,9 +91,9 @@
    "tipo": "tanque_agua",
    "origen": "solidos",
    "cuadro": {
-    "x": 135,
+    "x": 227,
     "y": 0,
-    "w": 30,
+    "w": 36,
     "h": 58
    },
    "x": 560,
@@ -64,9 +106,9 @@
    "tipo": "kiosco",
    "origen": "solidos",
    "cuadro": {
-    "x": 166,
+    "x": 264,
     "y": 0,
-    "w": 36,
+    "w": 44,
     "h": 68
    },
    "x": 2600,
@@ -79,9 +121,9 @@
    "tipo": "toldo",
    "origen": "bajo",
    "cuadro": {
-    "x": 203,
+    "x": 309,
     "y": 0,
-    "w": 120,
+    "w": 134,
     "h": 45
    },
    "x": 300,
@@ -89,16 +131,44 @@
    "orden": 40
   },
   {
+   "id": "cajas_5_cara",
+   "tipo": "cajas_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 444,
+    "y": 0,
+    "w": 15,
+    "h": 59
+   },
+   "x": 1615,
+   "y": 226,
+   "orden": 44.1
+  },
+  {
+   "id": "cajas_6_cara",
+   "tipo": "cajas_cara",
+   "origen": "plataformas",
+   "cuadro": {
+    "x": 460,
+    "y": 0,
+    "w": 15,
+    "h": 77
+   },
+   "x": 1655,
+   "y": 208,
+   "orden": 44.1
+  },
+  {
    "id": "carro_2",
    "tipo": "carro",
    "origen": "plataformas",
    "cuadro": {
-    "x": 324,
+    "x": 476,
     "y": 0,
-    "w": 96,
+    "w": 107,
     "h": 68
    },
-   "x": 800,
+   "x": 807,
    "y": 182,
    "orden": 50,
    "superficie": "madera"
@@ -108,12 +178,12 @@
    "tipo": "mesas_plasticas",
    "origen": "plataformas",
    "cuadro": {
-    "x": 421,
+    "x": 584,
     "y": 0,
-    "w": 48,
+    "w": 58,
     "h": 50
    },
-   "x": 3300,
+   "x": 3311,
    "y": 210,
    "orden": 60,
    "superficie": "plastico"
@@ -123,12 +193,12 @@
    "tipo": "mesas_plasticas",
    "origen": "plataformas",
    "cuadro": {
-    "x": 470,
+    "x": 643,
     "y": 0,
-    "w": 48,
+    "w": 58,
     "h": 64
    },
-   "x": 3348,
+   "x": 3359,
    "y": 196,
    "orden": 60,
    "superficie": "plastico"
@@ -138,12 +208,12 @@
    "tipo": "cajas",
    "origen": "plataformas",
    "cuadro": {
-    "x": 519,
+    "x": 702,
     "y": 0,
-    "w": 40,
+    "w": 54,
     "h": 58
    },
-   "x": 1600,
+   "x": 1615,
    "y": 226,
    "orden": 84,
    "superficie": "plastico"
@@ -153,12 +223,12 @@
    "tipo": "cajas",
    "origen": "plataformas",
    "cuadro": {
-    "x": 560,
+    "x": 757,
     "y": 0,
-    "w": 40,
+    "w": 54,
     "h": 76
    },
-   "x": 1640,
+   "x": 1655,
    "y": 208,
    "orden": 84,
    "superficie": "plastico"
@@ -168,9 +238,9 @@
    "tipo": "muro_alto",
    "origen": "muros",
    "cuadro": {
-    "x": 601,
+    "x": 812,
     "y": 0,
-    "w": 24,
+    "w": 56,
     "h": 148
    },
    "x": 1700,
@@ -183,12 +253,12 @@
    "tipo": "puesto_banhmi",
    "origen": "plataformas",
    "cuadro": {
-    "x": 626,
+    "x": 869,
     "y": 0,
-    "w": 40,
+    "w": 48,
     "h": 54
    },
-   "x": 1000,
+   "x": 1026,
    "y": 244,
    "orden": 98,
    "superficie": "metal"
@@ -198,12 +268,12 @@
    "tipo": "moto_estacionada",
    "origen": "plataformas",
    "cuadro": {
-    "x": 667,
+    "x": 918,
     "y": 0,
-    "w": 64,
+    "w": 74,
     "h": 56
    },
-   "x": 2100,
+   "x": 2129,
    "y": 254,
    "orden": 110,
    "superficie": "metal"
@@ -213,9 +283,9 @@
    "tipo": "muro_bajo",
    "origen": "muros",
    "cuadro": {
-    "x": 732,
+    "x": 993,
     "y": 0,
-    "w": 18,
+    "w": 64,
     "h": 158
    },
    "x": 1400,
@@ -228,12 +298,12 @@
    "tipo": "porton",
    "origen": "muros",
    "cuadro": {
-    "x": 751,
+    "x": 1058,
     "y": 0,
-    "w": 62,
+    "w": 76,
     "h": 113
    },
-   "x": 1698,
+   "x": 1730,
    "y": 218,
    "orden": 131
   }

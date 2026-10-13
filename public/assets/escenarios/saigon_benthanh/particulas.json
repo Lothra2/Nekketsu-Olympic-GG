@@ -1,0 +1,308 @@
+{
+ "nota": "x e y en pixeles de pantalla a escala 1 (y de pantalla = franja.atras + y del mundo). fx: nombre del efecto del catálogo (manifest.fx).",
+ "particulas": [
+  {
+   "tipo": "humo",
+   "x0": -14,
+   "x1": -10,
+   "y0": 178,
+   "y1": 180,
+   "color": [
+    "#cdc3b8",
+    "#a39a98"
+   ],
+   "cada": 0.5,
+   "sube": 14,
+   "vida": 1.8,
+   "nota": "incienso del altar"
+  },
+  {
+   "tipo": "humo",
+   "x0": 3494,
+   "x1": 3498,
+   "y0": 178,
+   "y1": 180,
+   "color": [
+    "#cdc3b8",
+    "#a39a98"
+   ],
+   "cada": 0.5,
+   "sube": 14,
+   "vida": 1.8,
+   "nota": "incienso del altar"
+  },
+  {
+   "tipo": "humo",
+   "x0": 3598,
+   "x1": 3602,
+   "y0": 178,
+   "y1": 180,
+   "color": [
+    "#cdc3b8",
+    "#a39a98"
+   ],
+   "cada": 0.5,
+   "sube": 14,
+   "vida": 1.8,
+   "nota": "incienso del altar"
+  },
+  {
+   "tipo": "humo",
+   "x0": 3897,
+   "x1": 3901,
+   "y0": 178,
+   "y1": 180,
+   "color": [
+    "#cdc3b8",
+    "#a39a98"
+   ],
+   "cada": 0.5,
+   "sube": 14,
+   "vida": 1.8,
+   "nota": "incienso del altar"
+  },
+  {
+   "tipo": "petalo",
+   "fx": "petalo_buganvilla",
+   "x0": -18,
+   "x1": -2,
+   "y0": 126,
+   "y1": 130,
+   "cada": 4,
+   "nota": "pétalos que caen de la buganvilla"
+  },
+  {
+   "tipo": "petalo",
+   "fx": "petalo_buganvilla",
+   "x0": -13,
+   "x1": 3,
+   "y0": 38,
+   "y1": 42,
+   "cada": 4,
+   "nota": "pétalos que caen de la buganvilla"
+  },
+  {
+   "tipo": "petalo",
+   "fx": "petalo_buganvilla",
+   "x0": 3296,
+   "x1": 3312,
+   "y0": 126,
+   "y1": 130,
+   "cada": 4,
+   "nota": "pétalos que caen de la buganvilla"
+  },
+  {
+   "tipo": "petalo",
+   "fx": "petalo_buganvilla",
+   "x0": 3271,
+   "x1": 3287,
+   "y0": 82,
+   "y1": 86,
+   "cada": 4,
+   "nota": "pétalos que caen de la buganvilla"
+  },
+  {
+   "tipo": "petalo",
+   "fx": "petalo_buganvilla",
+   "x0": 3264,
+   "x1": 3280,
+   "y0": 38,
+   "y1": 42,
+   "cada": 4,
+   "nota": "pétalos que caen de la buganvilla"
+  },
+  {
+   "tipo": "petalo",
+   "fx": "petalo_buganvilla",
+   "x0": 3323,
+   "x1": 3339,
+   "y0": 126,
+   "y1": 130,
+   "cada": 4,
+   "nota": "pétalos que caen de la buganvilla"
+  },
+  {
+   "tipo": "petalo",
+   "fx": "petalo_buganvilla",
+   "x0": 3747,
+   "x1": 3763,
+   "y0": 82,
+   "y1": 86,
+   "cada": 4,
+   "nota": "pétalos que caen de la buganvilla"
+  },
+  {
+   "tipo": "petalo",
+   "fx": "petalo_buganvilla",
+   "x0": 3753,
+   "x1": 3769,
+   "y0": 38,
+   "y1": 42,
+   "cada": 4,
+   "nota": "pétalos que caen de la buganvilla"
+  },
+  {
+   "tipo": "petalo",
+   "fx": "petalo_buganvilla",
+   "x0": 3834,
+   "x1": 3850,
+   "y0": 126,
+   "y1": 130,
+   "cada": 4,
+   "nota": "pétalos que caen de la buganvilla"
+  },
+  {
+   "tipo": "petalo",
+   "fx": "petalo_buganvilla",
+   "x0": 3886,
+   "x1": 3902,
+   "y0": 82,
+   "y1": 86,
+   "cada": 4,
+   "nota": "pétalos que caen de la buganvilla"
+  },
+  {
+   "tipo": "gota",
+   "x0": -18,
+   "x1": -16,
+   "y0": 110,
+   "y1": 110,
+   "color": [
+    "#8fbfdc"
+   ],
+   "cada": 3,
+   "vida": 0.8,
+   "nota": "gotera del aire acondicionado"
+  },
+  {
+   "tipo": "gota",
+   "x0": -18,
+   "x1": -16,
+   "y0": 66,
+   "y1": 66,
+   "color": [
+    "#8fbfdc"
+   ],
+   "cada": 3,
+   "vida": 0.8,
+   "nota": "gotera del aire acondicionado"
+  },
+  {
+   "tipo": "gota",
+   "x0": -18,
+   "x1": -16,
+   "y0": 22,
+   "y1": 22,
+   "color": [
+    "#8fbfdc"
+   ],
+   "cada": 3,
+   "vida": 0.8,
+   "nota": "gotera del aire acondicionado"
+  },
+  {
+   "tipo": "gota",
+   "x0": 3302,
+   "x1": 3304,
+   "y0": 110,
+   "y1": 110,
+   "color": [
+    "#8fbfdc"
+   ],
+   "cada": 3,
+   "vida": 0.8,
+   "nota": "gotera del aire acondicionado"
+  },
+  {
+   "tipo": "gota",
+   "x0": 3302,
+   "x1": 3304,
+   "y0": 66,
+   "y1": 66,
+   "color": [
+    "#8fbfdc"
+   ],
+   "cada": 3,
+   "vida": 0.8,
+   "nota": "gotera del aire acondicionado"
+  },
+  {
+   "tipo": "gota",
+   "x0": 3302,
+   "x1": 3304,
+   "y0": 22,
+   "y1": 22,
+   "color": [
+    "#8fbfdc"
+   ],
+   "cada": 3,
+   "vida": 0.8,
+   "nota": "gotera del aire acondicionado"
+  },
+  {
+   "tipo": "gota",
+   "x0": 3418,
+   "x1": 3420,
+   "y0": 22,
+   "y1": 22,
+   "color": [
+    "#8fbfdc"
+   ],
+   "cada": 3,
+   "vida": 0.8,
+   "nota": "gotera del aire acondicionado"
+  },
+  {
+   "tipo": "gota",
+   "x0": 3652,
+   "x1": 3654,
+   "y0": 110,
+   "y1": 110,
+   "color": [
+    "#8fbfdc"
+   ],
+   "cada": 3,
+   "vida": 0.8,
+   "nota": "gotera del aire acondicionado"
+  },
+  {
+   "tipo": "gota",
+   "x0": 3760,
+   "x1": 3762,
+   "y0": 22,
+   "y1": 22,
+   "color": [
+    "#8fbfdc"
+   ],
+   "cada": 3,
+   "vida": 0.8,
+   "nota": "gotera del aire acondicionado"
+  },
+  {
+   "tipo": "gota",
+   "x0": 3816,
+   "x1": 3818,
+   "y0": 66,
+   "y1": 66,
+   "color": [
+    "#8fbfdc"
+   ],
+   "cada": 3,
+   "vida": 0.8,
+   "nota": "gotera del aire acondicionado"
+  },
+  {
+   "tipo": "gota",
+   "x0": 3896,
+   "x1": 3898,
+   "y0": 110,
+   "y1": 110,
+   "color": [
+    "#8fbfdc"
+   ],
+   "cada": 3,
+   "vida": 0.8,
+   "nota": "gotera del aire acondicionado"
+  }
+ ]
+}
