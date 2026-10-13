@@ -27,6 +27,8 @@ export const PRUEBAS_GIRA: PruebaGira[] = [
   { id: 'Tamawari', scene: 'Tamawari', nombre: 'TAMA-WARI HỘI AN', lugar: 'HỘI AN, VIETNAM', bandera: 'flag_vn' },
   { id: 'DaCau', scene: 'DaCau', nombre: 'ĐÁ CẦU TAO ĐÀN', lugar: 'SAIGÓN, VIETNAM', bandera: 'flag_vn' },
   { id: 'Tejo', scene: 'Tejo', nombre: 'TEJO LA CANDELARIA', lugar: 'BOGOTÁ, COLOMBIA', bandera: 'flag_co' },
+  { id: 'Quemado', scene: 'Quemado', nombre: 'QUEMADO NEKKETSU', lugar: 'PATIO DEL LICEO, CARACAS', bandera: 'flag_ve' },
+  { id: 'Chapita', scene: 'Chapita', nombre: 'CHAPITA', lugar: 'BARRIO DE CARACAS, VENEZUELA', bandera: 'flag_ve' },
   { id: 'Judo', scene: 'Fight', nombre: 'JUDO Y VOVINAM', lugar: 'HÀ NỘI, VIETNAM', bandera: 'flag_vn', datos: { modo: 'judo' } },
   { id: 'Fight', scene: 'Fight', nombre: 'KACHINUKI FINAL', lugar: 'AZOTEA DE CARACAS, VENEZUELA', bandera: 'flag_ve', datos: { modo: '4v4', rival: 'kenji' } },
 ];

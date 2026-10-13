@@ -27,6 +27,8 @@ const MENUS: Record<string, { id: string; label: string }[]> = {
     { id: 'DaCau', label: 'ĐÁ CẦU SAIGÓN' },
     { id: 'Tejo', label: 'TEJO BOGOTÁ' },
     { id: 'judo', label: 'JUDO HÀ NỘI' },
+    { id: 'Quemado', label: 'QUEMADO NEKKETSU' },
+    { id: 'Chapita', label: 'CHAPITA CARACAS' },
     { id: '<', label: 'ATRÁS' },
   ],
   // el Cross completo son cinco tramos; para una partida corta se puede correr uno solo
@@ -49,6 +51,8 @@ const MENUS: Record<string, { id: string; label: string }[]> = {
     { id: 'practica:Tamawari', label: 'TAMA-WARI' },
     { id: 'practica:DaCau', label: 'ĐÁ CẦU' },
     { id: 'practica:Tejo', label: 'TEJO' },
+    { id: 'practica:Quemado', label: 'QUEMADO' },
+    { id: 'practica:Chapita', label: 'CHAPITA' },
     { id: 'practica:Fight', label: 'PELEA' },
     { id: '<', label: 'ATRÁS' },
   ],
@@ -121,7 +125,7 @@ export class Title extends Phaser.Scene {
     const g = this.add.graphics();
     const n = this.opciones.length;
     // el cuadro crece hacia arriba, sin tapar la línea de teclas de abajo; las listas largas van más juntas
-    const lh = n >= 8 ? 18 : 21;
+    const lh = n >= 11 ? 15 : n >= 8 ? 18 : 21;
     const top = 338 - (n * lh + 10);
     g.fillStyle(0x08081a, 0.78).fillRect(206, top, 228, n * lh + 10);
     g.lineStyle(1, 0xf2c230, 0.8).strokeRect(206.5, top + 0.5, 227, n * lh + 9);

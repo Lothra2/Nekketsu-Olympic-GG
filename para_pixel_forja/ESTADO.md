@@ -26,6 +26,10 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 
 ## Lo último del lado del juego
 
+- **Pruebas nuevas: Quemado Nekketsu y Chapita**, con lo que ya trae el kit (el balón de goma, las chapas, el palo de escoba, la chancleta, `weapon_throw`, `weapon_swing` con su `arma` por cuadro, `fight_block` para atrapar). Lo que les falta en arte, para un lote siguiente:
+  - Quemado: `catch` (atrapar el balón contra el pecho) y `dodge_jump`. Hoy atrapa con `fight_block` y esquiva con el salto normal. El patio del liceo (`liceo_patio`, techado, vista inclinada como la pelea) está pintado por código.
+  - Chapita: `bat_stance`, `bat_swing` con el palo a dos manos y `pitch` de lado. Hoy usa `weapon_swing` y `weapon_throw` con el palo y la chapa en la mano. La señora Carmen (rulos y bata) sería un NPC con `asomarse`, `regañar` y `tirar_chancleta`. El barrio (`barrio_caracas`, de lado) y la casa del vecino con la ventana, más su versión rota, están pintados por código.
+
 - **Prueba nueva: Azoteas de Cartagena** (salto con garrocha entre techos, al atardecer). Usa `pole_vault` del motor que ya está en main, sumado al pack `atletismo` (las demás animaciones del pack quedan iguales), con su `elevacion` y el `despegue`/`aterriza` en los cuadros 3 y 11. Lo que le falta en arte:
   - `vault_fail` (del pedido): hoy el que no llega cae con `jump_fall` y aterriza con `land_flat`.
   - El escenario `cartagena` (E4): hoy son fachadas pintadas por código, de lado. Hay balcón con buganvillas, carrito de frutas y una palenquera dibujada a mano que sería un NPC con `regañar`.

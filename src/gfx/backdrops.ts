@@ -708,6 +708,111 @@ function cartagena(): HTMLCanvasElement {
   return p.done();
 }
 
+/**
+ * El patio techado del liceo, en Caracas: la pared azul y blanca de la escuela, la bandera pintada, el tablero de
+ * básquet, la cantina con su ventanita, las gradas de cemento con los alumnos y el techo de cerchas de acero con
+ * sus lámparas. El piso es de cemento pintado; las rayas de la cancha las pone la prueba.
+ */
+function liceo(): HTMLCanvasElement {
+  const p = new Painter(W, H, M);
+  const r = rng(77);
+  // la pared: blanca arriba y azul abajo, con la franja amarilla
+  p.rect(X0, 0, AW, 200, C('#ece6d4'));
+  for (let i = 0; i < 900; i++) p.px(X0 + r() * AW, r() * 120, C('#dcd4c0'));
+  p.rect(X0, 120, AW, 80, C('#2a5aa8'));
+  p.rect(X0, 116, AW, 4, C('#f2c230'));
+  for (let i = 0; i < 400; i++) p.px(X0 + r() * AW, 120 + r() * 80, C('#24508f'));
+  // el techo: lámina y cerchas de acero en zigzag, con lámparas
+  p.rect(X0, 0, AW, 18, C('#8a8a92'));
+  for (let x = desde(0, 6); x < X1; x += 6) p.rect(x, 0, 1, 18, C('#6a6a72'));
+  p.rect(X0, 18, AW, 3, C('#4a4a52'));
+  p.rect(X0, 38, AW, 2, C('#4a4a52'));
+  for (let x = desde(0, 40); x < X1; x += 40) { p.line(x, 21, x + 20, 38, C('#4a4a52')); p.line(x + 20, 38, x + 40, 21, C('#4a4a52')); }
+  for (let x = desde(60, 120); x < X1; x += 120) { p.rect(x, 40, 2, 8, C('#3a3a42')); p.rect(x - 10, 48, 22, 3, C('#fffbe0')); p.rect(x - 10, 51, 22, 1, C('#c8c4a8')); }
+  // la bandera de Venezuela pintada y el nombre del liceo (el texto lo pone la escena)
+  flag(p, 've', 40, 58, 54, 36);
+  p.rect(140, 62, 260, 26, C('#f4f0e2'));
+  p.rect(140, 62, 260, 2, C('#2a5aa8'));
+  p.rect(140, 86, 260, 2, C('#d02a2a'));
+  // el tablero de básquet en la pared
+  p.rect(460, 54, 56, 36, C('#f4f4f4'));
+  p.rect(460, 54, 56, 2, C('#d02a2a')); p.rect(460, 88, 56, 2, C('#d02a2a')); p.rect(460, 54, 2, 36, C('#d02a2a')); p.rect(514, 54, 2, 36, C('#d02a2a'));
+  p.rect(478, 70, 20, 12, C('#d02a2a')); p.rect(480, 72, 16, 8, C('#f4f4f4'));
+  p.rect(480, 90, 16, 2, C('#f2902a'));
+  for (let k = 0; k < 4; k++) p.line(481 + k * 4, 92, 483 + k * 3, 102, C('#e8e8e8'));
+  // la cantina: la ventanita con reja, el letrero y la cola de muchachos
+  p.rect(560, 120, 70, 50, C('#e8d8b0'));
+  p.rect(570, 130, 50, 26, C('#3a2a1a'));
+  for (let x = 572; x < 620; x += 4) p.rect(x, 130, 1, 26, C('#8a8a8a'));
+  p.rect(566, 108, 58, 10, C('#d02a2a'));
+  // las gradas de cemento con los alumnos de uniforme (camisa blanca, azul, beige)
+  for (let k = 0; k < 4; k++) {
+    const y = 140 + k * 14;
+    p.rect(X0, y, 520 - X0, 14, k % 2 ? C('#a8a8a0') : C('#b8b8b0'));
+    p.rect(X0, y, 520 - X0, 2, C('#d0d0c8'));
+    for (let x = X0 + 6 + r() * 10; x < 512; x += 12 + r() * 14) {
+      const camisa = [C('#f4f4f4'), C('#7ab0e0'), C('#e0c890')][Math.floor(r() * 3)];
+      const piel = [C('#8a5a3a'), C('#c08a5a'), C('#e0b088'), C('#5a3a2a')][Math.floor(r() * 4)];
+      p.circle(x + 3, y - 6, 3, piel);
+      p.rect(x + 1, y - 8, 5, 2, C('#2a1a10'));
+      p.rect(x, y - 3, 7, 6, camisa);
+      if (r() < 0.25) p.rect(x - 2, y - 9, 2, 5, piel);
+    }
+  }
+  // el piso de cemento pintado y su borde
+  p.rect(X0, 196, AW, 6, C('#5a5a5e'));
+  p.vgrad(202, 360, [C('#5a8a7a'), C('#4a7a6a'), C('#3e6a5c')]);
+  for (let i = 0; i < 1600; i++) p.px(X0 + r() * AW, 202 + r() * 158, r() < 0.5 ? C('#527e70') : C('#629484'));
+  return p.done();
+}
+
+/**
+ * Un barrio de Caracas en la tarde: el cerro lleno de casitas de bloque una encima de otra, con sus tanques azules,
+ * las escaleras, el cableado y el Ávila atrás. Abajo, la calle donde se juega chapita. La casa del vecino (la de la
+ * ventana) la pone la prueba.
+ */
+function barrio(): HTMLCanvasElement {
+  const p = new Painter(W, H, M);
+  const r = rng(31);
+  p.vgrad(0, 200, [C('#5aa8e8'), C('#8ac4f0'), C('#c8e0f4'), C('#f4e8c8')]);
+  for (let i = 0; i < 8; i++) { const cx = X0 + r() * AW, cy = 20 + r() * 50; for (let k = 0; k < 6; k++) p.circle(cx + k * 8 - 20, cy + Math.sin(k) * 3, 7 + r() * 4, C('#ffffff'), 220); }
+  // el Ávila, lejos y azulado
+  p.ridge(120, 60, 11, C('#6a9a8a'), C('#8ab8a8'));
+  // el cerro del barrio y las casitas apiladas
+  const cerro = (x: number) => 110 + 30 * Math.sin(x / 90) + 20 * Math.cos(x / 41);
+  for (let x = X0; x < X1; x++) { const top = Math.round(cerro(x)); for (let y = top; y < 250; y++) p.px(x, y, (x * 7 + y * 3) % 11 === 0 ? C('#6a7a3a') : C('#7a8a4a')); }
+  const COLORES = ['#c8603a', '#d87a4a', '#b8523a', '#e8a070', '#f2d26a', '#7ab0e0', '#e8a0b8', '#f4f0e2', '#9ad0a0'].map(C);
+  for (let fila = 0; fila < 6; fila++) {
+    let x = X0 - 10 + r() * 20;
+    while (x < X1) {
+      const w = 20 + Math.floor(r() * 18), h = 14 + Math.floor(r() * 8);
+      const y = Math.round(cerro(x + w / 2)) + 10 + fila * 22 - h;
+      if (y > 250) break;
+      const col = r() < 0.45 ? COLORES[0] : COLORES[Math.floor(r() * COLORES.length)];
+      p.rect(x, y, w, h, col);
+      // el bloque sin frisar: rayitas
+      if (col === COLORES[0]) for (let yy = y + 2; yy < y + h; yy += 3) p.rect(x, yy, w, 1, C('#a84a2e'));
+      p.rect(x, y, w, 2, C('#8a8a8a'));
+      if (r() < 0.4) { p.rect(x + w - 6, y - 4, 5, 4, C('#2a6ad0')); p.rect(x + w - 6, y - 4, 5, 1, C('#5a9af0')); }
+      if (r() < 0.8) p.rect(x + 3, y + 5, 5, 5, r() < 0.3 ? C('#f2e070') : C('#2a2a3a'));
+      if (w > 28 && r() < 0.6) p.rect(x + w - 10, y + 5, 5, 5, C('#2a2a3a'));
+      if (r() < 0.3) p.rect(x + Math.floor(w / 2) - 2, y + h - 7, 4, 7, C('#5a3a2a'));
+      x += w + 3 + Math.floor(r() * 10);
+    }
+  }
+  // las escaleras del cerro
+  for (const ex of [120, 380, 610]) for (let k = 0; k < 14; k++) p.rect(ex + k * 3, 240 - k * 8, 6, 2, C('#c8c8c0'));
+  // el cableado
+  p.cable(X0, 150, X1, 160, 18, C('#2a2a2a'));
+  p.cable(X0, 172, X1, 166, 12, C('#2a2a2a'));
+  // la acera y la calle, con el home pintado con tiza lo pone la prueba
+  p.rect(X0, 250, AW, 8, C('#b8b0a0'));
+  p.rect(X0, 258, AW, 2, C('#8a8478'));
+  p.vgrad(260, 360, [C('#5a5a60'), C('#4a4a50')]);
+  for (let i = 0; i < 1200; i++) p.px(X0 + r() * AW, 260 + r() * 100, r() < 0.5 ? C('#64646a') : C('#3e3e44'));
+  return p.done();
+}
+
 /** Registra todos los fondos como texturas. */
 export function makeBackdrops(scene: Phaser.Scene) {
   const add = (k: string, c: HTMLCanvasElement) => { if (!scene.textures.exists(k)) scene.textures.addCanvas(k, c); };
@@ -727,6 +832,8 @@ export function makeBackdrops(scene: Phaser.Scene) {
   add('bg_candelaria', candelaria());
   add('bg_hanoi', hanoi());
   add('bg_cartagena', cartagena());
+  add('bg_liceo', liceo());
+  add('bg_barrio', barrio());
   // banderas sueltas
   for (const k of ['jp', 'vn', 'co', 've'] as const) {
     const p = new Painter(38, 26);
