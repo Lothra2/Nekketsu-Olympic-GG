@@ -35,6 +35,10 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
     - El círculo amarillo marca dónde va a caer (en Nekketsu no hay ayuda).
     - Patada la pasa al otro lado, puño la levanta para tu compañero, y saltando cerca de la red con patada sale la chilena, que vale doble si es punto.
     - Hasta 3 toques por lado. El toque perfecto, a media pierna, va al hueco del rival.
+  - *Tejo* (La Candelaria, Bogotá): el deporte nacional de Colombia, 2 contra 2 en 3 rondas.
+    - Un botón fija la puntería (la línea que recorre la caja, vista desde arriba) y otro la fuerza (la barra con su raya).
+    - Mecha que revienta: 3. Embocinada, adentro del bocín: 6. Moñona, las dos a la vez: 9, con fuegos artificiales.
+    - Si en una ronda nadie suma, el tejo más cerca del bocín se lleva la mano: 1. Empatados al final, desempate.
 - **Kachinuki Caracas**, la pelea final en una azotea de Parque Central de noche, en 1 contra 1 o 4 contra 4: Familia GG contra el Instituto Nekketsu.
   - Un borde sin baranda: caminando no te sales, pero si te tumban o te lanzan por ahí, quedas fuera.
   - Cada 30 s cae algo pesado del cielo. Antes aparece su sombra con un aro rojo.
@@ -117,6 +121,7 @@ node scripts/prueba-kachinuki.mjs http://localhost:5173/ capturas/kachinuki   # 
 node scripts/prueba-pruebas.mjs http://localhost:5173/ capturas/pruebas  # vallas, natación, jabalina y medallero
 node scripts/prueba-entrenamiento.mjs http://localhost:5173/ capturas/entrenamiento  # completa los 4 entrenamientos
 node scripts/prueba-tamawari.mjs http://localhost:5173/ capturas/tamawari   # el entrenamiento de Tama-wari jugado con el teclado
+node scripts/prueba-tejo.mjs http://localhost:5173/ capturas/tejo   # el entrenamiento de Tejo con un bot que apunta, y un partido de tres rondas
 node scripts/prueba-dacau.mjs http://localhost:5173/ capturas/dacau   # el entrenamiento de Đá cầu con un bot y un partido entero
 node scripts/prueba-cross.mjs http://localhost:5173/ capturas/cross     # los cinco tramos con piloto automático, de punta a punta
 node scripts/prueba-cross.mjs http://localhost:5173/ capturas/cross 3   # solo un tramo (1 a 5)

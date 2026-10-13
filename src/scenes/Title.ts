@@ -24,6 +24,7 @@ const MENUS: Record<string, { id: string; label: string }[]> = {
     { id: 'Jabalina', label: 'JABALINA LLANERA' },
     { id: 'Tamawari', label: 'TAMA-WARI HỘI AN' },
     { id: 'DaCau', label: 'ĐÁ CẦU SAIGÓN' },
+    { id: 'Tejo', label: 'TEJO BOGOTÁ' },
     { id: '<', label: 'ATRÁS' },
   ],
   // el Cross completo son cinco tramos; para una partida corta se puede correr uno solo
@@ -44,6 +45,7 @@ const MENUS: Record<string, { id: string; label: string }[]> = {
     { id: 'practica:Jabalina', label: 'JABALINA' },
     { id: 'practica:Tamawari', label: 'TAMA-WARI' },
     { id: 'practica:DaCau', label: 'ĐÁ CẦU' },
+    { id: 'practica:Tejo', label: 'TEJO' },
     { id: 'practica:Fight', label: 'PELEA' },
     { id: '<', label: 'ATRÁS' },
   ],

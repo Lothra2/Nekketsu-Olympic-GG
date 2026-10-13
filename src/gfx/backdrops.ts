@@ -518,6 +518,69 @@ function taodan(): HTMLCanvasElement {
   return p.done();
 }
 
+
+/**
+ * La Candelaria en Bogotá, de tarde nublada: Monserrate con su iglesia blanca arriba, las casas coloniales de colores
+ * con techo de teja y balcones de madera, banderitas de Colombia y la cancha de tejo de arena.
+ */
+function candelaria(): HTMLCanvasElement {
+  const p = new Painter(W, H, M);
+  const r = rng(91);
+  p.vgrad(0, 180, [C('#8aa4c0'), C('#a8bcd0'), C('#c8d4dc'), C('#dcdcd4')]);
+  // nubes de Bogotá
+  for (let i = 0; i < 14; i++) { const cx = X0 + r() * AW, cy = 20 + r() * 60; for (let k = 0; k < 7; k++) p.circle(cx + k * 9 - 27, cy + Math.sin(k) * 3, 8 + r() * 5, C('#eef0f2'), 200); }
+  // Monserrate: el cerro empinado, verde oscuro, con la iglesia blanca en la punta y el teleférico
+  const cerro = (x: number) => 190 - 150 * Math.exp(-Math.pow((x - 300) / 110, 2)) - 40 * Math.exp(-Math.pow((x - 520) / 160, 2));
+  for (let x = X0; x < X1; x++) { const top = Math.round(cerro(x)); for (let y = top; y < 200; y++) p.px(x, y, (x + y) % 7 === 0 ? C('#3e6a46') : y < top + 3 ? C('#5a8a5a') : C('#2e5a3a')); }
+  p.rect(292, 34, 16, 10, C('#f4f4ec')); p.rect(296, 26, 4, 8, C('#f4f4ec')); p.rect(302, 28, 4, 6, C('#f4f4ec')); p.px(298, 24, C('#c8a040')); p.px(304, 26, C('#c8a040'));
+  p.line(140, 160, 296, 46, C('#3a3a40'));
+  p.rect(214, 101, 5, 4, C('#d03a3a'));
+  // casas coloniales de colores con techo de teja y balcón de madera verde
+  let x = X0 - 6;
+  while (x < X1) {
+    const w = 54 + Math.floor(r() * 30), top = 150 + Math.floor(r() * 26);
+    const pared = [C('#f2d26a'), C('#7ab0e0'), C('#f4f0e2'), C('#e88a5a'), C('#9ad0a0'), C('#e8a0b8')][Math.floor(r() * 6)];
+    const sombra: RGB = [pared[0] * 0.75, pared[1] * 0.72, pared[2] * 0.7];
+    p.rect(x, top, w, 262 - top, pared);
+    p.rect(x + w - 3, top, 3, 262 - top, sombra);
+    p.rect(x, 252, w, 10, sombra);
+    for (let k = 0; k < 7; k++) p.rect(x - 4 + k, top - 7 + k, w + 8 - 2 * k, 1, k % 2 ? C('#a8442e') : C('#c0583a'));
+    for (let tx = x - 3; tx < x + w + 3; tx += 3) p.rect(tx, top - 7, 1, 7, C('#8a3424'));
+    // ventanas con reja y el balcón de madera
+    for (let wx = x + 7; wx < x + w - 14; wx += 18) {
+      p.rect(wx, top + 12, 10, 14, C('#3a4a5a'));
+      for (let k = 0; k < 10; k += 3) p.rect(wx + k, top + 12, 1, 14, C('#2a3a2a'));
+    }
+    if (r() < 0.6) { p.rect(x + 4, top + 28, w - 8, 3, C('#2e6a3a')); for (let bx2 = x + 5; bx2 < x + w - 5; bx2 += 3) p.rect(bx2, top + 31, 1, 6, C('#2e6a3a')); }
+    // puerta de madera grande
+    p.rect(x + Math.floor(w / 2) - 7, 232, 14, 22, C('#5a3420'));
+    p.rect(x + Math.floor(w / 2) - 1, 232, 1, 22, C('#3a2014'));
+    // matas en el balcón
+    if (r() < 0.5) for (let i = 0; i < 16; i++) p.px(x + 6 + r() * (w - 12), top + 26 + r() * 3, r() < 0.6 ? C('#e83a5a') : C('#2a7a3a'));
+    x += w + 1;
+  }
+  // el letrero de la cancha
+  p.rect(380, 196, 120, 18, C('#f4ecd8'));
+  p.rect(380, 196, 120, 2, C('#c0302a'));
+  p.rect(380, 212, 120, 2, C('#2a3aa0'));
+  // banderitas de Colombia cruzando la calle
+  for (const [y0, y1] of [[150, 158], [176, 170]] as [number, number][]) {
+    p.cable(X0, y0, X1, y1, 14, C('#4a4a4a'));
+    for (let fx = X0 + 6; fx < X1; fx += 12) {
+      const u = (fx - X0) / AW, fy = Math.round(y0 + (y1 - y0) * u + 14 * 4 * u * (1 - u)) + 1;
+      const col = [C('#f2d230'), C('#2a3aa0'), C('#d02a2a')][Math.floor((fx - X0) / 12) % 3];
+      for (let k = 0; k < 5; k++) p.rect(fx - 2 + Math.floor(k / 2), fy + k, 5 - k, 1, col);
+    }
+  }
+  // la cancha: piso de arena y el andén
+  p.rect(X0, 262, AW, 6, C('#9a9a94'));
+  p.vgrad(268, 344, [C('#c8a878'), C('#b89868'), C('#a88a5c')]);
+  for (let i = 0; i < 1400; i++) p.px(X0 + r() * AW, 268 + r() * 76, r() < 0.5 ? C('#a88a5a') : C('#d8bc8a'));
+  p.rect(X0, 344, AW, 16, C('#7a7a74'));
+  for (let xx = desde(0, 30); xx < X1; xx += 30) p.rect(xx, 344, 1, 16, C('#5a5a54'));
+  return p.done();
+}
+
 /** Registra todos los fondos como texturas. */
 export function makeBackdrops(scene: Phaser.Scene) {
   const add = (k: string, c: HTMLCanvasElement) => { if (!scene.textures.exists(k)) scene.textures.addCanvas(k, c); };
@@ -534,6 +597,7 @@ export function makeBackdrops(scene: Phaser.Scene) {
   add('bg_hoian_lejos', hoianLejos());
   add('bg_hoian', hoianCalle());
   add('bg_taodan', taodan());
+  add('bg_candelaria', candelaria());
   // banderas sueltas
   for (const k of ['jp', 'vn', 'co', 've'] as const) {
     const p = new Painter(38, 26);

@@ -135,10 +135,13 @@ export class Tamawari extends EventScene implements World {
   }
 
   /** La bola de la Familia: la del kit es roja; esta es la misma con el rojo y el azul cambiados. */
-  private bolaAzul() {
-    const k = 'bola_tama_azul';
+  private bolaAzul() { return this.azul('fx_bola_tama', 32); }
+
+  /** Una copia de una tira del kit con el rojo y el azul cambiados (lo de la Familia va en azul). */
+  private azul(key: string, celda: number) {
+    const k = `${key}_azul`;
     if (this.textures.exists(k)) return k;
-    const src = this.textures.get('fx_bola_tama').getSourceImage() as HTMLImageElement;
+    const src = this.textures.get(key).getSourceImage() as HTMLImageElement;
     const c = document.createElement('canvas');
     c.width = src.width; c.height = src.height;
     const ctx = c.getContext('2d')!;
@@ -147,7 +150,7 @@ export class Tamawari extends EventScene implements World {
     for (let i = 0; i < img.data.length; i += 4) { const r = img.data[i]; img.data[i] = img.data[i + 2]; img.data[i + 2] = r; }
     ctx.putImageData(img, 0, 0);
     const t = this.textures.addCanvas(k, c)!;
-    for (let i = 0; i < Math.floor(c.width / 32); i++) t.add(i, 0, i * 32, 0, 32, 32);
+    for (let fy = 0; fy < Math.floor(c.height / celda); fy++) for (let fx = 0; fx < Math.floor(c.width / celda); fx++) t.add(fy * Math.floor(c.width / celda) + fx, 0, fx * celda, fy * celda, celda, celda);
     return k;
   }
 
@@ -258,6 +261,14 @@ export class Tamawari extends EventScene implements World {
     p.rota = true;
     p.bola.setVisible(false);
     const bx = this.px(p.x, p.y), by = FT + p.y - p.alto + BOLA / 2;
+    // la bola del kit se abre en dos y cae el confeti (la de la Familia, en azul)
+    if (this.textures.exists('fx_bola_tama_explota')) {
+      const key = p.team === 0 ? this.azul('fx_bola_tama_explota', 64) : 'fx_bola_tama_explota';
+      const s = this.add.sprite(bx, FT + p.y - p.alto, key, 0).setOrigin(32.5 / 64, 0).setScale(BOLA / 32).setDepth(FT + p.y + 0.5);
+      const frames = this.anims.generateFrameNumbers(key, { start: 0, end: 9 });
+      if (!this.anims.exists(`${key}_abre`)) this.anims.create({ key: `${key}_abre`, frames, frameRate: 14, repeat: 0 });
+      s.play(`${key}_abre`);
+    }
     flash(this, 200);
     this.shake(400, 0.012);
     chip.boom(0.9);
