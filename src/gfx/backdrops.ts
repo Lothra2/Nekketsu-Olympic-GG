@@ -335,6 +335,129 @@ function llanos(): HTMLCanvasElement {
   return p.done();
 }
 
+
+/** Un farol de seda de Hội An encendido, con su brillo alrededor. */
+function farol(p: Painter, x: number, y: number, col: RGB, chico = false) {
+  const w = chico ? 4 : 6, h = chico ? 5 : 8;
+  for (let r = 6; r > 0; r--) p.circle(x, y + h / 2, w + r * 1.5, col, 10);
+  p.rect(x - 1, y - 3, 2, 3, C('#3a2418'));
+  for (let k = 0; k < h; k++) {
+    const ww = Math.round(w * (0.6 + 0.4 * Math.sin((k / (h - 1)) * Math.PI)));
+    p.rect(x - Math.floor(ww / 2), y + k, ww, 1, col);
+  }
+  p.rect(x - Math.floor(w / 4), y + 1, 1, h - 2, C('#fff2c8'), 150);
+  p.rect(x - 2, y + h, 4, 1, C('#3a2418'));
+  p.px(x, y + h + 1, C('#f2c230'));
+}
+
+const FAROLES = ['#e83a3a', '#f2a03a', '#f2d24a', '#e85aa0', '#4ac0a0', '#e8603a'].map(C);
+
+/** Hội An de noche, lo de atrás: el cielo, la luna, la otra orilla y el río Thu Bồn con el puente japonés. */
+function hoianLejos(): HTMLCanvasElement {
+  const p = new Painter(W, 200, M);
+  p.vgrad(0, 150, [C('#0a0e2c'), C('#161a44'), C('#2c2456'), C('#54305a')]);
+  stars(p, 110, 160, 61);
+  p.circle(500, 44, 13, C('#fff4d0'));
+  p.circle(496, 41, 3, C('#e8dcb0')); p.circle(506, 50, 2, C('#e8dcb0'));
+  for (let r = 1; r < 8; r++) p.circle(500, 44, 13 + r * 2, C('#fff4d0'), 8);
+  // la otra orilla: árboles oscuros y casitas con luz
+  const h = p.ridge(150, 112, 63, C('#141a30'), C('#1e2440'), (u) => 0.5 + 0.3 * Math.sin(u * 9) + 0.15 * Math.sin(u * 23));
+  void h;
+  buildings(p, { x0: X0, x1: X1, base: 152, minH: 8, maxH: 18, minW: 14, maxW: 26, cols: [C('#2a2440'), C('#30284a')], win: C('#ffcf7a'), winOff: C('#1c1830'), lit: 0.45, seed: 64 });
+  // el río: agua oscura con los reflejos de las luces
+  p.vgrad(152, 200, [C('#1a2048'), C('#121838'), C('#0c1230')]);
+  const r = rng(65);
+  for (let i = 0; i < 220; i++) { const x = X0 + r() * AW, y = 154 + r() * 44; p.rect(x, y, 1 + r() * 4, 1, r() < 0.5 ? C('#ffcf7a') : FAROLES[Math.floor(r() * FAROLES.length)], 90 + r() * 120); }
+  // el puente japonés (Chùa Cầu): arco de madera con su techito
+  const bx = 150, by = 150;
+  for (let x = -44; x <= 44; x++) { const yy = by - Math.round(10 * Math.cos((x / 44) * Math.PI / 2)); p.rect(bx + x, yy, 1, 5, C('#4a2a22')); }
+  p.rect(bx - 24, by - 26, 48, 12, C('#6a3a2a'));
+  for (let k = 0; k < 6; k++) p.rect(bx - 30 + k, by - 30 + k, 60 - 2 * k, 1, C('#3a2a30'));
+  for (const x of [-18, -6, 6, 18]) farol(p, bx + x, by - 14, C('#e83a3a'), true);
+  for (let x = -44; x <= 44; x += 8) p.rect(bx + x, by - 2, 1, 8, C('#3a2018'));
+  // botecitos con faroles en el río
+  for (const [x, y] of [[300, 176], [420, 186], [560, 170], [40, 188]] as [number, number][]) {
+    p.rect(x - 12, y, 24, 3, C('#3a2418'));
+    p.rect(x - 9, y + 3, 18, 2, C('#2a1810'));
+    farol(p, x, y - 10, FAROLES[(x / 20) % FAROLES.length | 0], true);
+  }
+  return p.done();
+}
+
+/** Hội An de noche, la calle: las casas amarillas con faroles, la calle de piedra, el muelle y las velitas en el río. */
+function hoianCalle(): HTMLCanvasElement {
+  const p = new Painter(W, 360, M);
+  const r = rng(71);
+  // casas amarillas de dos pisos con techo de teja y balcón de madera, con dos claros que dan al río y al puente
+  const claros: [number, number][] = [[84, 226], [372, 452]];
+  let x = X0 - 10;
+  while (x < X1) {
+    const claro = claros.find(([a, b2]) => x + 40 > a && x < b2);
+    if (claro) {
+      // la orilla: el murito del río con sus matas y un farol colgando de un palo
+      p.rect(claro[0], 230, claro[1] - claro[0], 16, C('#6a5a50'));
+      p.rect(claro[0], 230, claro[1] - claro[0], 2, C('#8a7a6a'));
+      for (let k = claro[0]; k < claro[1]; k += 9) p.rect(k, 232, 1, 14, C('#4a3e3a'));
+      for (let i = 0; i < 30; i++) p.circle(claro[0] + r() * (claro[1] - claro[0]), 226 + r() * 4, 2, r() < 0.5 ? C('#1e4a2a') : C('#2a5a32'));
+      const mx = (claro[0] + claro[1]) / 2 + 20;
+      p.rect(mx, 186, 2, 44, C('#3a2418'));
+      p.rect(mx - 10, 186, 22, 2, C('#3a2418'));
+      farol(p, mx - 8, 189, C('#e83a3a'));
+      farol(p, mx + 10, 189, C('#f2d24a'));
+      x = claro[1];
+      continue;
+    }
+    const w = Math.min(62 + Math.floor(r() * 26), (claros.find(([a]) => a > x)?.[0] ?? X1 + 60) - x - 2);
+    if (w < 30) { x += w + 2; continue; }
+    const top = 116 + Math.floor(r() * 18);
+    const pared = r() < 0.75 ? C('#d8a83a') : C('#c89a5a');
+    const sombra: RGB = [pared[0] * 0.7, pared[1] * 0.66, pared[2] * 0.6];
+    p.rect(x, top, w, 246 - top, pared);
+    p.rect(x + w - 4, top, 4, 246 - top, sombra);
+    // techo de tejas
+    for (let k = 0; k < 9; k++) p.rect(x - 6 + k, top - 9 + k, w + 12 - 2 * k, 1, k % 2 ? C('#4a2a26') : C('#5a3430'));
+    for (let tx = x - 4; tx < x + w + 4; tx += 4) p.rect(tx, top - 9, 1, 9, C('#3a2020'));
+    // segundo piso: ventanas con luz cálida y balcón
+    for (let wx = x + 8; wx < x + w - 14; wx += 18) {
+      const luz = r() < 0.7;
+      p.rect(wx, top + 10, 10, 14, luz ? C('#ffcf7a') : C('#3a2a30'));
+      p.rect(wx + 4, top + 10, 1, 14, C('#5a3a2a'));
+      p.rect(wx - 1, top + 9, 12, 1, C('#5a3a2a'));
+    }
+    p.rect(x + 2, top + 28, w - 6, 3, C('#5a3424'));
+    for (let bx2 = x + 3; bx2 < x + w - 4; bx2 += 3) p.rect(bx2, top + 31, 1, 6, C('#4a2a1e'));
+    // segundo techito sobre la planta baja
+    for (let k = 0; k < 5; k++) p.rect(x - 3 + k, top + 44 + k, w + 6 - 2 * k, 1, k % 2 ? C('#4a2a26') : C('#5a3430'));
+    // planta baja de madera, abierta y encendida (tiendas de faroles y de té)
+    p.rect(x + 3, top + 50, w - 7, 246 - top - 50, C('#4a2a1e'));
+    const abierta = r() < 0.8;
+    if (abierta) {
+      p.rect(x + 8, top + 56, w - 17, 246 - top - 60, C('#ffb860'));
+      p.rect(x + 8, top + 56, w - 17, 246 - top - 60, C('#e8803a'), 90);
+      for (let k = 0; k < 5; k++) farol(p, x + 14 + k * ((w - 28) / 4), top + 60 + (k % 2) * 6, FAROLES[Math.floor(r() * FAROLES.length)], true);
+      p.rect(x + 8, 236, w - 17, 4, C('#5a3424'));
+    } else for (let k = x + 8; k < x + w - 9; k += 4) p.rect(k, top + 56, 3, 246 - top - 60, C('#6a3a26'));
+    // buganvilla en la esquina
+    if (r() < 0.5) for (let i = 0; i < 40; i++) p.px(x + w - 6 + r() * 10, top + 2 + r() * 50, r() < 0.7 ? C('#e85aa0') : C('#2a6a3a'));
+    // faroles grandes en el alero
+    for (let fx = x + 10; fx < x + w - 6; fx += 22) farol(p, fx, top + 38, FAROLES[Math.floor(r() * FAROLES.length)]);
+    x += w + 2;
+  }
+  // la calle de piedra (la franja de la pelea) y la acera de atrás
+  floorBand(p, 246, 330, C('#5c5058'), C('#4a4048'), 34);
+  p.rect(X0, 246, AW, 14, C('#6a5e64'));
+  p.rect(X0, 259, AW, 1, C('#3e343c'));
+  // el resplandor de los faroles en la piedra
+  for (let i = 0; i < 900; i++) { const xx = X0 + r() * AW, yy = 260 + r() * 70; p.px(xx, yy, FAROLES[Math.floor(r() * FAROLES.length)], 50); }
+  // el muelle de madera adelante
+  for (let yy = 330; yy < 344; yy++) p.rect(X0, yy, AW, 1, yy % 4 === 0 ? C('#3a2418') : C('#5a3a26'));
+  for (let xx = desde(0, 40); xx < X1; xx += 40) for (let yy = 330; yy < 344; yy++) p.px(xx + (yy - 330) * 0.35, yy, C('#2a1810'));
+  // el río adelante con las velitas de papel flotando
+  p.vgrad(344, 360, [C('#141a40'), C('#0c1030')]);
+  for (let i = 0; i < 26; i++) { const xx = X0 + r() * AW, yy = 347 + r() * 10; p.rect(xx - 2, yy, 5, 2, C('#e8dcc0')); p.px(xx, yy - 1, C('#ffcf5a')); p.circle(xx, yy - 1, 3, C('#ffcf5a'), 40); }
+  return p.done();
+}
+
 /** Registra todos los fondos como texturas. */
 export function makeBackdrops(scene: Phaser.Scene) {
   const add = (k: string, c: HTMLCanvasElement) => { if (!scene.textures.exists(k)) scene.textures.addCanvas(k, c); };
@@ -348,6 +471,8 @@ export function makeBackdrops(scene: Phaser.Scene) {
   add('bg_cocora', cocora());
   add('bg_halong', halong());
   add('bg_llanos', llanos());
+  add('bg_hoian_lejos', hoianLejos());
+  add('bg_hoian', hoianCalle());
   // banderas sueltas
   for (const k of ['jp', 'vn', 'co', 've'] as const) {
     const p = new Painter(38, 26);

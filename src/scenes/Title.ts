@@ -22,6 +22,7 @@ const MENUS: Record<string, { id: string; label: string }[]> = {
     { id: 'Vallas', label: 'VALLAS DEL CAFÉ' },
     { id: 'Natacion', label: 'NATACIÓN HẠ LONG' },
     { id: 'Jabalina', label: 'JABALINA LLANERA' },
+    { id: 'Tamawari', label: 'TAMA-WARI HỘI AN' },
     { id: '<', label: 'ATRÁS' },
   ],
   // el Cross completo son cinco tramos; para una partida corta se puede correr uno solo
@@ -40,6 +41,7 @@ const MENUS: Record<string, { id: string; label: string }[]> = {
     { id: 'practica:Vallas', label: 'VALLAS' },
     { id: 'practica:Natacion', label: 'NATACIÓN' },
     { id: 'practica:Jabalina', label: 'JABALINA' },
+    { id: 'practica:Tamawari', label: 'TAMA-WARI' },
     { id: 'practica:Fight', label: 'PELEA' },
     { id: '<', label: 'ATRÁS' },
   ],
