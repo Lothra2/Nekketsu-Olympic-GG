@@ -5,6 +5,7 @@ import { ajustes, nivel, setNivel, ORDEN } from '../core/nivel';
 import { chip, MARCHA } from '../core/music';
 import { txt } from '../core/ui';
 import { buildLogo, fireworks } from './logo';
+import { prueba } from '../events/base';
 
 /** Menú en dos niveles para que quepa entre los dos equipos sin tapar a nadie. */
 const MENUS: Record<string, { id: string; label: string }[]> = {
@@ -76,6 +77,12 @@ export class Title extends Phaser.Scene {
   private sel = 0;
   private items: Phaser.GameObjects.BitmapText[] = [];
   private cursor!: Phaser.GameObjects.BitmapText;
+  /** en la grilla de dos columnas: dónde va cada opción, el recuadro que marca la elegida y el lugar de la prueba */
+  private celdas: { x: number; y: number; w: number }[] = [];
+  private marco?: Phaser.GameObjects.Graphics;
+  private lugar?: Phaser.GameObjects.BitmapText;
+  private logo!: Phaser.GameObjects.Container;
+  private get grilla() { return this.opciones.length > 8; }
   private figs: Figura[] = [];
   private started = false;
   private press!: Phaser.GameObjects.BitmapText;
@@ -96,6 +103,7 @@ export class Title extends Phaser.Scene {
     this.add.image(320, 180, 'bg_caracas');
     this.add.image(320, 280, 'bg_azotea');
     const logo = this.add.container(0, 0);
+    this.logo = logo;
     void buildLogo(this, logo, false, -46);
     fireworks(this).setDepth(-1);
 
@@ -130,23 +138,84 @@ export class Title extends Phaser.Scene {
 
   private buildMenu() {
     this.menu.removeAll(true);
+    this.marco = undefined;
+    this.lugar = undefined;
+    // las listas largas (las pruebas, el entrenamiento) van en dos columnas, con la bandera de cada una; el logo y los
+    // equipos se apagan un poco para que la grilla se lea bien
+    const grilla = this.grilla;
+    this.logo.setAlpha(grilla ? 0.15 : 1);
+    for (const f of this.figs) f.setAlpha(grilla ? 0.35 : 1);
+    if (grilla) this.buildGrilla();
+    else this.buildLista();
+    this.refresh();
+  }
+
+  /** La lista de siempre, para los menús cortos. */
+  private buildLista() {
     const g = this.add.graphics();
     const n = this.opciones.length;
-    // el cuadro crece hacia arriba, sin tapar la línea de teclas de abajo; las listas largas van más juntas
-    const lh = n >= 11 ? 15 : n >= 8 ? 18 : 21;
+    const lh = 21;
     const top = 338 - (n * lh + 10);
     g.fillStyle(0x08081a, 0.78).fillRect(206, top, 228, n * lh + 10);
     g.lineStyle(1, 0xf2c230, 0.8).strokeRect(206.5, top + 0.5, 227, n * lh + 9);
     this.menu.add(g);
+    this.celdas = [];
     this.items = this.opciones.map((o, i) => {
       const t = txt(this, 320, top + 5 + lh / 2 + i * lh, o.id === 'nivel' ? `NIVEL: ${ajustes().nombre}` : o.label, 'fuente_ui', 2);
       t.setInteractive().on('pointerdown', () => { if (this.started) { this.sel = i; this.choose(); } });
       this.menu.add(t);
+      this.celdas.push({ x: 320, y: t.y, w: 220 });
       return t;
     });
     this.cursor = txt(this, 0, 0, '»', 'fuente_ui', 2).setTint(0xf2c230);
     this.menu.add(this.cursor);
-    this.refresh();
+  }
+
+  /** Dos columnas con banderas, ATRÁS abajo al medio, y el lugar de la prueba elegida en el pie. */
+  private buildGrilla() {
+    const ops = this.opciones;
+    const juegos = ops.filter((o) => o.id !== '<');
+    const filas = Math.ceil(juegos.length / 2);
+    const lh = 24, colW = 252, x0 = 320 - colW - 6, top = 52;
+    const alto = filas * lh + 70;
+    const g = this.add.graphics();
+    g.fillStyle(0x08081a, 0.93).fillRoundedRect(x0 - 10, top - 10, colW * 2 + 32, alto, 6);
+    g.lineStyle(2, 0xf2c230, 0.9).strokeRoundedRect(x0 - 10, top - 10, colW * 2 + 32, alto, 6);
+    // la raya del medio y la del pie
+    g.lineStyle(1, 0xf2c230, 0.25).lineBetween(320, top - 2, 320, top + filas * lh - 4).lineBetween(x0, top + filas * lh + 4, x0 + colW * 2 + 12, top + filas * lh + 4);
+    this.menu.add(g);
+    this.marco = this.add.graphics();
+    this.menu.add(this.marco);
+    this.celdas = [];
+    this.items = ops.map((o, i) => {
+      let x: number, y: number, w: number;
+      if (o.id === '<') { x = 320; y = top + filas * lh + 34; w = 120; }
+      else {
+        const k = juegos.indexOf(o), col = k < filas ? 0 : 1, fila = k % filas;
+        x = x0 + col * (colW + 12) + colW / 2; y = top + fila * lh + lh / 2; w = colW;
+      }
+      this.celdas.push({ x, y, w });
+      // la bandera a la izquierda y el nombre al lado
+      const p = this.pruebaDe(o.id);
+      const conBandera = !!p && this.textures.exists(p.bandera);
+      if (conBandera) this.menu.add(this.add.image(x - w / 2 + 16, y, p!.bandera).setScale(0.6));
+      const t = txt(this, conBandera ? x - w / 2 + 32 : x, y, o.label, 'fuente_ui', 2, conBandera ? 0 : 0.5);
+      // todo el renglón se puede tocar, no solo las letras
+      const zona = this.add.zone(x, y, w, lh).setInteractive().on('pointerdown', () => { if (this.started) { this.sel = i; this.refresh(); this.choose(); } });
+      this.menu.add([t, zona]);
+      return t;
+    });
+    this.lugar = txt(this, 320, top + filas * lh + 14, '', 'fuente_ui', 1).setTint(0xffe080);
+    this.menu.add(this.lugar);
+    this.cursor = txt(this, -100, -100, '', 'fuente_ui', 1);
+    this.menu.add(this.cursor);
+  }
+
+  /** La prueba que abre una opción del menú (para su bandera y su lugar). */
+  private pruebaDe(id: string) {
+    const limpio = id.replace(/^practica:/, '').replace(/^>/, '').replace(/@\d+$/, '');
+    const scene = limpio === 'cross' ? 'CrossCountry' : limpio === 'judo' ? 'Judo' : limpio;
+    try { return prueba(scene) ?? null; } catch { return null; }
   }
 
   private openMenu() {
@@ -157,9 +226,41 @@ export class Title extends Phaser.Scene {
   }
 
   private refresh() {
-    this.items.forEach((t, i) => t.setTint(i === this.sel ? 0xffffff : 0x7a7a9a));
+    this.items.forEach((t, i) => t.setTint(i === this.sel ? 0xffffff : 0x8a8ab0));
     const t = this.items[this.sel];
+    if (this.marco) {
+      // el recuadro dorado alrededor de la elegida, y abajo su lugar
+      const c = this.celdas[this.sel];
+      this.marco.clear().fillStyle(0xf2c230, 0.16).fillRoundedRect(c.x - c.w / 2, c.y - 11, c.w, 22, 4).lineStyle(1, 0xf2c230, 0.9).strokeRoundedRect(c.x - c.w / 2, c.y - 11, c.w, 22, 4);
+      const p = this.pruebaDe(this.opciones[this.sel].id);
+      this.lugar?.setText(this.opciones[this.sel].id === '<' ? 'VOLVER AL MENÚ' : p ? p.lugar : '');
+      return;
+    }
     this.cursor.setPosition(t.x - t.width / 2 - 14, t.y);
+  }
+
+  /** En la grilla: la opción más cerca en esa dirección (arriba, abajo, izquierda o derecha). */
+  private mover(dx: number, dy: number) {
+    const a = this.celdas[this.sel];
+    let mejor = -1, dist = Infinity;
+    this.celdas.forEach((c, i) => {
+      if (i === this.sel) return;
+      const vx = c.x - a.x, vy = c.y - a.y;
+      // solo lo que queda hacia ese lado; pesa más irse de la línea que la distancia
+      if (dx && Math.sign(vx) !== dx) return;
+      if (dy && Math.sign(vy) !== dy) return;
+      if (dx && Math.abs(vx) < 4) return;
+      if (dy && Math.abs(vy) < 4) return;
+      const d = dx ? Math.abs(vx) + Math.abs(vy) * 3 : Math.abs(vy) + Math.abs(vx) * 0.5;
+      if (d < dist) { dist = d; mejor = i; }
+    });
+    // por arriba o por abajo da la vuelta a la columna
+    if (mejor < 0 && dy) {
+      const misma = this.celdas.map((c, i) => ({ c, i })).filter(({ c }) => Math.abs(c.x - a.x) < 4);
+      const ext = dy > 0 ? misma.sort((p, q) => p.c.y - q.c.y)[0] : misma.sort((p, q) => q.c.y - p.c.y)[0];
+      mejor = ext && ext.i !== this.sel ? ext.i : -1;
+    }
+    if (mejor >= 0) this.sel = mejor;
   }
 
   private choose() {
@@ -190,13 +291,15 @@ export class Title extends Phaser.Scene {
       if (p.pressed.start || p.pressed.punch || p.pressed.kick || p.pressed.jump) this.openMenu();
       return;
     }
-    if (p.y !== 0 && this.time.now > (this.data.get('next') ?? 0)) {
-      this.sel = (this.sel + p.y + this.opciones.length) % this.opciones.length;
+    const dx = Math.round(p.x), dy = Math.round(p.y);
+    if ((dy !== 0 || (dx !== 0 && this.grilla)) && this.time.now > (this.data.get('next') ?? 0)) {
+      if (this.grilla) this.mover(dy ? 0 : dx, dy);
+      else this.sel = (this.sel + dy + this.opciones.length) % this.opciones.length;
       this.data.set('next', this.time.now + 180);
       chip.blip(660, 0.04, 'sq25', 0.15);
       this.refresh();
     }
-    if (p.y === 0) this.data.set('next', 0);
+    if (dy === 0 && dx === 0) this.data.set('next', 0);
     if (p.pressed.start || p.pressed.punch || p.pressed.kick || p.pressed.jump) this.choose();
     if (p.pressed.back && this.nivel !== 'raiz') this.atras();
   }
