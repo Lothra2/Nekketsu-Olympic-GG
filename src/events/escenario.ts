@@ -44,16 +44,15 @@ export interface EscenarioJson {
 
 const k = (id: string, n: string) => `esc_${id}_${n}`;
 
-/** Lo pone en la cola de carga si existe. Llamar en el preload de la escena. */
+/**
+ * Lo pone en la cola de carga si existe. Llamar en el preload de la escena. Si el índice lo marca `junto` (la copia
+ * del artifact, que tiene un tope de archivos), los cuatro JSON del escenario vienen en uno solo: `junto.json`.
+ */
 export function queueEscenario(scene: Phaser.Scene, id: string) {
-  const index = scene.cache.json.get('escenarios') as Record<string, unknown> | undefined;
+  const index = scene.cache.json.get('escenarios') as Record<string, { junto?: boolean }> | undefined;
   if (!index?.[id] || scene.textures.exists(k(id, 'objetos'))) return;
   const dir = `${BASE}${id}/`;
-  scene.load.json(k(id, 'escenario'), dir + 'escenario.json');
-  scene.load.json(k(id, 'objetos_json'), dir + 'objetos.json');
-  scene.load.json(k(id, 'luces'), dir + 'luces.json');
-  scene.load.json(k(id, 'particulas'), dir + 'particulas.json');
-  scene.load.once(`filecomplete-json-${k(id, 'escenario')}`, (_key: string, _t: string, e: EscenarioJson) => {
+  const imagenes = (e: EscenarioJson) => {
     for (const [n, c] of Object.entries(e.capas)) {
       // solo las imágenes: la capa de objetos apunta a su json
       if (c.archivo?.endsWith('.png')) scene.load.image(k(id, n), dir + c.archivo);
@@ -65,7 +64,23 @@ export function queueEscenario(scene: Phaser.Scene, id: string) {
       scene.load.image(k(id, 'vacio'), dir + e.borde.vacio.archivo);
     }
     scene.load.image(k(id, 'vida'), dir + e.vida.imagen);
-  });
+  };
+  if (index[id].junto) {
+    scene.load.json(k(id, 'junto'), dir + 'junto.json');
+    scene.load.once(`filecomplete-json-${k(id, 'junto')}`, (_key: string, _t: string, j: { escenario: EscenarioJson; objetos: unknown; luces: unknown; particulas: unknown }) => {
+      scene.cache.json.add(k(id, 'escenario'), j.escenario);
+      scene.cache.json.add(k(id, 'objetos_json'), j.objetos);
+      scene.cache.json.add(k(id, 'luces'), j.luces);
+      scene.cache.json.add(k(id, 'particulas'), j.particulas);
+      imagenes(j.escenario);
+    });
+    return;
+  }
+  scene.load.json(k(id, 'escenario'), dir + 'escenario.json');
+  scene.load.json(k(id, 'objetos_json'), dir + 'objetos.json');
+  scene.load.json(k(id, 'luces'), dir + 'luces.json');
+  scene.load.json(k(id, 'particulas'), dir + 'particulas.json');
+  scene.load.once(`filecomplete-json-${k(id, 'escenario')}`, (_key: string, _t: string, e: EscenarioJson) => imagenes(e));
 }
 
 export const hayArte = (scene: Phaser.Scene, id: string) => scene.textures.exists(k(id, 'objetos')) && scene.cache.json.exists(k(id, 'escenario'));

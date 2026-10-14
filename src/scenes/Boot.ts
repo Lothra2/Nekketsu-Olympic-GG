@@ -16,6 +16,10 @@ export class Boot extends Phaser.Scene {
 
   create() {
     setKit(this.cache.json.get('manifest') as Manifest);
+    // un sonido que el navegador no pudo cargar (un formato que no sabe tocar) no suena, en vez de lanzar un error
+    // que trancaría la escena: el sonido es de todo el juego, así que basta con cuidarlo aquí una vez
+    const sonidos = this.sound, tocar = sonidos.play.bind(sonidos), cache = this.cache.audio;
+    sonidos.play = ((key: string, extra?: Phaser.Types.Sound.SoundConfig | Phaser.Types.Sound.SoundMarker) => (cache.exists(key) ? tocar(key, extra) : false)) as typeof sonidos.play;
     const bar = this.add.graphics();
     const label = this.add.text(320, 200, 'CALENTANDO LOS MÚSCULOS...', { fontFamily: 'monospace', fontSize: '12px', color: '#f2c230' }).setOrigin(0.5);
     this.load.on('progress', (v: number) => {
