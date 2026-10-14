@@ -204,6 +204,8 @@ export class Jabalina extends EventScene {
       const d = this.cur.fig.anim.data.desplazamiento ?? [];
       const now = this.cur.fig.anim.frame;
       if (now > before) this.x += (d[now] ?? 0) - (d[before] ?? 0);
+      // la lanza del Catatumbo (lote B7H8): en los cuadros 2 y 3 la sostiene arriba y le cae el relámpago
+      if (this.cur.fig.anim.name === 'javelin_rayo' && before < 2 && now >= 2) this.relampago();
       // planta y frena: solo el paso de la animación lo mueve
       this.v = Math.max(0, this.v - 900 * dt);
       this.x += this.v * dt * 0.15;
@@ -251,9 +253,20 @@ export class Jabalina extends EventScene {
       if (this.cur.c.human) void this.banner('¡LANZA DEL CATATUMBO!', 'fuente_titulo', 2, 600);
       this.sound.play('esquiva', { volume: 0.4, rate: 0.7 });
     }
-    this.cur.fig.anim.pos = 4;
+    if (this.catatumbo && this.cur.fig.anim.has('javelin_rayo')) this.cur.fig.set('javelin_rayo', true);
+    else this.cur.fig.anim.pos = 4;
     this.cur.fig.anim.speed = 1;
     if (this.cur.c.human) chip.blip(440, 0.1, 'sq25', 0.18, 880);
+  }
+
+  /** El relámpago del Catatumbo que le cae a la jabalina en alto, antes de soltarla. */
+  private relampago() {
+    const f = this.cur.fig;
+    // el rayo del kit sale de la mano hacia un lado: parado, baja del cielo a la punta de la jabalina en alto
+    efecto(this, 'rayo_catatumbo', this.x + (f.left ? -6 : 6), TOP + RUN_Y - 40, { depth: 6000, dura: 450 })?.setAngle(-90);
+    flash(this, 140, 0xc8e0ff);
+    this.cameras.main.shake(160, 0.006);
+    this.sound.play('critico', { volume: 0.35, rate: 0.7 });
   }
 
   private suelta([px, py]: [number, number]) {
@@ -266,9 +279,11 @@ export class Jabalina extends EventScene {
     const sombra = this.add.ellipse(x, TOP + RUN_Y, 22, 2, 0x000000, 0.3).setDepth(TOP + RUN_Y - 1);
     this.vuelo = { x, z, vx: Math.cos(a) * fuerza, vz: Math.sin(a) * fuerza, img, sombra };
     if (this.catatumbo) {
-      // el rayo del Catatumbo cae sobre la lanza y la lanza va en llamas
-      efecto(this, 'rayo_catatumbo', x + 30, TOP - 40, { depth: 6000 });
-      flash(this, 120);
+      // el rayo del Catatumbo cae sobre la lanza (si no le cayó ya en la mano) y la lanza va en llamas
+      if (this.cur.fig.anim.name !== 'javelin_rayo') {
+        efecto(this, 'rayo_catatumbo', x + 30, TOP - 40, { depth: 6000 });
+        flash(this, 120);
+      }
       this.cameras.main.shake(200, 0.008);
       const fuego = this.add.particles(0, 0, 'px', { lifespan: 300, scale: { start: 1.4, end: 0 }, alpha: { start: 0.9, end: 0 }, tint: [0xffe040, 0x8ae0ff, 0xffffff], frequency: 12 }).setDepth(TOP + RUN_Y);
       fuego.startFollow(img);

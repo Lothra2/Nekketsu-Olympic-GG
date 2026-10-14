@@ -67,6 +67,11 @@ export class Voley extends EventScene {
   /** entrenamiento */
   private pasadas = 0;
   private remates = 0;
+  /**
+   * El remate de fuego del kit (lote B7H8) que está dando la vuelta en el aire: la pelota se queda colgada sobre él
+   * hasta el impacto de `spike_fuego`, y ahí sale disparada.
+   */
+  private fuegoPend: { p: Voleador; team: 0 | 1; t: number } | null = null;
   private llego = false;
   private bloqueos = 0;
 
@@ -194,6 +199,7 @@ export class Voley extends EventScene {
     const c = this.bola;
     const del = this.pat.filter((p) => p.c.team === team);
     const quien = del.find((p) => p.c.human) ?? del.find((p) => p.fila === 0) ?? del[0];
+    this.fuegoPend = null;
     for (const p of this.pat) { p.x = p.casa; p.z = 0; p.vz = 0; p.st = 'piso'; p.fig.set('idle'); }
     // el que saca, al fondo de su lado
     quien.x = team === 0 ? 122 : 518;
@@ -230,7 +236,7 @@ export class Voley extends EventScene {
   }
 
   private tocar(p: Voleador, quiere: 'patada' | 'pase' | 'fuego', forzarMalo = false) {
-    if (p.golpeT > 0) return;
+    if (p.golpeT > 0 || this.fuegoPend) return;
     const c = this.bola;
     const team = p.c.team, dir = team === 0 ? 1 : -1;
     // el saque
@@ -267,7 +273,16 @@ export class Voley extends EventScene {
       tiro = 'fuego';
       this.nek[team] = 0;
       c.z = Math.max(c.z, RED_H + 24);
-      this.lanzar(this.hueco(team), 0, 0.42);
+      if (p.fig.anim.has('spike_fuego')) {
+        // salta, da la vuelta entera sobre la pelota, que lo espera colgada en el aire, y la mata en el impacto
+        this.fuegoPend = { p, team, t: 0 };
+        c.vx = 0; c.vz = 0;
+        p.fig.anim.play('spike_fuego', true);
+        p.fig.anim.pos = Math.max(0, p.fig.cuadroDe('despegue'));
+        p.fig.refresh();
+        p.golpeT = 1.2;
+        if (p.st === 'piso') { p.st = 'aire'; p.vz = 330; } else p.vz = Math.max(p.vz, 200);
+      } else this.lanzar(this.hueco(team), 0, 0.42);
       this.letrero(p, '¡REMATE DE FUEGO!', 0xff8020);
       efecto(this, 'aura_nekketsu', p.x, PISO + FILA[p.fila], { depth: PISO + FILA[p.fila] - 0.1 });
       if (team === 0) void this.banner('¡NEKKETSU!', 'fuente_titulo', 2, 500, 110);
@@ -311,6 +326,21 @@ export class Voley extends EventScene {
     if (tiro !== 'fuego' && !malo) this.carga(team, tiro === 'remate' ? 14 : perfecto ? 10 : 6);
     this.sfx('golpe', p.c.human ? 0.35 : 0.2);
     efecto(this, 'chispa_golpe_liviano', c.x, PISO + FILA[p.fila] - c.z, { depth: 5001 });
+  }
+
+  /** El impacto del remate de fuego: la pelota sale disparada al hueco, sin bloqueo posible. */
+  private soltarFuego() {
+    const f = this.fuegoPend;
+    if (!f) return;
+    this.fuegoPend = null;
+    const c = this.bola;
+    c.x = Phaser.Math.Clamp(f.p.x + (f.team === 0 ? 6 : -6), BORDE[0], BORDE[1]);
+    c.z = Math.max(c.z, RED_H + 24);
+    this.lanzar(this.hueco(f.team), 0, 0.42);
+    f.p.golpeT = 0.3;
+    this.sfx('golpe', 0.6);
+    efecto(this, 'chispa_golpe_pesado', c.x, PISO + FILA[f.p.fila] - c.z, { depth: 5001 });
+    this.shake(200, 0.012);
   }
 
   /** Llena la barra de un lado; cuando se llena la tuya, avisa. */
@@ -412,10 +442,16 @@ export class Voley extends EventScene {
         const libre = ['idle', 'vb_ready', 'walk', 'run'].includes(q.fig.anim.name) || q.fig.anim.done || mx !== 0;
         if (libre && q.fig.anim.name !== quiere) q.fig.set(quiere);
       }
-      q.fig.step(dt, Math.abs(mx) * vel * dt);
+      const ev = q.fig.step(dt, Math.abs(mx) * vel * dt);
+      if (this.fuegoPend?.p === q && ev.some((e) => e.tipo === 'impacto')) this.soltarFuego();
     }
     // la pelota
-    if (c.en === 'mano' && c.dueño) {
+    if (this.fuegoPend) {
+      // colgada en el aire mientras el que remata da la vuelta (si algo lo corta, sale igual al rato)
+      this.fuegoPend.t += dt;
+      c.z += Math.sin(this.fuegoPend.t * 20) * 0.3;
+      if (this.fuegoPend.t > 1.1 || this.fuegoPend.p.fig.anim.name !== 'spike_fuego') this.soltarFuego();
+    } else if (c.en === 'mano' && c.dueño) {
       const d = c.dueño;
       c.x = d.x + (d.c.team === 0 ? 9 : -9);
       c.z = 20 + Math.sin(this.time.now / 160) * 2;

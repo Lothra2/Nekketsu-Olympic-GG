@@ -408,7 +408,8 @@ export class Quemado extends EventScene {
     if (this.bola.dueño !== j) return;
     j.st = 'lanza';
     j.pend = tipo;
-    j.fig.set('weapon_throw', true, tipo === 'especial' ? 0.7 : 1);
+    // el tiro del quemado (lote B7H8): rodilla arriba, el balón atrás y por arriba; si no, el de la pelea
+    j.fig.set(j.fig.anim.has('dodge_throw') ? 'dodge_throw' : 'weapon_throw', true, tipo === 'especial' ? 0.7 : 1);
     if (tipo === 'especial') {
       this.nek[j.team] = 0;
       // la máquina avisa a quién se lo va a lanzar, para que alcances a atrapar o saltar
@@ -429,7 +430,7 @@ export class Quemado extends EventScene {
     j.pend = 'pase';
     j.ia.plan = null;
     this.bola.objetivo = para;
-    j.fig.set('weapon_throw', true, 0.9);
+    j.fig.set(j.fig.anim.has('dodge_throw') ? 'dodge_throw' : 'weapon_throw', true, 0.9);
   }
 
   /** A quién le apunta: al rival de adentro más alineado contigo. */
@@ -585,7 +586,9 @@ export class Quemado extends EventScene {
   private golpe(o: Jug) {
     const b = this.bola, L = b.lanzador!;
     o.st = 'golpe';
-    o.fig.set('knockout', true, 1.4);
+    // el balonazo (lote B7H8): sale disparado de espaldas y cae sentado, empujado hacia atrás mientras vuela
+    if (o.fig.anim.has('dodge_hit')) o.fig.set('dodge_hit', true, 0.8);
+    else o.fig.set('knockout', true, 1.4);
     o.empuje = Math.sign(b.vx || 1) * 80;
     o.dir = b.vx > 0 ? -1 : 1;
     efecto(this, b.especial ? 'chispa_golpe_pesado' : 'chispa_golpe_medio', this.sx(o.x, o.y), FT + o.y - o.z - 18, { depth: 6000 });
@@ -664,8 +667,9 @@ export class Quemado extends EventScene {
       b.x = o.x; b.y = o.y; b.z = o.z;
       s.setFrame('balon_goma_quieto_0').setOrigin(0.5, 0.5).setPosition(Math.round(this.sx(o.x, o.y) + hx), Math.round(FT + o.y - o.z + hy)).setDepth(FT + o.y + 0.3);
       // recién atrapado, contra el pecho donde lo pone la atrapada del kit
-      const pe = a.name === 'catch' ? o.fig.pelota() : null;
-      if (pe) s.setPosition(Math.round(pe.x), Math.round(pe.y));
+      // y en el tiro del kit, donde lo lleva la mano (detrás de la cabeza en el impulso)
+      const pe = a.name === 'catch' || a.name === 'dodge_throw' ? o.fig.pelota() : null;
+      if (pe) s.setPosition(Math.round(pe.x), Math.round(pe.y)).setDepth(FT + o.y + (pe.detras ? -0.3 : 0.3));
       b.sombra.setVisible(false);
     } else {
       const vuela = b.z > 1;

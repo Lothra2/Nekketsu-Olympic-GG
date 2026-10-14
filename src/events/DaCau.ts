@@ -72,6 +72,8 @@ export class DaCau extends EventScene {
   /** entrenamiento */
   private pasadas = 0;
   private chilenas = 0;
+  /** el tiempo desde el último toque del dominio antes del saque */
+  private dominioT = 0;
   private llego = false;
 
   constructor() { super('DaCau'); }
@@ -126,6 +128,7 @@ export class DaCau extends EventScene {
     this.uiAdd(txt(this, 390, 16, lado(1).corto, 'fuente_ui', 1, 0).setDepth(8001).setTint(0xffa0a0));
     this.toqueTxt = this.uiAdd(txt(this, 320, 34, '', 'fuente_ui', 1).setDepth(8001).setTint(0xffe080));
     this.tema('saigon_chay');
+    this.ambiente('parque_tao_dan');
     if (this.d.practica) void this.entrenar('ĐÁ CẦU', this.pasos());
     else void this.previa('ĐÁ CẦU', 'PARQUE TAO ĐÀN, SAIGÓN', '{MOVER} AL CÍRCULO · {PATADA} AL OTRO LADO · {PUÑO} A TU COMPAÑERO · {SALTO} Y {PATADA}: CHILENA · {ESPECIAL}: CHILENA NEKKETSU');
   }
@@ -253,7 +256,9 @@ export class DaCau extends EventScene {
     if (c.en === 'mano' && c.dueño === p) {
       c.x = p.x + dir * 8; c.z = 22;
       this.lanzar(team === 0 ? Phaser.Math.Between(400, 560) : this.d.practica ? Phaser.Math.Clamp(this.pat[0].x + Phaser.Math.Between(-50, 50), 70, 280) : Phaser.Math.Between(80, 240), 96);
-      this.golpeAnim(p, 'volley', 'low_kick');
+      // el saque es el dominio del kit (lote B7H8) que lo manda por arriba; sin él, la volea
+      if (p.fig.anim.has('shuttle_juggle')) this.golpeAnim(p, 'shuttle_juggle', 'volley');
+      else this.golpeAnim(p, 'volley', 'low_kick');
       c.ultimo = p; c.ultimoTiro = 'saque'; c.lado = team; c.toques = 1;
       this.sfx('esquiva', 0.3);
       return;
@@ -262,7 +267,10 @@ export class DaCau extends EventScene {
     if (quiere === 'fuego' && !this.alcanceFuego(p)) quiere = 'patada';
     const alto = quiere === 'fuego' ? Math.max(0, c.z - p.z) : this.alcance(p);
     // las del pack de fútbol del kit (sin la pelota pintada: el cầu lo pone el juego), o las patadas de la pelea
-    if (p.st === 'aire' || quiere === 'fuego') this.golpeAnim(p, 'chilena', 'air_kick');
+    // la chilena de lado del kit (lote B7H8): la Nekketsu, desde más alto y con la vuelta atrás
+    const chilena = (n: string) => (p.fig.anim.has(n) ? n : 'chilena');
+    if (quiere === 'fuego') this.golpeAnim(p, chilena('shuttle_kick_back_nekketsu'), 'air_kick');
+    else if (p.st === 'aire') this.golpeAnim(p, chilena('shuttle_kick_back'), 'air_kick');
     else if (quiere === 'pase') this.golpeAnim(p, 'trap', 'low_kick');
     else this.golpeAnim(p, 'volley', 'kick_martial');
     // le pegó al aire: recupera rápido y se puede seguir moviendo
@@ -436,18 +444,33 @@ export class DaCau extends EventScene {
         else if (q.golpeT <= 0 && q.vz < 0 && q.fig.anim.name !== 'jump_fall') q.fig.set('jump_fall');
       }
       // la animación: caminar, correr o quieto, cuando no está pegando ni celebrando (moverse corta la celebración)
+      // el que va a sacar domina el cầu con un pie y el otro (lote B7H8), hasta que lo manda
+      const domina = c.en === 'mano' && c.dueño === q && q.fig.anim.has('shuttle_juggle');
       if (q.st === 'piso' && q.golpeT <= 0) {
-        const quiere = mx ? (corre ? 'run' : 'walk') : 'idle';
-        const libre = ['idle', 'walk', 'run'].includes(q.fig.anim.name) || q.fig.anim.done || mx !== 0;
+        const quiere = domina ? 'shuttle_juggle' : mx ? (corre ? 'run' : 'walk') : 'idle';
+        const libre = ['idle', 'walk', 'run', 'shuttle_juggle'].includes(q.fig.anim.name) || q.fig.anim.done || mx !== 0;
         if (libre && q.fig.anim.name !== quiere) q.fig.set(quiere);
       }
-      q.fig.step(dt, Math.abs(mx) * vel * dt);
+      const ev = q.fig.step(dt, Math.abs(mx) * vel * dt);
+      // cada toque del dominio suena, y el cầu sube otra vez desde ese pie
+      if (domina && q.fig.anim.name === 'shuttle_juggle' && ev.some((e) => e.tipo === 'impacto')) {
+        this.dominioT = 0;
+        this.suena('toque_cau', q.c.human ? 0.25 : 0.12, () => this.sfx('golpe', 0.1));
+      }
     }
     // el volante
     if (c.en === 'mano' && c.dueño) {
       const d = c.dueño;
-      c.x = d.x + (d.c.team === 0 ? 9 : -9);
-      c.z = 20 + Math.sin(this.time.now / 160) * 2;
+      if (d.fig.anim.name === 'shuttle_juggle') {
+        // el dominio: sube y baja entre toque y toque, sobre el pie que le pega
+        this.dominioT += dt;
+        const u = Phaser.Math.Clamp(this.dominioT / 0.33, 0, 1);
+        c.x = d.x + (d.c.team === 0 ? 6 : -6);
+        c.z = 12 + 30 * 4 * u * (1 - u);
+      } else {
+        c.x = d.x + (d.c.team === 0 ? 9 : -9);
+        c.z = 20 + Math.sin(this.time.now / 160) * 2;
+      }
     } else if (c.en === 'aire') {
       const x0 = c.x;
       c.vz -= G * dt;

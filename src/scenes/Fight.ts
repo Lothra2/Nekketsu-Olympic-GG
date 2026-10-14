@@ -85,7 +85,8 @@ export class Fight extends Phaser.Scene implements World {
   private golpes: string[] = [];
   private thorFan: Figura | null = null;
   private thorRun: { f: Figura; x: number; owner: Actor; hit: Set<Actor>; dir: number } | null = null;
-  private specials = new Map<Actor, { kind: string; n: number; t: number }>();
+  /** las técnicas en curso; la tijera del vovinam lleva a su rival (`v`), que cae cuadro a cuadro con ella */
+  private specials = new Map<Actor, { kind: string; n: number; t: number; v?: Actor }>();
   private fullMeter = new Set<Actor>();
   private ui!: Phaser.GameObjects.Layer;
   private uiCam!: Phaser.Cameras.Scene2D.Camera;
@@ -267,11 +268,12 @@ export class Fight extends Phaser.Scene implements World {
     this.temaSonando = null;
     this.ambienteSonando = null;
     const n = this.judo || this.data0.practica ? null : this.data0.modo === '4v4' ? 'tema_instituto' : 'pana_dale';
+    // debajo: la ciudad de noche en la azotea de Caracas (lote H7), o el dojo de Hà Nội en el judo (lote B7H8)
+    const amb = this.judo ? 'dojo_hanoi' : 'azotea_noche';
+    if (kit().audio.ambientes?.[amb]) void bucle(this, 'ambientes', amb, 0.3, true).then((s) => { this.ambienteSonando = s; if (this.phase === 'end') this.callarTema(); });
     if (!n || !kit().audio.musica?.[n]) { chip.play(PELEA); return; }
     chip.stop(0.2);
     void bucle(this, 'musica', n, 0.4).then((s) => { this.temaSonando = s; if (this.phase === 'end') this.callarTema(); });
-    // la ciudad de noche debajo del tema, en la azotea de Caracas (lote H7)
-    if (!this.judo && kit().audio.ambientes?.azotea_noche) void bucle(this, 'ambientes', 'azotea_noche', 0.3, true).then((s) => { this.ambienteSonando = s; if (this.phase === 'end') this.callarTema(); });
   }
 
   private ambienteSonando: Phaser.Sound.BaseSound | null = null;
@@ -442,7 +444,9 @@ export class Fight extends Phaser.Scene implements World {
   }
   onHit(from: Actor | null, v: Actor, _dmg: number, kd: boolean) {
     // el seoi nage es ippon; el o-soto-gari, waza-ari; tumbarlo de un golpe, waza-ari
-    if (this.judo && kd && from && from.team !== v.team && this.phase === 'play') this.puntoJudo(from, (from.st === 'grab' && from.tecnica !== 'osoto') || from.st === 'throw');
+    // la tijera del vovinam con la barra llena también es ippon (la palmada suena cuando cae, en su aterriza)
+    const tijera = !!from && this.specials.get(from)?.kind === 'tijera';
+    if (this.judo && kd && from && from.team !== v.team && this.phase === 'play') this.puntoJudo(from, (from.st === 'grab' && from.tecnica !== 'osoto') || from.st === 'throw' || tijera, tijera);
     if (from === this.player && this.data0.practica) this.golpes.push(from.fig.anim.name);
     this.sfx(kd ? 'critico' : 'golpe', kd ? 0.55 : 0.45);
     this.sfx(v.team === 0 ? 'jugador_dolor' : 'enemigo_dolor', 0.25);
@@ -797,7 +801,7 @@ export class Fight extends Phaser.Scene implements World {
     const lines = this.uiAdd(speedLines(this, 8602));
     const por = this.uiAdd(this.add.image(320 - side * 400, 150, `retratos:${a.id}`, 'grande_enojo').setDepth(8603));
     this.tweens.add({ targets: por, x: 320 - side * 160, duration: 220, ease: 'Back.out' });
-    const name = this.uiAdd(txt(this, 320 + side * 90, 136, INFO[a.id]?.tecnica ?? '¡TÉCNICA!', 'fuente_titulo', 2).setDepth(8604).setScale(5).setAlpha(0));
+    const name = this.uiAdd(txt(this, 320 + side * 90, 136, (this.judo && a.tiene('vovinam_scissor') ? '¡TIJERA VOVINAM!' : INFO[a.id]?.tecnica ?? '¡TÉCNICA!'), 'fuente_titulo', 2).setDepth(8604).setScale(5).setAlpha(0));
     this.tweens.add({ targets: name, scale: 2, alpha: 1, duration: 200, delay: 150 });
     const who = this.uiAdd(txt(this, 320 + side * 90, 172, a.nombre, 'fuente_ui', 2).setDepth(8604).setTint(0xffe080));
     this.cutObjs = [dark, band, lines, por, name, who];
@@ -811,6 +815,9 @@ export class Fight extends Phaser.Scene implements World {
     this.cutObjs = [];
     const a = this.actors.find((x) => x.st === 'special' && !this.specials.has(x));
     if (!a) return;
+    // en el tatami, con la barra llena, la tijera del vovinam (lote B7H8) contra el rival más cerca
+    const v = this.judo && a.tiene('vovinam_scissor') ? this.rivalTijera(a) : null;
+    if (v) { this.tijera(a, v); return; }
     const kind = TECNICA[a.id] ?? 'mach';
     this.specials.set(a, { kind, n: 0, t: 0 });
     a.hitThisAttack.clear();
@@ -831,12 +838,63 @@ export class Fight extends Phaser.Scene implements World {
     }
   }
 
+  /** El rival de la tijera: el más cerca, de pie. */
+  private rivalTijera(a: Actor): Actor | null {
+    const r = this.actors.filter((o) => o.team !== a.team && o.alive && o.st !== 'ko' && o.st !== 'down');
+    return r.sort((x, y) => Math.abs(x.x - a.x) - Math.abs(y.x - a.x))[0] ?? null;
+  }
+
+  /**
+   * La tijera del vovinam: los dos arrancan juntos, el que la tira con `vovinam_scissor` y el rival, de pie, con
+   * `vovinam_scissored`, a media celda delante del punto del impacto (ahí le cierran las piernas al cuello).
+   */
+  private tijera(a: Actor, v: Actor) {
+    for (const o of [a, v]) { o.soltar(); o.vx = o.vy = o.vz = 0; o.z = 0; }
+    a.left = v.x < a.x;
+    a.play('vovinam_scissor', true);
+    const d = a.fig.anim.data;
+    const imp = a.fig.cuadroDe('impacto');
+    const p = d.eventos?.find((e) => e.tipo === 'impacto')?.punto?.[a.fig.rowIndex] ?? [20, -20];
+    const avance = imp >= 0 ? d.desplazamiento?.[imp] ?? 0 : 0;
+    v.x = Phaser.Math.Clamp(a.x + a.dir * (avance + p[0] + a.fig.celda / 2), XMIN, XMAX);
+    v.y = a.y;
+    v.left = !a.left;
+    v.dropAll();
+    v.setSt('frozen', v.tiene('vovinam_scissored') ? 'vovinam_scissored' : 'fight_hit');
+    a.hitThisAttack.clear();
+    this.specials.set(a, { kind: 'tijera', n: 0, t: 0, v });
+  }
+
   private specialTick(a: Actor, dt: number) {
     const s = this.specials.get(a)!;
     s.t += dt;
     const done = () => { this.specials.delete(a); a.vx = 0; a.vz = 0; a.z = 0; a.setSt('idle', 'idle'); a.invul = 0.4; };
     const hit = (def: AttackDef, radius = 8) => a.resolveHit(a.fig.anim.data.eventos?.find((e) => e.tipo === 'impacto')?.punto, def, radius);
-    if (s.kind === 'mach') {
+    if (s.kind === 'tijera' && s.v) {
+      const v = s.v;
+      const before = a.fig.anim.frame;
+      const ev = a.fig.step(dt);
+      const now = a.fig.anim.frame;
+      // avanza lo que dice su desplazamiento; el rival va en el mismo cuadro, sin moverse de donde lo atrapó
+      const d = a.fig.anim.data.desplazamiento ?? [];
+      if (now !== before) a.x = Phaser.Math.Clamp(a.x + a.dir * ((d[now] ?? 0) - (d[before] ?? 0)), XMIN, XMAX);
+      if (v.fig.anim.name === 'vovinam_scissored') { v.fig.anim.pos = a.fig.anim.pos; v.fig.refresh(); }
+      if (ev.some((e) => e.tipo === 'impacto')) {
+        const dmg = 14;
+        v.hp = Math.max(1, v.hp - dmg);
+        this.number(v.x, v.y, dmg);
+        this.spark(v.x - a.dir * 4, v.y, 26, true);
+        this.shake(220, 0.012);
+        this.onHit(a, v, dmg, true);
+      }
+      // al caer al tatami, la palmada del ukemi
+      if (ev.some((e) => e.tipo === 'aterriza')) { this.suena('caida_tatami', 0.8); this.dust(v.x, v.y); }
+      if (a.fig.anim.done) {
+        // el rival queda en el piso, sin el rebote de la caída de la calle; quien la tiró sigue en guardia
+        if (v.st === 'frozen') { v.knockdown(a.dir, 4, 0); v.bounces = 1; }
+        done();
+      }
+    } else if (s.kind === 'mach') {
       a.x += a.dir * 30 * dt;
       const ev = a.fig.step(dt);
       if (ev.some((e) => e.tipo === 'impacto')) { a.hitThisAttack.clear(); hit(s.n < 7 ? { dmg: 3, push: 18 } : { dmg: 12, kd: true, push: 170, launch: 200 }, 10); }
@@ -946,14 +1004,14 @@ export class Fight extends Phaser.Scene implements World {
   }
 
   /** Un punto en el judo: ¡IPPON! si fue lanzándolo desde el agarre, ¡WAZA-ARI! si lo tumbó de un golpe. Después, a empezar de nuevo. */
-  private puntoJudo(from: Actor, ippon: boolean) {
+  private puntoJudo(from: Actor, ippon: boolean, sinCaida = false) {
     const tm = from.team;
     this.puntos[tm] += ippon ? 2 : 1;
     this.phase = 'intro';
     this.shake(ippon ? 300 : 150, ippon ? 0.012 : 0.006);
     if (ippon) flash(this, 160);
     chip.boom(ippon ? 0.9 : 0.5);
-    this.suena('caida_tatami', ippon ? 0.8 : 0.5);
+    if (!sinCaida) this.suena('caida_tatami', ippon ? 0.8 : 0.5);
     void this.banner(ippon ? '¡IPPON!' : '¡WAZA-ARI!', 'fuente_titulo', ippon ? 3 : 2, 1000);
     const fin = this.puntos[tm] >= 3 || this.oro;
     this.time.delayedCall(1700, () => {

@@ -107,6 +107,15 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
 - Cada mundo con su tema de PixelForja: Saigón, la Comuna 13, Hội An, Bogotá, Margarita, Đà Lạt, el Carnaval de Barranquilla, la gaita de Maracaibo, Caracas, la champeta de Cartagena, el bambuco del Eje Cafetero, los remeros de Hạ Long, el pajarillo de Apure y el tema del Instituto en el Kachinuki. El judo sigue con la pelea sintetizada.
 - La interfaz de PixelForja (lote G1): la palanca y los botones táctiles con su cuadro apretado, el marcador de la pelea con el panel de cada equipo, el retrato en su marco dorado y las barras de aguante y Nekketsu (la llena brilla), el reloj en números de TV, la caja de diálogo de la intro con su flechita, y los letreros grandes con su fondo: ¡LISTOS!, ¡YA!, ¡META!, ¡GOL!, ¡JONRÓN!, ¡RÉCORD!, quien gana en la cinta dorada y los especiales en la explosión.
 - Los vehículos de PixelForja (lote D2) en el Cross: el ferry del río que anda al cruzar y se queda atracado en el muelle, las motos de cuatro colores que pitan cuando tienes adelante y frenan con polvo cuando atropellan, el xích lô, los jacintos que bajan por el río y la fruta regada cuando alguien tumba un puesto del mercado.
+- Los súper golpes de PixelForja (lote B7H8):
+  - **Básquet:** la clavada Nekketsu grande, que rompe el tablero en el instante en que la mano llega al aro, y la tacleada en plancha, que tumba al rival en el impacto.
+  - **Vóley:** el remate de fuego con la vuelta entera en el aire, mientras la pelota lo espera colgada hasta el impacto.
+  - **Đá cầu:** las chilenas de lado (la Nekketsu, desde más alto y con la vuelta atrás) y el dominio del cầu antes de sacar, con un toque en cada pie.
+  - **Chapita:** el lanzamiento de lado con golpe de muñeca y el batazo Nekketsu con la vuelta completa, espejada con su palo.
+  - **Jabalina:** la lanza del Catatumbo, con el relámpago sobre la jabalina en alto antes de soltarla.
+  - **Quemado:** el tiro con la rodilla arriba y el balonazo que lo sienta.
+  - **Judo:** con la barra llena, la tijera del vovinam, ippon, con el rival cayendo cuadro a cuadro y la palmada del ukemi al caer.
+  - **Ambientes nuevos:** el parque Tao Đàn en el Đá cầu, el barrio de Caracas en la Chapita y el dojo de Hà Nội en el judo.
 - Los efectos que se repiten (el aura de fuego de los poderes, el confeti, el rayo del Catatumbo) se apagan solos al rato y no se quedan tapando el juego.
 - Los deportes de pelota usan las animaciones de PixelForja sin la pelota pintada: la pelota la mueve el juego y, mientras alguien la tiene, va donde la pone la animación. En la pelea, cada equipo se burla con su gesto y su frase en un globo.
 
@@ -171,6 +180,7 @@ node scripts/prueba-celular.mjs http://localhost:5173/ capturas/celular 844 390 
 node scripts/prueba-girar.mjs http://localhost:5173/   # parado pide girar; al girar (y al cambiar de pantalla) todo se acomoda
 node scripts/prueba-palanca.mjs http://localhost:5173/   # la palanca táctil con un dedo de verdad: bajar hasta el borde y volver a subir sin soltar
 node scripts/prueba-aves.mjs http://localhost:4173/ capturas/aves   # las palomas del hẻm despegan y vuelven, el gallo de la Comuna 13 canta y se asusta (hace falta el kit con aves)
+node scripts/prueba-b7h8.mjs http://localhost:4173/ capturas/b7h8   # los súper golpes B7H8: clavada y tablero, plancha, remate colgado, dominio y chilenas, batazo girado, lanza del rayo, balonazo, tijera y ambientes
 node scripts/prueba-g1d2.mjs http://localhost:4173/ capturas/g1d2   # interfaz G1 y vehículos D2: botones, marcador, reloj de TV, letreros con fondo, ferry, motos, xích lô, jacintos y fruta
 node scripts/prueba-gira.mjs http://localhost:4173/ capturas/gira   # la Olimpiada con Tama-wari, Đá cầu, Tejo y Judo: cada una arranca en gira, reparte puntos y vuelve al medallero
 node scripts/prueba-azoteas.mjs http://localhost:4173/ capturas/azoteas   # el entrenamiento con un bot y tres rondas con el techo alejándose, con caídas

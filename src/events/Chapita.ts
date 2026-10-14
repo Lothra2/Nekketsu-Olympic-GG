@@ -17,7 +17,7 @@ const ZOOM = 1.2;
 const WORLD = 900;
 const BAT_X = 100;
 /** las animaciones del bateador con el palo en la mano: las del lote B4B6 y el swing de la pelea de respaldo */
-const BATEO = ['bat_stance', 'bat_swing', 'weapon_swing'];
+const BATEO = ['bat_stance', 'bat_swing', 'bat_nekketsu', 'weapon_swing'];
 /** el punto donde el palo le pega a la chapa, delante del bateador */
 const CONTACTO = BAT_X + 11;
 const PIT_X = 330;
@@ -137,6 +137,7 @@ export class Chapita extends EventScene {
     if (this.d.practica) this.ayudaTxt.setY(326);
     this.mitad();
     this.tema('pana_dale');
+    this.ambiente('barrio_caracas');
     this.cameras.main.centerOn(this.camX, 360 - 180 / ZOOM);
     if (this.d.practica) void this.entrenar('CHAPITA', this.pasos(), 40);
     else void this.previa('CHAPITA', 'BARRIO DE CARACAS, VENEZUELA', '{PUÑO} BATEA · {MOVER} ARRIBA LA MANDA ALTA · LANZANDO: {PUÑO} RECTA, {PATADA} CURVA · BARRA LLENA: {ESPECIAL}');
@@ -311,7 +312,9 @@ export class Chapita extends EventScene {
       }
       this.st = 'lanza';
       // el lanzamiento de béisbol del kit (sin la pelota pintada: la chapa va en su punto) o el de la pelea
-      this.pit.fig.set(this.pit.fig.anim.has('pitch') ? 'pitch' : 'weapon_throw', true);
+      // la chapa se lanza de lado, con golpe de muñeca (lote B7H8); si no, el lanzamiento de béisbol o el de la pelea
+      const f = this.pit.fig;
+      f.set(f.anim.has('cap_pitch') ? 'cap_pitch' : f.anim.has('pitch') ? 'pitch' : 'weapon_throw', true);
       return;
     }
     if (this.st === 'lanza') {
@@ -367,8 +370,10 @@ export class Chapita extends EventScene {
   private batear(altura: Altura, nek = false) {
     this.swing = { altura, hecho: false, nek };
     // el batazo con el palo de escoba (lote B4B6) o el swing de la pelea
+    // el batazo Nekketsu (lote B7H8): el barrido con todo y la vuelta completa, que en los cuadros girados va espejada
     const f = this.bat.fig;
-    f.set(f.anim.has('bat_swing') ? 'bat_swing' : 'weapon_swing', true, 1);
+    if (nek && f.anim.has('bat_nekketsu')) f.set('bat_nekketsu', true, 1);
+    else f.set(f.anim.has('bat_swing') ? 'bat_swing' : 'weapon_swing', true, 1);
   }
 
   /** El bateador esperando: la guardia de bateo meneando el palo, o el primer cuadro del swing de la pelea. */
@@ -718,13 +723,15 @@ export class Chapita extends EventScene {
       const a = b.anim, arma = a.data?.arma?.[b.rowIndex]?.[a.frame];
       const [ax, ay, ang, detras] = arma ?? [9, -14, 300, 0];
       const k = ((Math.round(ang / 22.5) % 16) + 16) % 16;
-      this.palo.setFrame(`broomstick_mano_${k}`).setFlipX(b.left).setPosition(Math.round(b.x + (b.left ? -ax : ax)), Math.round(b.y + ay)).setVisible(BATEO.includes(a.name)).setDepth(b.depth + (detras ? -0.1 : 0.1));
+      // en los cuadros girados (la vuelta del batazo Nekketsu) el palo se espeja con el sprite
+      const e = b.espejo;
+      this.palo.setFrame(`broomstick_mano_${k}`).setFlipX(e).setPosition(Math.round(b.x + (e ? -ax : ax)), Math.round(b.y + ay)).setVisible(BATEO.includes(a.name)).setDepth(b.depth + (detras ? -0.1 : 0.1));
     }
     const p = this.pit?.fig;
     const c = this.chapa;
     if (p) {
       const a = p.anim, arma = a.name === 'weapon_throw' ? a.data.arma?.[p.rowIndex]?.[a.frame] : null;
-      const ob = a.name === 'pitch' ? p.pelota() : null;
+      const ob = a.name === 'pitch' || a.name === 'cap_pitch' ? p.pelota() : null;
       this.chapaMano.setVisible((!!arma || !!ob) && c.st !== 'lanzada');
       if (ob) this.chapaMano.setFrame('chapa_mano_0').setFlipX(p.left).setPosition(Math.round(ob.x), Math.round(ob.y));
       else if (arma) {

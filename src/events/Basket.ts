@@ -315,16 +315,21 @@ export class Basket extends EventScene {
     }
     if (Math.abs(vx) > 10) j.dir = vx > 0 ? 1 : -1;
     const v = Math.hypot(vx, vy);
-    if (j.z > 0) {
+    // la tacleada en plancha (lote B7H8) sigue hasta el final: antes el puño del empujón la pisaba al cuadro siguiente
+    const plancha = j.fig.anim.name === 'tackle_nekketsu' && !j.fig.anim.done;
+    if (plancha) { /* sigue */ }
+    else if (j.z > 0) {
       // el tiro y la clavada del kit siguen hasta el final; sin ellos, el lanzamiento de la pelea
       if (j.st !== 'tira') j.fig.set(j.vz > 0 ? 'jump_rise' : 'jump_fall');
-      else if (j.fig.anim.name !== 'shoot' && j.fig.anim.name !== 'dunk') j.fig.set('throw_overhead');
+      else if (!['shoot', 'dunk', 'dunk_big'].includes(j.fig.anim.name)) j.fig.set('throw_overhead');
     } else if (j.empuja > 0.5) j.fig.set('punch');
     // parado con el balón, botándolo (el dribble del kit); corriendo, el balón bota a la par
     else if (v <= 8 && this.bola.dueño === j && j.fig.anim.has('dribble')) j.fig.set('dribble');
     else j.fig.set(v > 8 ? (v > 100 ? 'run' : 'walk') : 'idle');
-    const ev = j.fig.step(dt, v > 8 ? v * dt : undefined);
+    const ev = j.fig.step(dt, v > 8 && !plancha ? v * dt : undefined);
     if (this.bola.dueño === j && ev.some((e) => e.tipo === 'bote')) this.suena('rebote_balon', 0.2);
+    // la clavada Nekketsu rompe el tablero justo en el impacto, cuando la mano llega al aro
+    if (j.fig.anim.name === 'dunk_big' && ev.some((e) => e.tipo === 'impacto') && this.roto <= 0) this.romperTablero(j);
   }
 
   /** Lo que haces tú con el que manejas: cargar el tiro, clavar, pasar o empujar. */
@@ -442,7 +447,8 @@ export class Basket extends EventScene {
     if (!this.limpia && j.team === 1) return;
     j.st = 'tira'; j.vz = 300;
     // la clavada del kit desde el despegue: se ve el salto y el golpe al aro mientras vuela hasta él
-    if (j.fig.anim.play('dunk', true)) { j.fig.anim.pos = Math.max(0, j.fig.cuadroDe('despegue')); j.fig.refresh(); }
+    // con la barra llena, la clavada grande (lote B7H8), que rompe el tablero en su impacto
+    if (j.fig.anim.play(nekketsu && j.fig.anim.has('dunk_big') ? 'dunk_big' : 'dunk', true)) { j.fig.anim.pos = Math.max(0, j.fig.cuadroDe('despegue')); j.fig.refresh(); }
     else j.fig.set('throw_overhead', true);
     if (nekketsu) {
       this.nek[j.team] = 0;
@@ -467,6 +473,17 @@ export class Basket extends EventScene {
     this.lanzarTiro(j, entra, nekketsu ? 2 : 1, true, nekketsu);
     if (!entra && this.bola.tiro) this.bola.tiro.tapa = marca ?? null;
     this.cameras.main.shake(nekketsu ? 260 : 120, nekketsu ? 0.01 : 0.004);
+  }
+
+  /** El tablero se rompe en mil pedazos (la clavada Nekketsu). */
+  private romperTablero(j: Jug) {
+    this.roto = 4;
+    this.dibujarTablero();
+    efecto(this, 'ventana_rota', ARO.x + 12 + K * ARO.y, FT + ARO.y - 70, { depth: 6000 });
+    this.sound.play('romper', { volume: 0.7 });
+    flash(this, 200);
+    this.cameras.main.shake(300, 0.012);
+    this.letrero(j, '¡ROMPIÓ EL TABLERO!', 0xffe040);
   }
 
   /** El rival que marca una clavada: pegado al que clava o parado en la pintura, de pie y libre. */
@@ -547,13 +564,18 @@ export class Basket extends EventScene {
     this.nek[j.team] = 0;
     j.empuja = 0.9;
     efecto(this, 'aura_nekketsu', this.sx(j.x, j.y), FT + j.y, { depth: FT + j.y - 0.1 });
-    j.fig.set('flying_kick', true, 1.3);
+    // la plancha del kit (lote B7H8): vuela hasta él y el rival cae en el impacto; sin ella, la patada voladora
+    const plancha = j.fig.anim.play('tackle_nekketsu', true);
+    if (plancha) j.fig.refresh(); else j.fig.set('flying_kick', true, 1.3);
+    const imp = plancha ? j.fig.cuadroDe('impacto') : -1;
+    const llega = imp > 0 ? Math.round((imp / j.fig.anim.data.fps) * 1000) : 220;
     if (j.team === 0) void this.banner('¡TACLEADA NEKKETSU!', 'fuente_titulo', 2, 600);
     this.sound.play('esquiva', { volume: 0.5, rate: 0.8 });
     // el que tiene el balón se queda plantado mientras le llega la tacleada: ni pasa ni tira
     o.empuja = 0.6; o.ia.t = 0.5; o.cargando = false;
+    j.dir = o.x >= j.x ? 1 : -1;
     this.tweens.add({
-      targets: j, x: o.x - o.dir * 6, y: o.y, duration: 220, ease: 'Quad.in',
+      targets: j, x: o.x - j.dir * 10, y: o.y, duration: llega, ease: 'Quad.in',
       onComplete: () => {
         if (this.fase !== 'juego' || this.bola.dueño !== o) return;
         const b = this.bola;
@@ -679,13 +701,8 @@ export class Basket extends EventScene {
       flash(this, 120);
       this.cameras.main.shake(200, 0.008);
     } else if (t.nekketsu) {
-      this.roto = 4;
-      this.dibujarTablero();
-      efecto(this, 'ventana_rota', ARO.x + 12 + K * ARO.y, FT + ARO.y - 70, { depth: 6000 });
-      this.sound.play('romper', { volume: 0.7 });
-      flash(this, 200);
-      this.cameras.main.shake(300, 0.012);
-      this.letrero(j, '¡ROMPIÓ EL TABLERO!', 0xffe040);
+      // sin la clavada grande del kit el tablero se rompe al entrar
+      if (this.roto <= 0) this.romperTablero(j);
     } else this.letrero(j, t.clavada ? '¡CLAVADA!' : t.valor === 2 ? '¡DE DOS!' : '¡ADENTRO!', t.valor === 2 ? 0xffe040 : 0x8aff8a);
     if (j.team === 0 && this.d.practica) { if (t.clavada) this.clavadas++; else this.canastas++; }
     for (const o of this.js) if (o.st !== 'caido') o.fig.set(o.team === j.team ? 'celebrate' : 'sad', true);
