@@ -32,7 +32,7 @@ export const PACKS: Record<string, string[]> = {
   Basket: ['ngg_mov', 'ngg_golpe', 'ngg_carga', 'basket'],
 };
 
-/** Lo que cada paquete del artifact trae adentro, ya como URL del navegador (la copia del artifact junta archivos). */
+/** Lo que cada paquete del artifact trae adentro (las imágenes y los atlas de cada atleta), ya como URL del navegador. */
 const desempacados = new Map<string, string>();
 
 /** La URL de un archivo del kit: la de siempre, o la que salió de su paquete. */
@@ -82,7 +82,8 @@ export function cargarAtletas(scene: Phaser.Scene, ids: string[], packs: string[
       scene.load.binary(key, KIT + paq.archivo);
       scene.load.once(`filecomplete-binary-${key}`, (_k: string, _t: string, datos: ArrayBuffer) => {
         for (const [ruta, [ini, largo]] of Object.entries(paq.partes)) {
-          if (!desempacados.has(ruta)) desempacados.set(ruta, URL.createObjectURL(new Blob([datos.slice(ini, ini + largo)], { type: 'image/png' })));
+          const type = ruta.endsWith('.json') ? 'application/json' : 'image/png';
+          if (!desempacados.has(ruta)) desempacados.set(ruta, URL.createObjectURL(new Blob([datos.slice(ini, ini + largo)], { type })));
         }
         scene.cache.binary.remove(key);
         if (--pendientes === 0) encolar();
