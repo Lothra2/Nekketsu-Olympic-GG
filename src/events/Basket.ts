@@ -4,6 +4,7 @@ import { pelotaKit } from '../core/kit';
 import { ajustes } from '../core/nivel';
 import { efecto } from '../core/fx';
 import { txt, flash } from '../core/ui';
+import { MarcadorPartido } from '../core/interfaz';
 import { rotular } from '../core/input';
 import { Painter, hex } from '../gfx/paint';
 import { EventScene, prueba, type Competidor } from './base';
@@ -75,7 +76,7 @@ export class Basket extends EventScene {
   private tablero!: Phaser.GameObjects.Graphics;
   private roto = 0;
   private hud!: Phaser.GameObjects.Graphics;
-  private marcadorTxt!: Phaser.GameObjects.BitmapText;
+  private marcadorTxt!: MarcadorPartido;
   private relojTxt!: Phaser.GameObjects.BitmapText;
   private avisoTxt!: Phaser.GameObjects.BitmapText;
   private flecha!: Phaser.GameObjects.Triangle;
@@ -118,7 +119,8 @@ export class Basket extends EventScene {
     fuego.startFollow(spr);
     this.bola = { x: 300, y: PROF / 2, z: 0, vx: 0, vy: 0, vz: 0, dueño: null, tiro: null, libre: 0, ultimo: null, para: null, spr, sombra, fuego };
     this.hud = this.uiAdd(this.add.graphics().setDepth(8000));
-    this.marcadorTxt = this.uiAdd(txt(this, 320, 14, '', 'fuente_titulo', 1).setDepth(8001));
+    // el marcador de TV del kit, con el nombre de cada equipo a su lado
+    this.marcadorTxt = new MarcadorPartido(this, (o) => this.uiAdd(o), 320, 16, [lado(0).corto, lado(1).corto]);
     this.relojTxt = this.uiAdd(txt(this, 320, 32, '', 'fuente_ui', 1).setDepth(8001).setTint(0xffe080));
     this.avisoTxt = this.uiAdd(txt(this, 320, 330, '', 'fuente_ui', 1).setDepth(8001).setTint(0xffe080));
     this.flecha = this.add.triangle(0, 0, 0, 0, 8, 0, 4, 6, 0xffe040).setDepth(6000);
@@ -767,8 +769,8 @@ export class Basket extends EventScene {
   private drawHud() {
     const g = this.hud;
     g.clear();
-    if (this.d.practica) { this.marcadorTxt.setText(''); this.relojTxt.setText(''); return; }
-    this.marcadorTxt.setText(`${lado(0).corto} ${this.puntos[0]} - ${this.puntos[1]} ${lado(1).corto}`);
+    if (this.d.practica) { this.marcadorTxt.setVisible(false); this.relojTxt.setText(''); return; }
+    this.marcadorTxt.set(this.puntos[0], this.puntos[1]);
     const q = Math.max(0, TIEMPO - this.clock);
     this.relojTxt.setText(this.oro ? '¡CANASTA DE ORO!' : `${Math.floor(q / 60)}:${String(Math.floor(q % 60)).padStart(2, '0')} · A ${META}`);
     for (const t of [0, 1] as const) {

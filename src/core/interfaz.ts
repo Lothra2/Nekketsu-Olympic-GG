@@ -179,10 +179,51 @@ export class MarcadorTV {
       x += w;
     }
     this.c.add(this.letras);
-    this.placa?.setSize(Math.max(24, total + 14 * e), ch * e + 8);
+    this.ancho = Math.max(24, total + 14 * e);
+    this.placa?.setSize(this.ancho, ch * e + 8);
     return this;
   }
 
+  /** Lo ancho de la placa ahora. */
+  ancho = 24;
+
   setVisible(v: boolean) { this.c.setVisible(v); return this; }
   setTint(color: number) { for (const o of this.letras) (o as Phaser.GameObjects.Image).setTint?.(color); return this; }
+}
+
+/**
+ * El marcador de un partido: el placa de TV con los puntos en el medio y el nombre de cada equipo a su lado, en su
+ * color. Sin las piezas del kit, el texto de siempre (`NOMBRE a - b NOMBRE`).
+ */
+export class MarcadorPartido {
+  private tv: MarcadorTV | null = null;
+  private texto: Phaser.GameObjects.BitmapText | null = null;
+  private izq: Phaser.GameObjects.BitmapText | null = null;
+  private der: Phaser.GameObjects.BitmapText | null = null;
+
+  constructor(scene: Phaser.Scene, poner: <T extends Phaser.GameObjects.GameObject>(o: T) => T, private x: number, y: number, private nombres: [string, string], tintes: [number, number] = [0x9ac8ff, 0xffa0a0]) {
+    if (MarcadorTV.disponible(scene)) {
+      this.tv = new MarcadorTV(scene, x, y);
+      poner(this.tv.c.setDepth(8001));
+      this.izq = poner(txt(scene, x, y, nombres[0], 'fuente_ui', 1, 1).setDepth(8001).setTint(tintes[0]));
+      this.der = poner(txt(scene, x, y, nombres[1], 'fuente_ui', 1, 0).setDepth(8001).setTint(tintes[1]));
+    } else this.texto = poner(txt(scene, x, y - 2, '', 'fuente_titulo', 1).setDepth(8001));
+  }
+
+  /** Los puntos de cada lado. */
+  set(a: number, b: number) {
+    if (this.texto) { this.texto.setText(`${this.nombres[0]} ${a} - ${b} ${this.nombres[1]}`); return; }
+    this.tv!.setText(`${a}-${b}`);
+    const medio = this.tv!.ancho / 2 + 10;
+    this.izq!.setX(this.x - medio);
+    this.der!.setX(this.x + medio);
+  }
+
+  /** Entrenando no hay marcador. */
+  setVisible(v: boolean) {
+    this.texto?.setVisible(v);
+    this.tv?.setVisible(v);
+    this.izq?.setVisible(v);
+    this.der?.setVisible(v);
+  }
 }

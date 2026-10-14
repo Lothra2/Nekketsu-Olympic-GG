@@ -66,7 +66,7 @@ export class DaCau extends EventScene {
   private pausaT = 0;
   private clock = 0;
   private hud!: Phaser.GameObjects.Graphics;
-  private scoreTxt!: Phaser.GameObjects.BitmapText;
+  private scoreTxt!: { setText(s: string): unknown };
   private toqueTxt!: Phaser.GameObjects.BitmapText;
   private terminado = false;
   /** entrenamiento */
@@ -123,7 +123,7 @@ export class DaCau extends EventScene {
     this.alSaque(this.d.practica ? 1 : 0);
     this.cameras.main.centerOn(260, this.camY);
     this.hud = this.uiAdd(this.add.graphics().setDepth(8000));
-    this.scoreTxt = this.uiAdd(txt(this, 320, 16, '0 - 0', 'fuente_titulo', 1).setDepth(8001));
+    this.scoreTxt = this.marcadorTV(320, 16, 8001);
     this.uiAdd(txt(this, 250, 16, lado(0).corto, 'fuente_ui', 1, 1).setDepth(8001).setTint(0x9ac8ff));
     this.uiAdd(txt(this, 390, 16, lado(1).corto, 'fuente_ui', 1, 0).setDepth(8001).setTint(0xffa0a0));
     this.toqueTxt = this.uiAdd(txt(this, 320, 34, '', 'fuente_ui', 1).setDepth(8001).setTint(0xffe080));

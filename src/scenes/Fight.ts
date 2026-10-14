@@ -1230,7 +1230,10 @@ export class Fight extends Phaser.Scene implements World {
    * dorado, el nombre, y las barras de aguante y Nekketsu en su marco. Las de la derecha van en espejo.
    */
   private hudConKit(a: Actor, right: boolean, panel: string) {
-    const X = (x: number) => (right ? 640 - x : x);
+    // con controles táctiles, los paneles un poco hacia adentro: en la esquina de arriba va la pausa (en la tablet la
+    // pausa tapaba el retrato del rival)
+    const off = this.pad.hasTouch ? 26 : 0;
+    const X = (x: number) => (right ? 640 - x - off : x + off);
     const add = <T extends Phaser.GameObjects.GameObject>(o: T) => { this.hudObjs.push(this.uiAdd(o)); return o; };
     const [l, t, r, b] = pieza(panel)?.nueve ?? [8, 8, 8, 8];
     add(this.add.nineslice(X(105), 27, `ui_${panel}`, undefined, 208, 52, l, r, t, b).setAlpha(0.92).setDepth(8000));

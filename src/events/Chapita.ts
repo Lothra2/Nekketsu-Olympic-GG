@@ -4,6 +4,7 @@ import { ajustes } from '../core/nivel';
 import { efecto } from '../core/fx';
 import { chip } from '../core/music';
 import { txt, flash } from '../core/ui';
+import { MarcadorPartido } from '../core/interfaz';
 import { Painter, hex } from '../gfx/paint';
 import { lado } from '../core/equipos';
 import { EventScene, prueba, type Competidor } from './base';
@@ -86,7 +87,7 @@ export class Chapita extends EventScene {
   private vidrio!: Phaser.GameObjects.Image;
   private carmen!: Phaser.GameObjects.Image;
   private hud!: Phaser.GameObjects.Graphics;
-  private marcadorTxt!: Phaser.GameObjects.BitmapText;
+  private marcadorTxt!: MarcadorPartido;
   private inningTxt!: Phaser.GameObjects.BitmapText;
   private ayudaTxt!: Phaser.GameObjects.BitmapText;
   /** entrenamiento */
@@ -131,7 +132,8 @@ export class Chapita extends EventScene {
     const sombra = this.add.ellipse(0, PISO, 6, 2, 0x000000, 0.3).setDepth(PISO - 1);
     this.chapa = { x: 0, z: 0, vx: 0, vz: 0, st: 'mano', tipo: 'recta', x0: 0, t: 0, tt: 1, botes: 0, jonron: false, resuelta: false, escapa: false, escapo: false, spr, sombra };
     this.hud = this.uiAdd(this.add.graphics().setDepth(8000));
-    this.marcadorTxt = this.uiAdd(txt(this, 320, 14, '', 'fuente_titulo', 1).setDepth(8001));
+    // el marcador de TV del kit, con el nombre de cada equipo a su lado
+    this.marcadorTxt = new MarcadorPartido(this, (o) => this.uiAdd(o), 320, 16, [lado(0).corto, lado(1).corto]);
     this.inningTxt = this.uiAdd(txt(this, 320, 34, '', 'fuente_ui', 1).setDepth(8001).setTint(0xffe080));
     this.ayudaTxt = this.uiAdd(txt(this, 320, 340, '', 'fuente_ui', 1).setDepth(8001).setTint(0xffffff));
     if (this.d.practica) this.ayudaTxt.setY(326);
@@ -762,8 +764,8 @@ export class Chapita extends EventScene {
   private drawHud() {
     const g = this.hud;
     g.clear();
-    if (this.d.practica) { this.marcadorTxt.setText(''); this.inningTxt.setText(''); return; }
-    this.marcadorTxt.setText(`${lado(0).corto} ${this.carreras[0]} - ${this.carreras[1]} ${lado(1).corto}`);
+    if (this.d.practica) { this.marcadorTxt.setVisible(false); this.inningTxt.setText(''); return; }
+    this.marcadorTxt.set(this.carreras[0], this.carreras[1]);
     this.inningTxt.setText(`INNING ${Math.min(this.inning, INNINGS + 1)} ${this.abajo ? 'ABAJO' : 'ARRIBA'} · BATEA ${this.nombre(this.bat.c.id)}`);
     // los outs y los strikes en bolitas
     g.fillStyle(0x000000, 0.55).fillRect(8, 8, 112, 40);

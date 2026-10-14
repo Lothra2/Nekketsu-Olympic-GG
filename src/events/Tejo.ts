@@ -76,7 +76,7 @@ export class Tejo extends EventScene {
   private tab!: Phaser.GameObjects.Graphics;
   private hud!: Phaser.GameObjects.Graphics;
   private cara!: Phaser.GameObjects.Graphics;
-  private scoreTxt!: Phaser.GameObjects.BitmapText;
+  private scoreTxt!: { setText(s: string): unknown };
   private rondaTxt!: Phaser.GameObjects.BitmapText;
   private ayudaTxt!: Phaser.GameObjects.BitmapText;
   private cpu = { u: 0, p: JUSTA, listoU: 0, listoP: 0 };
@@ -128,7 +128,7 @@ export class Tejo extends EventScene {
     this.orden = this.d.practica ? [0] : [0, 2, 1, 3];
     this.hud = this.uiAdd(this.add.graphics().setDepth(8000));
     this.tab = this.uiAdd(this.add.graphics().setDepth(8001));
-    this.scoreTxt = this.uiAdd(txt(this, 320, 16, '0 - 0', 'fuente_titulo', 1).setDepth(8002));
+    this.scoreTxt = this.marcadorTV(320, 16, 8002);
     this.uiAdd(txt(this, 250, 16, lado(0).corto, 'fuente_ui', 1, 1).setDepth(8002).setTint(0x9ac8ff));
     this.uiAdd(txt(this, 390, 16, lado(1).corto, 'fuente_ui', 1, 0).setDepth(8002).setTint(0xffa0a0));
     this.rondaTxt = this.uiAdd(txt(this, 320, 34, '', 'fuente_ui', 1).setDepth(8002).setTint(0xffe080));

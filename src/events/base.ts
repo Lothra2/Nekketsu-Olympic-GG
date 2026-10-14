@@ -4,7 +4,7 @@ import { Input, rotular } from '../core/input';
 import { chip, PELEA } from '../core/music';
 import { kit, bucle } from '../core/kit';
 import { txt, flash, pantallaCarga } from '../core/ui';
-import { letreroGrande } from '../core/interfaz';
+import { letreroGrande, MarcadorTV } from '../core/interfaz';
 import { Coach, type Paso } from '../core/coach';
 import { nuestros, ellos, conJugador, lado, victoria } from '../core/equipos';
 import { cargarAtletas, packsDe } from '../core/carga';
@@ -229,6 +229,12 @@ export abstract class EventScene extends Phaser.Scene {
   protected filterUi() {
     const id = this.uiCam.id;
     for (const o of this.children.list) if ((o as unknown) !== this.ui) o.cameraFilter |= id;
+  }
+
+  /** Los puntos en números de marcador de TV del kit, sobre su placa (o el texto de siempre si no están). */
+  protected marcadorTV(x: number, y: number, depth = 8001): { setText(s: string): unknown } {
+    if (MarcadorTV.disponible(this)) { const m = new MarcadorTV(this, x, y).setText('0 - 0'); this.uiAdd(m.c.setDepth(depth)); return m; }
+    return this.uiAdd(txt(this, x, y, '0 - 0', 'fuente_titulo', 1).setDepth(depth));
   }
 
   protected banner(s: string, font: 'fuente_titulo' | 'fuente_titulo_plata' | 'fuente_ui', scale: number, hold: number, y = 150) {
