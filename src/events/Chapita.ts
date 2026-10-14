@@ -459,8 +459,9 @@ export class Chapita extends EventScene {
     const ag = this.d.practica ? 0.1 : ajustes().cpuAgresion;
     // el swing tarda tres cuadros (a 14 fps) en llegar al impacto
     const ideal = 3 / 14;
-    // con la barra llena, el batazo Nekketsu sin error
-    if (!this.d.practica && this.nek[this.bat.c.team] >= 100 && Math.random() < 0.5) return { t: ideal, altura: 'alta', nek: true };
+    // con la barra llena, el batazo Nekketsu sin error (el del kit llega al impacto un cuadro después)
+    const f = this.bat.fig, imp = f.anim.has('bat_nekketsu') ? 4 / 14 : ideal;
+    if (!this.d.practica && this.nek[this.bat.c.team] >= 100 && Math.random() < 0.5) return { t: imp, altura: 'alta', nek: true };
     const error = (Math.random() + Math.random() + Math.random() - 1.5) * (0.22 - 0.1 * ag);
     const acierta = this.chapa.tipo === 'recta' || Math.random() < 0.3 + 0.4 * ag;
     const altura: Altura = this.chapa.tipo === 'recta' ? (Math.random() < 0.35 ? 'alta' : 'media') : acierta ? (this.chapa.tipo === 'sube' ? 'alta' : 'baja') : this.chapa.tipo === 'sube' ? 'baja' : 'alta';

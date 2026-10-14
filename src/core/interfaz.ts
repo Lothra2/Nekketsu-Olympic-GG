@@ -75,7 +75,7 @@ export function animarInterfaz(scene: Phaser.Scene) {
     if (!scene.textures.exists(tex) || scene.anims.exists(key)) return;
     scene.anims.create({ key, frames: scene.anims.generateFrameNumbers(tex, { start: desde, end: desde + n - 1 }), frameRate: fps, repeat: loop ? -1 : 0 });
   };
-  for (const [id, v] of Object.entries(vehiculos())) for (const [an, a] of Object.entries(v.anims)) crear(`veh_${id}_${an}`, `veh_${id}`, a.desde, a.cuadros, a.fps, a.loop);
+  for (const [id, v] of Object.entries(vehiculos())) if (v.cuadros > 1) for (const [an, a] of Object.entries(v.anims)) crear(`veh_${id}_${an}`, `veh_${id}`, a.desde, a.cuadros, a.fps, a.loop);
   const logo = m().ui.logo;
   if (logo?.cuadros) { crear('ui_logo', 'ui_logo', 0, logo.cuadros, logo.fps ?? 10, true); if (logo.chico) crear('ui_logo_chico', 'ui_logo_chico', 0, logo.chico.cuadros ?? 1, logo.chico.fps ?? 10, true); }
   for (const [id, p] of Object.entries(piezas())) if ((p.cuadros ?? 1) > 1 && p.fps) crear(`ui_${id}`, `ui_${id}`, 0, p.cuadros!, p.fps, p.loop ?? true);
