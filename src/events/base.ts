@@ -3,7 +3,7 @@ import { MAX_W } from '../core/pantalla';
 import { Input, rotular } from '../core/input';
 import { chip, PELEA } from '../core/music';
 import { kit, bucle } from '../core/kit';
-import { txt, flash } from '../core/ui';
+import { txt, flash, pantallaCarga } from '../core/ui';
 import { Coach, type Paso } from '../core/coach';
 import { nuestros, ellos, conJugador, lado, victoria } from '../core/equipos';
 import { cargarAtletas, packsDe } from '../core/carga';
@@ -108,7 +108,10 @@ export abstract class EventScene extends Phaser.Scene {
    * Las animaciones de los dos equipos que usa esta prueba (y se sueltan las demás). Las pruebas que tienen su
    * preload lo llaman con super.preload().
    */
-  preload() { cargarAtletas(this, [...nuestros(), ...ellos()], packsDe(this.scene.key), undefined, true); }
+  preload() {
+    pantallaCarga(this, prueba(this.scene.key)?.nombre ?? '');
+    cargarAtletas(this, [...nuestros(), ...ellos()], packsDe(this.scene.key), undefined, true);
+  }
 
   /** Prepara capas y cámara. Llamar al inicio de create(). */
   protected setup(zoom: number, worldW: number) {

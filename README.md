@@ -8,6 +8,7 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
 - **Entrenamiento** para cada prueba y para la pelea: sin rivales ni reloj, un cartel dice qué hacer, espera a que lo hagas y los botones táctiles del paso laten en pantalla. Los carteles nombran el botón de lo que estés usando: J y K en teclado, A y B en la tablet, X y A en un control. Al final te ofrece jugar de verdad.
 - **Niveles** en el menú (se recuerdan): PASEO (la máquina va suave, tu equipo aguanta el doble y pega más, en jabalina no hay nulo y en natación no hay salida en falso), NORMAL (un poco de ventaja) y NEKKETSU (sin ayuda). En PASEO y NORMAL hay una "goma" invisible: si vas muy atrás la máquina afloja, y si vas muy adelante aprieta un poco. Los números están todos en `src/core/nivel.ts`.
 - **Seis equipos, 24 atletas**: Familia GG (Venezuela), Instituto Nekketsu (Japón), Rồng Sài Gòn (Vietnam), Rolos de Chapinero (Colombia), Panas de Caracas y Maracuchos del Lago (Venezuela). La selección va por pasos: tu equipo, tu atleta, el equipo rival y, en el 1 contra 1 y el judo, tu rival. Cada equipo tiene sus colores, su bandera, su burla y su frase, y todas las pruebas usan los dos equipos elegidos. El entrenamiento se salta el rival: te espera el Instituto (o la Familia, si el Instituto eres tú).
+- **Carga**: cada prueba muestra su nombre, una barra y un consejo mientras carga. Al elegir tu equipo y el rival, sus atletas se empiezan a bajar mientras eliges, así la prueba arranca casi sin espera. La copia del artifact arranca con un manifiesto de 2.7 MB (antes 10) y cada atleta llega en un paquete de 1.4 MB (antes 1.8); el judo va en otro paquete que solo se baja al ir al tatami.
 - **Barra Nekketsu en todas las pruebas de pelota y en las de campo**: se llena jugando bien (tirar, encestar, robar, tapar, buenos toques, puntos) y también cuando te anotan, para remontar. Llena, ★ es el súper golpe de cada deporte. Si la tocas antes de tiempo, un cartel te dice cómo llenarla. La máquina también usa el suyo.
 - **Olimpiada Express**: tu equipo contra el que elijas. Cada gira sortea 5 de las 16 pruebas (al menos una de Vietnam y una de Colombia) y cierra con el Kachinuki en Caracas. Medallero por equipos (10, 6, 4 y 2 puntos por puesto, el judo da 10 y 6) y la final vale 20. Termina con podio y fuegos artificiales.
 - **Pruebas sueltas**:
@@ -76,11 +77,13 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
     - Barra llena: ★ es el tiro Nekketsu.
     - El arquero se lanza y al arquero no se le barre. Cada tanto la Marimonda cruza la cancha y el balón le rebota.
   - *Básquet 3x3* (Maracaibo, con el relámpago del Catatumbo de fondo): 3 contra 3 a un aro, gana el primero a 11 o el que vaya ganando a los 3 minutos.
-    - Mantén patada para llenar la barra y suéltala en lo verde. Cerca del aro, salto es la clavada, y corriendo vuela de más lejos.
+    - Mantén patada para llenar la barra y suéltala en lo verde. Cerca del aro, salto es la clavada, y corriendo vuela de más lejos. La clavada puede fallar, y si te marcan el defensor salta a taparla: el cartel avisa "¡TE MARCAN!" para que la pases.
     - Aquí los golpes valen: sin balón, pegado al que lo tiene, puño se lo roba. Saltando frente al que tira, tapón. Abajo un cartel dice lo que puedes hacer ahora.
     - Barra llena, ★: cerca del aro la clavada Nekketsu rompe el tablero, de lejos el tiro de fuego no falla y sin balón la tacleada se lo arranca al rival.
   - *Judo y Vovinam Hà Nội* (tatami frente al lago Hoàn Kiếm): 1 contra 1 con el motor de la pelea y otras reglas.
-    - Agarrados de solapa y manga, patada es la proyección: lo carga al hombro y lo azota en el tatami. ¡IPPON!, 2 puntos. Tumbar de un golpe: ¡WAZA-ARI!, 1. Gana el primero a 3.
+    - Cada uno en su judogi: blanco el tuyo, azul el rival, con el cinturón del color de su equipo. Se saludan con el rei al empezar, en cada ¡HAJIME! y al final.
+    - Agarrados de solapa y manga, flecha adelante y patada es el seoi nage: gira de espaldas, lo carga en la espalda y lo azota del otro lado. ¡IPPON!, 2 puntos.
+    - Patada sola es el o-soto-gari, la barrida por fuera: ¡WAZA-ARI!, 1 punto. El que cae hace el ukemi, la palmada al tatami. Tumbar de un golpe: ¡WAZA-ARI!, 1. Gana el primero a 3.
     - 1:30 de reloj. Si se acaba empatado, punto de oro. Después de cada punto, ¡HAJIME! de nuevo.
 - **Kachinuki Caracas**, la pelea final en una azotea de Parque Central de noche, en 1 contra 1 o 4 contra 4: Familia GG contra el Instituto Nekketsu.
   - Un borde sin baranda: caminando no te sales, pero si te tumban o te lanzan por ahí, quedas fuera.

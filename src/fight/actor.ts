@@ -58,7 +58,7 @@ export const HUECO = -1000;
 
 export type St =
   | 'idle' | 'walk' | 'run' | 'jump' | 'attack' | 'hurt' | 'fall' | 'down' | 'getup' | 'dizzy'
-  | 'lifted' | 'thrown' | 'lift' | 'carry' | 'throw' | 'pick' | 'ko' | 'win' | 'lose' | 'special' | 'frozen'
+  | 'lifted' | 'thrown' | 'lift' | 'carry' | 'throw' | 'pick' | 'ko' | 'win' | 'lose' | 'special' | 'frozen' | 'rei'
   | 'guard' | 'grab' | 'grabbed' | 'taunt';
 
 const ACTIVE: St[] = ['idle', 'walk', 'run'];
@@ -100,6 +100,8 @@ export class Actor {
   private rodillazos = 0;
   /** el proyectado del judo va detrás de quien lo proyecta mientras vuela en su carga */
   detras = false;
+  /** la última proyección de judo: el seoi nage es ippon y el o-soto-gari waza-ari */
+  tecnica: 'seoi' | 'osoto' | null = null;
   /** un ratito después de un golpe (sin caer) se le puede agarrar */
   agarrable = 0;
   /** los golpes que paró la guardia hace poco: al tercero se rompe */
@@ -155,7 +157,8 @@ export class Actor {
     const a = this.fig.anim;
     const c = a.data.carga?.[this.fig.rowIndex]?.[a.frame];
     if (!c) return null;
-    return [this.x + (this.left ? -c[0] : c[0]), this.z - c[1]];
+    // la carga va espejada igual que el sprite (en los cuadros girados, al revés de como mira)
+    return [this.x + (this.fig.espejo ? -c[0] : c[0]), this.z - c[1]];
   }
 
   // ------------------------------------------------------------------ cuadro a cuadro
@@ -183,6 +186,8 @@ export class Actor {
       case 'ko': this.fig.step(dt); break;
       case 'win': case 'lose': this.fig.step(dt); if (this.st === 'win' && this.fig.anim.done) this.play('celebrate'); break;
       case 'special': case 'frozen': break;
+      // el saludo del judo: quieto, haciendo su animación
+      case 'rei': this.fig.step(dt); break;
       case 'guard': this.guardTick(dt, it); break;
       case 'grab': this.grabTick(dt, it); break;
       case 'grabbed': this.grabbedTick(dt, it); break;
@@ -386,7 +391,7 @@ export class Actor {
   }
 
   canBeHit() {
-    return this.invul <= 0 && !['down', 'ko', 'lifted', 'thrown', 'getup', 'fall', 'frozen'].includes(this.st);
+    return this.invul <= 0 && !['down', 'ko', 'lifted', 'thrown', 'getup', 'fall', 'frozen', 'rei'].includes(this.st);
   }
 
   takeHit(from: Actor | null, def: AttackDef, dir: number) {
@@ -496,7 +501,7 @@ export class Actor {
     // en el judo, agarrados de solapa y manga; en la calle, sosteniéndolo
     const sostener = this.w.esJudo && this.tiene('judo_grip') ? 'judo_grip' : 'grab_hold';
     if (nombre === 'grab' && this.fig.anim.done) this.play(sostener);
-    if (nombre === 'judo_throw') { this.proyectar(v, ev); return; }
+    if (nombre === 'judo_throw' || nombre === 'osoto_gari') { this.proyectar(v, ev); return; }
     if (nombre === 'knee_grab') {
       if (ev.some((e) => e.tipo === 'impacto')) {
         this.rodillazos++;
@@ -511,13 +516,21 @@ export class Actor {
       }
       if (this.fig.anim.done) this.play(sostener);
     } else if (it.punch) this.play(this.tiene('knee_grab') ? 'knee_grab' : 'jab', true);
-    else if (it.kick && this.w.esJudo && this.tiene('judo_throw') && v.tiene('judo_thrown')) {
-      // la proyección: los dos arrancan juntos, cuadro a cuadro
-      this.play('judo_throw', true);
-      v.play('judo_thrown', true);
-      this.w.sfx('esquiva', 0.45);
-      return;
-    } else if (it.kick) {
+    else if (it.kick && this.w.esJudo && (this.tiene('judo_throw') || this.tiene('osoto_gari'))) {
+      // la proyección, los dos arrancan juntos cuadro a cuadro: flecha adelante y patada es el seoi nage (ippon),
+      // patada sola el o-soto-gari (waza-ari). La máquina elige a veces una y a veces la otra
+      const adelante = this.human ? it.x * this.dir > 0.3 : Math.random() < 0.4;
+      const seoi = this.tiene('judo_throw') && v.tiene('judo_thrown') && (adelante || !this.tiene('osoto_gari'));
+      const osoto = !seoi && this.tiene('osoto_gari') && v.tiene('osoto_gari_thrown');
+      if (seoi || osoto) {
+        this.tecnica = seoi ? 'seoi' : 'osoto';
+        this.play(seoi ? 'judo_throw' : 'osoto_gari', true);
+        v.play(seoi ? 'judo_thrown' : 'osoto_gari_thrown', true);
+        this.w.sfx('esquiva', 0.45);
+        return;
+      }
+    }
+    if (it.kick) {
       // lo bota al piso con todo
       const dmg = 9 * (this.w.multDaño?.(this, v) ?? 1);
       v.hp = Math.max(0, v.hp - dmg);
@@ -541,10 +554,13 @@ export class Actor {
    */
   private proyectar(v: Actor, ev: Evento[]) {
     const a = this.fig.anim;
-    if (v.fig.anim.name === 'judo_thrown') { v.fig.anim.pos = a.pos; v.fig.refresh(); }
-    const c = a.frame >= 3 && a.frame <= 5 ? this.cargaPoint() : null;
+    const seoi = a.name === 'judo_throw';
+    if (v.fig.anim.name === 'judo_thrown' || v.fig.anim.name === 'osoto_gari_thrown') { v.fig.anim.pos = a.pos; v.fig.refresh(); }
+    // seoi nage: del 3 al 5 uke va con la base en la carga de tori (ya espejada), detrás de él, y cae del otro lado,
+    // delante de donde tori termina mirando. O-soto-gari: cada uno en su lugar, sin carga
+    const c = seoi && a.frame >= 3 && a.frame <= 5 ? this.cargaPoint() : null;
     if (c) { v.x = c[0]; v.z = Math.max(0, c[1]); v.detras = true; }
-    else { v.x = this.x + this.dir * (a.frame > 5 ? 18 : 13); v.z = 0; v.detras = false; }
+    else { v.x = this.x + this.dir * (seoi && a.frame > 5 ? -18 : seoi ? 13 : 16); v.z = 0; v.detras = false; }
     v.y = this.y;
     if (ev.some((e) => e.tipo === 'impacto')) {
       const dmg = 12 * (this.w.multDaño?.(this, v) ?? 1);
@@ -558,7 +574,11 @@ export class Actor {
     if (a.done) {
       v.detras = false;
       this.soltar();
-      v.knockdown(this.dir, 10, 30);
+      v.knockdown(seoi ? -this.dir : this.dir, 6, 0);
+      // ya cayó con el ukemi: queda en el piso sin el rebote de la caída de la calle
+      v.bounces = 1;
+      // el seoi nage termina girado, de cara a donde cayó uke: le cambia el lado
+      if (seoi) this.left = !this.left;
       this.setSt('idle', 'idle');
     }
   }
@@ -569,7 +589,7 @@ export class Actor {
     this.fig.step(dt);
     if (!g || g.agarra !== this || g.st !== 'grab') { this.agarrador = null; this.detras = false; this.setSt('idle', 'idle'); return; }
     // volando en la proyección no hay forcejeo: el cuadro lo pone quien proyecta
-    if (g.fig.anim.name === 'judo_throw') return;
+    if (g.fig.anim.name === 'judo_throw' || g.fig.anim.name === 'osoto_gari') return;
     if (it.punch || it.kick || it.jump || (it.x && Math.random() < 0.2)) this.t += 0.22;
     if (this.t > 2.4) {
       // se zafa: empuja al otro y queda libre

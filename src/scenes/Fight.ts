@@ -7,7 +7,7 @@ import { ajustes } from '../core/nivel';
 import { efecto, talla } from '../core/fx';
 import { Input, rotular } from '../core/input';
 import { chip, PELEA } from '../core/music';
-import { txt, flash, speedLines } from '../core/ui';
+import { txt, flash, speedLines, pantallaCarga } from '../core/ui';
 import { INFO } from './Select';
 import { nuestros, ellos, lado, equipos, conJugador, victoria } from '../core/equipos';
 import { cargarAtletas, packsDe } from '../core/carga';
@@ -242,7 +242,11 @@ export class Fight extends Phaser.Scene implements World {
   private get escenario() { return this.judo ? 'judo_hanoi' : 'caracas_azotea'; }
 
   preload() {
-    cargarAtletas(this, [...nuestros(), ...ellos(), this.data0.jugador, this.data0.rival], packsDe('Fight'), undefined, true);
+    pantallaCarga(this, this.judo ? 'JUDO Y VOVINAM' : 'KACHINUKI CARACAS');
+    const j = this.data0.jugador, r = this.data0.rival;
+    // en el judo, cada uno en su judogi (lote B4B6 bis): blanco el de la persona, azul el rival; sin el pack, lo de antes
+    if (this.judo && kit().atletas[j]?.packs.judo) cargarAtletas(this, [j, r], (id) => (id === j && id === r ? ['judo', 'judo_azul'] : id === j ? ['judo'] : ['judo_azul']), undefined, true);
+    else cargarAtletas(this, [...nuestros(), ...ellos(), j, r], packsDe('Fight'), undefined, true);
     queueEscenario(this, this.escenario);
   }
 
@@ -330,6 +334,8 @@ export class Fight extends Phaser.Scene implements World {
       // entrenando, el rival es un saco: no se mueve ni pega
       if (!this.data0.practica) this.brains.set(a, new Brain(a, (modo === '4v4' ? 0.85 : 1) * ajustes().cpuAgresion));
     });
+    // en el tatami, cada uno con su judogi: el pack blanco para la persona y el azul para el rival
+    if (this.judo) for (const a of this.actors) { a.fig.anim.prefer = a.team === 0 ? 'judo' : 'judo_azul'; a.play('idle', true); }
     // en el tatami no hay armas
     const n = this.judo ? 0 : modo === '4v4' ? 6 : 4;
     for (let i = 0; i < n; i++) this.items.push(new Item(this, ARMAS_PISO[i], 200 + Math.random() * 240, 10 + Math.random() * (DEPTH - 20)));
@@ -429,7 +435,8 @@ export class Fight extends Phaser.Scene implements World {
     this.tweens.add({ targets: t, y: t.y - 16, alpha: 0, duration: 650, onComplete: () => t.destroy() });
   }
   onHit(from: Actor | null, v: Actor, _dmg: number, kd: boolean) {
-    if (this.judo && kd && from && from.team !== v.team && this.phase === 'play') this.puntoJudo(from, from.st === 'grab' || from.st === 'throw');
+    // el seoi nage es ippon; el o-soto-gari, waza-ari; tumbarlo de un golpe, waza-ari
+    if (this.judo && kd && from && from.team !== v.team && this.phase === 'play') this.puntoJudo(from, (from.st === 'grab' && from.tecnica !== 'osoto') || from.st === 'throw');
     if (from === this.player && this.data0.practica) this.golpes.push(from.fig.anim.name);
     this.sfx(kd ? 'critico' : 'golpe', kd ? 0.55 : 0.45);
     this.sfx(v.team === 0 ? 'jugador_dolor' : 'enemigo_dolor', 0.25);
@@ -600,12 +607,17 @@ export class Fight extends Phaser.Scene implements World {
       band.fillStyle(0x08081a, 0.82).fillRect(-80, 120, 800, 70);
       band.fillStyle(0xf2c230).fillRect(-80, 120, 800, 2).fillRect(-80, 188, 800, 2);
       const t1 = this.uiAdd(txt(this, 320, 138, 'JUDO Y VOVINAM · GANA EL PRIMERO A 3', 'fuente_titulo_plata', 1).setDepth(8500));
-      const t2 = this.uiAdd(txt(this, 320, 160, rotular('AGARRA Y LANZA CON {PATADA}: ¡IPPON! (2)', this.pad.fuente), 'fuente_ui', 1).setDepth(8500).setTint(0xffe080));
-      const t3 = this.uiAdd(txt(this, 320, 174, 'TÚMBALO DE UN GOLPE: ¡WAZA-ARI! (1)', 'fuente_ui', 1).setDepth(8500).setTint(0xc0c0e0));
+      const t2 = this.uiAdd(txt(this, 320, 160, rotular('AGARRADO: ADELANTE + {PATADA} SEOI NAGE, ¡IPPON! (2)', this.pad.fuente), 'fuente_ui', 1).setDepth(8500).setTint(0xffe080));
+      const t3 = this.uiAdd(txt(this, 320, 174, rotular('{PATADA} SOLA: O-SOTO-GARI · DE UN GOLPE: ¡WAZA-ARI! (1)', this.pad.fuente), 'fuente_ui', 1).setDepth(8500).setTint(0xc0c0e0));
       await new Promise<void>((r) => this.time.delayedCall(2600, r));
       band.destroy(); t1.destroy(); t2.destroy(); t3.destroy();
     }
-    if (this.judo) this.suena('pitazo_largo', 0.5);
+    if (this.judo) {
+      // frente a frente en el centro del tatami para el saludo, como en cada ¡HAJIME!
+      for (const a of this.actors) { a.x = a.team === 0 ? 220 : 420; a.y = 50; a.vx = a.vy = 0; }
+      await this.rei();
+      this.suena('pitazo_largo', 0.5);
+    }
     await this.banner(this.judo ? '¡HAJIME!' : '¡LISTOS!', 'fuente_titulo_plata', 3, 800);
     this.phase = 'play';
     chip.blip(1320, 0.2, 'sq50', 0.2, 1760);
@@ -926,7 +938,7 @@ export class Fight extends Phaser.Scene implements World {
     const r = Math.ceil(this.relojJudo);
     this.relojTxt?.setText(`${Math.floor(r / 60)}:${String(r % 60).padStart(2, '0')}`).setTint(r <= 10 && Math.floor(this.relojJudo * 3) % 2 ? 0xff6060 : 0xffffff);
     if (this.relojJudo > 0) return;
-    if (this.puntos[0] !== this.puntos[1]) { this.finJudo(this.puntos[0] > this.puntos[1] ? 0 : 1); return; }
+    if (this.puntos[0] !== this.puntos[1]) { void this.finJudo(this.puntos[0] > this.puntos[1] ? 0 : 1); return; }
     this.oro = true;
     void this.banner('¡PUNTO DE ORO!', 'fuente_titulo', 2, 1100);
   }
@@ -943,23 +955,37 @@ export class Fight extends Phaser.Scene implements World {
     void this.banner(ippon ? '¡IPPON!' : '¡WAZA-ARI!', 'fuente_titulo', ippon ? 3 : 2, 1000);
     const fin = this.puntos[tm] >= 3 || this.oro;
     this.time.delayedCall(1700, () => {
-      if (fin) { this.finJudo(tm); return; }
+      if (fin) { void this.finJudo(tm); return; }
       // ¡Hajime! de nuevo: cada uno a su lado, de pie
       for (const a of this.actors) {
         a.soltar();
         a.x = a.team === 0 ? 220 : 420; a.y = 50; a.z = 0; a.vx = a.vy = a.vz = 0;
         a.hp = a.maxHp;
         a.left = a.team === 1;
+        a.tecnica = null;
         a.setSt('idle', 'idle');
       }
-      void this.banner('¡HAJIME!', 'fuente_titulo_plata', 2, 600).then(() => { this.phase = 'play'; });
+      void this.rei().then(() => this.banner('¡HAJIME!', 'fuente_titulo_plata', 2, 600)).then(() => { this.phase = 'play'; });
     });
   }
 
-  private finJudo(tm: 0 | 1) {
-    this.phase = 'play';
+  private async finJudo(tm: 0 | 1) {
+    this.phase = 'intro';
     this.suena('pitazo_largo', 0.5);
+    // el rei del final, de frente al rival
+    for (const a of this.actors) if (a.alive) { a.soltar(); a.left = a.team === 1; a.setSt('idle', 'idle'); }
+    await this.rei();
+    this.phase = 'play';
     if (tm === 0) this.victory(); else this.defeat();
+  }
+
+  /** El rei (lote B4B6 bis): los dos se saludan de frente antes de seguir. Si el kit no lo trae, no espera. */
+  private async rei() {
+    const conRei = this.actors.filter((a) => a.alive && a.tiene('bow'));
+    if (!conRei.length) return;
+    for (const a of conRei) { a.left = a.team === 1; a.setSt('rei', 'bow'); }
+    await new Promise<void>((r) => this.time.delayedCall(900, r));
+    for (const a of conRei) if (a.st === 'rei') a.setSt('idle', 'idle');
   }
 
   /** Las reglas de la final: el reloj, lo pesado que cae cada 30 s y la azotea que se achica a los 90 s. */

@@ -40,7 +40,7 @@ interface Jug {
   /** la máquina: cuándo decide y adónde va */
   ia: { t: number; tx: number; ty: number };
 }
-interface Tiro { entra: boolean; valor: number; x0: number; y0: number; z0: number; t: number; tt: number; tirador: Jug; clavada: boolean; nekketsu: boolean; taponIntentado: boolean }
+interface Tiro { entra: boolean; valor: number; x0: number; y0: number; z0: number; t: number; tt: number; tirador: Jug; clavada: boolean; nekketsu: boolean; taponIntentado: boolean; tapa?: Jug | null }
 interface Balon {
   x: number; y: number; z: number; vx: number; vy: number; vz: number;
   dueño: Jug | null; tiro: Tiro | null; libre: number; ultimo: Jug | null;
@@ -453,10 +453,25 @@ export class Basket extends EventScene {
     const lejos = this.dAro(j) > ALCANCE_CLAVADA;
     if (lejos) { j.vz = 360; this.letrero(j, '¡VUELA!', 0x8ae0ff); }
     this.tweens.add({ targets: j, x: ARO.x - 10, y: ARO.y, duration: lejos ? 460 : 380, ease: 'Quad.out' });
-    // la tapa un rival que está saltando junto al aro (la tuya, en Paseo, casi nunca)
-    const tapado = !nekketsu && this.js.some((o) => o.team !== j.team && o.z > 20 && Math.hypot(o.x - (ARO.x - 10), o.y - ARO.y) < 26) && !(j.team === 0 && ajustes().nombre === 'PASEO' && Math.random() < 0.7);
-    this.lanzarTiro(j, !tapado, nekketsu ? 2 : 1, true, nekketsu);
+    // ¿entra? La Nekketsu siempre. La normal depende del nivel, de si vuela de lejos y de si lo marcan: el que lo
+    // marca salta a taparla
+    const marca = nekketsu ? undefined : this.marcaClavada(j);
+    let prob = j.team === 0 ? ({ PASEO: 0.9, NORMAL: 0.74, NEKKETSU: 0.6 } as Record<string, number>)[ajustes().nombre] ?? 0.74 : 0.55 + 0.25 * ajustes().cpuAgresion;
+    if (lejos) prob -= 0.15;
+    if (marca) {
+      prob -= j.team === 0 && ajustes().nombre === 'PASEO' ? 0.15 : 0.32;
+      if (marca.z === 0) { marca.vz = 250; marca.fig.set('jump_rise', true); }
+    }
+    if (this.d.practica) prob = 1;
+    const entra = nekketsu || Math.random() < prob;
+    this.lanzarTiro(j, entra, nekketsu ? 2 : 1, true, nekketsu);
+    if (!entra && this.bola.tiro) this.bola.tiro.tapa = marca ?? null;
     this.cameras.main.shake(nekketsu ? 260 : 120, nekketsu ? 0.01 : 0.004);
+  }
+
+  /** El rival que marca una clavada: pegado al que clava o parado en la pintura, de pie y libre. */
+  private marcaClavada(j: Jug): Jug | undefined {
+    return this.js.find((o) => o.team !== j.team && o.st === 'libre' && (Math.hypot(o.x - j.x, o.y - j.y) < 34 || Math.hypot(o.x - (ARO.x - 10), o.y - ARO.y) < 30));
   }
 
   private lanzarTiro(j: Jug, entra: boolean, valor: number, clavada: boolean, nekketsu = false) {
@@ -501,7 +516,7 @@ export class Basket extends EventScene {
     let s = '';
     if (c && b.dueño === c) {
       if (this.nek[0] >= 100) s = this.dAro(c) < ALCANCE_CLAVADA ? '{ESPECIAL}: ¡CLAVADA NEKKETSU!' : '{ESPECIAL}: ¡TIRO DE FUEGO!';
-      else if (this.dAro(c) < ALCANCE_CLAVADA) s = '{SALTO}: ¡CLAVADA!';
+      else if (this.dAro(c) < ALCANCE_CLAVADA) s = this.marcaClavada(c) ? '¡TE MARCAN! {PUÑO} PASA O {PATADA} TIRA' : '{SALTO}: ¡CLAVADA!';
     } else if (c && b.dueño && b.dueño.team === 1) s = this.nek[0] >= 100 ? '{ESPECIAL}: ¡TACLEADA!' : Math.hypot(b.dueño.x - c.x, b.dueño.y - c.y) < 40 ? '{PUÑO}: ¡RÓBALA!' : '';
     this.avisoTxt.setText(rotular(s, this.pad.fuente));
   }
@@ -648,7 +663,8 @@ export class Basket extends EventScene {
     if (!t.entra) {
       b.vx = -Phaser.Math.Between(40, 100); b.vy = (Math.random() - 0.5) * 110; b.vz = 140; b.libre = 0.2;
       this.suena('aro_fallo', 0.5, () => this.sound.play('golpe', { volume: 0.25, rate: 1.6 }));
-      this.letrero(null, t.clavada ? '¡TAPONAZO!' : '¡AL ARO!', 0xffffff);
+      if (t.tapa) { this.letrero(t.tapa, '¡TAPÓN!', 0x8ae0ff); this.stats.tapones[t.tapa.team]++; this.carga(t.tapa.team, 14); this.sound.play('bloqueo', { volume: 0.5 }); }
+      else this.letrero(null, t.clavada ? '¡SE SALIÓ!' : '¡AL ARO!', 0xffffff);
       return;
     }
     this.puntos[j.team] += t.valor;

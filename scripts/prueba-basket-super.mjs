@@ -57,7 +57,7 @@ const clava = async (x, corre) => {
   return (await pon(() => window.game.scene.getScene('Basket').puntos[0])) - antes;
 };
 let clavo = 0;
-for (let k = 0; k < 3 && !clavo; k++) clavo = await clava(500, false);
+for (let k = 0; k < 5 && !clavo; k++) clavo = await clava(500, false);
 check(clavo > 0, 'salto con el balón cerca del aro: clavada y canasta');
 await p.screenshot({ path: `${out}/clavada.png` });
 

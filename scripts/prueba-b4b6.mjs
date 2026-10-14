@@ -21,26 +21,46 @@ const ir = (e, d) => p.evaluate(([e, d]) => { const g = window.game; g.scene.get
 const ev = (f, a) => p.evaluate(f, a);
 const shot = (n) => p.screenshot({ path: `${out}/${n}.png` });
 
-// 1) judo: agarre de solapa y la proyección sincronizada
+// 1) judo: en judogi, el rei, agarre de solapa, el seoi nage girado (adelante + patada) y el o-soto-gari (patada sola)
 await ir('Fight', { modo: 'judo', jugador: 'rick', rival: 'kenji' });
+const reiVisto = await p.waitForFunction(() => window.game.scene.getScene('Fight')?.actors?.some((a) => a.fig.anim.name === 'bow'), null, { timeout: 30000 }).then(() => true, () => false);
+check(reiVisto, 'judo: el rei antes del ¡HAJIME!');
+await shot('judo_rei');
 await p.waitForFunction(() => window.game.scene.getScene('Fight')?.phase === 'play', null, { timeout: 30000 });
-await ev(() => { const f = window.game.scene.getScene('Fight'); f.brains.clear(); const [a, r] = f.actors; a.x = 300; r.x = 318; a.y = r.y = 50; r.setSt('dizzy', 'dizzy'); a.left = false; a.intentaAgarrar(1, true); });
+let s = await ev(() => { const f = window.game.scene.getScene('Fight'); return f.actors.map((a) => a.fig.anim.pack).join(','); });
+check(s === 'judo,judo_azul', 'judo: blanco la persona y azul el rival', s);
+const agarrar = () => ev(() => { const f = window.game.scene.getScene('Fight'); f.brains.clear(); const [a, r] = f.actors; a.x = 300; r.x = 318; a.y = r.y = 50; a.left = false; r.left = true; a.setSt('idle', 'idle'); r.setSt('dizzy', 'dizzy'); a.intentaAgarrar(1, true); });
+await agarrar();
 await p.waitForTimeout(500);
-let s = await ev(() => { const f = window.game.scene.getScene('Fight'); const [a, r] = f.actors; return { a: a.st, an: a.fig.anim.name, r: r.st, rn: r.fig.anim.name }; });
+s = await ev(() => { const f = window.game.scene.getScene('Fight'); const [a, r] = f.actors; return { an: a.fig.anim.name, rn: r.fig.anim.name }; });
 check(s.an === 'judo_grip' && s.rn === 'judo_grip', 'judo: los dos agarrados de solapa', JSON.stringify(s));
 await shot('judo_0_agarre');
-await p.keyboard.down('k'); await p.waitForTimeout(40); await p.keyboard.up('k');
+await p.keyboard.down('ArrowRight'); await p.keyboard.down('k'); await p.waitForTimeout(50); await p.keyboard.up('k'); await p.keyboard.up('ArrowRight');
 const vuelo = [];
-for (let i = 0; i < 10; i++) {
-  await p.waitForTimeout(70);
-  const q = await ev(() => { const f = window.game.scene.getScene('Fight'); const [a, r] = f.actors; return { af: a.fig.anim.frame, an: a.fig.anim.name, rf: r.fig.anim.frame, rn: r.fig.anim.name, rz: Math.round(r.z), detras: r.detras, rd: r.fig.depth < a.fig.depth, pts: f.puntos?.join('-') }; });
+for (let i = 0; i < 12; i++) {
+  await p.waitForTimeout(65);
+  const q = await ev(() => { const f = window.game.scene.getScene('Fight'); const [a, r] = f.actors; return { af: a.fig.anim.frame, an: a.fig.anim.name, flip: a.fig.flipX, left: a.left, rf: r.fig.anim.frame, rn: r.fig.anim.name, rx: Math.round(r.x - a.x), rz: Math.round(r.z), detras: r.detras, pts: f.puntos?.join('-') }; });
   vuelo.push(q);
-  if (i === 3 || i === 5) await shot(`judo_${i}_proyeccion`);
+  if (i === 3 || i === 5) await shot(`judo_${i}_seoi`);
 }
-console.log('  judo:', vuelo.map((q) => `${q.an}:${q.af}/${q.rn}:${q.rf} z${q.rz}${q.detras ? ' detrás' : ''}`).join(' | '));
-check(vuelo.some((q) => q.an === 'judo_throw' && q.rn === 'judo_thrown' && q.af === q.rf), 'judo: proyección y proyectado en el mismo cuadro');
-check(vuelo.some((q) => q.detras && q.rd && q.rz > 10), 'judo: del 3 al 5 vuela en la carga, detrás');
-check(vuelo.some((q) => q.pts && q.pts !== '0-0'), 'judo: la proyección cuenta', vuelo.at(-1).pts);
+console.log('  seoi:', vuelo.map((q) => `${q.an}:${q.af}${q.flip ? ' espejo' : ''}/${q.rn}:${q.rf} dx${q.rx} z${q.rz}${q.detras ? ' detrás' : ''}`).join(' | '));
+check(vuelo.some((q) => q.an === 'judo_throw' && q.af >= 2 && q.flip && !q.left), 'judo: en los cuadros girados el sprite va espejado');
+check(vuelo.some((q) => q.an === 'judo_throw' && q.rn === 'judo_thrown' && q.af === q.rf), 'judo: seoi nage y uke en el mismo cuadro');
+check(vuelo.some((q) => q.detras && q.rz > 10), 'judo: del 3 al 5 uke va en la carga, detrás');
+check(vuelo.some((q) => q.an === 'judo_throw' && q.af >= 7 && q.rx < 0), 'judo: uke cae del otro lado');
+const tras = vuelo.at(-1);
+check(tras.pts === '2-0', 'judo: el seoi nage es ippon', tras.pts);
+// el o-soto-gari, después del ¡HAJIME!
+await p.waitForFunction(() => window.game.scene.getScene('Fight')?.phase === 'play', null, { timeout: 30000 });
+await agarrar();
+await p.waitForTimeout(500);
+await p.keyboard.down('k'); await p.waitForTimeout(50); await p.keyboard.up('k');
+const os = [];
+for (let i = 0; i < 12; i++) { await p.waitForTimeout(65); os.push(await ev(() => { const f = window.game.scene.getScene('Fight'); const [a, r] = f.actors; return { an: a.fig.anim.name, af: a.fig.anim.frame, rn: r.fig.anim.name, rz: Math.round(r.z), pts: f.puntos?.join('-') }; })); if (i === 5) await shot('judo_osoto'); }
+console.log('  osoto:', os.map((q) => `${q.an}:${q.af}/${q.rn} z${q.rz}`).join(' | '));
+check(os.some((q) => q.an === 'osoto_gari' && q.rn === 'osoto_gari_thrown'), 'judo: patada sola es o-soto-gari');
+check(os.every((q) => q.rz === 0), 'judo: en el o-soto-gari uke no vuela');
+check(os.at(-1).pts === '3-0', 'judo: el o-soto-gari es waza-ari', os.at(-1).pts);
 
 // 2) tejo: en la mano hasta la suelta
 await ir('Tejo', { jugador: 'andres' });
@@ -87,6 +107,15 @@ check(qj.some((q) => q.an === 'dodge_jump' && q.z > 8), 'quemado: salto de bolit
 await p.waitForTimeout(2500);
 const amb = await ev(() => window.game.cache.audio.exists('amb_liceo'));
 check(amb, 'quemado: el ambiente del liceo cargó');
+
+// 5b) la canción del mundo al volver a jugarlo: antes, la segunda vez quedaba muda
+const suena = () => ev(() => window.game.sound.getAll('mus_playa_margarita').some((x) => x.isPlaying));
+for (const vez of [1, 2, 3]) {
+  await ir('Voley', { jugador: 'rick' });
+  await p.waitForFunction(() => window.game.scene.getScene('Voley')?.sys.settings.status === 5, null, { timeout: 30000 });
+  await p.waitForTimeout(2500);
+  check(await suena(), `la canción de Margarita suena al entrar (vez ${vez})`);
+}
 
 // 6) el acorde del ganador
 await ev(() => { window.game.registry.set('gira', { jugador: 'rick', idx: 5, puntos: [30, 10], resultados: [], pruebas: ['Vallas'], equipos: ['familia_gg', 'instituto_nekketsu'] }); });

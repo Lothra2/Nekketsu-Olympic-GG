@@ -241,13 +241,15 @@ export function cutPortraits(scene: Phaser.Scene) {
  * no mete un silencio cada vuelta. Devuelve el sonido (o null si el kit no lo trae, o la escena se fue antes).
  */
 /**
- * Toca una vez una música corta del kit (el acorde de victoria de un equipo), cargándola la primera vez. Devuelve
- * false si el kit no la trae o no se pudo tocar.
+ * Carga (si hace falta) un audio del kit para una escena y avisa si la escena sigue siendo la misma corrida cuando
+ * llega. Ojo: dentro del create() la escena todavía no está "activa" (está creándose), y la segunda vez que entras el
+ * audio ya está en caché y no hay espera; por eso se mira la corrida y no isActive(), que dejaba muda la canción al
+ * volver a jugar un mundo.
  */
-export async function unaVez(scene: Phaser.Scene, n: string, volumen = 0.6): Promise<boolean> {
-  const a = kit().audio.musica?.[n];
-  if (!a) return false;
-  const key = `mus_${n}`;
+async function audioListo(scene: Phaser.Scene, key: string, a: Sonido): Promise<boolean> {
+  let cerrada = false;
+  const alCerrar = () => { cerrada = true; };
+  scene.events.once(Phaser.Scenes.Events.SHUTDOWN, alCerrar);
   if (!scene.cache.audio.exists(key)) {
     await new Promise<void>((res) => {
       scene.load.audio(key, rutas(a));
@@ -255,7 +257,20 @@ export async function unaVez(scene: Phaser.Scene, n: string, volumen = 0.6): Pro
       scene.load.start();
     });
   }
-  if (!scene.sys.isActive() || !scene.cache.audio.exists(key)) return false;
+  scene.events.off(Phaser.Scenes.Events.SHUTDOWN, alCerrar);
+  const st = scene.sys.settings.status;
+  return !cerrada && st >= Phaser.Scenes.LOADING && st <= Phaser.Scenes.PAUSED && scene.cache.audio.exists(key);
+}
+
+/**
+ * Toca una vez una música corta del kit (el acorde de victoria de un equipo), cargándola la primera vez. Devuelve
+ * false si el kit no la trae o no se pudo tocar.
+ */
+export async function unaVez(scene: Phaser.Scene, n: string, volumen = 0.6): Promise<boolean> {
+  const a = kit().audio.musica?.[n];
+  if (!a) return false;
+  const key = `mus_${n}`;
+  if (!(await audioListo(scene, key, a))) return false;
   const s = scene.sound.add(key, { volume: volumen });
   s.once(Phaser.Sound.Events.COMPLETE, () => s.destroy());
   scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { if (!s.pendingRemove) s.destroy(); });
@@ -266,14 +281,7 @@ export async function bucle(scene: Phaser.Scene, seccion: 'musica' | 'ambientes'
   const a = kit().audio[seccion]?.[n];
   if (!a) return null;
   const key = `${seccion === 'musica' ? 'mus' : 'amb'}_${n}`;
-  if (!scene.cache.audio.exists(key)) {
-    await new Promise<void>((res) => {
-      scene.load.audio(key, rutas(a));
-      scene.load.once(Phaser.Loader.Events.COMPLETE, () => res());
-      scene.load.start();
-    });
-  }
-  if (!scene.sys.isActive() || !scene.cache.audio.exists(key)) return null;
+  if (!(await audioListo(scene, key, a))) return null;
   const s = scene.sound.add(key, { volume: volumen });
   const largo = a.muestras && a.frecuencia ? a.muestras / a.frecuencia : 0;
   if (largo > 0) {

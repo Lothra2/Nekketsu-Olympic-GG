@@ -44,8 +44,14 @@ export class Figura extends Phaser.GameObjects.Sprite {
     const a = this.anim;
     if (!a.data) return;
     this.setTexture(texKey(this.who, a.pack), frameName(a.name, this.row, a.frame));
-    this.setFlipX(this.left);
+    this.setFlipX(this.espejo);
   }
+
+  /** El cuadro está dibujado girado (el seoi nage de espaldas, lote B4B6 bis): se espeja al revés de como mira. */
+  get girado(): boolean { return !!(this.anim.data as { girado?: boolean[] } | undefined)?.girado?.[this.anim.frame]; }
+
+  /** Si el sprite (y los datos de este cuadro) van espejados: mira a la izquierda, o el cuadro va girado. */
+  get espejo(): boolean { return this.left !== this.girado; }
 
   /** Índice de la fila actual en los datos por cuadro. */
   get rowIndex(): number {
@@ -59,7 +65,7 @@ export class Figura extends Phaser.GameObjects.Sprite {
   pelota(): { x: number; y: number; detras: boolean } | null {
     const o = this.anim.data?.objetos?.[this.rowIndex]?.[this.anim.frame]?.[0];
     if (!o) return null;
-    return { x: this.x + (this.left ? -o.x : o.x) * this.scaleX, y: this.y + o.y * this.scaleY, detras: !!o.detras };
+    return { x: this.x + (this.espejo ? -o.x : o.x) * this.scaleX, y: this.y + o.y * this.scaleY, detras: !!o.detras };
   }
 
   /**
@@ -82,14 +88,14 @@ export class Figura extends Phaser.GameObjects.Sprite {
     const d = this.anim.data?.arma?.[this.rowIndex]?.[this.anim.frame];
     if (!d) return null;
     const [ax, ay, ang, detras] = d;
-    return { x: this.x + (this.left ? -ax : ax) * this.scaleX, y: this.y + ay * this.scaleY, k: ((Math.round(ang / 22.5) % 16) + 16) % 16, detras: !!detras };
+    return { x: this.x + (this.espejo ? -ax : ax) * this.scaleX, y: this.y + ay * this.scaleY, k: ((Math.round(ang / 22.5) % 16) + 16) % 16, detras: !!detras };
   }
 
   /** Dónde está, en pixeles de la escena, el punto de un evento (la suelta del tejo) en la fila que mira. */
   puntoDe(tipo: Evento['tipo']): { x: number; y: number } | null {
     const p = this.anim.data?.eventos?.find((e) => e.tipo === tipo)?.punto?.[this.rowIndex];
     if (!p) return null;
-    return { x: this.x + (this.left ? -p[0] : p[0]) * this.scaleX, y: this.y + p[1] * this.scaleY };
+    return { x: this.x + (this.espejo ? -p[0] : p[0]) * this.scaleX, y: this.y + p[1] * this.scaleY };
   }
 
   /** El cuadro de un evento de la animación que suena (o -1 si no lo trae). */

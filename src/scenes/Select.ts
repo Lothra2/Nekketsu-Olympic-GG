@@ -170,7 +170,9 @@ export class Select extends Phaser.Scene {
   /** El atleta en grande; si sus animaciones todavía no cargaron, se cargan y aparece. */
   private mostrar(id: string) {
     const poner = () => {
-      if (!this.scene.isActive() || this.esEquipos || this.atletasDelPaso[this.sel] !== id) return;
+      // creándose también vale: si el atleta ya estaba cargado, esto corre dentro del create()
+      const st = this.sys.settings.status;
+      if (st < Phaser.Scenes.CREATING || st > Phaser.Scenes.PAUSED || this.esEquipos || this.atletasDelPaso[this.sel] !== id) return;
       this.fig?.destroy();
       this.fig = new Figura(this, 320, 340, id, this.paso === 'jugador' ? 'celebrate' : 'taunt').setScale(2.5);
       this.fig.row = 'down';
@@ -183,6 +185,7 @@ export class Select extends Phaser.Scene {
     this.sound.play('elegir', { volume: 0.5 });
     if (this.paso === 'equipo') {
       this.miEquipo = this.equiposDelPaso[this.sel].id;
+      this.precargar(this.miEquipo);
       this.paso = 'jugador';
       this.sel = 0;
       this.build();
@@ -205,11 +208,21 @@ export class Select extends Phaser.Scene {
     }
     if (this.paso === 'rivalEquipo') {
       this.suEquipo = this.equiposDelPaso[this.sel].id;
+      this.precargar(this.suEquipo);
       if (this.modo === '1v1' || this.modo === 'judo') { this.paso = 'rival'; this.sel = 0; this.build(); return; }
       this.salir();
       return;
     }
     this.salir(this.atletasDelPaso[this.sel]);
+  }
+
+  /**
+   * Mientras se elige, baja los atletas de un equipo: la primera vez cada atleta llega en su paquete (todas sus
+   * animaciones), así que la prueba que viene después arranca casi sin espera.
+   */
+  private precargar(id: string) {
+    const e = equipo(id);
+    if (e) cargarAtletas(this, e.atletas, ['ngg_mov'], () => {});
   }
 
   /** Arranca lo elegido, con el partido ya puesto. */

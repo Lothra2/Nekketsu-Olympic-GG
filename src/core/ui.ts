@@ -65,3 +65,42 @@ export function speedLines(scene: Phaser.Scene, depth = 8000, color = 0xffffff):
   g.once('destroy', () => ev.remove());
   return g;
 }
+
+/** Los consejos de la pantalla de carga: para que la espera enseñe algo. */
+const CONSEJOS = [
+  'CON LA BARRA LLENA, LA ESTRELLA ES TU SÚPER GOLPE',
+  'EN EL VÓLEY, PATADA SE LA PASA A TU COMPAÑERO',
+  'EN EL BÁSQUET, SI TE MARCAN, PÁSALA',
+  'PEGADO AL QUE BOTA, PUÑO LE ROBA EL BALÓN',
+  'EN LA JABALINA, UN TOQUE CORTO LANZA A 40°',
+  'EN EL QUEMADO, SALTA Y EL BALÓN PASA POR DEBAJO',
+  'EN EL FÚTBOL, CERCA DEL ARCO EL PASE SALE DE CENTRO',
+  'EN LA GARROCHA, CLAVA JUSTO EN LA CAJITA',
+  'EN EL TEJO, LA MOÑONA VALE 9',
+  'EN LA PELEA, MANTÉN LA ESTRELLA Y TE CUBRES',
+  'SI TE ANOTAN, TU BARRA SE LLENA MÁS RÁPIDO',
+];
+
+/**
+ * La pantalla de carga de una prueba: el nombre, la barra y un consejo. Va en el preload; se quita sola al terminar
+ * de cargar (o al crear la escena, si no había nada que bajar).
+ */
+export function pantallaCarga(scene: Phaser.Scene, titulo: string) {
+  const fondo = scene.add.rectangle(320, 180, 2000, 2000, 0x0b0b14).setDepth(9990).setScrollFactor(0);
+  const t = txt(scene, 320, 150, titulo, 'fuente_titulo', 2).setDepth(9991).setScrollFactor(0);
+  const consejo = txt(scene, 320, 222, CONSEJOS[Math.floor(Math.random() * CONSEJOS.length)], 'fuente_ui', 1).setDepth(9991).setTint(0x9ac8ff).setScrollFactor(0);
+  const bar = scene.add.graphics().setDepth(9991).setScrollFactor(0);
+  const pintar = (v: number) => {
+    bar.clear();
+    bar.lineStyle(2, 0xf2c230).strokeRect(220, 182, 200, 12);
+    bar.fillStyle(0xf2c230).fillRect(223, 185, 194 * v, 6);
+  };
+  pintar(0);
+  const alProgreso = (v: number) => pintar(v);
+  scene.load.on(Phaser.Loader.Events.PROGRESS, alProgreso);
+  const quitar = () => {
+    scene.load.off(Phaser.Loader.Events.PROGRESS, alProgreso);
+    for (const o of [fondo, t, consejo, bar]) o.destroy();
+  };
+  scene.events.once(Phaser.Scenes.Events.CREATE, quitar);
+}
