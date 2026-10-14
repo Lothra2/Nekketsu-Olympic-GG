@@ -16,8 +16,8 @@ await p.waitForFunction(() => window.game?.scene.isActive('Tap'), null, { timeou
 await p.mouse.click(400, 200);
 let fallas = 0;
 const check = (ok, s) => { if (!ok) fallas++; console.log(`${ok ? 'ok   ' : 'FALLA'} ${s}`); };
-const ir = (e, d) => p.evaluate(([e, d]) => { const g = window.game; g.scene.getScenes(true).forEach((x) => g.scene.stop(x.scene.key)); g.scene.start(e, d); }, [e, d]);
-const st = () => p.evaluate(() => { const s = window.game.scene.getScene('Tejo'); return { estado: s.estado, u: s.u, p: s.p, paso: s.coach?.i ?? -1, fase: s.fase, humano: s.actual?.c.human, m: s.marcador.join('-'), ronda: s.ronda, mechas: s.mechas.map((x) => (x ? 1 : 0)).join('') }; });
+const ir = (e, d) => p.evaluate(([e, d]) => { const g = window.game; g.scene.getScenes(false).forEach((x) => { const st = x.sys.settings.status; if (st >= 3 && st <= 7) g.scene.stop(x.scene.key); }); g.scene.start(e, d); }, [e, d]);
+const st = () => p.evaluate(() => { const s = window.game.scene.getScene('Tejo'); return { estado: s.estado, u: s.u, p: s.p, paso: s.coach?.i ?? -1, fase: s.fase, humano: s.actual ? s.tuyo(s.actual) : false, m: s.marcador.join('-'), ronda: s.ronda, mechas: s.mechas.map((x) => (x ? 1 : 0)).join('') }; });
 const toque = async () => { await p.keyboard.down('k'); await p.waitForTimeout(30); await p.keyboard.up('k'); };
 
 // el entrenamiento: al bocín en los pasos 1, 2 y 4; a la mecha de adelante en el 3
@@ -29,7 +29,7 @@ while (Date.now() - t0 < 90000) {
   const s = await st();
   if (s.paso !== visto) { visto = s.paso; console.log(`paso ${s.paso}`); await p.screenshot({ path: `${out}/paso_${s.paso}.png` }); }
   if (s.fase === 'fin') break;
-  const metaP = s.paso === 2 ? 0.62 - 0.34 / 3.2 : 0.62;
+  const metaP = s.paso === 2 ? 0.5 - 0.34 / 3 : 0.5;
   if (s.estado === 'apunta' && Math.abs(s.u) < 0.04) await toque();
   else if (s.estado === 'fuerza' && Math.abs(s.p - metaP) < 0.015) await toque();
   await p.waitForTimeout(10);
@@ -43,11 +43,11 @@ await ir('Tejo', { jugador: 'alana' });
 await p.waitForFunction(() => window.game.scene.getScene('Tejo').fase === 'juego', null, { timeout: 20000 });
 const t1 = Date.now();
 let k = 0;
-while (Date.now() - t1 < 180000) {
+while (Date.now() - t1 < 300000) {
   const s = await st();
   if (s.fase === 'fin') break;
   if (s.humano && s.estado === 'apunta' && Math.abs(s.u) < 0.15) await toque();
-  else if (s.humano && s.estado === 'fuerza' && Math.abs(s.p - 0.62) < 0.05) await toque();
+  else if (s.humano && s.estado === 'fuerza' && Math.abs(s.p - 0.5) < 0.05) await toque();
   if (s.estado === 'vuela' && k < 6) { await p.waitForTimeout(700); await p.screenshot({ path: `${out}/tiro_${++k}.png` }); }
   await p.waitForTimeout(15);
 }

@@ -13,7 +13,7 @@ const logs = []; p.on('pageerror', (e) => logs.push(e.message));
 await p.goto(url);
 await p.waitForFunction(() => window.game?.scene.isActive('Tap'), null, { timeout: 60000 });
 await p.mouse.click(400, 200);
-await p.evaluate(() => { const g = window.game; g.scene.getScenes(true).forEach((x) => g.scene.stop(x.scene.key)); g.scene.start('Tamawari', { jugador: 'alana', practica: true }); });
+await p.evaluate(() => { const g = window.game; g.scene.getScenes(false).forEach((x) => { const st = x.sys.settings.status; if (st >= 3 && st <= 7) g.scene.stop(x.scene.key); }); g.scene.start('Tamawari', { jugador: 'alana', practica: true }); });
 await p.waitForFunction(() => window.game.scene.getScene('Tamawari').coach, null, { timeout: 20000 });
 const st = () => p.evaluate(() => { const s = window.game.scene.getScene('Tamawari'); const a = s.jugadores[0].a; const t = s.trepa.get(a); return { x: Math.round(a.x), y: Math.round(a.y), st: a.st, h: t ? Math.round(t.h) : -1, paso: s.coach?.i ?? s.coach?.paso, bolas: s.postes.map((q) => Math.round(q.vida)).join('/'), fase: s.fase, otros: s.jugadores.slice(1).map((j) => `${j.c.id}:${s.trepa.has(j.a) ? 'T' + Math.round(s.trepa.get(j.a).h) : j.a.st}`).join(' ') }; });
 const tecla = async (k, ms = 50) => { await p.keyboard.down(k); await p.waitForTimeout(ms); await p.keyboard.up(k); };

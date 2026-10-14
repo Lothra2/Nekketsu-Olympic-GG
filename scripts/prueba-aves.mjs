@@ -21,7 +21,7 @@ await page.waitForTimeout(300);
 const arrancar = (esc, datos) => page.evaluate(([e, d]) => {
   window.__esc = e;
   const g = window.game;
-  g.scene.getScenes(true).forEach((x) => g.scene.stop(x.scene.key));
+  g.scene.getScenes(false).forEach((x) => { const st = x.sys.settings.status; if (st >= 3 && st <= 7) g.scene.stop(x.scene.key); });
   g.scene.start(e, { jugador: 'sophie', ...d });
 }, [esc, datos]);
 const aves = () => page.evaluate(() => {

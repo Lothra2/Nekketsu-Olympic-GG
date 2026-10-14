@@ -8,6 +8,7 @@ import { efecto } from '../core/fx';
 import { kit } from '../core/kit';
 import { buildLogo, fireworks } from './logo';
 import { JET, PARADAS } from '../gfx/mapa';
+import { cargarAtletas, packsDe } from '../core/carga';
 
 const FAMILIA = [
   { id: 'rick', nombre: 'RICK', apodo: 'EL CAPITÁN', tecnica: 'PUÑO MACH', color: 0x2a5bd7 },
@@ -50,6 +51,9 @@ export class Intro extends Phaser.Scene {
   private masks: Phaser.GameObjects.Graphics[] = [];
 
   constructor() { super('Intro'); }
+
+  /** La Familia y el Instituto de la historia. */
+  preload() { cargarAtletas(this, ['rick', 'steph', 'sophie', 'alana', 'kenji', 'ryu', 'goro', 'tetsu'], packsDe('Intro'), undefined, true); }
 
   create() {
     this.done = false;

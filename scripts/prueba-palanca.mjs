@@ -12,7 +12,7 @@ p.on('pageerror', (e) => logs.push(`pageerror: ${e.message}`));
 await p.goto(url);
 await p.waitForFunction(() => window.game?.scene.isActive('Tap'), null, { timeout: 60000 });
 await p.touchscreen.tap(400, 200);
-await p.evaluate(() => { const g = window.game; g.scene.getScenes(true).forEach((x) => g.scene.stop(x.scene.key)); g.scene.start('CrossCountry', { jugador: 'sophie', tramo: 1 }); });
+await p.evaluate(() => { const g = window.game; g.scene.getScenes(false).forEach((x) => { const st = x.sys.settings.status; if (st >= 3 && st <= 7) g.scene.stop(x.scene.key); }); g.scene.start('CrossCountry', { jugador: 'sophie', tramo: 1 }); });
 await p.waitForFunction(() => window.game.scene.getScene('CrossCountry')?.fase === 'juego', null, { timeout: 30000 });
 const cdp = await p.context().newCDPSession(p);
 const toque = (type, x, y) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y, id: 1 }] });

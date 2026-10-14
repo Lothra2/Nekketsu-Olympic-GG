@@ -21,7 +21,7 @@ let fallas = 0;
 const check = (ok, s, extra = '') => { if (!ok) fallas++; console.log(`${ok ? 'ok   ' : 'FALLA'} ${s}${extra ? ` (${extra})` : ''}`); };
 const ev = (f, a) => page.evaluate(f, a);
 
-await ev(() => { const g = window.game; g.scene.getScenes(true).forEach((x) => g.scene.stop(x.scene.key)); g.scene.start('Fight', { modo: '1v1', jugador: 'sophie', rival: 'kenji' }); });
+await ev(() => { const g = window.game; g.scene.getScenes(false).forEach((x) => { const st = x.sys.settings.status; if (st >= 3 && st <= 7) g.scene.stop(x.scene.key); }); g.scene.start('Fight', { modo: '1v1', jugador: 'sophie', rival: 'kenji' }); });
 await page.waitForTimeout(1300);
 await page.screenshot({ path: `${out}/01_vs.png` });
 await page.waitForFunction(() => window.game.scene.getScene('Fight').phase === 'play', null, { timeout: 15000 });

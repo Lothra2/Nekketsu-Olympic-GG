@@ -19,7 +19,7 @@ await page.waitForTimeout(300);
 let fallas = 0;
 const ok = (c, s) => { console.log(`${c ? 'ok   ' : 'FALLA'} ${s}`); if (!c) fallas++; };
 const empezar = async (modo, nivel) => {
-  await page.evaluate(([modo, nivel]) => { localStorage.setItem('ngg_nivel', nivel); const g = window.game; g.scene.getScenes(true).forEach((x) => g.scene.stop(x.scene.key)); g.scene.start('Fight', { modo, jugador: 'sophie', rival: 'kenji' }); }, [modo, nivel]);
+  await page.evaluate(([modo, nivel]) => { localStorage.setItem('ngg_nivel', nivel); const g = window.game; g.scene.getScenes(false).forEach((x) => { const st = x.sys.settings.status; if (st >= 3 && st <= 7) g.scene.stop(x.scene.key); }); g.scene.start('Fight', { modo, jugador: 'sophie', rival: 'kenji' }); }, [modo, nivel]);
   await page.waitForFunction(() => window.game.scene.getScene('Fight').phase === 'play', null, { timeout: 15000 });
 };
 const F = (fn, arg) => page.evaluate(fn, arg);

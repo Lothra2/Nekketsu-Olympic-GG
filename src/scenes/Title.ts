@@ -6,6 +6,8 @@ import { chip, MARCHA } from '../core/music';
 import { txt } from '../core/ui';
 import { buildLogo, fireworks } from './logo';
 import { prueba } from '../events/base';
+import { FAMILIA, INSTITUTO } from './Select';
+import { cargarAtletas, packsDe } from '../core/carga';
 
 /** Menú en dos niveles para que quepa entre los dos equipos sin tapar a nadie. */
 const MENUS: Record<string, { id: string; label: string }[]> = {
@@ -94,6 +96,9 @@ export class Title extends Phaser.Scene {
   private get opciones() { return MENUS[this.nivel]; }
 
   constructor() { super('Title'); }
+
+  /** La Familia y el Instituto del título (y se sueltan las animaciones de lo que se jugó antes). */
+  preload() { cargarAtletas(this, [...FAMILIA, ...INSTITUTO], packsDe('Title'), undefined, true); }
 
   create() {
     this.cameras.main.fadeIn(300);

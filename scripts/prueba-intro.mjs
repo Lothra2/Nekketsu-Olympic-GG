@@ -22,7 +22,7 @@ await page.waitForFunction(() => window.game?.scene.isActive('Tap') || window.ga
 await page.waitForTimeout(300);
 await page.mouse.click(640, 360);
 await page.waitForTimeout(200);
-await page.evaluate(() => { const g = window.game; g.scene.getScenes(true).forEach((x) => g.scene.stop(x.scene.key)); g.scene.start('Intro'); });
+await page.evaluate(() => { const g = window.game; g.scene.getScenes(false).forEach((x) => { const st = x.sys.settings.status; if (st >= 3 && st <= 7) g.scene.stop(x.scene.key); }); g.scene.start('Intro'); });
 
 const revisar = () => page.evaluate(() => {
   const s = window.game.scene.getScene('Intro');

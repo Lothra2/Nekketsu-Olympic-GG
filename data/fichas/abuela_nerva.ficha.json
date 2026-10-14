@@ -1,0 +1,155 @@
+{
+  "format": "pixelforja.ficha",
+  "version": 3,
+  "name": "Abuela Nerva",
+  "body": {
+    "skeleton": "human",
+    "proportions": {
+      "preset": "chibi",
+      "height": 0.96,
+      "build": 1.05,
+      "legs": 1,
+      "arms": 1,
+      "head": 1,
+      "shoulders": 0.8929999999999999,
+      "hips": 1.14
+    }
+  },
+  "palette": {
+    "skin": [
+      "#551f10",
+      "#9b5437",
+      "#b97a4e",
+      "#cb9768"
+    ],
+    "hair": [
+      "#4d4a44",
+      "#a5a199",
+      "#c8c4bc",
+      "#e2ded7"
+    ],
+    "eyes": "#2a1c14",
+    "top": [
+      "#6e6c63",
+      "#c4c1b4",
+      "#f2efe2",
+      "#fbf9ed"
+    ],
+    "bottom": [
+      "#6e6c63",
+      "#c4c1b4",
+      "#f2efe2",
+      "#fbf9ed"
+    ],
+    "socks": [
+      "#020203",
+      "#101016",
+      "#2a2a30",
+      "#49494f"
+    ],
+    "shoes": [
+      "#5a341a",
+      "#ac7a52",
+      "#c8a070",
+      "#dabd8d"
+    ],
+    "accessory": [
+      "#6e4602",
+      "#de9d02",
+      "#f2c94c",
+      "#fee894"
+    ]
+  },
+  "outfit": {
+    "sleeves": "short",
+    "bottom": "skirt",
+    "socks": "none",
+    "shoes": "chancletas",
+    "print": null,
+    "jacket": null,
+    "pattern": "flores",
+    "pattern2": "#3d6fd6",
+    "collar": "redondo"
+  },
+  "face": {
+    "eyes": "round",
+    "mouth": "line",
+    "blush": false,
+    "brows": true,
+    "glasses": null
+  },
+  "heads": {},
+  "avatar": {
+    "version": 1,
+    "look": "stardew",
+    "skin": "#b97a4e",
+    "face": {
+      "dome": 1.12,
+      "forehead": 0.58,
+      "eyeNose": 0.6,
+      "noseMouth": 0.3,
+      "mouthChin": 0.52,
+      "cheek": 0.97,
+      "jaw": 0.84,
+      "chin": 2.6,
+      "eyeX": 0.42,
+      "ears": 0.18,
+      "mouth": 0.3
+    },
+    "hair": {
+      "style": "corto",
+      "color": "#c8c4bc",
+      "params": {
+        "top": 0.22,
+        "side": 0.08,
+        "back": 0.1,
+        "recede": 0,
+        "length": 1,
+        "fringe": 0,
+        "part": 0,
+        "sweep": 0.3,
+        "curl": 0,
+        "tail": "none"
+      }
+    },
+    "eyes": {
+      "style": "brillo",
+      "color": "#3a2418"
+    },
+    "brows": {
+      "style": "normal"
+    },
+    "nose": "normal",
+    "beard": {
+      "style": "ninguna",
+      "color": "#c8c4bc",
+      "gray": 0
+    },
+    "glasses": {
+      "style": "ninguno",
+      "color": "#1e1e24"
+    },
+    "kit": "lpc",
+    "lpc": {
+      "head": "female_elderly",
+      "hair": "bob",
+      "brows": "thin",
+      "nose": null,
+      "beard": null,
+      "mustache": null,
+      "glasses": null,
+      "hat": null,
+      "hatColor": null
+    },
+    "body": {
+      "age": "mayor",
+      "build": "medio",
+      "shape": "curvas"
+    }
+  },
+  "headMode": "avatar",
+  "physics": {
+    "hairLag": 1
+  },
+  "movementProfile": "premium"
+}

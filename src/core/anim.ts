@@ -47,7 +47,8 @@ export class AnimPlayer {
    * Devuelve los eventos cuyo cuadro se alcanzó en este paso.
    */
   update(dt: number, dist?: number): Evento[] {
-    if (this.done) return [];
+    // sin animación (el pack de ese atleta no está cargado) no avanza: mejor quieto que romper el cuadro
+    if (this.done || !this.data) return [];
     const d = this.data;
     const before = this.pos;
     let step: number;

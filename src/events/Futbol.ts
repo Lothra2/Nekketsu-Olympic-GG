@@ -7,7 +7,7 @@ import { Painter, hex } from '../gfx/paint';
 import { EventScene, prueba, type Competidor } from './base';
 import { queueEscenario } from './escenario';
 import { npcs, pelotaKit } from '../core/kit';
-import { FAMILIA, INSTITUTO } from '../scenes/Select';
+import { nuestros, ellos, lado } from '../core/equipos';
 import type { Paso } from '../core/coach';
 import type { Pad } from '../core/input';
 
@@ -25,8 +25,10 @@ const TIEMPO = 150;
 interface Jug {
   id: string; team: 0 | 1; arquero: boolean; fig: Figura; sombra: Phaser.GameObjects.Ellipse;
   x: number; y: number; z: number; vz: number; dir: 1 | -1;
-  st: 'libre' | 'patea' | 'barre' | 'caido' | 'vuela';
+  st: 'libre' | 'patea' | 'barre' | 'caido' | 'vuela' | 'tambalea';
   t: number; vx: number; vy: number; goles: number;
+  /** el hombro: cuánto falta para poder volver a empujar; y el ratico en que aguanta otro empujón */
+  empuja: number; aguanta: number;
   /** la máquina: cuándo decide y adónde va */
   ia: { t: number; tx: number; ty: number };
   /** la estirada del arquero con la del kit: hacia la cámara (down) o hacia el fondo (up) */
@@ -37,13 +39,19 @@ interface Balon {
   dueño: Jug | null; ultimo: Jug | null; especial: boolean; t: number; libre: number;
   /** el arquero al que ya se le escapó este tiro: no lo puede volver a intentar */
   seEscapo: Jug | null;
+  /** el pase: para quién va y si va alto (el centro para cabecear) */
+  para: Jug | null; centro: boolean;
+  /** el tiro al arco que va en camino: qué tan colocado (0 al medio, 1 a la esquina) y si fue de cabeza */
+  tiro: { apunta: number; cabeza: boolean } | null;
   spr: Phaser.GameObjects.Image; sombra: Phaser.GameObjects.Ellipse; fuego: Phaser.GameObjects.Particles.ParticleEmitter;
 }
 
 /**
  * Fútbol Callejero en Barranquilla, en pleno Carnaval. 4 contra 4: tres en la cancha y un arquero que maneja la
- * máquina. Sin faltas: patada sin el balón es la barrida que lo roba. Con el balón, patada tira al arco (la flecha
- * apunta arriba o abajo) y puño lo pasa. Salto para cabecear. Con la barra llena, especial es el tiro Nekketsu.
+ * máquina. Sin faltas: sin el balón, patada es la barrida y puño el hombro que lo roba (saltando pasas por encima de
+ * la barrida). Con el balón, patada tira al arco (la flecha apunta arriba o abajo) y puño lo pasa; cerca del área, el
+ * pase sale alto, de centro. En el aire, el balón que pasa cerca se cabecea. La barra se llena tirando, robando,
+ * pasando, atajando y con los goles (más al que lo recibe). Con la barra llena, especial es el tiro Nekketsu.
  * Los arcos son de piedra y cada tanto una Marimonda se mete a la cancha. Dos minutos y medio, y gol de oro si hay
  * empate.
  * Con los packs de fútbol y de arquero del kit (sin el balón pintado), los tiros, los pases, la barrida, el cabezazo y
@@ -75,12 +83,18 @@ export class Futbol extends EventScene {
   private tiros = 0;
   private robos = 0;
   private golesTuyos = 0;
+  /** el que recibe un pase: un ratico sin hacerle caso al stick para que no se vaya del balón */
+  private recibe = 0;
+  /** el arquero que acaba de quitarle el balón a uno en el área espera antes de volver a hacerlo */
+  private quitaT = 0;
+  /** para no repetir la pista del especial a cada toque */
+  private pistaT = 0;
   /** para medir: tiros, atajadas y contactos del arquero de cada equipo */
   stats = { tiros: [0, 0], atajadas: [0, 0], arquero: [0, 0] };
 
   constructor() { super('Futbol'); }
 
-  preload() { queueEscenario(this, 'barranquilla'); }
+  preload() { super.preload(); queueEscenario(this, 'barranquilla'); }
 
   create() {
     this.js = [];
@@ -91,6 +105,7 @@ export class Futbol extends EventScene {
     this.oro = false;
     this.pausa = 0;
     this.paso = this.pases = this.tiros = this.robos = this.golesTuyos = 0;
+    this.recibe = this.pistaT = this.quitaT = 0;
     this.stats = { tiros: [0, 0], atajadas: [0, 0], arquero: [0, 0] };
     this.mari = { x: -60, y: 50, vx: 0, t: 14 };
     this.setup(1, 640);
@@ -104,7 +119,7 @@ export class Futbol extends EventScene {
     const sombra = this.add.ellipse(0, 0, 9, 3, 0x000000, 0.3);
     const fuego = this.add.particles(0, 0, 'px', { lifespan: 300, scale: { start: 1.4, end: 0 }, alpha: { start: 0.8, end: 0 }, tint: [0xffe040, 0xff6020, 0xffffff], frequency: 14, emitting: false }).setDepth(4999);
     fuego.startFollow(spr);
-    this.bola = { x: 300, y: PROF / 2, z: 0, vx: 0, vy: 0, vz: 0, dueño: null, ultimo: null, especial: false, t: 0, libre: 0, seEscapo: null, spr, sombra, fuego };
+    this.bola = { x: 300, y: PROF / 2, z: 0, vx: 0, vy: 0, vz: 0, dueño: null, ultimo: null, especial: false, t: 0, libre: 0, seEscapo: null, para: null, centro: false, tiro: null, spr, sombra, fuego };
     const mk = npcs().marimonda;
     this.mariKit = !!mk && this.anims.exists('npc_marimonda_caminar');
     this.marimonda = (this.mariKit ? this.add.sprite(-80, 0, 'npc_marimonda', 0).setOrigin((mk.ancla[0] + 0.5) / mk.w, (mk.ancla[1] + 0.5) / mk.h) : this.add.sprite(-80, 0, 'marimonda').setOrigin(0.5, 1)).setVisible(false);
@@ -116,7 +131,7 @@ export class Futbol extends EventScene {
     this.tema('carnaval_quilla');
     this.cameras.main.centerOn(320, 180);
     if (this.d.practica) void this.entrenar('FÚTBOL', this.pasos(), 40);
-    else void this.previa('FÚTBOL CALLEJERO', 'CARNAVAL DE BARRANQUILLA, COLOMBIA', '{PUÑO} PASE · {PATADA} TIRO (O BARRIDA SIN BALÓN) · {SALTO} CABEZAZO · {ESPECIAL} CON LA BARRA LLENA');
+    else void this.previa('FÚTBOL CALLEJERO', 'CARNAVAL DE BARRANQUILLA, COLOMBIA', '{PUÑO} PASE (O HOMBRO SIN BALÓN) · {PATADA} TIRO (O BARRIDA) · {SALTO} CABEZAZO · {ESPECIAL} CON LA BARRA LLENA');
   }
 
   private pasos(): Paso[] {
@@ -124,7 +139,7 @@ export class Futbol extends EventScene {
       { texto: 'CORRE CON {MOVER} HASTA EL BALÓN:\nPASAS POR ENCIMA Y ES TUYO', botones: ['stick'], antes: () => { this.paso = 0; }, listo: () => this.bola.dueño === this.js[0] },
       { texto: '{PUÑO} SE LO PASA A TU COMPAÑERA', botones: ['punch'], antes: () => { this.paso = 1; }, listo: () => this.pases > 0 },
       { texto: 'CERCA DEL ARCO, {PATADA} TIRA.\nCON LA FLECHA APUNTAS ARRIBA O ABAJO', botones: ['kick', 'stick'], antes: () => { this.paso = 2; }, listo: () => this.golesTuyos > 0 },
-      { texto: 'SIN EL BALÓN, {PATADA} ES LA BARRIDA:\n¡QUÍTASELO A KENJI!', botones: ['kick'], antes: () => { this.paso = 3; this.balonAKenji(); }, listo: () => this.robos > 0 },
+      { texto: `SIN EL BALÓN, {PATADA} ES LA BARRIDA:\n¡QUÍTASELO A ${this.rivalEntrenoNombre}!`, botones: ['kick'], antes: () => { this.paso = 3; this.balonAKenji(); }, listo: () => this.robos > 0 },
     ];
   }
 
@@ -134,7 +149,7 @@ export class Futbol extends EventScene {
     if (!k) return;
     k.x = 330; k.y = PROF / 2; k.ia.tx = 330; k.ia.ty = PROF / 2;
     const b = this.bola;
-    b.dueño = k; b.vx = b.vy = b.vz = 0; b.especial = false;
+    b.dueño = k; b.vx = b.vy = b.vz = 0; b.especial = false; b.para = null; b.tiro = null;
   }
 
   private texturas() {
@@ -187,20 +202,20 @@ export class Futbol extends EventScene {
     const yo = this.d.jugador;
     const comp = this.gente[1]?.id;
     let fam: string[], inst: string[];
-    if (this.d.practica) { fam = [yo, FAMILIA.find((f) => f !== yo)!]; inst = ['kenji']; }
+    if (this.d.practica) { fam = [yo, nuestros().find((f) => f !== yo)!]; inst = [ellos()[0]]; }
     else {
       // el arquero de la Familia es el que no juega en la tabla; el del Instituto, el que sobra
-      const resto = FAMILIA.filter((f) => f !== yo && f !== comp);
+      const resto = nuestros().filter((f) => f !== yo && f !== comp);
       fam = [yo, comp, ...resto];
       const elegidos = [this.gente[2].id, this.gente[3].id];
-      inst = [...elegidos, ...INSTITUTO.filter((i) => !elegidos.includes(i))];
+      inst = [...elegidos, ...ellos().filter((i) => !elegidos.includes(i))];
     }
     const poner = (ids: string[], team: 0 | 1) => ids.forEach((id, k) => {
       const arquero = !this.d.practica && k === ids.length - 1;
       const fig = new Figura(this, 0, 0, id, 'idle');
       const sombra = this.add.ellipse(0, 0, 18, 5, 0x000000, 0.3);
       const [x, y] = this.casa(team, k, arquero);
-      this.js.push({ id, team, arquero, fig, sombra, x, y, z: 0, vz: 0, dir: team === 0 ? 1 : -1, st: 'libre', t: 0, vx: 0, vy: 0, goles: 0, ia: { t: Math.random(), tx: x, ty: y } });
+      this.js.push({ id, team, arquero, fig, sombra, x, y, z: 0, vz: 0, dir: team === 0 ? 1 : -1, st: 'libre', t: 0, vx: 0, vy: 0, goles: 0, empuja: 0, aguanta: 0, ia: { t: Math.random(), tx: x, ty: y } });
     });
     poner(fam, 0);
     poner(inst, 1);
@@ -221,10 +236,11 @@ export class Futbol extends EventScene {
     for (const j of this.js) {
       const k = porTeam[j.team]++;
       [j.x, j.y] = this.casa(j.team, k, j.arquero);
-      j.z = 0; j.vz = 0; j.st = 'libre'; j.vx = j.vy = 0; j.fig.setAngle(0);
+      j.z = 0; j.vz = 0; j.st = 'libre'; j.vx = j.vy = 0; j.empuja = j.aguanta = 0; j.fig.setAngle(0);
     }
     const b = this.bola;
-    Object.assign(b, { x: 313, y: PROF / 2, z: 0, vx: 0, vy: 0, vz: 0, dueño: null, especial: false, libre: 0 });
+    Object.assign(b, { x: 313, y: PROF / 2, z: 0, vx: 0, vy: 0, vz: 0, dueño: null, especial: false, libre: 0, para: null, centro: false, tiro: null });
+    this.recibe = 0;
     this.protegido = 1.5;
     // entrenando: el balón aparece cerca de ti (en el paso de la barrida, lo tiene Kenji)
     if (this.d.practica) { b.x = 220; b.y = PROF / 2; if (this.paso === 3) this.balonAKenji(); }
@@ -263,7 +279,13 @@ export class Futbol extends EventScene {
       }
     }
     this.protegido = Math.max(0, this.protegido - dt);
+    this.pistaT = Math.max(0, this.pistaT - dt);
+    this.recibe = Math.max(0, this.recibe - dt);
+    this.quitaT = Math.max(0, this.quitaT - dt);
+    const antes = this.ctrl;
     this.ctrl = this.control();
+    // te cambió al que recibe el pase: un ratico quieto para que no salga corriendo lejos del balón
+    if (this.ctrl && this.ctrl !== antes && this.ctrl === this.bola.para && !this.bola.dueño) this.recibe = 0.25;
     for (const j of this.js) this.jugador(j, dt, p);
     this.moverBola(dt);
     this.moverMarimonda(dt);
@@ -273,6 +295,8 @@ export class Futbol extends EventScene {
   private control(): Jug | null {
     const b = this.bola;
     if (b.dueño?.team === 0 && !b.dueño.arquero) return b.dueño;
+    // el pase que va para una de las nuestras: la manejas desde que sale, para recibirlo (o cabecearlo)
+    if (!b.dueño && b.para && b.para.team === 0 && !b.para.arquero && b.para.st !== 'caido') return b.para;
     const mios = this.js.filter((j) => j.team === 0 && !j.arquero && j.st !== 'caido');
     const cerca = mios.sort((a, c) => Math.hypot(a.x - b.x, a.y - b.y) - Math.hypot(c.x - b.x, c.y - b.y))[0] ?? null;
     // no cambia por un pelito: se queda con el que tenías si está casi igual de cerca
@@ -283,8 +307,10 @@ export class Futbol extends EventScene {
 
   private jugador(j: Jug, dt: number, p: Pad) {
     j.t -= dt;
+    j.empuja = Math.max(0, j.empuja - dt);
+    j.aguanta = Math.max(0, j.aguanta - dt);
     if (j.z > 0 || j.vz) { j.vz -= 700 * dt; j.z += j.vz * dt; if (j.z <= 0) { j.z = 0; j.vz = 0; } }
-    if (j.st === 'caido') { j.fig.step(dt); if (j.t <= 0) { j.st = 'libre'; j.fig.setAngle(0); } return; }
+    if (j.st === 'caido' || j.st === 'tambalea') { j.fig.step(dt); if (j.t <= 0) { j.st = 'libre'; j.fig.setAngle(0); } return; }
     if (j.st === 'vuela') {
       // la estirada: va derecho a donde va a cruzar el balón, y ahí se queda
       const d = j.ia.ty - j.y;
@@ -312,6 +338,8 @@ export class Futbol extends EventScene {
     if (j.st !== 'libre') return;
     j.x += vx * dt; j.y += vy * dt;
     this.limitar(j);
+    // en el aire, cada cuadro: si el balón pasa cerca, cabezazo
+    if (j.z > 0 && !j.arquero && this.cabezazo(j)) return;
     if (Math.abs(vx) > 10) j.dir = vx > 0 ? 1 : -1;
     else if (j.arquero) j.dir = j.team === 0 ? 1 : -1;
     const v = Math.hypot(vx, vy);
@@ -336,12 +364,20 @@ export class Futbol extends EventScene {
   private humano(j: Jug, p: Pad): [number, number] {
     const b = this.bola;
     const vel = (p.run ? 130 : 95) * (b.dueño === j ? 0.92 : 1);
-    if (p.pressed.jump && j.z === 0) { j.vz = 210; this.cabezazo(j); }
+    // el salto: en el aire cabecea el balón que pasa cerca, y pasa por encima de la barrida
+    if (p.pressed.jump && j.z === 0) j.vz = 210;
     if (b.dueño === j) {
       if (p.pressed.special && this.nek[0] >= 100) this.tirar(j, p.y, true);
       else if (p.pressed.kick) this.tirar(j, p.y, false);
       else if (p.pressed.punch) this.pasar(j);
-    } else if (p.pressed.kick && j.z === 0) this.barrer(j, p.x || j.dir, p.y);
+      else if (p.pressed.special) this.pista(j, '¡LLENA LA BARRA!');
+    } else {
+      if (p.pressed.kick && j.z === 0) this.barrer(j, p.x || j.dir, p.y);
+      else if (p.pressed.punch && j.z === 0) this.hombro(j);
+      else if (p.pressed.special) this.pista(j, this.nek[0] >= 100 ? '¡PRIMERO EL BALÓN!' : '¡LLENA LA BARRA!');
+    }
+    // recibiendo el pase: el stick no te saca de donde va a llegar el balón
+    if (this.recibe > 0 && b.para === j && !b.dueño) return [0, 0];
     return [p.x * vel, p.y * vel * 0.75];
   }
 
@@ -364,7 +400,8 @@ export class Futbol extends EventScene {
       const presion = this.js.some((o) => o.team !== j.team && !o.arquero && Math.hypot(o.x - j.x, o.y - j.y) < 26);
       if (j.ia.t <= 0) {
         j.ia.t = 0.5 + Math.random() * 0.5;
-        if (this.nek[j.team] >= 100 && dGol < 260 && Math.random() < 0.6) { this.tirar(j, (Math.random() - 0.5) * 2, true); return [0, 0]; }
+        // el especial, no apenas se llena: cerca del arco y de vez en cuando
+        if (this.nek[j.team] >= 100 && dGol < 210 && Math.random() < 0.35) { this.tirar(j, (Math.random() - 0.5) * 2, true); return [0, 0]; }
         if (dGol < 200 && Math.random() < 0.55 + 0.3 * ag) { this.tirar(j, (Math.random() - 0.5) * 2, false); return [0, 0]; }
         if (presion && Math.random() < 0.4) { this.pasar(j); return [0, 0]; }
       }
@@ -372,6 +409,11 @@ export class Futbol extends EventScene {
     }
     // entrenando, Kenji no persigue ni barre: se queda en su sitio
     if (this.d.practica) return ir(j.ia.tx, j.ia.ty, 40);
+    // el centro que viene para él: va al balón y salta a cabecearlo cuando baja
+    if (!b.dueño && b.para === j && b.centro) {
+      if (j.z === 0 && b.vz < 0 && b.z > 10 && b.z < 46 && Math.hypot(b.x - j.x, b.y - j.y) < 30) j.vz = 210;
+      return ir(b.x, b.y, vel);
+    }
     // el balón suelto o del otro equipo: va el que esté más cerca de los suyos
     const libreOrival = !b.dueño || b.dueño.team !== j.team;
     if (libreOrival) {
@@ -403,6 +445,12 @@ export class Futbol extends EventScene {
     const b = this.bola;
     const linea = j.team === 0 ? GOL[0] + 6 : GOL[1] - 6;
     const viene = (j.team === 0 ? b.vx < -60 : b.vx > 60) && !b.dueño;
+    // el rival se le mete al área chiquita con el balón: sale a quitárselo
+    const o = b.dueño;
+    if (o && o.team !== j.team && j.st === 'libre' && this.enArea(o, j.team)) {
+      const dx = o.x - j.x, dy = o.y - j.y, d = Math.hypot(dx, dy) || 1;
+      return [(dx / d) * 100, (dy / d) * 110];
+    }
     let ty = Phaser.Math.Clamp(b.y, ARCO.y0 - 4, ARCO.y1 + 4);
     if (viene) {
       const tLlega = (linea - b.x) / b.vx;
@@ -421,16 +469,21 @@ export class Futbol extends EventScene {
     return [Math.abs(dx) > 2 ? Math.sign(dx) * 60 : 0, Math.abs(dy) > 2 ? Math.sign(dy) * 110 : 0];
   }
 
-  /** El tiro al arco: rasante y fuerte. `apunta` (-1 a 1) lo manda arriba o abajo del arco. */
+  /** El tiro al arco: rasante y fuerte. `apunta` (-1 a 1) lo manda arriba o abajo del arco, siempre adentro de los palos. */
   private tirar(j: Jug, apunta: number, especial: boolean) {
     const b = this.bola;
-    const meta = j.team === 0 ? GOL[1] + 10 : GOL[0] - 10;
-    const ty = PROF / 2 + Phaser.Math.Clamp(apunta, -1, 1) * 15 + (Math.random() - 0.5) * (especial ? 4 : 14);
+    const s = j.team === 0 ? 1 : -1;
+    const linea = j.team === 0 ? GOL[1] : GOL[0];
+    // apunta a la línea de gol: el más colocado queda a 4 del palo, y el error no lo saca
+    const a = Phaser.Math.Clamp(apunta, -1, 1);
+    const ty = PROF / 2 + a * 10 + (Math.random() - 0.5) * (especial ? 2 : 7);
     const v = especial ? 420 : 300 + Math.random() * 40;
-    const d = Math.hypot(meta - b.x, ty - b.y), t = d / v;
-    b.vx = (meta - b.x) / t; b.vy = (ty - b.y) / t;
+    const dx = Math.max(12, (linea - b.x) * s) * s;
+    const t = Math.hypot(dx, ty - b.y) / v;
+    b.vx = dx / t; b.vy = (ty - b.y) / t;
     b.vz = especial ? 40 : 60 + Math.random() * 60;
     b.dueño = null; b.ultimo = j; b.especial = especial; b.t = 0; b.libre = 0.25; b.seEscapo = null;
+    b.para = null; b.centro = false; b.tiro = { apunta: Math.abs(a), cabeza: false };
     this.stats.tiros[j.team]++;
     j.st = 'patea'; j.t = 0.35;
     if (especial) j.fig.set('flying_kick', true, 1.4);
@@ -440,13 +493,12 @@ export class Futbol extends EventScene {
       efecto(this, 'aura_nekketsu', this.sx(j.x, j.y), FT + j.y, { depth: FT + j.y - 0.1 });
       if (j.team === 0) void this.banner('¡TIRO NEKKETSU!', 'fuente_titulo', 2, 700);
       this.cameras.main.shake(120, 0.006);
-    }
-    this.nek[j.team] = Math.min(100, this.nek[j.team] + 6);
+    } else this.carga(j.team, 6);
     this.sound.play('golpe', { volume: 0.4, rate: 0.8 });
     if (j.team === 0 && this.d.practica) this.tiros++;
   }
 
-  /** El pase rasante al compañero más adelantado y despejado. */
+  /** El pase al compañero más adelantado: rasante, o alto (de centro) si el compañero está cerca del área rival. */
   private pasar(j: Jug) {
     const b = this.bola;
     const compas = this.js.filter((o) => o.team === j.team && o !== j && !o.arquero && o.st !== 'caido');
@@ -455,14 +507,18 @@ export class Futbol extends EventScene {
     if (!para) { this.tirar(j, 0, false); return; }
     const tx = para.x + (j.team === 0 ? 14 : -14), ty = para.y;
     const d = Math.hypot(tx - b.x, ty - b.y);
-    // el arquero la saca alta con la mano, por encima de los que esperan en el área
-    const t = j.arquero ? Math.max(0.6, d / 260) : Math.max(0.25, d / 240);
-    b.vx = (tx - b.x) / t; b.vy = (ty - b.y) / t; b.vz = j.arquero ? (G * t) / 2 : 30;
-    b.dueño = null; b.ultimo = j; b.especial = false; b.t = 0; b.libre = 0.2; b.seEscapo = null;
+    const cerca = Math.abs((j.team === 0 ? GOL[1] : GOL[0]) - para.x) < 130;
+    const centro = !j.arquero && !this.d.practica && cerca && d > 30 && Math.random() < 0.5;
+    // el arquero la saca alta con la mano, por encima de los que esperan en el área; el centro sube unos 40
+    const t = j.arquero ? Math.max(0.6, d / 260) : centro ? Phaser.Math.Clamp(d / 200, 0.7, 0.82) : Math.max(0.25, d / 240);
+    b.vx = (tx - b.x) / t; b.vy = (ty - b.y) / t; b.vz = j.arquero || centro ? (G * t) / 2 : 30;
+    b.dueño = null; b.ultimo = j; b.especial = false; b.t = 0; b.libre = j.arquero ? 0.45 : 0.2; b.seEscapo = null;
+    b.para = para; b.centro = centro; b.tiro = null;
     j.st = 'patea'; j.t = 0.25;
     if (j.arquero) j.fig.set('throw_overhead', true, 1.4);
     else j.fig.contacto('pass', 'low_kick', 1.4);
     this.sound.play('esquiva', { volume: 0.25, rate: 1.3 });
+    if (centro && para.team === 0) this.letrero(para, '¡CENTRO! ¡SALTA!', 0x8ae0ff);
     if (j.team === 0 && this.d.practica) this.pases++;
   }
 
@@ -478,28 +534,116 @@ export class Futbol extends EventScene {
   private barrida(j: Jug) {
     const b = this.bola, o = b.dueño;
     if (j.st !== 'barre') return;
-    // al arquero con el balón en las manos no se le barre
-    if (o && o.team !== j.team && !o.arquero && Math.hypot(o.x - j.x, o.y - j.y) < 14 && this.protegido <= 0) {
+    // al arquero con el balón en las manos no se le barre, y al que salta, la barrida le pasa por debajo
+    if (o && o.team !== j.team && !o.arquero && o.z < 4 && Math.hypot(o.x - j.x, o.y - j.y) < 14 && this.protegido <= 0) {
       o.st = 'caido'; o.t = 0.9; o.fig.set('knockout', true, 1.6);
       b.dueño = null; b.vx = j.vx * 0.7; b.vy = (Math.random() - 0.5) * 60; b.vz = 80; b.libre = 0.3; b.ultimo = j;
+      b.para = null; b.tiro = null;
+      this.carga(j.team, 15);
       this.sound.play('golpe', { volume: 0.4 });
       efecto(this, 'chispa_golpe_liviano', this.sx(o.x, o.y), FT + o.y - 14, { depth: 6000 });
       this.letrero(j, '¡BARRIDA!', 0xffe080);
       if (j.team === 0 && this.d.practica) this.robos++;
     } else if (!o && Math.hypot(b.x - j.x, b.y - j.y) < 12 && b.z < 10) {
       // barrió el balón suelto: es suyo
-      b.dueño = j;
+      this.tomar(j);
     }
   }
 
-  /** En el aire, si el balón pasa alto cerca, lo cabecea hacia el arco. */
-  private cabezazo(j: Jug) {
+  /** El hombro: pegado al que lleva el balón, puño se lo saca (o aguanta, y por un ratico no se deja). */
+  private hombro(j: Jug) {
+    if (j.empuja > 0) return;
+    j.empuja = 0.5;
+    j.st = 'patea'; j.t = 0.2;
+    j.fig.set('punch', true, 1.4);
+    const b = this.bola, o = b.dueño;
+    if (!o || o.team === j.team || o.arquero || Math.hypot(o.x - j.x, o.y - j.y) > 22 || this.protegido > 0) return;
+    const prob = this.d.practica ? 1 : o.aguanta > 0 ? 0 : j.team === 0 && ajustes().nombre === 'PASEO' ? 0.75 : 0.55;
+    if (Math.random() >= prob) {
+      // aguantó: el que empujó rebota y se tambalea
+      o.aguanta = 0.5;
+      j.st = 'tambalea'; j.t = 0.35; j.fig.set(j.fig.anim.has('stagger') ? 'stagger' : 'fight_hit', true, 1.6);
+      this.letrero(o, '¡AGUANTÓ!', 0xffffff);
+      this.sound.play('bloqueo', { volume: 0.3 });
+      return;
+    }
+    o.st = 'tambalea'; o.t = 0.45; o.fig.set(o.fig.anim.has('stagger') ? 'stagger' : 'fight_hit', true, 1.6);
+    this.tomar(j);
+    b.ultimo = j;
+    this.carga(j.team, 15);
+    this.sound.play('golpe', { volume: 0.35, rate: 1.3 });
+    efecto(this, 'chispa_golpe_liviano', this.sx(o.x, o.y), FT + o.y - 20, { depth: 6000 });
+    this.letrero(j, '¡ROBO!', 0x8aff8a);
+    if (j.team === 0 && this.d.practica) this.robos++;
+  }
+
+  /**
+   * En el aire, cada cuadro: si el balón suelto pasa cerca y a la altura de la cabeza, lo cabecea hacia el arco.
+   * El que viene de centro o de pase, cerca del arco, es medio gol.
+   */
+  private cabezazo(j: Jug): boolean {
     const b = this.bola;
-    if (b.dueño || Math.hypot(b.x - j.x, b.y - j.y) > 22 || b.z < 14 || b.z > 50) return;
+    if (b.dueño || j.st !== 'libre' || (j === b.ultimo && b.libre > 0)) return false;
+    if (Math.hypot(b.x - j.x, b.y - j.y) > 16 || b.z < 4 || b.z > j.z + 40) return false;
+    const dePase = !!b.para && b.para.team === j.team;
     this.tirar(j, (Math.random() - 0.5) * 2, false);
     b.vz = -40;
+    if (b.tiro) b.tiro.cabeza = dePase;
     this.letrero(j, '¡CABEZAZO!', 0x8ae0ff);
     j.fig.contacto('header', 'jump_rise');
+    return true;
+  }
+
+  /** Se queda con el balón a los pies (o en las manos, el arquero). */
+  private tomar(j: Jug) {
+    const b = this.bola;
+    b.dueño = j; b.especial = false; b.vx = b.vy = b.vz = 0;
+    b.para = null; b.centro = false; b.tiro = null;
+  }
+
+  /** El arquero con el balón: espera un momento y lo saca. */
+  private sacaArquero(j: Jug) {
+    const b = this.bola;
+    j.ia.t = 0.8;
+    this.time.delayedCall(800, () => { if (b.dueño === j) this.pasar(j); });
+  }
+
+  /** ¿Está adentro del área chiquita del arco de `team`? */
+  private enArea(j: Jug, team: 0 | 1) {
+    const x = team === 0 ? j.x - GOL[0] : GOL[1] - j.x;
+    return x < 42 && j.y > ARCO.y0 - 10 && j.y < ARCO.y1 + 10;
+  }
+
+  /**
+   * Lo que ataja un arquero: la misma cuenta para los dos, según el nivel (el nuestro con una ayudita en PASEO).
+   * El tiro lento de lejos es más fácil; el colocado y el cabezazo de pase, más difíciles. El Nekketsu casi siempre
+   * entra (el de la máquina, un poco menos).
+   */
+  private ataja(j: Jug, tiro: { apunta: number; cabeza: boolean }, v: number): number {
+    const a = ajustes();
+    if (this.bola.especial) return j.team === 0 ? 0.45 : 0.2;
+    let p = 0.5 + 0.3 * a.cpuAgresion + (j.team === 0 && a.nombre === 'PASEO' ? 0.1 : 0);
+    p += 0.35 * Phaser.Math.Clamp((260 - v) / 200, 0, 1);
+    p -= 0.18 * tiro.apunta;
+    if (tiro.cabeza) p -= 0.15;
+    return Phaser.Math.Clamp(p, 0.15, 0.92);
+  }
+
+  /** Llena la barra Nekketsu de un equipo; al llenarse la tuya, avisa. */
+  private carga(team: 0 | 1, n: number) {
+    const antes = this.nek[team];
+    this.nek[team] = Math.min(100, antes + n);
+    if (team === 0 && antes < 100 && this.nek[0] >= 100) {
+      this.letrero(this.ctrl ?? this.js[0], '¡BARRA LLENA!', 0xffe040);
+      this.sound.play('elegir', { volume: 0.4, rate: 1.4 });
+    }
+  }
+
+  /** La pista cortica cuando aprietas especial y todavía no se puede. */
+  private pista(j: Jug, s: string) {
+    if (this.pistaT > 0) return;
+    this.pistaT = 1.2;
+    this.letrero(j, s, 0xffe080);
   }
 
   private moverBola(dt: number) {
@@ -508,11 +652,28 @@ export class Futbol extends EventScene {
     b.libre = Math.max(0, b.libre - dt);
     b.fuego.emitting = b.especial && !b.dueño;
     if (b.dueño) {
+      // el arquero que toca al que se mete con el balón en su área chiquita, se lo quita
+      const o = b.dueño;
+      const arq = o.arquero || this.quitaT > 0 ? null : this.js.find((k) => k.arquero && k.team !== o.team && k.st !== 'caido' && Math.hypot(k.x - o.x, k.y - o.y) < 16 && this.enArea(o, k.team));
+      if (arq) {
+        o.st = 'tambalea'; o.t = 0.4; o.fig.set(o.fig.anim.has('stagger') ? 'stagger' : 'fight_hit', true, 1.6);
+        if (arq.st === 'vuela') { arq.st = 'libre'; arq.fig.setAngle(0); arq.filaVuelo = undefined; }
+        this.tomar(arq);
+        this.quitaT = 1.6;
+        this.stats.atajadas[arq.team]++;
+        this.carga(arq.team, 10);
+        this.letrero(arq, '¡ATAJADA!', 0x8aff8a);
+        this.sound.play('recoger', { volume: 0.3 });
+        this.sacaArquero(arq);
+        return;
+      }
       // entrar caminando al arco con el balón también es gol
       if (b.y > ARCO.y0 && b.y < ARCO.y1 && (b.x <= GOL[0] || b.x >= GOL[1])) { b.ultimo = b.dueño; b.dueño = null; this.gol(b.x >= GOL[1] ? 0 : 1); }
       return;
     }
     const x0 = b.x;
+    // el pase que no recibió nadie ya no es de nadie
+    if (b.para && b.t > 1.6) { b.para = null; b.centro = false; }
     b.vz -= G * dt; b.z += b.vz * dt;
     if (b.z <= 0) { b.z = 0; if (Math.abs(b.vz) > 60) { b.vz = -b.vz * 0.4; } else b.vz = 0; }
     const roce = Math.pow(b.z === 0 ? 0.45 : 0.9, dt);
@@ -531,20 +692,25 @@ export class Futbol extends EventScene {
     // los que lo pueden agarrar: cualquiera a los pies (el arquero también en el aire, con las manos); el que acaba
     // de patear espera un ratico, y el arquero al que ya se le escapó este tiro no lo vuelve a intentar
     for (const j of this.js) {
-      if (j.st === 'caido' || j.st === 'patea' || (j === b.ultimo && b.libre > 0) || j === b.seEscapo) continue;
-      const alcance = j.arquero ? 14 : 9;
+      // el saque del arquero: en el primer instante solo lo toca el compañero al que va (que no se lo robe el que
+      // estaba pegado al arquero)
+      const saque = b.libre > 0 && !!b.ultimo?.arquero && j !== b.para;
+      if (j.st === 'caido' || j.st === 'tambalea' || j.st === 'patea' || (j === b.ultimo && b.libre > 0) || saque || j === b.seEscapo) continue;
+      // el pase que va para alguien tiene un imán suave: lo recibe un poco más lejos
+      const alcance = j.arquero ? 14 : j === b.para ? 14 : 9;
       const alto = j.arquero ? 34 : 12;
       if (Math.hypot(j.x - b.x, j.y - b.y) < alcance && b.z < j.z + alto) {
-        // el arquero puede no alcanzarla: el tiro fuerte y el Nekketsu se le escapan
+        // el arquero puede no alcanzarla: depende de lo fuerte, lo colocado y el nivel
         if (j.arquero) this.stats.arquero[j.team]++;
-        if (j.arquero && Math.hypot(b.vx, b.vy) > 200) {
-          const ataja = b.especial ? 0.15 : (j.team === 1 ? 0.55 + 0.3 * ajustes().cpuAgresion : 0.68);
-          if (Math.random() > ataja) { b.seEscapo = j; continue; }
+        const v = Math.hypot(b.vx, b.vy);
+        if (j.arquero && b.tiro && b.ultimo && b.ultimo.team !== j.team && v > 50) {
+          if (Math.random() > this.ataja(j, b.tiro, v)) { b.seEscapo = j; continue; }
           this.letrero(j, '¡ATAJADA!', 0x8aff8a);
           this.stats.atajadas[j.team]++;
-        }
-        b.dueño = j; b.especial = false; b.vx = b.vy = b.vz = 0;
-        if (j.arquero) { j.ia.t = 0.8; this.time.delayedCall(800, () => { if (b.dueño === j) this.pasar(j); }); }
+          this.carga(j.team, 10);
+        } else if (j === b.para && b.ultimo && b.ultimo.team === j.team) this.carga(j.team, 5);
+        this.tomar(j);
+        if (j.arquero) this.sacaArquero(j);
         if (j.team === 0 && j === this.js[0] && this.d.practica && this.paso === 0) this.sound.play('recoger', { volume: 0.3 });
         break;
       }
@@ -554,6 +720,9 @@ export class Futbol extends EventScene {
   private gol(team: 0 | 1) {
     const b = this.bola;
     this.goles[team]++;
+    // la barra: algo para el que lo metió y más para el que lo recibió, para que se pueda devolver
+    this.carga(team, 10);
+    this.carga(team === 0 ? 1 : 0, 15);
     if (b.ultimo && b.ultimo.team === team) b.ultimo.goles++;
     if (team === 0 && this.d.practica) this.golesTuyos++;
     b.vx *= 0.2; b.vy = 0; b.vz = 0;
@@ -574,7 +743,7 @@ export class Futbol extends EventScene {
     const arq = this.js.find((j) => j.team === lado && j.arquero);
     const b = this.bola;
     if (!arq) { b.vx = -b.vx * 0.4; b.x = Phaser.Math.Clamp(b.x, GOL[0] + 2, GOL[1] - 2); return; }
-    b.dueño = arq; b.vx = b.vy = b.vz = 0; b.especial = false;
+    this.tomar(arq);
     this.time.delayedCall(700, () => { if (b.dueño === arq) this.pasar(arq); });
   }
 
@@ -634,7 +803,7 @@ export class Futbol extends EventScene {
     const g = this.hud;
     g.clear();
     if (this.d.practica) { this.marcadorTxt.setText(''); this.relojTxt.setText(''); return; }
-    this.marcadorTxt.setText(`FAMILIA ${this.goles[0]} - ${this.goles[1]} INSTITUTO`);
+    this.marcadorTxt.setText(`${lado(0).corto} ${this.goles[0]} - ${this.goles[1]} ${lado(1).corto}`);
     const q = Math.max(0, TIEMPO - this.clock);
     this.relojTxt.setText(this.oro ? '¡GOL DE ORO!' : `${Math.floor(q / 60)}:${String(Math.floor(q % 60)).padStart(2, '0')}`);
     for (const t of [0, 1] as const) {
@@ -651,6 +820,6 @@ export class Futbol extends EventScene {
     const de = (c: Competidor) => this.js.find((j) => j.id === c.id)!;
     const orden = [...this.gente].sort((a, b) => (a.team !== b.team ? (a.team === ganador ? -1 : 1) : de(b).goles - de(a).goles))
       .map((c) => ({ c, valor: `${de(c).goles} GOL${de(c).goles === 1 ? '' : 'ES'}` }));
-    void this.banner(ganador === 0 ? '¡GANÓ LA FAMILIA!' : '¡GANÓ EL INSTITUTO!', 'fuente_titulo', 2, 1300).then(() => this.resultados(prueba('Futbol').nombre, orden));
+    void this.banner(`¡${lado(ganador).gana}!`, 'fuente_titulo', 2, 1300).then(() => this.resultados(prueba('Futbol').nombre, orden));
   }
 }

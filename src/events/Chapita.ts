@@ -5,6 +5,7 @@ import { efecto } from '../core/fx';
 import { chip } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { Painter, hex } from '../gfx/paint';
+import { lado } from '../core/equipos';
 import { EventScene, prueba, type Competidor } from './base';
 import { queueEscenario } from './escenario';
 import type { Paso } from '../core/coach';
@@ -37,6 +38,8 @@ interface Chapa {
   x: number; z: number; vx: number; vz: number;
   st: 'mano' | 'lanzada' | 'bateada' | 'quieta';
   tipo: Lanz; x0: number; t: number; tt: number; botes: number; jonron: boolean; resuelta: boolean;
+  /** se decide al batear: si el del campo la va a soltar (los batazos duros y altos casi siempre) y si ya la soltó */
+  escapa: boolean; escapo: boolean;
   spr: Phaser.GameObjects.Image; sombra: Phaser.GameObjects.Ellipse;
 }
 
@@ -44,8 +47,10 @@ interface Chapa {
  * Chapita, béisbol de calle venezolano: chapas de refresco y un palo de escoba, en la calle de un barrio de Caracas.
  * Bateas con puño justo antes de que llegue la chapa (con la flecha arriba la mandas alta, abajo rasante). Lanzas con
  * puño (recta) o patada (curva, que sube o baja con la flecha). Tres strikes es ponche, la que atrapa el del campo es
- * out, y según lo lejos que llegue es sencillo, doble o triple. Por encima de la casa del vecino es jonrón; si rompe
- * la ventana, sale la señora Carmen con la chancleta. Tres innings cortos.
+ * out (los batazos duros y altos casi siempre se le escapan), y según lo lejos que llegue es sencillo, doble o
+ * triple. Por encima de la casa del vecino es jonrón (alta y bien pegada); si rompe la ventana, sale la señora Carmen
+ * con la chancleta. Tres innings cortos. Batear, recibir strikes y ponchar llenan la barra Nekketsu: llena, {ESPECIAL}
+ * bateando es el BATAZO NEKKETSU (jonrón si le das, sin importar la altura) y lanzando es la RECTA DE FUEGO.
  */
 export class Chapita extends EventScene {
   private eq: [Jug[], Jug[]] = [[], []];
@@ -62,12 +67,16 @@ export class Chapita extends EventScene {
   private carreras: [number, number] = [0, 0];
   private st: 'prepara' | 'lanza' | 'vuela' | 'resultado' | 'cambio' = 'cambio';
   private espera = 0;
-  private swing: { altura: Altura; hecho: boolean } | null = null;
+  private swing: { altura: Altura; hecho: boolean; nek: boolean } | null = null;
   private quiereLanz: Lanz | null = null;
   private fx = 0;
   private fieldVx = 0;
   private fieldZ = 0;
   private camX = 230;
+  /** la barra Nekketsu de cada equipo, la recta de fuego que viene y el aviso chiquito de abajo */
+  private nek: [number, number] = [0, 0];
+  private rapida = false;
+  private avisoT = 0;
   /** el fondo de código que se repite (sin el arte de PixelForja) */
   private bg?: Phaser.GameObjects.TileSprite;
   private palo!: Phaser.GameObjects.Image;
@@ -88,13 +97,14 @@ export class Chapita extends EventScene {
 
   constructor() { super('Chapita'); }
 
-  preload() { queueEscenario(this, 'barrio_caracas'); }
+  preload() { super.preload(); queueEscenario(this, 'barrio_caracas'); }
 
   create() {
     this.inning = 1; this.abajo = false; this.outs = 0; this.strikes = 0; this.turnos = 0;
     this.orden = [0, 0]; this.carreras = [0, 0]; this.st = 'cambio'; this.espera = 0; this.swing = null; this.quiereLanz = null;
     this.paso = this.contactos = this.contactosCurva = this.mejor = this.lanzadas = this.ponchesTuyos = 0;
     this.camX = 230;
+    this.nek = [0, 0]; this.rapida = false; this.avisoT = 0;
     this.setup(ZOOM, WORLD);
     this.texturas();
     this.bg = undefined;
@@ -117,7 +127,7 @@ export class Chapita extends EventScene {
     this.chapaMano = this.add.image(0, 0, 'armas', 'chapa_mano_0').setDepth(PISO + 1).setVisible(false);
     const spr = this.add.image(0, 0, 'armas', 'chapa_girando_0').setScale(1.4).setDepth(PISO + 2);
     const sombra = this.add.ellipse(0, PISO, 6, 2, 0x000000, 0.3).setDepth(PISO - 1);
-    this.chapa = { x: 0, z: 0, vx: 0, vz: 0, st: 'mano', tipo: 'recta', x0: 0, t: 0, tt: 1, botes: 0, jonron: false, resuelta: false, spr, sombra };
+    this.chapa = { x: 0, z: 0, vx: 0, vz: 0, st: 'mano', tipo: 'recta', x0: 0, t: 0, tt: 1, botes: 0, jonron: false, resuelta: false, escapa: false, escapo: false, spr, sombra };
     this.hud = this.uiAdd(this.add.graphics().setDepth(8000));
     this.marcadorTxt = this.uiAdd(txt(this, 320, 14, '', 'fuente_titulo', 1).setDepth(8001));
     this.inningTxt = this.uiAdd(txt(this, 320, 34, '', 'fuente_ui', 1).setDepth(8001).setTint(0xffe080));
@@ -127,15 +137,15 @@ export class Chapita extends EventScene {
     this.tema('pana_dale');
     this.cameras.main.centerOn(this.camX, 360 - 180 / ZOOM);
     if (this.d.practica) void this.entrenar('CHAPITA', this.pasos(), 40);
-    else void this.previa('CHAPITA', 'BARRIO DE CARACAS, VENEZUELA', '{PUÑO} BATEA · {MOVER} ARRIBA LA MANDA ALTA · LANZANDO: {PUÑO} RECTA, {PATADA} CURVA');
+    else void this.previa('CHAPITA', 'BARRIO DE CARACAS, VENEZUELA', '{PUÑO} BATEA · {MOVER} ARRIBA LA MANDA ALTA · LANZANDO: {PUÑO} RECTA, {PATADA} CURVA · BARRA LLENA: {ESPECIAL}');
   }
 
   private pasos(): Paso[] {
     return [
       { texto: 'LA CHAPA VIENE: {PUÑO} BATEA\nUN PELITO ANTES DE QUE LLEGUE', botones: ['punch'], antes: () => { this.paso = 0; }, listo: () => this.contactos > 0 },
-      { texto: 'MANTÉN {MOVER} ARRIBA PARA MANDARLA\nALTA. ¡PASA LOS 30 M!', botones: ['stick', 'punch'], antes: () => { this.paso = 1; }, listo: () => this.mejor >= 300 },
+      { texto: 'MANTÉN {MOVER} ARRIBA: ALTA Y FUERTE\nSE LE ESCAPA AL DEL CAMPO. ¡PASA LOS 30 M!', botones: ['stick', 'punch'], antes: () => { this.paso = 1; }, listo: () => this.mejor >= 300 },
       { texto: 'AHORA CURVAS: SI LA CHAPA SUBE,\nARRIBA; SI BAJA, ABAJO', botones: ['stick', 'punch'], antes: () => { this.paso = 2; }, listo: () => this.contactosCurva > 0 },
-      { texto: 'TE TOCA LANZAR: {PUÑO} RECTA,\n{PATADA} CURVA. ¡PONCHA A KENJI!', botones: ['punch', 'kick'], antes: () => { this.paso = 3; this.cambiarEntrenamiento(); }, listo: () => this.ponchesTuyos > 0 || this.lanzadas >= 8 },
+      { texto: `TE TOCA LANZAR: {PUÑO} RECTA,\n{PATADA} CURVA. ¡PONCHA A ${this.rivalEntrenoNombre}!`, botones: ['punch', 'kick'], antes: () => { this.paso = 3; this.cambiarEntrenamiento(); }, listo: () => this.ponchesTuyos > 0 || this.lanzadas >= 8 },
     ];
   }
 
@@ -190,7 +200,7 @@ export class Chapita extends EventScene {
       return { c, fig, carreras: 0, ponches: 0 };
     };
     if (this.d.practica) {
-      this.eq = [[mk(this.gente[0])], [mk({ id: 'kenji', team: 1, human: false })]];
+      this.eq = [[mk(this.gente[0])], [mk({ id: this.rivalEntreno, team: 1, human: false })]];
     } else {
       this.eq = [this.gente.filter((c) => c.team === 0).map(mk), this.gente.filter((c) => c.team === 1).map(mk)];
     }
@@ -275,11 +285,17 @@ export class Chapita extends EventScene {
 
   private tick(dt: number, p: Pad) {
     this.espera -= dt;
+    if (this.avisoT > 0) this.avisoT -= dt;
+    if (p.pressed.special) this.especial();
     if (this.st === 'prepara') {
-      this.ayudaTxt.setText(this.humanoLanza() ? rotular('{PUÑO} RECTA · {PATADA} CURVA · CON {MOVER} ARRIBA SUBE, ABAJO BAJA', this.pad.fuente) : this.humanoBatea() ? rotular('{PUÑO} BATEA · {MOVER} ARRIBA ALTA · ABAJO RASANTE', this.pad.fuente) : '');
+      const lleno = this.nek[0] >= 100;
+      this.ayudaTxt.setText(this.humanoLanza()
+        ? rotular(lleno ? '{ESPECIAL}: ¡RECTA DE FUEGO! · {PUÑO} RECTA · {PATADA} CURVA' : '{PUÑO} RECTA · {PATADA} CURVA · CON {MOVER} ARRIBA SUBE, ABAJO BAJA', this.pad.fuente)
+        : this.humanoBatea() ? rotular(lleno ? '{ESPECIAL}: ¡BATAZO NEKKETSU! · {PUÑO} BATEA' : '{PUÑO} BATEA · {MOVER} ARRIBA ALTA · ABAJO RASANTE', this.pad.fuente) : '');
       if (this.espera > 0) return;
       if (this.humanoLanza()) {
-        if (p.pressed.punch) this.quiereLanz = 'recta';
+        if (this.rapida) this.quiereLanz = 'recta';
+        else if (p.pressed.punch) this.quiereLanz = 'recta';
         else if (p.pressed.kick) this.quiereLanz = p.y < 0 ? 'sube' : p.y > 0 ? 'baja' : Math.random() < 0.5 ? 'sube' : 'baja';
         // si se queda pensando, la lanza recta sola
         else if (this.espera < -6) this.quiereLanz = 'recta';
@@ -287,6 +303,9 @@ export class Chapita extends EventScene {
       } else {
         const curvas = this.d.practica ? this.paso === 2 : Math.random() < 0.4;
         this.quiereLanz = curvas ? (Math.random() < 0.5 ? 'sube' : 'baja') : 'recta';
+        // con la barra llena, a veces la máquina tira la recta de fuego (en PASEO no)
+        const team = this.pit.c.team;
+        if (!this.d.practica && ajustes().nombre !== 'PASEO' && this.nek[team] >= 100 && Math.random() < 0.5) this.rectaFuego();
       }
       this.st = 'lanza';
       // el lanzamiento de béisbol del kit (sin la pelota pintada: la chapa va en su punto) o el de la pelea
@@ -301,7 +320,8 @@ export class Chapita extends EventScene {
     if (this.st === 'vuela') {
       // el swing: tú con puño (la altura con la flecha); la máquina, cuando le parece
       if (!this.swing) {
-        if (this.humanoBatea() && p.pressed.punch) this.batear(p.y < 0 ? 'alta' : p.y > 0 ? 'baja' : 'media');
+        if (this.humanoBatea() && p.pressed.special && this.nek[this.bat.c.team] >= 100) this.batazo();
+        else if (this.humanoBatea() && p.pressed.punch) this.batear(p.y < 0 ? 'alta' : p.y > 0 ? 'baja' : 'media');
         else if (!this.humanoBatea()) this.cpuBatea();
       }
       this.moverChapa(dt);
@@ -322,10 +342,11 @@ export class Chapita extends EventScene {
     this.quiereLanz = null;
     this.cpuPlan = null;
     const nivel = this.humanoLanza() ? 1 : this.d.practica ? 0.62 : ajustes().nombre === 'PASEO' ? 0.7 : ajustes().nombre === 'NORMAL' ? 0.85 : 1;
-    const v = (tipo === 'recta' ? 230 : 200) * nivel;
+    const v = (tipo === 'recta' ? 230 : 200) * nivel * (this.rapida ? 1.4 : 1);
+    this.rapida = false;
     c.st = 'lanzada'; c.tipo = tipo; c.x0 = PIT_X - 10; c.x = c.x0; c.z = 22; c.t = 0;
     c.tt = (c.x0 - CONTACTO) / v;
-    c.vx = -v; c.botes = 0; c.jonron = false; c.resuelta = false;
+    c.vx = -v; c.botes = 0; c.jonron = false; c.resuelta = false; c.escapa = false; c.escapo = false;
     this.swing = null;
     this.st = 'vuela';
     this.sound.play('esquiva', { volume: 0.25, rate: 1.4 });
@@ -341,9 +362,70 @@ export class Chapita extends EventScene {
   }
 
   /** Empieza el swing: el palo le pega (o no) en el cuadro del impacto. */
-  private batear(altura: Altura) {
-    this.swing = { altura, hecho: false };
+  private batear(altura: Altura, nek = false) {
+    this.swing = { altura, hecho: false, nek };
     this.bat.fig.set('weapon_swing', true, 1);
+  }
+
+  /** Llena la barra Nekketsu de un equipo; al llenarse la tuya, avisa. Entrenando no se llena. */
+  private carga(team: 0 | 1, n: number) {
+    if (this.d.practica) return;
+    const antes = this.nek[team];
+    this.nek[team] = Math.min(100, antes + n);
+    if (team === 0 && antes < 100 && this.nek[0] >= 100) {
+      this.letrero('¡BARRA LLENA!', 0xffe040, 124);
+      this.sound.play('elegir', { volume: 0.4, rate: 1.4 });
+    }
+  }
+
+  /** {ESPECIAL}: lanzando es la recta de fuego, antes de soltar; bateando, el batazo (lo hace el swing). */
+  private especial() {
+    if (this.fase !== 'juego') return;
+    if (this.d.practica) { this.aviso('EN EL PARTIDO, CON LA BARRA LLENA'); return; }
+    const lleno = this.nek[0] >= 100;
+    if (this.humanoLanza()) {
+      if (this.st !== 'prepara' || this.rapida) { if (this.st !== 'prepara') this.aviso('ANTES DE LANZAR'); return; }
+      if (!lleno) { this.aviso('LLENA LA BARRA NEKKETSU'); return; }
+      this.rectaFuego();
+      return;
+    }
+    if (this.humanoBatea()) {
+      if (!lleno) this.aviso('LLENA LA BARRA NEKKETSU');
+      else if (this.st === 'prepara') this.aviso('ESPERA LA CHAPA Y TOCA {ESPECIAL}');
+      return;
+    }
+    this.aviso('ESPERA TU TURNO');
+  }
+
+  /** La recta de fuego: la próxima chapa sale mucho más rápida. */
+  private rectaFuego() {
+    const team = this.pit.c.team;
+    this.nek[team] = 0;
+    this.rapida = true;
+    this.quiereLanz = 'recta';
+    efecto(this, 'aura_nekketsu', PIT_X, PISO, { depth: PISO - 0.1 });
+    this.cameras.main.shake(120, 0.005);
+    if (this.humanoLanza()) void this.banner('¡RECTA DE FUEGO!', 'fuente_titulo', 2, 600);
+    else this.aviso('¡RECTA DE FUEGO DEL RIVAL!', 0xffa0a0);
+  }
+
+  /** El batazo Nekketsu: swing alto con el doble de margen, sin importar la altura de la chapa. */
+  private batazo() {
+    const team = this.bat.c.team;
+    this.nek[team] = 0;
+    this.batear('alta', true);
+    efecto(this, 'aura_nekketsu', BAT_X, PISO, { depth: PISO - 0.1 });
+    this.cameras.main.shake(120, 0.005);
+    if (this.humanoBatea()) void this.banner('¡BATAZO NEKKETSU!', 'fuente_titulo', 2, 600);
+    else this.aviso('¡BATAZO NEKKETSU DEL RIVAL!', 0xffa0a0);
+  }
+
+  /** Un letrero chiquito abajo, que se va solo. */
+  private aviso(s: string, tint = 0xffffff) {
+    if (this.avisoT > 0) return;
+    this.avisoT = 0.8;
+    const t = this.uiAdd(txt(this, 320, 300, rotular(s, this.pad.fuente), 'fuente_ui', 1).setDepth(8600).setTint(tint));
+    this.tweens.add({ targets: t, alpha: 0, y: 292, delay: 700, duration: 300, onComplete: () => t.destroy() });
   }
 
   /** La máquina batea: calcula cuándo y a qué altura, con su error según el nivel. */
@@ -353,19 +435,21 @@ export class Chapita extends EventScene {
     // la decisión se toma una vez por lanzamiento
     const plan = this.cpuPlan ?? (this.cpuPlan = this.planCpu());
     const llegaEn = (c.x - CONTACTO) / -c.vx;
-    if (llegaEn <= plan.t) { this.batear(plan.altura); this.cpuPlan = null; }
+    if (llegaEn <= plan.t) { if (plan.nek) this.batazo(); else this.batear(plan.altura); this.cpuPlan = null; }
   }
 
-  private cpuPlan: { t: number; altura: Altura } | null = null;
+  private cpuPlan: { t: number; altura: Altura; nek: boolean } | null = null;
 
-  private planCpu(): { t: number; altura: Altura } {
+  private planCpu(): { t: number; altura: Altura; nek: boolean } {
     const ag = this.d.practica ? 0.1 : ajustes().cpuAgresion;
     // el swing tarda tres cuadros (a 14 fps) en llegar al impacto
     const ideal = 3 / 14;
+    // con la barra llena, el batazo Nekketsu sin error
+    if (!this.d.practica && this.nek[this.bat.c.team] >= 100) return { t: ideal, altura: 'alta', nek: true };
     const error = (Math.random() + Math.random() + Math.random() - 1.5) * (0.22 - 0.1 * ag);
     const acierta = this.chapa.tipo === 'recta' || Math.random() < 0.3 + 0.4 * ag;
     const altura: Altura = this.chapa.tipo === 'recta' ? (Math.random() < 0.35 ? 'alta' : 'media') : acierta ? (this.chapa.tipo === 'sube' ? 'alta' : 'baja') : this.chapa.tipo === 'sube' ? 'baja' : 'alta';
-    return { t: ideal + error, altura };
+    return { t: ideal + error, altura, nek: false };
   }
 
   private pasoSwing(dt: number) {
@@ -381,14 +465,22 @@ export class Chapita extends EventScene {
     const c = this.chapa, s = this.swing!;
     if (c.st !== 'lanzada') return;
     const ayuda = this.humanoBatea() ? ajustes().ayuda : 0.6;
-    const ventana = 20 + 12 * ayuda;
+    // el batazo Nekketsu: el doble de margen y la altura no importa
+    const ventana = (20 + 12 * ayuda) * (s.nek ? 2 : 1);
     const dx = c.x - CONTACTO;
     const [a, b] = BANDA[s.altura];
-    const alturaBien = (this.humanoBatea() && ajustes().nombre === 'PASEO') || this.d.practica && this.paso === 0 || (c.z >= a - 2 && c.z <= b + 2);
+    const alturaBien = s.nek || (this.humanoBatea() && ajustes().nombre === 'PASEO') || this.d.practica && this.paso === 0 || (c.z >= a - 2 && c.z <= b + 2);
     if (Math.abs(dx) > ventana || !alturaBien) { this.sound.play('esquiva', { volume: 0.2, rate: 0.8 }); return; }
-    const q = 1 - Math.abs(dx) / ventana;
-    const ang = Phaser.Math.DegToRad(q < 0.2 ? 4 : ANGULO[s.altura] + (Math.random() - 0.5) * 6);
-    const v = q < 0.2 ? 120 : 150 + 280 * q;
+    const q = s.nek ? 1 : 1 - Math.abs(dx) / ventana;
+    // alta y bien pegada (q de 0.85 para arriba) se va por encima de la casa: jonrón
+    const jonron = s.altura === 'alta' && q >= 0.85;
+    const ang = Phaser.Math.DegToRad(q < 0.2 ? 4 : jonron ? ANGULO.alta + (Math.random() - 0.5) * 2 : ANGULO[s.altura] + (Math.random() - 0.5) * 6);
+    const v = q < 0.2 ? 120 : jonron ? 440 + 200 * (q - 0.85) : 150 + 280 * q;
+    // el del campo: los flojos los atrapa casi siempre; los duros y altos casi nunca (la máquina, menos en los fáciles)
+    const fuerza = q * (s.altura === 'alta' ? 1.1 : s.altura === 'media' ? 0.8 : 0.6);
+    const ag = this.d.practica ? 0.5 : ajustes().cpuAgresion;
+    const atrapa = Phaser.Math.Clamp(1.25 - fuerza, 0.15, 0.92) * (this.field?.c.team === 1 ? 0.75 + 0.25 * ag : 1);
+    c.escapa = Math.random() > atrapa;
     c.st = 'bateada';
     c.vx = Math.cos(ang) * v;
     c.vz = Math.sin(ang) * v;
@@ -398,6 +490,12 @@ export class Chapita extends EventScene {
     this.suena('chapa', 0.5 + 0.3 * q, () => this.sound.play('golpe', { volume: 0.4 + 0.3 * q, rate: 1.2 }));
     efecto(this, q > 0.85 ? 'chispa_golpe_pesado' : 'chispa_golpe_liviano', CONTACTO, PISO - c.z, { depth: PISO + 5 });
     if (q > 0.85) { this.cameras.main.shake(100, 0.006); chip.blip(1320, 0.08, 'sq25', 0.2, 1760); }
+    if (s.nek) {
+      flash(this, 150, 0xffe040, 0.8);
+      efecto(this, 'confeti', CONTACTO, PISO - 50, { depth: 6000 });
+      this.cameras.main.shake(260, 0.014);
+      chip.boom(1);
+    } else this.carga(this.bat.c.team, 20);
     if (this.humanoBatea()) { this.contactos++; if (c.tipo !== 'recta') this.contactosCurva++; }
     // el del campo sale corriendo hacia donde va a caer
     this.fieldVx = 0;
@@ -433,8 +531,15 @@ export class Chapita extends EventScene {
       if (Math.abs(c.vx) < 6 && c.vz === 0) c.st = 'quieta';
     }
     c.x = Phaser.Math.Clamp(c.x, 0, WORLD - 4);
-    // el del campo la atrapa en el aire: out
-    if (!c.resuelta && this.field && c.botes === 0 && Math.abs(c.x - this.fx) < 10 && c.z < 30 + this.fieldZ && c.z > 0) {
+    // el del campo la atrapa en el aire: out (o se le escapa, si era un batazo duro)
+    if (!c.resuelta && !c.escapo && this.field && c.botes === 0 && Math.abs(c.x - this.fx) < 7 && c.z < 30 + this.fieldZ && c.z > 0) {
+      if (c.escapa) {
+        c.escapo = true;
+        this.field.fig.set('hit', true);
+        this.sound.play('esquiva', { volume: 0.3 });
+        this.letrero('¡SE LE ESCAPÓ!', 0xffe080, 124);
+        return;
+      }
       c.resuelta = true;
       c.st = 'quieta'; c.vx = 0; c.vz = 0;
       this.field.fig.set('celebrate', true);
@@ -455,12 +560,12 @@ export class Chapita extends EventScene {
     let x = c.x, z = c.z, vx = c.vx, vz = c.vz;
     for (let k = 0; k < 200 && z > 14; k++) { vz -= G * 0.02; x += vx * 0.02; z += vz * 0.02; }
     const meta = Phaser.Math.Clamp(x, PIT_X + 20, CASA_X - 10);
-    const vel = (this.d.practica ? 60 : 85 + 40 * ajustes().cpuAgresion) * (f.c.team === 0 ? 1.1 : 1);
+    const vel = (this.d.practica ? 60 : 85 + 15 * ajustes().cpuAgresion) * (f.c.team === 0 ? 1.05 : 1);
     const d = meta - this.fx;
     const mueve = Math.abs(d) > 3;
     if (mueve) this.fx += Math.sign(d) * Math.min(Math.abs(d), vel * dt);
     f.fig.left = d < 0 || !mueve;
-    if (f.fig.anim.name !== 'celebrate') f.fig.set(mueve ? 'run' : 'idle');
+    if (f.fig.anim.name !== 'celebrate' && f.fig.anim.name !== 'hit') f.fig.set(mueve ? 'run' : 'idle');
     if (Math.abs(c.x - this.fx) < 30 && c.z > 30 && c.z < 56 && this.fieldZ === 0 && c.vz < 0) this.fieldVx = 170;
   }
 
@@ -530,6 +635,8 @@ export class Chapita extends EventScene {
 
   private strike() {
     this.strikes++;
+    this.carga(this.bat.c.team, 10);
+    if (this.strikes >= 3) this.carga(this.pit.c.team, 25);
     this.letrero(this.strikes >= 3 ? '¡PONCHADO!' : `STRIKE ${this.strikes}`, this.strikes >= 3 ? 0xff6060 : 0xffffff);
     this.chapa.resuelta = true;
     if (this.strikes >= 3) {
@@ -574,7 +681,7 @@ export class Chapita extends EventScene {
     const fin = this.inning > INNINGS && this.carreras[0] !== this.carreras[1];
     if (fin || this.inning > INNINGS + 1) { this.final(); return; }
     this.st = 'cambio';
-    const quien = this.abajo ? 'BATEA EL INSTITUTO' : 'BATEA LA FAMILIA';
+    const quien = `AL BATE: ${lado(this.abajo ? 1 : 0).corto}`;
     void this.banner(this.inning > INNINGS ? `¡EXTRA INNING! ${quien}` : `INNING ${this.inning} · ${quien}`, 'fuente_titulo_plata', 1, 1100).then(() => { if (this.fase === 'juego') this.mitad(); });
   }
 
@@ -588,8 +695,8 @@ export class Chapita extends EventScene {
     this.resultados(prueba('Chapita').nombre, orden);
   }
 
-  private letrero(s: string, tint: number) {
-    const t = this.uiAdd(txt(this, 320, 96, s, 'fuente_titulo', 1).setDepth(8500).setTint(tint));
+  private letrero(s: string, tint: number, y = 96) {
+    const t = this.uiAdd(txt(this, 320, y, s, 'fuente_titulo', 1).setDepth(8500).setTint(tint));
     this.tweens.add({ targets: t, scale: { from: 2.4, to: 1.4 }, duration: 220, ease: 'Back.out' });
     this.time.delayedCall(1100, () => t.destroy());
   }
@@ -638,13 +745,19 @@ export class Chapita extends EventScene {
     const g = this.hud;
     g.clear();
     if (this.d.practica) { this.marcadorTxt.setText(''); this.inningTxt.setText(''); return; }
-    this.marcadorTxt.setText(`FAMILIA ${this.carreras[0]} - ${this.carreras[1]} INSTITUTO`);
+    this.marcadorTxt.setText(`${lado(0).corto} ${this.carreras[0]} - ${this.carreras[1]} ${lado(1).corto}`);
     this.inningTxt.setText(`INNING ${Math.min(this.inning, INNINGS + 1)} ${this.abajo ? 'ABAJO' : 'ARRIBA'} · BATEA ${this.nombre(this.bat.c.id)}`);
     // los outs y los strikes en bolitas
     g.fillStyle(0x000000, 0.55).fillRect(8, 8, 112, 40);
     for (let k = 0; k < 3; k++) {
       g.fillStyle(k < this.outs ? 0xff5a5a : 0x3a3a4a).fillCircle(70 + k * 14, 18, 5);
       g.fillStyle(k < Math.min(3, this.strikes) ? 0xffe040 : 0x3a3a4a).fillCircle(70 + k * 14, 36, 5);
+    }
+    // las barras Nekketsu: la tuya a la izquierda, la del rival a la derecha
+    for (const t of [0, 1] as const) {
+      const x = t === 0 ? 16 : 520, lleno = this.nek[t] >= 100;
+      g.fillStyle(0x000000, 0.6).fillRect(x, 54, 104, 8);
+      g.fillStyle(lleno ? (Math.floor(this.time.now / 150) % 2 ? 0xffe040 : 0xff6020) : t === 0 ? 0x5a9af0 : 0xf05a5a).fillRect(x + 2, 56, this.nek[t], 4);
     }
     if (!this.outsTxt) {
       this.outsTxt = this.uiAdd(txt(this, 14, 18, 'OUTS', 'fuente_ui', 1, 0).setDepth(8001));

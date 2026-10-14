@@ -6,6 +6,7 @@ import { efecto } from '../core/fx';
 import { chip } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { kit } from '../core/kit';
+import { lado } from '../core/equipos';
 import { EventScene, prueba, type Competidor } from './base';
 import type { Paso } from '../core/coach';
 import { hayArte, pintarEscenario, queueEscenario } from './escenario';
@@ -57,7 +58,7 @@ export class Tamawari extends EventScene implements World {
 
   get sc(): Phaser.Scene { return this; }
 
-  preload() { queueEscenario(this, 'hoian'); }
+  preload() { super.preload(); queueEscenario(this, 'hoian'); }
 
   /** La x de pantalla de un punto del piso, con la vista inclinada del arte (sin arte, derecho). */
   px(x: number, y: number) { return x + this.inclinacion * y; }
@@ -97,8 +98,8 @@ export class Tamawari extends EventScene implements World {
     this.cameras.main.centerOn(this.px(220, 50), this.camY);
     this.hud = this.uiAdd(this.add.graphics().setDepth(8000));
     this.relojTxt = this.uiAdd(txt(this, 320, 14, '2:00', 'fuente_ui', 2).setDepth(8001));
-    this.uiAdd(txt(this, 18, 12, 'BOLA FAMILIA GG', 'fuente_ui', 1, 0).setDepth(8001).setTint(0x9ac8ff));
-    this.uiAdd(txt(this, 622, 12, 'BOLA INSTITUTO', 'fuente_ui', 1, 1).setDepth(8001).setTint(0xffa0a0));
+    this.uiAdd(txt(this, 18, 12, `BOLA ${lado(0).corto}`, 'fuente_ui', 1, 0).setDepth(8001).setTint(0x9ac8ff));
+    this.uiAdd(txt(this, 622, 12, `BOLA ${lado(1).corto}`, 'fuente_ui', 1, 1).setDepth(8001).setTint(0xffa0a0));
     this.tema('hoian_noche');
     if (this.d.practica) void this.entrenar('TAMA-WARI', this.pasos());
     else void this.previa('TAMA-WARI HỘI AN', 'HỘI AN, VIETNAM', 'ROMPE LA BOLA DEL OTRO POSTE · {SALTO} AGARRA EL POSTE · {PUÑO} Y {PATADA} TREPAN Y PEGAN');
@@ -282,7 +283,7 @@ export class Tamawari extends EventScene implements World {
     }).setDepth(5003);
     confeti.explode(90);
     // el cartel que cuelga de la bola rota, con el nombre del equipo que la rompió
-    const equipo = j.c.team === 0 ? 'FAMILIA GG' : 'INSTITUTO NEKKETSU';
+    const equipo = lado(j.c.team).nombre.toUpperCase();
     const cartel = this.add.container(bx, by - 10).setDepth(5004);
     const g = this.add.graphics();
     g.fillStyle(0xf4ecd8).fillRect(-58, 0, 116, 26);
@@ -471,12 +472,12 @@ export class Tamawari extends EventScene implements World {
     const me = () => this.jugadores[0];
     const suyo = () => this.postes[1];
     return [
-      { texto: 'CAMINA HASTA EL POSTE DEL INSTITUTO\n(EL DE LA BOLA ROJA)', botones: ['stick'], listo: () => this.alPie(me().a, suyo(), 30) || this.trepa.has(me().a) },
+      { texto: 'CAMINA HASTA EL POSTE RIVAL\n(EL DE LA BOLA ROJA)', botones: ['stick'], listo: () => this.alPie(me().a, suyo(), 30) || this.trepa.has(me().a) },
       { texto: 'AL PIE DEL POSTE, TOCA {SALTO}\nPARA AGARRARTE', botones: ['jump'], listo: () => this.trepa.has(me().a) },
       { texto: 'ALTERNA {PUÑO} Y {PATADA} RÁPIDO\nPARA TREPAR', botones: ['punch', 'kick'], listo: () => (this.trepa.get(me().a)?.h ?? 0) >= this.cima(suyo()) - 1 },
       { texto: '¡ARRIBA! DALE {PUÑO} A LA BOLA\nHASTA AGRIETARLA', botones: ['punch'], listo: () => suyo().vida <= 50 },
       {
-        texto: '¡KENJI TREPA TU POSTE! BÁJATE CON {SALTO},\nCORRE Y PATÉALO CON {PATADA}', botones: ['jump', 'kick'],
+        texto: `¡${this.rivalEntrenoNombre} TREPA TU POSTE! BÁJATE CON {SALTO},\nCORRE Y PATÉALO CON {PATADA}`, botones: ['jump', 'kick'],
         antes: () => this.sparring(), listo: () => this.bajados >= 1 || ![...this.trepa.keys()].some((o) => o.team === 1),
       },
       { texto: '¡ESO! AHORA VUELVE Y\nROMPE LA BOLA', botones: ['punch', 'kick', 'jump'], listo: () => suyo().rota },
@@ -485,9 +486,9 @@ export class Tamawari extends EventScene implements World {
 
   /** Entrenamiento: Kenji aparece trepando el poste de la Familia, despacito. */
   private sparring() {
-    if (this.jugadores.some((j) => j.c.id === 'kenji')) return;
-    const c: Competidor = { id: 'kenji', team: 1, human: false };
-    const a = new Actor(this, 'kenji', 1, this.postes[0].x + 12, this.postes[0].y + 6);
+    if (this.jugadores.some((j) => j.c.id === this.rivalEntreno)) return;
+    const c: Competidor = { id: this.rivalEntreno, team: 1, human: false };
+    const a = new Actor(this, this.rivalEntreno, 1, this.postes[0].x + 12, this.postes[0].y + 6);
     a.left = true;
     this.actors.push(a);
     const j: Jugador = { a, c, rol: 'ataque', golpes: 0, pensar: 0, quiere: NOTHING, cercaDeCasa: 0, sparring: true };
@@ -556,7 +557,7 @@ export class Tamawari extends EventScene implements World {
     if (this.terminado) return;
     this.terminado = true;
     for (const [a] of this.trepa) if (!this.postes.some((q) => q.rota)) this.soltar(a, false);
-    void this.banner(ganador === 0 ? '¡GANA LA FAMILIA GG!' : '¡GANA EL INSTITUTO!', 'fuente_titulo', 2, 1600, 110);
+    void this.banner(`¡${lado(ganador).gana}!`, 'fuente_titulo', 2, 1600, 110);
     this.time.delayedCall(2600, () => {
       for (const [a] of this.trepa) this.soltar(a, false);
       for (const j of this.jugadores) if (j.a.grounded) j.a.setSt(j.c.team === ganador ? 'win' : 'lose', j.c.team === ganador ? 'victory' : 'sad');

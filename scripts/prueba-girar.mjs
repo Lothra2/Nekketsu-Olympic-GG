@@ -32,7 +32,7 @@ check(e.w >= 843 && e.h >= 389 && e.ancho === 779, `acostado llena la pantalla (
 check(/main:779\/-69/.test(e.camaras), `la pantalla de inicio queda centrada (${e.camaras})`);
 await page.screenshot({ path: `${out}/2_acostado.png` });
 // a una pelea, y se vuelve a girar a un tamaño distinto (otro teléfono)
-await page.evaluate(() => { const g = window.game; g.scene.getScenes(true).forEach((x) => g.scene.stop(x.scene.key)); g.scene.start('Fight', { modo: '1v1', jugador: 'sophie', rival: 'kenji' }); });
+await page.evaluate(() => { const g = window.game; g.scene.getScenes(false).forEach((x) => { const st = x.sys.settings.status; if (st >= 3 && st <= 7) g.scene.stop(x.scene.key); }); g.scene.start('Fight', { modo: '1v1', jugador: 'sophie', rival: 'kenji' }); });
 await page.waitForTimeout(3500);
 await page.setViewportSize({ width: 915, height: 412 });
 await page.waitForTimeout(800);

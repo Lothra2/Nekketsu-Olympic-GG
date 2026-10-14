@@ -22,7 +22,7 @@ await page.waitForTimeout(400);
 await page.mouse.click(640, 360);
 await page.waitForTimeout(300);
 await page.evaluate((e) => { window.__esc = e; }, escena);
-await page.evaluate((t) => { const g = window.game; g.scene.getScenes(true).forEach((x) => g.scene.stop(x.scene.key)); g.scene.start(window.__esc, { jugador: 'sophie', ...(t !== null ? { tramo: t } : {}) }); }, solo);
+await page.evaluate((t) => { const g = window.game; g.scene.getScenes(false).forEach((x) => { const st = x.sys.settings.status; if (st >= 3 && st <= 7) g.scene.stop(x.scene.key); }); g.scene.start(window.__esc, { jugador: 'sophie', ...(t !== null ? { tramo: t } : {}) }); }, solo);
 await page.waitForTimeout(1500);
 await page.screenshot({ path: `${out}/00_previa.png` });
 // el estado, con el jugador también en piloto automático (cada tramo arma atletas nuevos)

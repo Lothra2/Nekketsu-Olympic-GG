@@ -17,7 +17,7 @@ await p.waitForFunction(() => window.game?.scene.isActive('Tap'), null, { timeou
 await p.mouse.click(400, 200);
 let fallas = 0;
 const check = (ok, s) => { if (!ok) fallas++; console.log(`${ok ? 'ok   ' : 'FALLA'} ${s}`); };
-const ir = (escena, d) => p.evaluate(([e, d]) => { const g = window.game; g.scene.getScenes(true).forEach((x) => g.scene.stop(x.scene.key)); g.scene.start(e, d); }, [escena, d]);
+const ir = (escena, d) => p.evaluate(([e, d]) => { const g = window.game; g.scene.getScenes(false).forEach((x) => { const st = x.sys.settings.status; if (st >= 3 && st <= 7) g.scene.stop(x.scene.key); }); g.scene.start(e, d); }, [escena, d]);
 
 // el entrenamiento
 await ir('DaCau', { jugador: 'alana', practica: true });

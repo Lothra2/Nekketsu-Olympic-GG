@@ -180,7 +180,7 @@ export class CrossCountry extends EventScene implements World {
     if (this.L.franja.atras !== FT || this.L.franja.adelante - this.L.franja.atras !== DEPTH) throw new Error(`${this.L.id}: la franja tiene que ser 200 a 330`);
   }
 
-  preload() { queueEscenario(this, this.L.id); }
+  preload() { super.preload(); queueEscenario(this, this.L.id); }
 
   get sc(): Phaser.Scene { return this; }
 

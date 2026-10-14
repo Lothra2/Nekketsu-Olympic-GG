@@ -20,7 +20,7 @@ await page.mouse.click(640, 360);
 await page.waitForTimeout(400);
 const shot = (n) => page.screenshot({ path: `${out}/${n}.png` });
 const key = async (k, ms = 40) => { await page.keyboard.down(k); await page.waitForTimeout(ms); await page.keyboard.up(k); };
-const start = (scene, d) => page.evaluate(([s, d]) => { const g = window.game; g.scene.getScenes(true).forEach((x) => g.scene.stop(x.scene.key)); g.scene.start(s, d); }, [scene, d]);
+const start = (scene, d) => page.evaluate(([s, d]) => { const g = window.game; g.scene.getScenes(false).forEach((x) => { const st = x.sys.settings.status; if (st >= 3 && st <= 7) g.scene.stop(x.scene.key); }); g.scene.start(s, d); }, [scene, d]);
 const mash = async (secs, extra) => {
   const t0 = Date.now();
   let n = 0;

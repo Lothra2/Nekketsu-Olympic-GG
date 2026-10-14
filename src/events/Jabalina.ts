@@ -4,6 +4,7 @@ import { ajustes } from '../core/nivel';
 import { efecto } from '../core/fx';
 import { chip } from '../core/music';
 import { txt, flash } from '../core/ui';
+import { rotular } from '../core/input';
 import { Painter, hex } from '../gfx/paint';
 import { EventScene, prueba, type Competidor } from './base';
 import { queueEscenario } from './escenario';
@@ -22,12 +23,14 @@ const ZOOM = 1.5;
 const GRAV = 380;
 const INTENTOS = 2;
 
-interface Lanzador { c: Competidor; fig: Figura; best: number; marcas: number[]; top: number }
-interface Vuelo { x: number; z: number; vx: number; vz: number; img: Phaser.GameObjects.Image; sombra: Phaser.GameObjects.Ellipse }
+interface Lanzador { c: Competidor; fig: Figura; best: number; marcas: number[]; top: number; rayo: number }
+interface Vuelo { x: number; z: number; vx: number; vz: number; img: Phaser.GameObjects.Image; sombra: Phaser.GameObjects.Ellipse; fuego?: Phaser.GameObjects.Particles.ParticleEmitter }
 
 /**
- * Jabalina llanera: carrerita alternando botones, mantén SALTO para subir el ángulo y suéltalo para lanzar.
- * Si pisas la raya es nulo. Dos intentos, cuenta el mejor.
+ * Jabalina llanera: carrerita alternando botones, mantén SALTO para subir el ángulo y suéltalo para lanzar (un toque
+ * corto lanza a 40°). Si sueltas pasada la raya es nulo. Corriendo a tope se llena la barra del rayo, que sigue de un
+ * intento al otro; llena, ESPECIAL es la lanza del Catatumbo: sale sola a 45° con un rayo y más fuerza.
+ * Dos intentos, cuenta el mejor.
  */
 export class Jabalina extends EventScene {
   private gente2: Lanzador[] = [];
@@ -49,6 +52,12 @@ export class Jabalina extends EventScene {
   /** velocidad que llevaba al plantar: es la que se lleva la jabalina */
   private vLanza = 0;
   private cpuAng = 0;
+  /** este lanzamiento es la lanza del Catatumbo */
+  private catatumbo = false;
+  /** dónde estaba al soltar: el nulo se mide ahí */
+  private xSuelta = 0;
+  private cpuRayo = false;
+  private avisoT = 0;
   private hud!: Phaser.GameObjects.Graphics;
   /** el fondo de código que se repite (sin el arte de PixelForja) */
   private bg?: Phaser.GameObjects.TileSprite;
@@ -57,7 +66,7 @@ export class Jabalina extends EventScene {
 
   constructor() { super('Jabalina'); }
 
-  preload() { queueEscenario(this, 'llanos_apure'); }
+  preload() { super.preload(); queueEscenario(this, 'llanos_apure'); }
 
   create() {
     this.gente2 = [];
@@ -81,14 +90,15 @@ export class Jabalina extends EventScene {
       fig.set('idle');
       fig.row = 'down_right';
       const top = c.id === 'tetsu' || c.id === 'goro' ? 66 : c.id === 'kenji' ? 62 : 56;
-      this.gente2.push({ c, fig, best: 0, marcas: [], top });
+      this.gente2.push({ c, fig, best: 0, marcas: [], top, rayo: 0 });
       fig.setPosition(18 + i * 13, TOP + (WAIT_Y[i % 3] ?? 42));
     });
     this.hud = this.uiAdd(this.add.graphics().setDepth(8000));
     this.tema('pajarillo_llano');
+    this.ambiente('llano');
     this.cameras.main.centerOn(this.camX, 360 - 180 / ZOOM);
     if (this.d.practica) void this.entrenar('JABALINA LLANERA', this.pasos(), 100);
-    else void this.previa('JABALINA LLANERA', 'LLANOS DE APURE, VENEZUELA', 'ALTERNA {PUÑO} Y {PATADA} PARA CORRER · MANTÉN {SALTO} Y SUELTA PARA LANZAR');
+    else void this.previa('JABALINA LLANERA', 'LLANOS DE APURE, VENEZUELA', 'ALTERNA {PUÑO} Y {PATADA} PARA CORRER · MANTÉN {SALTO} Y SUELTA PARA LANZAR · RAYO LLENO: {ESPECIAL}');
   }
 
   private pasos(): Paso[] {
@@ -128,6 +138,7 @@ export class Jabalina extends EventScene {
     for (const l of this.gente2) if (l !== this.cur || this.st === 'espera') l.fig.step(dt);
     if (this.fase === 'juego') this.tick(dt, p);
     this.coach?.tick(dt);
+    if (this.avisoT > 0) { this.avisoT -= dt; if (this.avisoT <= 0) this.avisoTxt?.setVisible(false); }
     this.camera(dt);
     this.drawHud();
     this.filterUi();
@@ -145,19 +156,36 @@ export class Jabalina extends EventScene {
           this.boost = Math.min(100, this.boost + (k !== this.last ? 15 : 5));
           this.last = k;
         }
-        this.boost = Math.max(0, this.boost - 36 * dt);
+        // apuntando con el mismo pulgar no se puede correr: la carrera baja más lento mientras mantienes salto
+        this.boost = Math.max(0, this.boost - (this.holding ? 14 : 36) * dt);
         target = this.boost * 1.7;
-        if (p.held.jump) {
+        // a tope, se llena la barra del rayo
+        if (this.boost > 80) this.cargaRayo(this.cur, 20 * dt);
+        if (p.pressed.special) {
+          if (this.cur.rayo >= 100) { this.ang = 45; this.catatumbo = true; this.lanza(); }
+          else this.aviso('¡CORRE A TOPE PARA LLENAR EL RAYO!');
+        }
+        if (this.st !== 'carrera') { /* ya lanzó con el rayo */ } else if (p.held.jump) {
           if (!this.holding) { this.holding = true; this.angT = 0; }
           this.angT += dt;
-          // sube de 10 a 60 grados y baja otra vez, por si te pasas
-          this.ang = 10 + 50 * Math.abs(Math.sin(this.angT * 1.6));
-        } else if (this.holding) this.lanza();
+          // sube de 20 a 60 grados y baja otra vez, por si te pasas
+          this.ang = 20 + 40 * Math.abs(Math.sin(this.angT * 1.4));
+        } else if (this.holding) {
+          // un toque corto: lanzamiento a 40°, lo que haría cualquiera
+          if (this.angT < 0.2) this.ang = 40;
+          this.lanza();
+        }
         // en el nivel suave no hay nulo: al llegar a la raya lanza solo
         if (ajustes().sinNulo && this.x > FOUL - 8 && this.st === 'carrera') { if (!this.holding) this.ang = 40; this.lanza(); }
       } else {
         target = this.cur.top * 2.6 * ajustes().cpuVel;
-        if (this.x >= this.cpuSuelta) { this.ang = this.cpuAng; this.lanza(); }
+        if (this.v > this.cur.top * 2.2) this.cargaRayo(this.cur, 20 * dt);
+        if (this.x >= this.cpuSuelta) {
+          // la máquina usa el rayo a veces, cuando lo tiene
+          if (this.cur.rayo >= 100 && this.cpuRayo) { this.ang = 45; this.catatumbo = true; }
+          else this.ang = this.cpuAng;
+          this.lanza();
+        }
       }
       this.v += Phaser.Math.Clamp(target - this.v, -200 * dt, 240 * dt);
       const dx = this.v * dt;
@@ -196,12 +224,14 @@ export class Jabalina extends EventScene {
     this.cur.fig.setPosition(RUN0, TOP + RUN_Y);
     this.cpuSuelta = FOUL - 14 - Math.random() * 30 + (Math.random() < 0.08 ? 40 : 0);
     this.cpuAng = 36 + Math.random() * 12;
+    this.catatumbo = false;
+    this.cpuRayo = Math.random() < 0.4 + 0.3 * ajustes().cpuAgresion;
     this.camX = RUN0 + 100;
     const intento = this.d.practica ? `INTENTO ${this.ronda + 1}` : `INTENTO ${this.ronda + 1} DE ${INTENTOS}`;
     const t = this.uiAdd(txt(this, 320, 84, `${this.nombre(this.cur.c.id)} · ${intento}`, 'fuente_ui', 2).setDepth(8500).setTint(this.cur.c.human ? 0xffe040 : this.cur.c.team === 0 ? 0x9ac8ff : 0xffa0a0));
     this.time.delayedCall(1300, () => t.destroy());
     this.st = 'carrera';
-    if (this.cur.c.human && this.ronda === 0) {
+    if (this.cur.c.human) {
       const m = Math.max(...this.gente2.map((l) => l.best));
       if (m > 0) {
         const b = this.uiAdd(txt(this, 320, 104, `MARCA A BATIR: ${m.toFixed(2)} M`, 'fuente_ui', 1).setDepth(8500).setTint(0xf2c230));
@@ -214,19 +244,36 @@ export class Jabalina extends EventScene {
     this.holding = false;
     this.st = 'lanza';
     this.vLanza = this.v;
+    this.xSuelta = this.x;
+    if (this.catatumbo) {
+      this.cur.rayo = 0;
+      efecto(this, 'aura_nekketsu', this.x, TOP + RUN_Y, { depth: TOP + RUN_Y - 0.1 });
+      if (this.cur.c.human) void this.banner('¡LANZA DEL CATATUMBO!', 'fuente_titulo', 2, 600);
+      this.sound.play('esquiva', { volume: 0.4, rate: 0.7 });
+    }
     this.cur.fig.anim.pos = 4;
     this.cur.fig.anim.speed = 1;
     if (this.cur.c.human) chip.blip(440, 0.1, 'sq25', 0.18, 880);
   }
 
   private suelta([px, py]: [number, number]) {
-    if (this.x > FOUL && !(this.cur.c.human && ajustes().sinNulo)) this.nulo = true;
-    const fuerza = 120 + this.vLanza * 2.1;
+    // el nulo se mide donde soltaste, no donde termina el paso
+    if (this.xSuelta > FOUL && !(this.cur.c.human && ajustes().sinNulo)) this.nulo = true;
+    const fuerza = (120 + this.vLanza * 2.1) * (this.catatumbo ? 1.2 : 1);
     const a = Phaser.Math.DegToRad(this.nulo && this.ang === 0 ? 20 : this.ang);
     const x = this.x + px, z = -py;
     const img = this.add.image(x, TOP + RUN_Y - z, 'jabalina').setOrigin(0.6, 0.5);
     const sombra = this.add.ellipse(x, TOP + RUN_Y, 22, 2, 0x000000, 0.3).setDepth(TOP + RUN_Y - 1);
     this.vuelo = { x, z, vx: Math.cos(a) * fuerza, vz: Math.sin(a) * fuerza, img, sombra };
+    if (this.catatumbo) {
+      // el rayo del Catatumbo cae sobre la lanza y la lanza va en llamas
+      efecto(this, 'rayo_catatumbo', x + 30, TOP - 40, { depth: 6000 });
+      flash(this, 120);
+      this.cameras.main.shake(200, 0.008);
+      const fuego = this.add.particles(0, 0, 'px', { lifespan: 300, scale: { start: 1.4, end: 0 }, alpha: { start: 0.9, end: 0 }, tint: [0xffe040, 0x8ae0ff, 0xffffff], frequency: 12 }).setDepth(TOP + RUN_Y);
+      fuego.startFollow(img);
+      this.vuelo.fuego = fuego;
+    }
     this.st = 'vuelo';
     this.sound.play('esquiva', { volume: this.cur.c.human ? 0.5 : 0.2 });
     if (this.cur.c.human) this.cameras.main.shake(80, 0.004);
@@ -248,6 +295,7 @@ export class Jabalina extends EventScene {
       f.img.setPosition(Math.round(f.x), TOP + RUN_Y - 4).setRotation(0.6);
       efecto(this, 'polvo_caer_chico', f.x, TOP + RUN_Y);
       f.sombra.destroy();
+      if (f.fuego) { f.fuego.stop(); this.time.delayedCall(400, () => f.fuego?.destroy()); }
       this.vuelo = null;
       this.sound.play('golpe', { volume: this.cur.c.human ? 0.4 : 0.15, rate: 0.7 });
       this.cameras.main.shake(70, 0.003);
@@ -290,6 +338,20 @@ export class Jabalina extends EventScene {
     });
   }
 
+  /** Llena la barra del rayo; cuando la tuya se llena, avisa. */
+  private cargaRayo(l: Lanzador, n: number) {
+    const antes = l.rayo;
+    l.rayo = Math.min(100, l.rayo + n);
+    if (l.c.human && antes < 100 && l.rayo >= 100) { this.aviso('¡RAYO LLENO! {ESPECIAL}'); this.sound.play('elegir', { volume: 0.4, rate: 1.4 }); }
+  }
+
+  private avisoTxt?: Phaser.GameObjects.BitmapText;
+  private aviso(s: string) {
+    this.avisoTxt ??= this.uiAdd(txt(this, 320, 280, '', 'fuente_ui', 1).setDepth(8501).setTint(0x8ae0ff));
+    this.avisoTxt.setText(rotular(s, this.pad.fuente)).setVisible(true);
+    this.avisoT = 1.4;
+  }
+
   private final() {
     this.fase = 'fin';
     const orden = [...this.gente2].sort((a, b) => b.best - a.best).map((l) => ({ c: l.c, valor: l.best > 0 ? `${l.best.toFixed(2)} M` : 'NULO' }));
@@ -322,7 +384,7 @@ export class Jabalina extends EventScene {
       this.uiAdd(txt(this, 32, y, this.nombre(l.c.id), 'fuente_ui', 1, 0).setDepth(8001).setTint(l.c.human ? 0xffe040 : l.c.team === 0 ? 0x9ac8ff : 0xffa0a0));
       this.marcasTxt.push(Array.from({ length: INTENTOS }, (_, r) => this.uiAdd(txt(this, 150 + r * 46, y, '-', 'fuente_ui', 1, 1).setDepth(8001))));
     });
-    this.carreraTxt = this.uiAdd(txt(this, 66, 326, 'CARRERA', 'fuente_ui', 1).setDepth(8001));
+    this.carreraTxt = this.uiAdd(txt(this, 66, 326, 'CARRERA · RAYO', 'fuente_ui', 1).setDepth(8001));
     this.angTxt = this.uiAdd(txt(this, 206, 334, '', 'fuente_ui', 1).setDepth(8001));
     this.ojo = this.uiAdd(txt(this, 320, 300, '¡OJO CON LA RAYA!', 'fuente_ui', 2).setDepth(8001).setTint(0xff6060));
   }
@@ -343,6 +405,10 @@ export class Jabalina extends EventScene {
     if (!show) return;
     g.fillStyle(0x000000, 0.6).fillRect(14, 334, 104, 12);
     g.fillStyle(this.boost > 70 ? 0xff6040 : 0xf2c230).fillRect(16, 336, this.boost, 8);
+    // la barra del rayo, debajo de la carrera
+    const lleno = this.cur.rayo >= 100;
+    g.fillStyle(0x000000, 0.6).fillRect(14, 348, 104, 6);
+    g.fillStyle(lleno ? (Math.floor(this.time.now / 150) % 2 ? 0xffe040 : 0x8ae0ff) : 0x5a9af0).fillRect(16, 349, this.cur.rayo, 4);
     const cx = 160, cy = 344;
     g.lineStyle(1, 0xffffff, 0.5).beginPath().arc(cx, cy, 30, Phaser.Math.DegToRad(-90), 0).strokePath();
     g.lineStyle(1, 0x40ff80, 0.6).lineBetween(cx, cy, cx + Math.cos(Phaser.Math.DegToRad(-42)) * 30, cy + Math.sin(Phaser.Math.DegToRad(-42)) * 30);

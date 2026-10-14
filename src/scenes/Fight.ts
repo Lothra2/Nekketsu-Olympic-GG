@@ -8,7 +8,9 @@ import { efecto, talla } from '../core/fx';
 import { Input, rotular } from '../core/input';
 import { chip, PELEA, VICTORIA } from '../core/music';
 import { txt, flash, speedLines } from '../core/ui';
-import { FAMILIA, INSTITUTO, INFO } from './Select';
+import { INFO } from './Select';
+import { nuestros, ellos, lado, equipos, conJugador } from '../core/equipos';
+import { cargarAtletas, packsDe } from '../core/carga';
 import { PUNTOS, type Gira } from '../events/base';
 import { Coach, type Paso } from '../core/coach';
 import { kit, bucle } from '../core/kit';
@@ -24,6 +26,8 @@ const ARMAS_PISO = ['chancleta', 'tubo', 'pote_basura', 'silla_plastica', 'coco'
 /** Qué técnica usa cada atleta con la barra Nekketsu llena. */
 const TECNICA: Record<string, 'mach' | 'huracan' | 'chilena' | 'thor' | 'dragon' | 'tackle'> = {
   rick: 'mach', steph: 'huracan', sophie: 'chilena', alana: 'thor', kenji: 'dragon', ryu: 'huracan', goro: 'tackle', tetsu: 'mach',
+  minh: 'huracan', lan: 'mach', tuan: 'tackle', ba_hoa: 'chilena', andres: 'dragon', camila: 'huracan', pipe: 'chilena', don_hernando: 'tackle',
+  gabo: 'mach', yuli: 'huracan', toto: 'chilena', carmen: 'mach', ender: 'dragon', yusmary: 'huracan', jhonder: 'chilena', abuela_nerva: 'tackle',
 };
 
 interface FightData { modo: string; jugador: string; rival: string; gira?: boolean; practica?: boolean }
@@ -41,14 +45,13 @@ const PESADOS = ['llanta', 'pote_basura', 'silla_plastica'];
 const FRASE: Record<string, string> = {
   rick: '¡AQUÍ NADIE SE RINDE, PANA!', steph: '¡ORDEN EN ESTA AZOTEA!', sophie: '¡TE VOY A GANAR, YA VERÁS!', alana: '¡THOR Y YO TE GANAMOS!',
   kenji: '¡ESTA AZOTEA ES MÍA!', ryu: '¡ERES DEMASIADO LENTO!', goro: '¡GORO TIENE HAMBRE!', tetsu: '¡JE, JE! ¡PREPÁRATE!',
+  minh: '¡EL DRAGÓN NUNCA PIERDE!', lan: '¡NI ME VAS A VER PASAR!', tuan: '¡HOY HAY BÁNH MÌ PARA EL QUE GANE!', ba_hoa: '¡RESPETA A TU ABUELA, MIJO!',
+  andres: '¡TE RECETO UNA DERROTA!', camila: '¡HÁGALE PUES, SUMERCÉ!', pipe: '¡QUÉ CHIMBA DE PELEA, PARCE!', don_hernando: '¡EN MIS TIEMPOS ESTO ERA EN SERIO!',
+  gabo: '¡AQUÍ MANDAN LOS PANAS!', yuli: '¡VAS A VER LO QUE ES BUENO!', toto: '¡CHAMO, NO TE ME ESCAPES!', carmen: '¡ESTA CHANCLETA TIENE TU NOMBRE!',
+  ender: '¡MOLLEJA, PRIMO! ¿Y QUÉ?', yusmary: '¡EL RELÁMPAGO NO AVISA!', jhonder: '¡ME COMÍ TRES PATACONES Y VOY POR TI!', abuela_nerva: '¡AY, MI AMOR, TE VOY A BENDECIR!',
 };
 /** Las burlas del Instituto cuando te tumba. */
 const BURLAS = ['¡JAJAJA!', '¿ESO ES TODO?', '¡QUÉ LENTO!', '¡NI ME DESPEINÉ!', '¡LEVÁNTATE, PUES!'];
-/** Lo que dice cada equipo en el gesto fuerte de su burla (el pulgar de la Familia, el "ven" del Instituto). */
-const FRASE_EQUIPO: Record<string, string[]> = {
-  familia_gg: ['¡ASÍ MISMO!', '¡ESO, FAMILIA!', '¡BUENA ESA!'],
-  instituto_nekketsu: ['¡VEN, PUES!', '¿ESO ES TODO?', '¡NI ME DESPEINÉ!'],
-};
 /** Las onomatopeyas de cómic de los golpes fuertes. */
 const PUM = ['¡POW!', '¡BAM!', '¡CATAPLUM!', '¡PUM!', '¡KRAK!'];
 const PAF = ['¡PAF!', '¡ZAS!', '¡TOING!', '¡PLAF!'];
@@ -120,6 +123,7 @@ export class Fight extends Phaser.Scene implements World {
 
   init(d: FightData) {
     this.data0 = { modo: d.modo ?? '1v1', jugador: d.jugador ?? 'rick', rival: d.rival ?? 'kenji', gira: !!d.gira, practica: !!d.practica };
+    conJugador(this.data0.jugador);
     this.coach = null;
     this.golpes = [];
     this.actors = [];
@@ -160,7 +164,7 @@ export class Fight extends Phaser.Scene implements World {
   /** El globo de una burla de equipo, en el gesto fuerte: blanco con su colita, y la frase de su equipo. */
   frase(a: Actor) {
     const eq = (kit().atletas[a.id] as { equipo?: string } | undefined)?.equipo ?? '';
-    const s = Phaser.Utils.Array.GetRandom(FRASE_EQUIPO[eq] ?? BURLAS);
+    const s = Phaser.Utils.Array.GetRandom(equipos()[eq]?.frases ?? BURLAS);
     const x = this.px(a.x, a.y), y = FLOOR_TOP + a.y - a.z - 66;
     const t = txt(this, x, y, s, 'fuente_ui', 1).setDepth(6001).setTint(a.team === 0 ? 0x2a5ab0 : 0xb02a3a);
     const w = t.width + 10, h = 14;
@@ -235,7 +239,10 @@ export class Fight extends Phaser.Scene implements World {
   /** el escenario de PixelForja: el dojo de Hà Nội en el judo, la azotea de Caracas en la pelea */
   private get escenario() { return this.judo ? 'judo_hanoi' : 'caracas_azotea'; }
 
-  preload() { queueEscenario(this, this.escenario); }
+  preload() {
+    cargarAtletas(this, [...nuestros(), ...ellos(), this.data0.jugador, this.data0.rival], packsDe('Fight'), undefined, true);
+    queueEscenario(this, this.escenario);
+  }
 
   /** el tema que suena en bucle (lotes H2 y H3 de PixelForja) */
   private temaSonando: Phaser.Sound.BaseSound | null = null;
@@ -301,16 +308,16 @@ export class Fight extends Phaser.Scene implements World {
     this.dusts = this.add.particles(0, 0, 'px', { speedX: { min: -40, max: 40 }, speedY: { min: -30, max: -6 }, lifespan: 380, scale: { start: 0.8, end: 0 }, tint: 0xb0a8b8, alpha: { start: 0.7, end: 0 }, emitting: false }).setDepth(4999);
 
     const { modo, jugador, rival } = this.data0;
-    const nuestros = modo === '4v4' ? [jugador, ...FAMILIA.filter((f) => f !== jugador)] : [jugador];
-    const ellos = modo === '4v4' ? INSTITUTO : [rival];
-    nuestros.forEach((id, i) => {
+    const mios = modo === '4v4' ? [jugador, ...nuestros().filter((f) => f !== jugador)] : [jugador];
+    const suyos = modo === '4v4' ? ellos() : [rival];
+    mios.forEach((id, i) => {
       const a = new Actor(this, id, 0, 90 + (i % 2) * 40, 20 + i * 22, i === 0);
       this.actors.push(a);
       // tu equipo aguanta más según el nivel
       a.maxHp = a.hp = Math.round(a.maxHp * ajustes().vida);
       if (i === 0) this.player = a; else this.brains.set(a, new Brain(a, 0.9));
     });
-    ellos.forEach((id, i) => {
+    suyos.forEach((id, i) => {
       const a = new Actor(this, id, 1, this.data0.practica ? 230 : 550 - (i % 2) * 40, 20 + i * 22);
       this.actors.push(a);
       // entrenando, el rival es un saco: no se mueve ni pega
@@ -613,8 +620,8 @@ export class Fight extends Phaser.Scene implements World {
       this.tweens.add({ targets: pa, x: 150, duration: 260, ease: 'Back.out' });
       this.tweens.add({ targets: pb, x: 490, duration: 260, ease: 'Back.out', delay: 120 });
       const modo4 = this.data0.modo === '4v4';
-      add(txt(this, 150, 246, modo4 ? 'FAMILIA GG' : yo.nombre.toUpperCase(), 'fuente_ui', 2).setDepth(8604).setTint(0x9ac8ff));
-      add(txt(this, 490, 246, modo4 ? 'INSTITUTO NEKKETSU' : el.nombre.toUpperCase(), 'fuente_ui', 2).setDepth(8604).setTint(0xffa0a0));
+      add(txt(this, 150, 246, modo4 ? lado(0).nombre.toUpperCase() : yo.nombre.toUpperCase(), 'fuente_ui', 2).setDepth(8604).setTint(0x9ac8ff));
+      add(txt(this, 490, 246, modo4 ? lado(1).nombre.toUpperCase() : el.nombre.toUpperCase(), 'fuente_ui', 2).setDepth(8604).setTint(0xffa0a0));
       const fa = add(txt(this, 150, 268, FRASE[yo.id] ?? '¡VAMOS!', 'fuente_ui', 1).setDepth(8604).setAlpha(0));
       const fb = add(txt(this, 490, 268, FRASE[el.id] ?? '¡VEN!', 'fuente_ui', 1).setDepth(8604).setAlpha(0));
       this.tweens.add({ targets: fa, alpha: 1, delay: 500, duration: 150 });
@@ -690,7 +697,7 @@ export class Fight extends Phaser.Scene implements World {
    */
   private cierraGira(team: 0 | 1) {
     const gira = this.registry.get('gira') as Gira | undefined;
-    const equipo = (t: number) => (t === 0 ? 'FAMILIA GG' : 'INSTITUTO');
+    const equipo = (t: number) => lado(t).corto;
     if (gira) {
       if (this.judo) {
         gira.puntos[team] += PUNTOS[0];

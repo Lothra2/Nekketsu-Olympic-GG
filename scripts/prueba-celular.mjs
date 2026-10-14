@@ -36,7 +36,7 @@ for (const [i, ms] of [[1, 4000], [2, 9000], [3, 12000], [4, 9000], [5, 12000], 
   await page.screenshot({ path: `${out}/0${i}_intro.png` });
 }
 const ir = async (escena, datos, ms, nombre) => {
-  await page.evaluate(([e, d]) => { const g = window.game; g.scene.getScenes(true).forEach((x) => g.scene.stop(x.scene.key)); g.scene.start(e, d); }, [escena, datos]);
+  await page.evaluate(([e, d]) => { const g = window.game; g.scene.getScenes(false).forEach((x) => { const st = x.sys.settings.status; if (st >= 3 && st <= 7) g.scene.stop(x.scene.key); }); g.scene.start(e, d); }, [escena, datos]);
   await page.waitForTimeout(ms);
   await page.screenshot({ path: `${out}/${nombre}.png` });
   await lienzo(nombre);

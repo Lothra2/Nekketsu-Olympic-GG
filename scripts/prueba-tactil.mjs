@@ -22,7 +22,7 @@ const P = (x, y) => ({ x: x * k, y: oy + y * k, id: 1 });
 const touch = (type, pts) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: pts });
 const BTN = { A: [528, 302], B: [586, 270], C: [586, 326] };
 const tap = async (b) => { await touch('touchStart', [P(...BTN[b])]); await page.waitForTimeout(35); await touch('touchEnd', []); await page.waitForTimeout(30); };
-await page.evaluate(() => { const g = window.game; g.scene.getScenes(true).forEach((x) => g.scene.stop(x.scene.key)); g.scene.start('Vallas', { jugador: 'alana', practica: true }); });
+await page.evaluate(() => { const g = window.game; g.scene.getScenes(false).forEach((x) => { const st = x.sys.settings.status; if (st >= 3 && st <= 7) g.scene.stop(x.scene.key); }); g.scene.start('Vallas', { jugador: 'alana', practica: true }); });
 await page.waitForFunction(() => !!window.game.scene.getScene('Vallas').coach, null, { timeout: 15000 });
 const estado = () => page.evaluate(() => { const s = window.game.scene.getScene('Vallas'); const c = s.coach; const me = s.racers[0]; const h = s.hurdles.filter((h) => h.lane === me.lane && !h.down && h.x > me.x).map((h) => h.x)[0]; return { i: c.i, texto: c.main.text.replace(/\n/g, ' '), teclas: c.keys.text, gap: h ? h - me.x : 999, v: me.v }; });
 let e = await estado();

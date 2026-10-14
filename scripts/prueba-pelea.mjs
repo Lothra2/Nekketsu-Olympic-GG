@@ -19,7 +19,7 @@ await page.waitForFunction(() => window.game?.scene.isActive('Tap') || window.ga
 await page.waitForTimeout(400);
 await page.mouse.click(640, 360);
 await page.waitForTimeout(400);
-await page.evaluate(([j, r]) => { const g = window.game; g.scene.getScenes(true).forEach((s) => g.scene.stop(s.scene.key)); g.scene.start('Fight', { modo: '1v1', jugador: j, rival: r }); }, [jugador, rival]);
+await page.evaluate(([j, r]) => { const g = window.game; g.scene.getScenes(false).forEach((s) => { const st = s.sys.settings.status; if (st >= 3 && st <= 7) g.scene.stop(s.scene.key); }); g.scene.start('Fight', { modo: '1v1', jugador: j, rival: r }); }, [jugador, rival]);
 await page.waitForTimeout(2600);
 const shot = (n) => page.screenshot({ path: `${out}/${n}.png` });
 const key = async (k, ms = 70) => { await page.keyboard.down(k); await page.waitForTimeout(ms); await page.keyboard.up(k); };

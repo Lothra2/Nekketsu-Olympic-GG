@@ -108,7 +108,11 @@
     ],
     "ngg_burlas": [
       "burla_pulgar",
-      "burla_bruce_lee"
+      "burla_bruce_lee",
+      "burla_dragon",
+      "burla_risa_tapada",
+      "burla_salsa",
+      "burla_hombros"
     ],
     "voley": {
       "anims": [
@@ -171,7 +175,11 @@
   },
   "alias": {
     "burla_familia_gg": "burla_pulgar",
-    "burla_instituto_nekketsu": "burla_bruce_lee"
+    "burla_instituto_nekketsu": "burla_bruce_lee",
+    "burla_rong_sai_gon": "burla_dragon",
+    "burla_rolos_de_chapinero": "burla_risa_tapada",
+    "burla_panas_de_caracas": "burla_salsa",
+    "burla_maracuchos_del_lago": "burla_hombros"
   },
   "pruebas": {
     "pelea": [
@@ -301,7 +309,10 @@
       "garrocha"
     ],
     "ambientes": [
-      "agua"
+      "agua",
+      "mar",
+      "cafetal",
+      "llano"
     ],
     "musica": [
       "marcha_nekketsu",

@@ -4,6 +4,7 @@ import { ajustes } from '../core/nivel';
 import { efecto } from '../core/fx';
 import { chip } from '../core/music';
 import { txt, flash } from '../core/ui';
+import { rotular } from '../core/input';
 import { Painter, hex, rng, type RGB } from '../gfx/paint';
 import { EventScene, prueba, type Competidor } from './base';
 import { queueEscenario } from './escenario';
@@ -30,11 +31,13 @@ const HUECO_PRACTICA = 4;
 const CLAVA = 3, ATERRIZA = 11;
 
 type Caida = 'balcon' | 'carrito' | 'palenquera';
-interface Saltador { c: Competidor; fig: Figura; best: number; marcas: number[]; top: number }
+interface Saltador { c: Competidor; fig: Figura; best: number; marcas: number[]; top: number; nek: number }
 
 /**
  * Azoteas de Cartagena (Crash 'n the Boys, 1992): carrerita con la garrocha alternando botones, SALTO en la cajita
  * para clavarla y SALTO otra vez arriba para el empuje. Hay que llegar al techo de enfrente, cada ronda más lejos.
+ * Corriendo a tope y clavando perfecto se llena la barra Nekketsu, que sigue de una ronda a la otra; llena, ESPECIAL
+ * arriba es la garrocha Nekketsu, un empuje que te lleva mucho más lejos.
  * El que no llega cae en un balcón con buganvillas, en el carrito de frutas o al lado de la palenquera, que lo regaña.
  * Tres rondas, cuenta el salto más largo.
  */
@@ -59,6 +62,11 @@ export class Azoteas extends EventScene {
   private viento = 0;
   private cpuClava = 0;
   private cpuEmpuja = false;
+  /** este salto lleva la garrocha Nekketsu, y si la máquina la va a usar */
+  private nekketsu = false;
+  private cpuNek = false;
+  private avisoT = 0;
+  private avisoTxt?: Phaser.GameObjects.BitmapText;
   private caida: { tipo: Caida; vy: number; vx: number; hasta: number } | null = null;
   private hueco = HUECO_PRACTICA;
   private skip = false;
@@ -77,7 +85,7 @@ export class Azoteas extends EventScene {
 
   constructor() { super('Azoteas'); }
 
-  preload() { queueEscenario(this, 'cartagena'); }
+  preload() { super.preload(); queueEscenario(this, 'cartagena'); }
 
   create() {
     this.gente2 = [];
@@ -132,14 +140,14 @@ export class Azoteas extends EventScene {
       fig.set('idle');
       fig.row = 'down_right';
       const top = c.id === 'tetsu' || c.id === 'goro' ? 66 : c.id === 'kenji' ? 62 : 56;
-      this.gente2.push({ c, fig, best: 0, marcas: [], top });
+      this.gente2.push({ c, fig, best: 0, marcas: [], top, nek: 0 });
       this.esperando(this.gente2[i]);
     });
     this.hud = this.uiAdd(this.add.graphics().setDepth(8000));
     this.tema('champeta_murallas');
     this.cameras.main.centerOn(this.camX, 360 - 180 / ZOOM);
     if (this.d.practica) void this.entrenar('AZOTEAS DE CARTAGENA', this.pasos(), 40);
-    else void this.previa('AZOTEAS DE CARTAGENA', 'CARTAGENA, COLOMBIA', 'ALTERNA {PUÑO} Y {PATADA} PARA CORRER · {SALTO} EN LA CAJITA PARA CLAVAR LA GARROCHA');
+    else void this.previa('AZOTEAS DE CARTAGENA', 'CARTAGENA, COLOMBIA', 'ALTERNA {PUÑO} Y {PATADA} PARA CORRER · {SALTO} EN LA CAJITA PARA CLAVAR · {SALTO} ARRIBA: EMPUJE · BARRA LLENA: {ESPECIAL}');
   }
 
   private pasos(): Paso[] {
@@ -288,6 +296,7 @@ export class Azoteas extends EventScene {
     if (this.fase === 'juego') this.tick(dt, p);
     this.flamear();
     this.coach?.tick(dt);
+    if (this.avisoT > 0) { this.avisoT -= dt; if (this.avisoT <= 0) this.avisoTxt?.setVisible(false); }
     this.camera(dt);
     this.drawHud();
     this.filterUi();
@@ -308,11 +317,15 @@ export class Azoteas extends EventScene {
         }
         this.boost = Math.max(0, this.boost - 36 * dt);
         target = this.boost * 1.7;
-        if (p.pressed.jump && this.x > RUN0 + 20) this.clava();
+        if (this.boost > 80) this.cargaNek(this.cur, 16 * dt);
+        // salto lejos de la cajita no clava: avisa y espera (un toque temprano no te bota el salto)
+        if (p.pressed.jump && this.x > CAJA - 70) this.clava();
+        else if (p.pressed.jump && this.x > RUN0 + 20) this.consejo('¡TODAVÍA NO! CLAVA EN LA CAJITA');
         // en el nivel suave, si no la clavó, la clava sola en la cajita
         else if (ajustes().sinNulo && this.x >= CAJA) this.clava();
       } else {
         target = this.cur.top * 2.6 * ajustes().cpuVel;
+        if (this.v > this.cur.top * 2.2) this.cargaNek(this.cur, 16 * dt);
         if (this.x >= this.cpuClava) this.clava();
       }
       if (this.st === 'carrera') {
@@ -333,11 +346,18 @@ export class Azoteas extends EventScene {
       fig.step(dt * k);
       const f = fig.anim.frame;
       // el empuje: SALTO otra vez arriba del todo (de la subida al suelte)
-      if (human && p.pressed.jump && !this.intentoEmpuje && f >= CLAVA + 1) {
-        this.intentoEmpuje = true;
-        if (f >= 5 && f <= 8) this.empujar();
+      // el empuje: de la subida al suelte; si te apuras, te avisa y puedes volver a intentar
+      if (human && (p.pressed.jump || p.pressed.special) && !this.intentoEmpuje && f >= CLAVA + 1) {
+        const nek = p.pressed.special;
+        if (nek && this.cur.nek < 100) this.consejo('¡LLENA LA BARRA: CORRE A TOPE Y CLAVA PERFECTO!');
+        else if (f < 5) this.letrero('¡ARRIBA DEL TODO!', 0xffe080);
+        else {
+          this.intentoEmpuje = true;
+          if (f <= 9) this.empujar(nek);
+          else this.letrero('¡TARDE!', 0xff8080);
+        }
       }
-      if (!human && this.cpuEmpuja && !this.intentoEmpuje && f >= 6) { this.intentoEmpuje = true; this.empujar(); }
+      if (!human && (this.cpuEmpuja || this.cpuNek) && !this.intentoEmpuje && f >= 6) { this.intentoEmpuje = true; this.empujar(this.cpuNek); }
       const u = Phaser.Math.Clamp((fig.anim.pos - CLAVA) / (ATERRIZA - CLAVA), 0, 1);
       this.x = this.x0 + (this.xCae - this.x0) * (u * u * (3 - 2 * u));
       this.y = TECHO - (fig.anim.data.elevacion?.[f] ?? 0) * 1.4;
@@ -369,6 +389,9 @@ export class Azoteas extends EventScene {
     const fino = 1 - ajustes().cpuAgresion * 0.6;
     this.cpuClava = CAJA + (Math.random() * 2 - 1) * 22 * fino + (Math.random() < 0.04 ? 30 : 0);
     this.cpuEmpuja = Math.random() < 0.3 + ajustes().cpuAgresion * 0.4;
+    this.nekketsu = false;
+    // la máquina guarda la garrocha Nekketsu para la última ronda (o la usa si ya la tiene llena)
+    this.cpuNek = !this.cur.c.human && this.cur.nek >= 100 && (this.ronda === INTENTOS - 1 || Math.random() < 0.3);
     this.camX = RUN0 + 100;
     const intento = this.d.practica ? `SALTO ${this.saltos + 1}` : `RONDA ${this.ronda + 1} DE ${INTENTOS} · ${this.hueco.toFixed(1)} M`;
     const t = this.uiAdd(txt(this, 320, this.d.practica ? 150 : 84, `${this.nombre(this.cur.c.id)} · ${intento}`, 'fuente_ui', 2).setDepth(8500).setTint(this.cur.c.human ? 0xffe040 : this.cur.c.team === 0 ? 0x9ac8ff : 0xffa0a0));
@@ -389,7 +412,9 @@ export class Azoteas extends EventScene {
    */
   private clava() {
     const off = this.x - CAJA;
-    this.eff = Phaser.Math.Clamp(1 - Math.max(0, Math.abs(off) - 4) / 50, 0.35, 1);
+    // a un par de pasos de la cajita todavía clava bien: la perfecta es a menos de unos 12 pixeles
+    this.eff = Phaser.Math.Clamp(1 - Math.max(0, Math.abs(off) - 8) / 60, 0.35, 1);
+    if (this.eff > 0.92) this.cargaNek(this.cur, 30);
     if (this.cur.c.human && ajustes().sinNulo) this.eff = Math.max(this.eff, 0.75);
     this.x0 = this.x;
     this.xCae = this.x0 + this.alcance();
@@ -409,14 +434,42 @@ export class Azoteas extends EventScene {
     this.suena('garrocha', this.cur.c.human ? 0.55 : 0.2, () => this.sound.play('esquiva', { volume: this.cur.c.human ? 0.4 : 0.15, rate: 0.8 }));
   }
 
-  private alcance() {
-    return (24 + this.v * 0.4) * this.eff * (1 + this.viento * 0.04) * (this.empuje ? 1.08 : 1);
+  /** Llena la barra de un saltador; cuando se llena la tuya, avisa. */
+  private cargaNek(sa: Saltador, n: number) {
+    const antes = sa.nek;
+    sa.nek = Math.min(100, sa.nek + n);
+    if (sa.c.human && antes < 100 && sa.nek >= 100) { this.consejo('¡BARRA LLENA! ARRIBA, {ESPECIAL}'); this.sound.play('elegir', { volume: 0.4, rate: 1.4 }); }
   }
 
-  private empujar() {
+  private consejo(s: string) {
+    this.avisoTxt ??= this.uiAdd(txt(this, 320, 280, '', 'fuente_ui', 1).setDepth(8501).setTint(0x8ae0ff));
+    this.avisoTxt.setText(rotular(s, this.pad.fuente)).setVisible(true);
+    this.avisoT = 1.4;
+  }
+
+  private letrero(s: string, tint: number) {
+    const t = this.add.bitmapText(this.x, this.y - 56, 'fuente_ui', s).setOrigin(0.5).setDepth(6000).setTint(tint);
+    this.tweens.add({ targets: t, y: t.y - 10, alpha: 0, delay: 400, duration: 400, onComplete: () => t.destroy() });
+  }
+
+  private alcance() {
+    return (24 + this.v * 0.4) * this.eff * (1 + this.viento * 0.04) * (this.nekketsu ? 1.2 : this.empuje ? 1.08 : 1);
+  }
+
+  private empujar(nek = false) {
     this.empuje = true;
+    if (nek && this.cur.nek >= 100) {
+      this.nekketsu = true;
+      this.cur.nek = 0;
+      efecto(this, 'aura_nekketsu', this.x, this.y, { depth: TECHO + 2 });
+      flash(this, 120);
+      this.cameras.main.shake(200, 0.008);
+      this.suena('garrocha', this.cur.c.human ? 0.6 : 0.3);
+      if (this.cur.c.human) void this.banner('¡GARROCHA NEKKETSU!', 'fuente_titulo', 2, 600);
+      else this.letrero('¡NEKKETSU!', 0xff8020);
+    }
     this.xCae = this.x0 + this.alcance();
-    if (!this.cur.c.human) return;
+    if (!this.cur.c.human || this.nekketsu) return;
     chip.blip(990, 0.12, 'sq25', 0.2, 1480);
     const t = this.add.bitmapText(this.x, this.y - 56, 'fuente_ui', '¡EMPUJE!').setOrigin(0.5).setDepth(6000).setTint(0x8ae0ff);
     this.tweens.add({ targets: t, y: t.y - 10, alpha: 0, delay: 400, duration: 400, onComplete: () => t.destroy() });
@@ -573,7 +626,7 @@ export class Azoteas extends EventScene {
       this.marcasTxt.push(Array.from({ length: INTENTOS }, (_, r) => this.uiAdd(txt(this, 140 + r * 40, y, '-', 'fuente_ui', 1, 1).setDepth(8001))));
     });
     this.vientoTxt = this.uiAdd(txt(this, 626, 14, '', 'fuente_ui', 1, 1).setDepth(8001));
-    this.carreraTxt = this.uiAdd(txt(this, 66, 326, 'CARRERA', 'fuente_ui', 1).setDepth(8001));
+    this.carreraTxt = this.uiAdd(txt(this, 66, 326, 'CARRERA · NEKKETSU', 'fuente_ui', 1).setDepth(8001));
     this.cajaTxt = this.uiAdd(txt(this, 320, 300, '¡CLAVA EN LA CAJITA!', 'fuente_ui', 2).setDepth(8001).setTint(0xffe040));
   }
 
@@ -589,9 +642,16 @@ export class Azoteas extends EventScene {
     }));
     const v = this.viento;
     this.vientoTxt.setText(this.fase === 'juego' ? `VIENTO ${v > 0 ? '+' : ''}${v.toFixed(1)}` : '').setTint(v > 0.3 ? 0x8aff8a : v < -0.3 ? 0xff8a8a : 0xffffff);
-    const show = !!this.cur?.c.human && this.st === 'carrera' && this.fase === 'juego';
+    const yo = this.gente2.find((sa) => sa.c.human);
+    const show = !!this.cur?.c.human && (this.st === 'carrera' || this.st === 'salto') && this.fase === 'juego';
     this.carreraTxt.setVisible(show);
-    this.cajaTxt.setVisible(show && this.x > CAJA - 70);
+    // la barra Nekketsu, debajo de la carrera (también en el aire, que es donde se usa)
+    if (show && yo) {
+      const lleno = yo.nek >= 100;
+      g.fillStyle(0x000000, 0.6).fillRect(14, 348, 104, 6);
+      g.fillStyle(lleno ? (Math.floor(this.time.now / 150) % 2 ? 0xffe040 : 0xff6020) : 0x5a9af0).fillRect(16, 349, yo.nek, 4);
+    }
+    this.cajaTxt.setVisible(show && this.st === 'carrera' && this.x > CAJA - 70);
     if (!show) return;
     g.fillStyle(0x000000, 0.6).fillRect(14, 334, 104, 12);
     g.fillStyle(this.boost > 70 ? 0xff6040 : 0xf2c230).fillRect(16, 336, this.boost, 8);

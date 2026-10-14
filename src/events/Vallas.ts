@@ -23,10 +23,16 @@ interface Racer {
   st: 'set' | 'start' | 'run' | 'air' | 'stumble' | 'done'; t: number; time: number; react: number; last: string; cool: number; top: number;
   /** entrenamiento: corre pegado a la persona para que practique el codazo */
   sombra?: boolean;
+  /** la persona: cuánto lleva la palanca arriba o abajo, la espera entre cambios de carril y el salto guardado */
+  palanca?: number; espera?: number; salto?: number;
 }
 interface Hurdle { x: number; lane: number; down: boolean; img: Phaser.GameObjects.Image }
 
-/** Vallas del Café: 4 carriles, 9 vallas, codazos permitidos. */
+/**
+ * Vallas del Café: 4 carriles, 9 vallas, codazos permitidos (solo a los rivales). Para cambiar de carril hay que
+ * empujar la palanca bien arriba o abajo un momentico, y hay una pausa corta entre cambio y cambio; la valla que te
+ * tumba es la del carril donde se te ve. El salto que tocas un pelito antes de poder saltar se guarda y sale solo.
+ */
 export class Vallas extends EventScene {
   private racers: Racer[] = [];
   /** entrenamiento: vallas pasadas sin tumbar y cambios de carril */
@@ -42,7 +48,7 @@ export class Vallas extends EventScene {
 
   constructor() { super('Vallas'); }
 
-  preload() { queueEscenario(this, 'cocora'); }
+  preload() { super.preload(); queueEscenario(this, 'cocora'); }
 
   create() {
     this.racers = [];
@@ -78,8 +84,9 @@ export class Vallas extends EventScene {
     this.timeTxt = this.uiAdd(txt(this, 626, 14, '0.00', 'fuente_ui', 2, 1).setDepth(8001));
     this.racers.forEach((r) => this.uiAdd(this.add.image(0, 22, 'cabecitas', r.c.id).setDepth(8002).setData('r', r)));
     this.tema('cafe_neblina');
+    this.ambiente('cafetal');
     if (this.d.practica) void this.entrenar('VALLAS DEL CAFÉ', this.pasos());
-    else void this.previa('VALLAS DEL CAFÉ', 'EJE CAFETERO, COLOMBIA', 'ALTERNA {PUÑO} Y {PATADA} PARA CORRER · {SALTO} SALTA · {ESPECIAL} CODAZO');
+    else void this.previa('VALLAS DEL CAFÉ', 'EJE CAFETERO, COLOMBIA', 'ALTERNA {PUÑO} Y {PATADA} PARA CORRER · {SALTO} SALTA · {MOVER} ARRIBA O ABAJO CAMBIA DE CARRIL · {ESPECIAL} CODAZO');
   }
 
   private pasos(): Paso[] {
@@ -91,7 +98,7 @@ export class Vallas extends EventScene {
       { texto: '¡ESO! SALTA 3 VALLAS MÁS\nSIN TUMBARLAS', botones: ['punch', 'kick', 'jump'], antes: () => { base = this.saltadas; }, listo: () => this.saltadas - base >= 3 },
       { texto: 'USA {MOVER} ARRIBA O ABAJO\nPARA CAMBIAR DE CARRIL', botones: ['stick'], listo: () => this.cambios >= 1 },
       {
-        texto: 'KENJI CORRE PEGADO A TI:\nTOCA {ESPECIAL} PARA EL CODAZO', botones: ['special'],
+        texto: `${this.rivalEntrenoNombre} CORRE PEGADO A TI:\nTOCA {ESPECIAL} PARA EL CODAZO`, botones: ['special'],
         antes: () => this.sparring(), listo: () => this.codazos >= 1,
       },
       { texto: '¡TUMBADO! AHORA\nLLEGA A LA META', botones: ['punch', 'kick', 'jump'], listo: () => me().st === 'done' },
@@ -151,13 +158,21 @@ export class Vallas extends EventScene {
       }
       r.boost = Math.max(0, r.boost - 42 * dt);
       target = (p.x > 0 || r.boost > 0 ? 70 : 0) + r.boost;
-      if (p.pressed.jump && r.st !== 'air') this.jump(r);
-      if (p.y !== 0 && Math.abs(r.y - LANES[r.lane]) < 2) { const nl = Phaser.Math.Clamp(r.lane + p.y, 0, 3); if (nl !== r.lane && !this.racers.some((o) => o !== r && o.lane === nl && Math.abs(o.x - r.x) < 14)) { r.lane = nl; this.cambios++; } }
+      // el salto se guarda un ratico: si lo tocas tropezando, arrancando o aún en el aire, sale apenas se pueda
+      if (p.pressed.jump) r.salto = 0.2;
+      if ((r.salto ?? 0) > 0) { r.salto = (r.salto ?? 0) - dt; if (r.st === 'run') { r.salto = 0; this.jump(r); } }
+      // cambio de carril: la palanca bien arriba o abajo un momentico (más si va en diagonal) y una pausa entre cambios
+      r.palanca = Math.abs(p.y) > 0.6 ? (r.palanca ?? 0) + dt : 0;
+      r.espera = Math.max(0, (r.espera ?? 0) - dt);
+      if (r.palanca >= (p.x !== 0 ? 0.25 : 0.08) && r.espera <= 0) {
+        const nl = Phaser.Math.Clamp(r.lane + Math.sign(p.y), 0, 3);
+        if (nl !== r.lane && !this.racers.some((o) => o !== r && o.lane === nl && Math.abs(o.x - r.x) < 14)) { r.lane = nl; this.cambios++; r.espera = 0.3; r.palanca = 0; }
+      }
       if (p.pressed.special) this.codazo(r);
     } else {
       const me = this.racers[0];
       target = r.sombra ? me.v + Phaser.Math.Clamp((me.x - 4 - r.x) * 3, -60, 60) : (r.top + Math.sin(r.t * 2 + r.react * 20) * 10) * ajustes().cpuVel * goma(r.x - me.x);
-      const next = this.hurdles.find((h) => h.lane === r.lane && !h.down && h.x > r.x);
+      const next = this.hurdles.find((h) => h.lane === this.carrilVisto(r) && !h.down && h.x > r.x);
       if (next && r.st !== 'air' && next.x - r.x < 26 + r.v * 0.05 && Math.random() < 0.92) this.jump(r);
       else if (next && r.st !== 'air' && next.x - r.x < 12) this.jump(r);
       const h = this.racers.find((o) => o !== r && o.c.team !== r.c.team && Math.abs(o.lane - r.lane) === 1 && Math.abs(o.x - r.x) < 22);
@@ -167,9 +182,11 @@ export class Vallas extends EventScene {
     r.v += Phaser.Math.Clamp(target - r.v, -260 * dt, 230 * dt);
     const dx = r.v * dt;
     // una valla de tu carril que quedó atrás sin caerse: saltada
-    if (r.c.human) for (const h of this.hurdles) if (h.lane === r.lane && !h.down && h.x > r.x && h.x <= r.x + dx) this.saltadas++;
+    const visto = this.carrilVisto(r);
+    if (r.c.human) for (const h of this.hurdles) if (h.lane === visto && !h.down && h.x > r.x && h.x <= r.x + dx) this.saltadas++;
     r.x += dx;
-    r.y += Phaser.Math.Clamp(LANES[r.lane] - r.y, -60 * dt, 60 * dt);
+    // al carril nuevo en un quinto de segundo
+    r.y += Phaser.Math.Clamp(LANES[r.lane] - r.y, -140 * dt, 140 * dt);
     if (r.st === 'air') {
       r.vz -= 900 * dt;
       r.z += r.vz * dt;
@@ -186,9 +203,10 @@ export class Vallas extends EventScene {
       if (r.v < 5) r.fig.set('idle');
       else if (r.fig.anim.name === 'idle') r.fig.set('sprint');
     } else r.fig.step(dt);
-    // chocar con una valla
+    // chocar con una valla: la del carril donde se le ve
+    const carril = this.carrilVisto(r);
     if (r.z < 9) for (const h of this.hurdles) {
-      if (h.down || h.lane !== r.lane || Math.abs(h.x - r.x) > 5) continue;
+      if (h.down || h.lane !== carril || Math.abs(h.x - r.x) > 5) continue;
       h.down = true;
       h.img.setTexture('valla_caida').setOrigin(0.5, 1);
       efecto(this, 'polvo_caer_chico', h.x, TOP + LANES[h.lane]);
@@ -197,6 +215,13 @@ export class Vallas extends EventScene {
       this.sound.play('romper', { volume: r.c.human ? 0.45 : 0.15 });
     }
     if (r.x >= FINISH) { r.st = 'done'; r.time = this.clock; r.fig.set('sprint'); if (r.c.human) { flash(this, 120); chip.blip(1568, 0.3, 'sq25', 0.2, 2093); } }
+  }
+
+  /** El carril donde se le ve (mientras cambia, el más cercano). */
+  private carrilVisto(r: Racer) {
+    let k = 0;
+    for (let i = 1; i < LANES.length; i++) if (Math.abs(LANES[i] - r.y) < Math.abs(LANES[k] - r.y)) k = i;
+    return k;
   }
 
   private jump(r: Racer) {
@@ -221,17 +246,17 @@ export class Vallas extends EventScene {
 
   private codazo(r: Racer) {
     if (r.cool > 0) return;
-    // el de al lado más cercano, primero los rivales
+    // el rival de al lado más cercano (al compañero nunca)
     const cerca = this.racers
-      .filter((o) => o !== r && o.st !== 'done' && Math.abs(o.lane - r.lane) === 1 && Math.abs(o.x - r.x) < 40)
-      .sort((a, b) => Number(a.c.team === r.c.team) - Number(b.c.team === r.c.team) || Math.abs(a.x - r.x) - Math.abs(b.x - r.x));
+      .filter((o) => o !== r && o.c.team !== r.c.team && o.st !== 'done' && Math.abs(o.lane - r.lane) === 1 && Math.abs(o.x - r.x) < 40)
+      .sort((a, b) => Math.abs(a.x - r.x) - Math.abs(b.x - r.x));
     const v = cerca[0];
     if (!v) {
       // falló: se nota, y se puede volver a intentar enseguida
       r.cool = 0.4;
       if (r.c.human) {
         this.sound.play('esquiva', { volume: 0.4 });
-        const t = txt(this, r.x, TOP + r.y - 54, '¡NADIE AL LADO!', 'fuente_ui', 1).setDepth(6000).setTint(0xff9090);
+        const t = txt(this, r.x, TOP + r.y - 54, '¡NINGÚN RIVAL AL LADO!', 'fuente_ui', 1).setDepth(6000).setTint(0xff9090);
         this.tweens.add({ targets: t, y: t.y - 10, alpha: 0, duration: 600, onComplete: () => t.destroy() });
       }
       return;
@@ -256,11 +281,11 @@ export class Vallas extends EventScene {
     if (this.racers.some((r) => r.sombra)) return;
     const me = this.racers[0];
     const lane = me.lane < 3 ? me.lane + 1 : me.lane - 1;
-    const fig = new Figura(this, me.x - 30, TOP + LANES[lane], 'kenji', 'idle');
+    const fig = new Figura(this, me.x - 30, TOP + LANES[lane], this.rivalEntreno, 'idle');
     fig.anim.prefer = 'atletismo';
     fig.set('sprint', true);
     const shadow = this.add.ellipse(me.x - 30, TOP + LANES[lane], 20, 5, 0x000000, 0.3);
-    this.racers.push({ c: { id: 'kenji', team: 1, human: false }, fig, shadow, x: me.x - 30, y: LANES[lane], lane, z: 0, vz: 0, v: me.v, boost: 0, st: 'run', t: 0, time: 0, react: 0.1, last: '', cool: 0, top: 0, sombra: true });
+    this.racers.push({ c: { id: this.rivalEntreno, team: 1, human: false }, fig, shadow, x: me.x - 30, y: LANES[lane], lane, z: 0, vz: 0, v: me.v, boost: 0, st: 'run', t: 0, time: 0, react: 0.1, last: '', cool: 0, top: 0, sombra: true });
   }
 
   private placeOf(r: Racer) {

@@ -8,6 +8,7 @@ import { Painter, hex } from '../gfx/paint';
 import { EventScene, prueba, type Competidor } from './base';
 import { queueEscenario } from './escenario';
 import type { Paso } from '../core/coach';
+import { rotular } from '../core/input';
 
 const WORLD = 1460;
 const TOP = 226;
@@ -23,11 +24,17 @@ const AGUA = 6;
 interface Swimmer {
   c: Competidor; fig: Figura; x: number; lane: number; v: number; boost: number; last: string;
   st: 'set' | 'dive' | 'swim' | 'done'; t: number; time: number; react: number; top: number; falso: boolean; jalon: number;
+  /** tocó después del ¡YA! pero todavía paga la salida en falso: se tira apenas pueda */
+  quiere?: boolean;
   /** la estela detrás al nadar y las ondas al llegar (efectos del kit) */
   estela?: Phaser.GameObjects.Sprite | null; ondas?: Phaser.GameObjects.Sprite | null;
 }
 
-/** Natación Hạ Long: 50 metros libres en una piscina flotante en la bahía. Salida en falso castiga. */
+/**
+ * Natación Hạ Long: 50 metros libres en una piscina flotante en la bahía. Al ¡YA! (con su pitazo) te tiras con
+ * cualquier botón. Solo en NEKKETSU tirarse antes castiga (un segundo quieto); en PASEO y NORMAL lo de antes no cuenta.
+ * La barra verde DELFÍN, llena, da con {ESPECIAL} la patada de delfín.
+ */
 export class Natacion extends EventScene {
   private swimmers: Swimmer[] = [];
   private clock = 0;
@@ -39,10 +46,12 @@ export class Natacion extends EventScene {
   private splash!: Phaser.GameObjects.Particles.ParticleEmitter;
   private armed = false;
   private heads: { img: Phaser.GameObjects.Image; s: Swimmer }[] = [];
+  private delfinTxt!: Phaser.GameObjects.BitmapText;
+  private avisoT = 0;
 
   constructor() { super('Natacion'); }
 
-  preload() { queueEscenario(this, 'halong'); }
+  preload() { super.preload(); queueEscenario(this, 'halong'); }
 
   create() {
     this.swimmers = [];
@@ -50,6 +59,7 @@ export class Natacion extends EventScene {
     this.heads = [];
     this.clock = 0;
     this.armed = false;
+    this.avisoT = 0;
     this.setup(ZOOM, WORLD);
     this.makeTextures();
     // el arte de PixelForja trae el cielo, lo lejano con su paralaje y la piscina; sin él, el fondo de código
@@ -84,7 +94,10 @@ export class Natacion extends EventScene {
     this.timeTxt = this.uiAdd(txt(this, 626, 14, '0.00', 'fuente_ui', 2, 1).setDepth(8001));
     for (const s of this.swimmers) this.heads.push({ img: this.uiAdd(this.add.image(0, 22, 'cabecitas', s.c.id).setDepth(8002)), s });
     this.uiAdd(txt(this, 66, 326, 'BRAZADA', 'fuente_ui', 1).setDepth(8001));
+    this.uiAdd(txt(this, 139, 326, 'DELFÍN', 'fuente_ui', 1).setDepth(8001).setTint(0x9affc0));
+    this.delfinTxt = this.uiAdd(txt(this, 160, 340, '', 'fuente_ui', 1, 0).setDepth(8001).setTint(0x40ff80));
     this.tema('halong_remos');
+    this.ambiente('mar');
     // el agua de la bahía de fondo, suavecito, mientras dure la prueba
     if (this.cache.audio.exists('amb_agua')) {
       const amb = this.sound.add('amb_agua', { loop: true, volume: 0.16 });
@@ -93,7 +106,7 @@ export class Natacion extends EventScene {
     }
     this.time.delayedCall(2200, () => { this.armed = true; });
     if (this.d.practica) void this.entrenar('NATACIÓN HẠ LONG', this.pasos());
-    else void this.previa('NATACIÓN HẠ LONG', 'BAHÍA DE HẠ LONG, VIETNAM', '{SALTO} PARA LANZARTE · ALTERNA {PUÑO} Y {PATADA} · {ESPECIAL} DELFÍN');
+    else void this.previa('NATACIÓN HẠ LONG', 'BAHÍA DE HẠ LONG, VIETNAM', 'AL ¡YA!, {SALTO} PARA LANZARTE · ALTERNA {PUÑO} Y {PATADA} · BARRA VERDE LLENA: {ESPECIAL} DELFÍN');
   }
 
   private pasos(): Paso[] {
@@ -134,8 +147,16 @@ export class Natacion extends EventScene {
     this.textures.addCanvas('poyete', b.done());
   }
 
-  /** La salida con su pitazo y el arranque, en vez del blip de la base. */
-  protected sonidoYa() { this.suena('salida_natacion', 0.6, () => super.sonidoYa()); }
+  /** La salida: el pitazo y el arranque, y encima el pito de la base para que se oiga clarito cuándo ir. */
+  protected sonidoYa() { this.suena('salida_natacion', 0.6); super.sonidoYa(); }
+
+  /** Un letrero chiquito que se va solo. */
+  private aviso(s: string, tint = 0xffffff) {
+    if (this.avisoT > 0) return;
+    this.avisoT = 1;
+    const t = this.uiAdd(txt(this, 320, 240, rotular(s, this.pad.fuente), 'fuente_ui', 2).setDepth(8600).setTint(tint));
+    this.tweens.add({ targets: t, alpha: 0, y: 232, delay: 700, duration: 300, onComplete: () => t.destroy() });
+  }
 
   /** A quién se le oyen las brazadas: a la persona mientras nada; si ya llegó, al que va más cerca de la cámara. */
   private quienSeOye() {
@@ -149,9 +170,12 @@ export class Natacion extends EventScene {
     const dt = Math.min(0.05, dms / 1000);
     const p = this.pad.read();
     if (this.endTick(p)) { for (const s of this.swimmers) s.fig.step(dt); this.render(); this.filterUi(); return; }
-    // salida en falso: tirarse antes del ¡YA!
+    // salida en falso: tirarse antes del ¡YA! (solo castiga en NEKKETSU; en los demás se avisa y no cuenta)
     const me = this.swimmers[0];
-    if (this.fase === 'previa' && this.armed && !me.falso && !ajustes().sinFalso && (p.pressed.jump || p.pressed.punch || p.pressed.kick)) {
+    if (this.avisoT > 0) this.avisoT -= dt;
+    const toca = p.pressed.jump || p.pressed.punch || p.pressed.kick || p.pressed.special;
+    if (this.fase === 'previa' && this.armed && !me.falso && toca && (ajustes().nombre !== 'NEKKETSU' || this.d.practica)) this.aviso('ESPERA EL ¡YA!', 0xffe080);
+    else if (this.fase === 'previa' && this.armed && !me.falso && toca) {
       me.falso = true;
       chip.blip(220, 0.3, 'sq50', 0.25, 110);
       const t = this.uiAdd(txt(this, 320, 210, '¡SALIDA EN FALSO! · TE QUEDAS UN SEGUNDO', 'fuente_ui', 2).setDepth(8600).setTint(0xff6060));
@@ -170,8 +194,11 @@ export class Natacion extends EventScene {
     if (s.jalon > 0) s.jalon -= dt;
     if (s.st === 'set') {
       if (this.fase !== 'juego') return;
-      const go = s.c.human ? (p.pressed.jump || p.pressed.punch || p.pressed.kick) && this.clock >= (s.falso ? 1 : 0) : this.clock >= s.react;
+      // después del ¡YA! cualquier botón sirve; si pagas la salida en falso, se tira solo al cumplir el segundo
+      if (s.c.human && (p.pressed.jump || p.pressed.punch || p.pressed.kick || p.pressed.special)) s.quiere = true;
+      const go = s.c.human ? !!s.quiere && this.clock >= (s.falso ? 1 : 0) : this.clock >= s.react;
       if (go) { s.st = 'dive'; s.t = 0; s.fig.set('dive', true); s.react = this.clock; }
+      else if (s.c.human && !s.quiere && this.clock > 0.8 && !this.d.practica) this.aviso('¡{SALTO} PARA TIRARTE!', 0x9ad8ff);
       return;
     }
     if (s.st === 'dive') {
@@ -203,7 +230,7 @@ export class Natacion extends EventScene {
       }
       s.boost = Math.max(0, s.boost - 38 * dt);
       target = 18 + s.boost * 1.02;
-      if (p.pressed.special && s.jalon <= 0) this.delfin(s);
+      if (p.pressed.special) { if (s.jalon <= 0) this.delfin(s); else this.aviso('ESPERA QUE SE LLENE EL DELFÍN', 0x9affc0); }
     } else {
       target = (s.top + Math.sin(s.t * 1.7 + s.react * 30) * 8) * ajustes().cpuVel * goma(s.x - this.swimmers[0].x);
       if (s.jalon <= 0 && Math.random() < 0.25 * ajustes().cpuAgresion * dt) this.delfin(s);
@@ -271,6 +298,9 @@ export class Natacion extends EventScene {
     g.fillStyle(me.boost > 70 ? 0x40c0ff : 0x9ad8ff).fillRect(16, 336, me.boost, 8);
     g.fillStyle(0x000000, 0.6).fillRect(124, 334, 30, 12);
     g.fillStyle(me.jalon <= 0 ? 0x40ff80 : 0x406050).fillRect(126, 336, 26 * (1 - Math.max(0, me.jalon) / 3), 8);
+    // lista la patada de delfín: el botón, titilando
+    const listo = me.st === 'swim' && me.jalon <= 0 && Math.floor(this.time.now / 300) % 2 === 0;
+    this.delfinTxt.setText(listo ? rotular('¡{ESPECIAL}!', this.pad.fuente) : '');
   }
 
   private checkEnd() {

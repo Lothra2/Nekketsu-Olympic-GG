@@ -28,7 +28,7 @@ const lista = ['Tamawari', 'DaCau', 'Tejo', 'Judo', 'Jabalina', 'Fight'];
 await page.evaluate((pruebas) => {
   const g = window.game;
   g.registry.set('gira', { jugador: 'sophie', idx: 0, puntos: [0, 0], resultados: [], pruebas });
-  g.scene.getScenes(true).forEach((x) => g.scene.stop(x.scene.key));
+  g.scene.getScenes(false).forEach((x) => { const st = x.sys.settings.status; if (st >= 3 && st <= 7) g.scene.stop(x.scene.key); });
   g.scene.start('Medallero');
 }, lista);
 let suma = 0;

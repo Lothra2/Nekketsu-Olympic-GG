@@ -27,5 +27,63 @@
       "goro",
       "tetsu"
     ]
+  },
+  "rong_sai_gon": {
+    "nombre": "Rồng Sài Gòn",
+    "pais": "vietnam",
+    "colores": [
+      "#da251d",
+      "#ffcd00"
+    ],
+    "atletas": [
+      "minh",
+      "lan",
+      "tuan",
+      "ba_hoa"
+    ]
+  },
+  "rolos_de_chapinero": {
+    "nombre": "Rolos de Chapinero",
+    "pais": "colombia",
+    "colores": [
+      "#ffd700",
+      "#c8102e"
+    ],
+    "atletas": [
+      "andres",
+      "camila",
+      "pipe",
+      "don_hernando"
+    ]
+  },
+  "panas_de_caracas": {
+    "nombre": "Los Panas de Caracas",
+    "pais": "venezuela",
+    "colores": [
+      "#ffcc00",
+      "#00247d",
+      "#cf142b"
+    ],
+    "atletas": [
+      "gabo",
+      "yuli",
+      "toto",
+      "carmen"
+    ]
+  },
+  "maracuchos_del_lago": {
+    "nombre": "Maracuchos del Lago",
+    "pais": "venezuela",
+    "colores": [
+      "#0055a4",
+      "#ffd100",
+      "#1e1e24"
+    ],
+    "atletas": [
+      "ender",
+      "yusmary",
+      "jhonder",
+      "abuela_nerva"
+    ]
   }
 }

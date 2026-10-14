@@ -11,10 +11,10 @@ await page.waitForFunction(() => window.game?.scene.isActive('Tap') || window.ga
 await page.waitForTimeout(400);
 await page.touchscreen.tap(590, 410);
 await page.waitForTimeout(800);
-await page.evaluate(() => { const g = window.game; g.scene.getScenes(true).forEach((s) => g.scene.stop(s.scene.key)); g.scene.start('Select', { modo: '4v4' }); });
+await page.evaluate(() => { const g = window.game; g.scene.getScenes(false).forEach((s) => { const st = s.sys.settings.status; if (st >= 3 && st <= 7) g.scene.stop(s.scene.key); }); g.scene.start('Select', { modo: '4v4' }); });
 await page.waitForTimeout(800);
 await page.screenshot({ path: `${out}/tablet_seleccion.png` });
-await page.evaluate(() => { const g = window.game; g.scene.getScenes(true).forEach((s) => g.scene.stop(s.scene.key)); g.scene.start('Fight', { modo: '4v4', jugador: 'sophie', rival: 'kenji' }); });
+await page.evaluate(() => { const g = window.game; g.scene.getScenes(false).forEach((s) => { const st = s.sys.settings.status; if (st >= 3 && st <= 7) g.scene.stop(s.scene.key); }); g.scene.start('Fight', { modo: '4v4', jugador: 'sophie', rival: 'kenji' }); });
 await page.waitForTimeout(3500);
 await page.screenshot({ path: `${out}/tablet_pelea.png` });
 await ctx.close();

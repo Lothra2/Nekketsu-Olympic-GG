@@ -19,7 +19,7 @@ await page.waitForTimeout(400);
 await page.mouse.click(640, 360);
 await page.waitForTimeout(400);
 const key = async (k, ms = 40) => { await page.keyboard.down(k); await page.waitForTimeout(ms); await page.keyboard.up(k); };
-const start = (scene, d) => page.evaluate(([s, d]) => { const g = window.game; g.scene.getScenes(true).forEach((x) => g.scene.stop(x.scene.key)); g.scene.start(s, d); }, [scene, d]);
+const start = (scene, d) => page.evaluate(([s, d]) => { const g = window.game; g.scene.getScenes(false).forEach((x) => { const st = x.sys.settings.status; if (st >= 3 && st <= 7) g.scene.stop(x.scene.key); }); g.scene.start(s, d); }, [scene, d]);
 const paso = (scene) => page.evaluate((s) => { const c = window.game.scene.getScene(s).coach; return c ? (c.done ? 99 : c.i) : -1; }, scene);
 
 /** Juega hasta terminar o hasta el tiempo límite; `jugar(i)` hace un poquito según el paso actual. */

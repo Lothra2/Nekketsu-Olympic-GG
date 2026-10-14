@@ -5,14 +5,16 @@ import { chip, VICTORIA, PELEA } from '../core/music';
 import { kit, bucle } from '../core/kit';
 import { txt, flash } from '../core/ui';
 import { Coach, type Paso } from '../core/coach';
-import { FAMILIA, INSTITUTO } from '../scenes/Select';
+import { nuestros, ellos, conJugador } from '../core/equipos';
+import { cargarAtletas, packsDe } from '../core/carga';
 import { hayArte, pintarEscenario } from './escenario';
 
 export interface EventData { jugador: string; gira?: boolean; practica?: boolean }
 export interface Competidor { id: string; team: 0 | 1; human: boolean }
 
 /** Estado de la Olimpiada Express (vive en el registro de Phaser). `pruebas`: los ids sorteados para esta gira. */
-export interface Gira { jugador: string; idx: number; puntos: [number, number]; resultados: { prueba: string; podio: string[] }[]; pruebas?: string[] }
+/** La Olimpiada en curso. `equipos` es el partido: [el tuyo, el rival] (sin el campo, la Familia contra el Instituto). */
+export interface Gira { jugador: string; idx: number; puntos: [number, number]; resultados: { prueba: string; podio: string[] }[]; pruebas?: string[]; equipos?: [string, string] }
 
 /** Una prueba que puede tocar en la gira: su escena, con qué datos arranca y su bandera en el medallero. */
 export interface PruebaGira { id: string; scene: string; nombre: string; lugar: string; bandera: string; datos?: Record<string, unknown> }
@@ -63,11 +65,11 @@ export const pruebasDe = (g: Gira): PruebaGira[] =>
 export const PUNTOS = [10, 6, 4, 2];
 
 
-/** Los 4 de una prueba individual: tú, un compañero de la familia y dos del Instituto. */
+/** Los 4 de una prueba individual: tú, un compañero de tu equipo y dos del equipo rival. */
 export function lineup(jugador: string): Competidor[] {
   const pick = <T,>(xs: T[]) => xs[Math.floor(Math.random() * xs.length)];
-  const comp = pick(FAMILIA.filter((f) => f !== jugador));
-  const inst = [...INSTITUTO].sort(() => Math.random() - 0.5).slice(0, 2);
+  const comp = pick(nuestros().filter((f) => f !== jugador));
+  const inst = [...ellos()].sort(() => Math.random() - 0.5).slice(0, 2);
   return [
     { id: jugador, team: 0, human: true },
     { id: comp, team: 0, human: false },
@@ -92,6 +94,8 @@ export abstract class EventScene extends Phaser.Scene {
 
   init(d: EventData) {
     this.d = { jugador: d.jugador ?? 'rick', gira: !!d.gira, practica: !!d.practica };
+    // la persona juega con su equipo, aunque la prueba arranque sin pasar por la selección
+    conJugador(this.d.jugador);
     // en el entrenamiento estás solo: nadie te apura
     this.gente = this.d.practica ? [{ id: this.d.jugador, team: 0, human: true }] : lineup(this.d.jugador);
     this.coach = null;
@@ -99,6 +103,12 @@ export abstract class EventScene extends Phaser.Scene {
     this.endChoice = null;
     this.ultimo = -1;
   }
+
+  /**
+   * Las animaciones de los dos equipos que usa esta prueba (y se sueltan las demás). Las pruebas que tienen su
+   * preload lo llaman con super.preload().
+   */
+  preload() { cargarAtletas(this, [...nuestros(), ...ellos()], packsDe(this.scene.key), undefined, true); }
 
   /** Prepara capas y cámara. Llamar al inicio de create(). */
   protected setup(zoom: number, worldW: number) {
@@ -128,10 +138,20 @@ export abstract class EventScene extends Phaser.Scene {
     void bucle(this, 'musica', n, 0.4).then((s) => { this.temaSonando = s; if (this.fase === 'fin') this.callarTema(); });
   }
 
+  /** el ambiente del lugar que suena debajo de la música (lo pone `ambiente()`) */
+  private ambienteSonando: Phaser.Sound.BaseSound | null = null;
+
+  /** El ambiente del lugar (lote H6: mar, cafetal, llano) en bucle, bajito y desde un punto al azar. Se calla con el tema. */
+  protected ambiente(n: string) {
+    this.ambienteSonando = null;
+    if (!kit().audio.ambientes?.[n]) return;
+    void bucle(this, 'ambientes', n, 0.3, true).then((s) => { this.ambienteSonando = s; if (this.fase === 'fin') this.callarTema(); });
+  }
+
   private callarTema() {
-    const s = this.temaSonando;
+    for (const s of [this.temaSonando, this.ambienteSonando]) if (s) this.tweens.add({ targets: s, volume: 0, duration: 300, onComplete: () => s.stop() });
     this.temaSonando = null;
-    if (s) this.tweens.add({ targets: s, volume: 0, duration: 300, onComplete: () => s.stop() });
+    this.ambienteSonando = null;
   }
 
   /** Un efecto del kit, si lo trae; si no, `siNo` (el sonido sintetizado de antes). */
@@ -224,6 +244,10 @@ export abstract class EventScene extends Phaser.Scene {
 
   /** El sonido del ¡YA! (la natación lo cambia por su salida). */
   protected sonidoYa() { chip.blip(1320, 0.25, 'sq50', 0.22, 1760); }
+
+  /** El que te espera en el entrenamiento: el capitán del equipo rival (Kenji, casi siempre). */
+  protected get rivalEntreno() { return ellos()[0] ?? 'kenji'; }
+  protected get rivalEntrenoNombre() { return this.nombre(this.rivalEntreno); }
 
   protected nombre(id: string) { return (kit().atletas[id]?.nombre ?? id).split(' ')[0].toUpperCase(); }
 

@@ -1,0 +1,153 @@
+{
+  "format": "pixelforja.ficha",
+  "version": 3,
+  "name": "Tuấn",
+  "body": {
+    "skeleton": "human",
+    "proportions": {
+      "preset": "chibi",
+      "height": 0.75,
+      "build": 0.765,
+      "legs": 0.82,
+      "arms": 0.85,
+      "head": 1.05,
+      "shoulders": 0.8075,
+      "hips": 0.855
+    }
+  },
+  "palette": {
+    "skin": [
+      "#63321e",
+      "#bc7b58",
+      "#d9a273",
+      "#ebbf8f"
+    ],
+    "hair": [
+      "#050100",
+      "#110502",
+      "#2a1d14",
+      "#473c31"
+    ],
+    "eyes": "#2a1c14",
+    "top": [
+      "#724b0e",
+      "#d99902",
+      "#ffcd00",
+      "#fdeeb3"
+    ],
+    "bottom": [
+      "#13173e",
+      "#2d386b",
+      "#3d5a8a",
+      "#4f749d"
+    ],
+    "socks": [
+      "#020203",
+      "#101016",
+      "#2a2a30",
+      "#49494f"
+    ],
+    "shoes": [
+      "#4e031c",
+      "#961533",
+      "#c8302a",
+      "#dc5a37"
+    ],
+    "accessory": [
+      "#6e4602",
+      "#de9d02",
+      "#f2c94c",
+      "#fee894"
+    ]
+  },
+  "outfit": {
+    "sleeves": "short",
+    "bottom": "shorts",
+    "socks": "none",
+    "shoes": "sandalias",
+    "print": null,
+    "jacket": null,
+    "collar": "redondo"
+  },
+  "face": {
+    "eyes": "round",
+    "mouth": "line",
+    "blush": false,
+    "brows": true,
+    "glasses": null
+  },
+  "heads": {},
+  "avatar": {
+    "version": 1,
+    "look": "stardew",
+    "skin": "#d9a273",
+    "face": {
+      "dome": 1.12,
+      "forehead": 0.58,
+      "eyeNose": 0.6,
+      "noseMouth": 0.3,
+      "mouthChin": 0.52,
+      "cheek": 0.97,
+      "jaw": 0.84,
+      "chin": 2.6,
+      "eyeX": 0.42,
+      "ears": 0.18,
+      "mouth": 0.3
+    },
+    "hair": {
+      "style": "corto",
+      "color": "#2a1d14",
+      "params": {
+        "top": 0.22,
+        "side": 0.08,
+        "back": 0.1,
+        "recede": 0,
+        "length": 1,
+        "fringe": 0,
+        "part": 0,
+        "sweep": 0.3,
+        "curl": 0,
+        "tail": "none"
+      }
+    },
+    "eyes": {
+      "style": "brillo",
+      "color": "#3a2418"
+    },
+    "brows": {
+      "style": "normal"
+    },
+    "nose": "normal",
+    "beard": {
+      "style": "ninguna",
+      "color": "#2a1d14",
+      "gray": 0
+    },
+    "glasses": {
+      "style": "ninguno",
+      "color": "#1e1e24"
+    },
+    "kit": "lpc",
+    "lpc": {
+      "head": "male",
+      "hair": "messy1",
+      "brows": "thick",
+      "nose": null,
+      "beard": null,
+      "mustache": null,
+      "glasses": null,
+      "hat": null,
+      "hatColor": null
+    },
+    "body": {
+      "age": "nino",
+      "build": "delgado",
+      "shape": "recto"
+    }
+  },
+  "headMode": "avatar",
+  "physics": {
+    "hairLag": 1
+  },
+  "movementProfile": "premium"
+}

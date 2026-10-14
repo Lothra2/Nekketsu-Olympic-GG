@@ -4,7 +4,8 @@ import { Input } from '../core/input';
 import { chip, MARCHA, VICTORIA } from '../core/music';
 import { txt, panel, flash } from '../core/ui';
 import { pruebasDe, type Gira, type PruebaGira } from '../events/base';
-import { FAMILIA, INSTITUTO } from './Select';
+import { nuestros, ellos, lado, setPartido } from '../core/equipos';
+import { cargarAtletas, packsDe } from '../core/carga';
 import { fireworks } from './logo';
 
 /**
@@ -20,6 +21,13 @@ export class Medallero extends Phaser.Scene {
   private fin = false;
 
   constructor() { super('Medallero'); }
+
+  /** El partido de la gira, y los dos equipos para el podio. */
+  preload() {
+    const g = this.registry.get('gira') as Gira | undefined;
+    if (g?.equipos) setPartido(g.equipos[0], g.equipos[1]);
+    cargarAtletas(this, [...nuestros(), ...ellos(), ...(g ? [g.jugador] : [])], packsDe('Medallero'), undefined, true);
+  }
 
   create() {
     this.gira = this.registry.get('gira') as Gira;
@@ -41,14 +49,14 @@ export class Medallero extends Phaser.Scene {
     txt(this, 320, 24, 'OLIMPIADA EXPRESS', 'fuente_titulo', 2);
     // marcador por equipos
     panel(this, 60, 46, 520, 64);
-    txt(this, 170, 64, 'FAMILIA GG', 'fuente_ui', 2).setTint(0x9ac8ff);
-    txt(this, 470, 64, 'INSTITUTO', 'fuente_ui', 2).setTint(0xffa0a0);
+    txt(this, 170, 64, lado(0).corto, 'fuente_ui', 2).setTint(lado(0).claro);
+    txt(this, 470, 64, lado(1).corto, 'fuente_ui', 2).setTint(lado(1).claro);
     const a = txt(this, 170, 92, `${g.puntos[0]}`, 'fuente_titulo', 2);
     const b = txt(this, 470, 92, `${g.puntos[1]}`, 'fuente_titulo', 2);
     txt(this, 320, 86, 'PTS', 'fuente_ui', 2).setTint(0xf2c230);
     if (g.idx > 0) for (const t of [a, b]) this.tweens.add({ targets: t, scale: { from: 3, to: 2 }, duration: 400, ease: 'Back.out' });
-    FAMILIA.forEach((id, i) => this.add.image(84 + i * 14, 92, 'cabecitas', id));
-    INSTITUTO.forEach((id, i) => this.add.image(514 + i * 14, 92, 'cabecitas', id));
+    nuestros().forEach((id, i) => this.add.image(84 + i * 14, 92, 'cabecitas', id));
+    ellos().forEach((id, i) => this.add.image(514 + i * 14, 92, 'cabecitas', id));
     // las pruebas: hechas con su oro, la que viene parpadeando
     // la lista de pruebas: el panel crece con las que haya, y cada una lleva su nombre y su lugar
     const fila = 27;
@@ -93,13 +101,14 @@ export class Medallero extends Phaser.Scene {
     this.add.image(320, 180, 'bg_caracas');
     this.add.image(320, 280, 'bg_azotea');
     fireworks(this);
-    txt(this, 320, 30, gana === 0 ? '¡CAMPEONES DE LA GIRA!' : 'GANÓ EL INSTITUTO...', gana === 0 ? 'fuente_titulo' : 'fuente_titulo_plata', 2);
-    txt(this, 320, 58, gana === 0 ? 'LA FAMILIA GG SE TRAE LA COPA PA\' SAIGÓN' : '¡LA REVANCHA ES PERSONAL, CHAMO!', 'fuente_ui', 2).setTint(0xffe080);
+    txt(this, 320, 30, gana === 0 ? '¡CAMPEONES DE LA GIRA!' : `${lado(1).gana}...`, gana === 0 ? 'fuente_titulo' : 'fuente_titulo_plata', 2);
+    txt(this, 320, 58, gana === 0 ? lado(0).copa : '¡LA REVANCHA ES PERSONAL, CHAMO!', 'fuente_ui', 2).setTint(0xffe080);
     panel(this, 170, 76, 300, 40);
-    txt(this, 240, 96, `GG ${g.puntos[0]}`, 'fuente_ui', 2).setTint(0x9ac8ff);
-    txt(this, 400, 96, `INST ${g.puntos[1]}`, 'fuente_ui', 2).setTint(0xffa0a0);
+    txt(this, 240, 96, `${g.puntos[0]}`, 'fuente_ui', 2).setTint(lado(0).claro);
+    txt(this, 400, 96, `${g.puntos[1]}`, 'fuente_ui', 2).setTint(lado(1).claro);
+    txt(this, 320, 96, 'PTS', 'fuente_ui', 1).setTint(0xf2c230);
     // podio con los cuatro del equipo ganador
-    const team = gana === 0 ? FAMILIA : INSTITUTO;
+    const team = gana === 0 ? nuestros() : ellos();
     const podio = this.add.graphics();
     podio.fillStyle(0xf2c230).fillRect(280, 268, 80, 60);
     podio.fillStyle(0xd0d8e8).fillRect(200, 284, 80, 44);
@@ -108,14 +117,14 @@ export class Medallero extends Phaser.Scene {
     txt(this, 240, 306, '2', 'fuente_titulo', 2).setTint(0x6a6a7a);
     txt(this, 400, 312, '3', 'fuente_titulo', 2).setTint(0x6a3a10);
     const pos: [number, number][] = [[320, 268], [240, 284], [400, 296], [470, 330]];
-    const lider = gana === 0 ? g.jugador : 'kenji';
+    const lider = gana === 0 ? g.jugador : ellos()[0];
     const orden = [lider, ...team.filter((id) => id !== lider)];
     orden.forEach((id, i) => {
       const f = new Figura(this, pos[i][0], pos[i][1], id, 'victory').setScale(1.6);
       f.row = 'down';
       this.figs.push(f);
     });
-    if (gana === 0) { const thor = new Figura(this, 150, 330, 'thor', 'celebrate').setScale(1.6); thor.row = 'down_right'; this.figs.push(thor); }
+    if (gana === 0 && lado(0).mascota === 'thor') { const thor = new Figura(this, 150, 330, 'thor', 'celebrate').setScale(1.6); thor.row = 'down_right'; this.figs.push(thor); }
     const go = txt(this, 320, 346, 'PRESIONA START PARA VOLVER', 'fuente_ui', 1);
     this.tweens.add({ targets: go, alpha: 0.2, duration: 450, yoyo: true, repeat: -1 });
     this.sound.play(gana === 0 ? 'subir_nivel' : 'enemigo_muere', { volume: 0.5 });
@@ -135,8 +144,8 @@ export class Medallero extends Phaser.Scene {
         return;
       }
       const p = this.lista[this.gira.idx];
-      // el judo es contra uno del Instituto, al azar
-      const rival = p.id === 'Judo' ? INSTITUTO[Math.floor(Math.random() * INSTITUTO.length)] : undefined;
+      // el judo es contra uno del equipo rival, al azar; la final, contra su capitán
+      const rival = p.id === 'Judo' ? ellos()[Math.floor(Math.random() * ellos().length)] : p.id === 'Fight' ? ellos()[0] : undefined;
       this.scene.start(p.scene, { ...p.datos, ...(rival ? { rival } : {}), jugador: this.gira.jugador, gira: true });
     });
   }

@@ -6,7 +6,7 @@ import { chip } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { EventScene, prueba, type Competidor } from './base';
 import { queueEscenario } from './escenario';
-import { FAMILIA, INSTITUTO } from '../scenes/Select';
+import { nuestros, ellos, lado } from '../core/equipos';
 import type { Paso } from '../core/coach';
 import type { Pad } from '../core/input';
 
@@ -47,7 +47,8 @@ interface Bola {
  * cementerio, desde donde también puedes quemar; si quemas desde ahí, vuelves a la cancha. Pierde el equipo que se
  * queda sin nadie adentro.
  * Puño lanza (corriendo o saltando sale más fuerte), patada pasa o atrapa (justo antes de que llegue), salto esquiva,
- * y con la barra llena el ESPECIAL lanza el tiro Nekketsu.
+ * y con la barra llena el ESPECIAL lanza el tiro Nekketsu (cuando lo lanza la máquina, avisa a quién va). El tiro de
+ * tu equipo pasa por encima de tus compañeros; la barra se llena lanzando, quemando y atrapando.
  */
 export class Quemado extends EventScene {
   private js: Jug[] = [];
@@ -66,12 +67,14 @@ export class Quemado extends EventScene {
   private esquivas = 0;
   private pasesFuera = 0;
   private paso = 0;
+  /** para no repetir la pista del especial a cada toque */
+  private pistaT = 0;
   /** para medir: tiros, golpes, atrapadas y esquivas de cada equipo */
   stats = { tiros: [0, 0], golpes: [0, 0], atrapadas: [0, 0], esquivas: [0, 0] };
 
   constructor() { super('Quemado'); }
 
-  preload() { queueEscenario(this, 'liceo_patio'); }
+  preload() { super.preload(); queueEscenario(this, 'liceo_patio'); }
 
   create() {
     this.js = [];
@@ -81,6 +84,7 @@ export class Quemado extends EventScene {
     this.subita = false;
     this.caras = [];
     this.golpesKenji = this.atrapadas = this.esquivas = this.pasesFuera = this.paso = 0;
+    this.pistaT = 0;
     this.stats = { tiros: [0, 0], golpes: [0, 0], atrapadas: [0, 0], esquivas: [0, 0] };
     this.setup(1, 640);
     // el arte de PixelForja trae el patio, los letreros y la cancha con sus rayas; sin él, los de código
@@ -117,8 +121,8 @@ export class Quemado extends EventScene {
     const yo = () => this.js[0];
     return [
       { texto: 'CAMINA HASTA EL BALÓN CON\n{MOVER} PARA AGARRARLO', botones: ['stick'], antes: () => { this.paso = 0; }, listo: () => this.bola.dueño === yo() },
-      { texto: '{PUÑO} LANZA. ¡QUÉMALO A KENJI!', botones: ['punch'], antes: () => { this.paso = 1; }, listo: () => this.golpesKenji > 0 },
-      { texto: 'KENJI TE LANZA: {PATADA} JUSTO\nANTES DE QUE TE LLEGUE ATRAPA', botones: ['kick'], antes: () => { this.paso = 2; }, listo: () => this.atrapadas > 0 },
+      { texto: `{PUÑO} LANZA. ¡QUÉMALO A ${this.rivalEntrenoNombre}!`, botones: ['punch'], antes: () => { this.paso = 1; }, listo: () => this.golpesKenji > 0 },
+      { texto: `${this.rivalEntrenoNombre} TE LANZA: {PATADA} JUSTO\nANTES DE QUE TE LLEGUE ATRAPA`, botones: ['kick'], antes: () => { this.paso = 2; }, listo: () => this.atrapadas > 0 },
       { texto: 'SI VIENE MUY FUERTE, {SALTO}\nY PASA POR DEBAJO', botones: ['jump'], antes: () => { this.paso = 3; }, listo: () => this.esquivas > 0 },
       { texto: 'CON EL BALÓN, {PATADA} SE LO PASA A\nTU COMPAÑERO DEL CEMENTERIO', botones: ['kick'], antes: () => { this.paso = 4; }, listo: () => this.pasesFuera > 0 },
     ];
@@ -150,13 +154,13 @@ export class Quemado extends EventScene {
     let fam: string[], inst: string[], fueraFam: string | null, fueraInst: string | null;
     if (this.d.practica) {
       // entrenando: tú en la cancha con un compañero en el cementerio, y Kenji solo del otro lado
-      const otro = FAMILIA.find((f) => f !== yo)!;
-      fam = [yo, otro]; inst = ['kenji']; fueraFam = otro; fueraInst = null;
+      const otro = nuestros().find((f) => f !== yo)!;
+      fam = [yo, otro]; inst = [ellos()[0]]; fueraFam = otro; fueraInst = null;
     } else {
-      fam = [yo, ...FAMILIA.filter((f) => f !== yo)];
+      fam = [yo, ...nuestros().filter((f) => f !== yo)];
       fueraFam = fam.find((f) => f !== yo && f !== comp) ?? fam[3];
       const elegidos = [this.gente[2].id, this.gente[3].id];
-      inst = [...elegidos, ...INSTITUTO.filter((i) => !elegidos.includes(i))];
+      inst = [...elegidos, ...ellos().filter((i) => !elegidos.includes(i))];
       fueraInst = inst[3];
     }
     const poner = (ids: string[], team: 0 | 1, fuera: string | null) => {
@@ -221,6 +225,7 @@ export class Quemado extends EventScene {
         void this.banner('¡MUERTE SÚBITA!', 'fuente_titulo', 2, 1000);
       }
     }
+    this.pistaT = Math.max(0, this.pistaT - dt);
     this.ctrl = this.control();
     for (const j of this.js) this.jugador(j, dt, p);
     this.moverBola(dt);
@@ -264,7 +269,7 @@ export class Quemado extends EventScene {
     if (j.st === 'atrapa') {
       j.catchT -= dt;
       j.fig.step(dt);
-      if (j.catchT <= 0) { j.st = 'libre'; j.catchCool = 0.35; }
+      if (j.catchT <= 0) { j.st = 'libre'; j.catchCool = j.team === 0 ? 0.25 : 0.35; }
       return;
     }
     let vx = 0, vy = 0;
@@ -298,7 +303,11 @@ export class Quemado extends EventScene {
       if (p.pressed.special && this.nek[j.team] >= 100) this.lanzar(j, 'especial');
       else if (p.pressed.punch) this.lanzar(j, j.z > 0 ? 'salto' : p.run && Math.abs(p.x) > 0 ? 'corriendo' : 'normal');
       else if (p.pressed.kick) this.pasar(j);
-    } else if (p.pressed.kick && j.catchCool <= 0 && j.dentro) this.atrapar(j);
+      else if (p.pressed.special) this.pista(j, '¡LLENA LA BARRA!');
+    } else {
+      if (p.pressed.kick && j.catchCool <= 0 && j.dentro) this.atrapar(j);
+      else if (p.pressed.special) this.pista(j, this.nek[0] >= 100 ? '¡PRIMERO EL BALÓN!' : '¡LLENA LA BARRA!');
+    }
     return [p.x * vel, p.y * vel * 0.7];
   }
 
@@ -325,12 +334,17 @@ export class Quemado extends EventScene {
       else this.lanzar(j, 'normal');
       return [0, 0];
     }
-    // el tiro que le viene: atrapa, salta o se lo come, según lo que decidió al salir el balón
-    if (b.st === 'tiro' && b.objetivo === j && j.ia.plan) {
+    // el tiro del rival que le viene (a él o de paso): atrapa, salta o se lo come, según lo que decidió al salir
+    if (b.st === 'tiro' && b.lanzador && b.lanzador.team !== j.team && j.dentro && j.ia.plan) {
       const d = Math.hypot(b.x - j.x, b.y - j.y);
-      if (j.ia.plan === 'atrapa' && d < 30 && j.catchCool <= 0) { this.atrapar(j); return [0, 0]; }
-      if (j.ia.plan === 'salta' && d < 40 && j.z === 0) j.vz = 190;
-      return [0, 0];
+      // ¿le pasa cerca? por dónde va a cruzar el balón cuando llegue a donde está
+      const viene = (j.x - b.x) * b.vx > 0;
+      const cruza = b.y + b.vy * ((j.x - b.x) / (b.vx || 1));
+      if (viene && (b.objetivo === j || Math.abs(cruza - j.y) < 12)) {
+        if (j.ia.plan === 'atrapa' && d < 30 && j.catchCool <= 0) { this.atrapar(j); return [0, 0]; }
+        if (j.ia.plan === 'salta' && d < 40 && j.z === 0) j.vz = 190;
+      }
+      if (b.objetivo === j) return [0, 0];
     }
     // el balón suelto en su zona: va el que esté más cerca
     if (b.st === 'suelta' && this.enZona(j, b.x, 4)) {
@@ -373,6 +387,9 @@ export class Quemado extends EventScene {
     j.fig.set('weapon_throw', true, tipo === 'especial' ? 0.7 : 1);
     if (tipo === 'especial') {
       this.nek[j.team] = 0;
+      // la máquina avisa a quién se lo va a lanzar, para que alcances a atrapar o saltar
+      const o = j.team === 1 ? this.apunta(j) : null;
+      if (o) { this.letrero(o, '¡CUIDADO!', 0xff6060); chip.blip(880, 0.12, 'sq25', 0.15, 440); }
       efecto(this, 'aura_nekketsu', this.sx(j.x, j.y), FT + j.y - j.z, { depth: FT + j.y - 0.1 });
       chip.blip(220, 0.3, 'saw', 0.2, 880);
       if (j.team === 0) void this.banner('¡TIRO NEKKETSU!', 'fuente_titulo', 2, 700);
@@ -427,15 +444,19 @@ export class Quemado extends EventScene {
     b.st = 'tiro';
     b.objetivo = o;
     b.especial = tipo === 'especial';
-    this.nek[j.team] = Math.min(100, this.nek[j.team] + 8);
+    this.carga(j.team, 8);
     this.stats.tiros[j.team]++;
-    // la máquina decide qué hace con el tiro que le viene
-    if (o && o.team === 1) {
+    // la máquina decide qué hace con el tiro que le viene: el blanco y los que están de paso, de los dos equipos (tus
+    // compañeros, parejos pero no perfectos). Al blanco de tu equipo lo manejas tú
+    const fuerte = tipo === 'corriendo' || tipo === 'salto' ? 0.6 : 1;
+    for (const r of this.js) {
+      r.ia.plan = null;
+      if (r.team === j.team || !r.dentro || (o === r && r.team === 0)) continue;
       const ag = ajustes().cpuAgresion;
-      const pc = this.d.practica ? 0 : b.especial ? 0.08 : (0.18 + 0.3 * ag) * (tipo === 'corriendo' || tipo === 'salto' ? 0.6 : 1);
-      const pd = this.d.practica ? 0 : 0.2;
-      const r = Math.random();
-      o.ia.plan = r < pc ? 'atrapa' : r < pc + pd ? 'salta' : 'golpe';
+      const pc = this.d.practica ? 0 : b.especial ? 0.08 : r.team === 1 ? (0.18 + 0.3 * ag) * fuerte : 0.35 * fuerte;
+      const pd = this.d.practica ? 0 : r.team === 1 ? 0.2 : 0.3;
+      const x = Math.random();
+      r.ia.plan = x < pc ? 'atrapa' : x < pc + pd ? 'salta' : 'golpe';
     }
     this.sound.play('esquiva', { volume: b.especial ? 0.6 : 0.35, rate: b.especial ? 0.7 : 1 });
     if (b.especial) this.cameras.main.shake(120, 0.006);
@@ -444,7 +465,9 @@ export class Quemado extends EventScene {
   /** Con patada, sin balón: la guardia de atrapar, que dura un ratico. */
   private atrapar(j: Jug) {
     j.st = 'atrapa';
-    j.catchT = 0.28 + (j.team === 0 ? 0.14 * ajustes().ayuda : 0);
+    // la ventana para atrapar: la tuya más ancha en PASEO y NORMAL; la máquina, cortica
+    const n = ajustes().nombre;
+    j.catchT = j.team === 1 ? 0.28 : n === 'PASEO' ? 0.45 : n === 'NORMAL' ? 0.38 : 0.34;
     // la atrapada de béisbol del kit (los brazos al balón) o la guardia de la pelea
     j.fig.set(j.fig.anim.has('catch') ? 'catch' : 'fight_block', true);
   }
@@ -461,8 +484,9 @@ export class Quemado extends EventScene {
       for (const o of this.js) {
         if (o === L || o.st === 'golpe' || o.quemado || b.st !== 'tiro') continue;
         if (Math.abs(o.x - b.x) > 9 || Math.abs(o.y - b.y) > 8 || b.z < o.z - 2 || b.z > o.z + 40) continue;
-        // los de tu equipo lo agarran (el del cementerio recibe el tiro que pasó de largo)
-        if (o.team === L.team) { if (b.t > 0.2) this.agarra(o); continue; }
+        // el tiro pasa por encima de tus compañeros en la cancha (no lo tapan); el del cementerio, detrás del rival,
+        // sí recibe el que pasó de largo
+        if (o.team === L.team) { if (!o.dentro && b.t > 0.2) this.agarra(o); continue; }
         if (!o.dentro) continue;
         if (o.st === 'atrapa' && (!b.especial || Math.random() < 0.15)) this.agarra(o, true);
         else if (o.z > 12) { this.stats.esquivas[o.team]++; if (o.team === 0 && o === b.objetivo) { this.esquivas++; this.letrero(o, '¡ESQUIVÓ!', 0x8ae0ff); } }
@@ -521,7 +545,7 @@ export class Quemado extends EventScene {
     this.sound.play('recoger', { volume: 0.3 });
     if (atrapo) {
       this.stats.atrapadas[o.team]++;
-      this.nek[o.team] = Math.min(100, this.nek[o.team] + 25);
+      this.carga(o.team, 25);
       o.empuje = -o.dir * 50;
       this.sound.play('bloqueo', { volume: 0.5 });
       this.letrero(o, '¡ATRAPADO!', 0x8aff8a);
@@ -544,7 +568,7 @@ export class Quemado extends EventScene {
     b.vx *= -0.25; b.vy = (Math.random() - 0.5) * 40; b.vz = 120; b.st = 'suelta';
     L.quemo++;
     this.stats.golpes[L.team]++;
-    this.nek[L.team] = Math.min(100, this.nek[L.team] + 20);
+    this.carga(L.team, 20);
     if (this.d.practica) { if (o.team === 1) this.golpesKenji++; this.letrero(o, '¡PAF!', 0xffe080); return; }
     o.vidas--;
     if (o.vidas > 0) { this.letrero(o, o.vidas === 1 ? '¡UNA MÁS Y SE QUEMA!' : '¡PAF!', 0xffe080); return; }
@@ -568,6 +592,24 @@ export class Quemado extends EventScene {
     j.y = Phaser.Math.Between(20, PROF - 20);
     j.z = 0;
     efecto(this, 'polvo_caer_medio', this.sx(j.x, j.y), FT + j.y);
+  }
+
+  /** Llena la barra Nekketsu de un equipo; al llenarse la tuya, avisa. */
+  private carga(team: 0 | 1, n: number) {
+    const antes = this.nek[team];
+    this.nek[team] = Math.min(100, antes + n);
+    if (team === 0 && antes < 100 && this.nek[0] >= 100) {
+      const j = this.ctrl ?? this.js[0];
+      this.letrero(j, '¡BARRA LLENA!', 0xffe040);
+      this.sound.play('elegir', { volume: 0.4, rate: 1.4 });
+    }
+  }
+
+  /** La pista cortica cuando aprietas especial y todavía no se puede. */
+  private pista(j: Jug, s: string) {
+    if (this.pistaT > 0) return;
+    this.pistaT = 1.2;
+    this.letrero(j, s, 0xffe080);
   }
 
   private letrero(j: Jug, s: string, tint: number) {
@@ -640,6 +682,6 @@ export class Quemado extends EventScene {
       return Number(jb.dentro) - Number(ja.dentro) || jb.quemo - ja.quemo;
     }).map((c) => ({ c, valor: `QUEMÓ ${de(c).quemo}` }));
     for (const j of this.js) if (j.st !== 'golpe') { j.fig.set(j.team === ganador ? 'celebrate' : 'sad', true); j.st = 'libre'; }
-    void this.banner(ganador === 0 ? '¡GANÓ LA FAMILIA!' : '¡GANÓ EL INSTITUTO!', 'fuente_titulo', 2, 1300).then(() => this.resultados(prueba('Quemado').nombre, orden));
+    void this.banner(`¡${lado(ganador).gana}!`, 'fuente_titulo', 2, 1300).then(() => this.resultados(prueba('Quemado').nombre, orden));
   }
 }

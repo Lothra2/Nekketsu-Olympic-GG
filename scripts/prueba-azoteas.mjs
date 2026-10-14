@@ -18,7 +18,7 @@ await p.mouse.click(640, 360);
 await p.waitForTimeout(300);
 let fallas = 0;
 const check = (ok, s) => { if (!ok) fallas++; console.log(`${ok ? 'ok   ' : 'FALLA'} ${s}`); };
-const ir = (e, d) => p.evaluate(([e, d]) => { const g = window.game; g.scene.getScenes(true).forEach((x) => g.scene.stop(x.scene.key)); g.scene.start(e, d); }, [e, d]);
+const ir = (e, d) => p.evaluate(([e, d]) => { const g = window.game; g.scene.getScenes(false).forEach((x) => { const st = x.sys.settings.status; if (st >= 3 && st <= 7) g.scene.stop(x.scene.key); }); g.scene.start(e, d); }, [e, d]);
 const st = () => p.evaluate(() => {
   const s = window.game.scene.getScene('Azoteas');
   return { st: s.st, x: Math.round(s.x), y: Math.round(s.y), f: s.cur?.fig.anim.frame, humano: s.cur?.c.human, fase: s.fase, paso: s.coach?.i ?? -1, ronda: s.ronda, hueco: s.hueco, caida: s.caida?.tipo, empuje: s.empuje, marcas: s.gente2.map((g) => `${g.c.id}:${g.marcas.map((m) => m.toFixed(1)).join('/')}`).join(' ') };
@@ -72,7 +72,7 @@ while (Date.now() - t0 < 240000) {
 const e2 = await st();
 console.log(e2.marcas);
 check(e2.fase === 'fin', 'la competencia termina con la tabla');
-check(huecos.size === 3, `el techo de enfrente se aleja: ${[...huecos].join(', ')} m`);
+check([5, 6, 7].every((h) => huecos.has(h)), `el techo de enfrente se aleja: ${[...huecos].join(', ')} m`);
 check(e2.marcas.split(' ').every((m) => m.split(':')[1].split('/').length === 3), 'tres saltos cada uno');
 check(caidas.size > 0, `alguien cae: ${[...caidas].join(', ')}`);
 await p.waitForTimeout(1500);

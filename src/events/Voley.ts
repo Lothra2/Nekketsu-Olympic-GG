@@ -7,6 +7,7 @@ import { chip } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { rotular } from '../core/input';
 import { Painter, hex } from '../gfx/paint';
+import { lado } from '../core/equipos';
 import { EventScene, prueba, type Competidor } from './base';
 import { queueEscenario } from './escenario';
 import type { Paso } from '../core/coach';
@@ -23,7 +24,7 @@ const ZOOM = 1.15;
 /** a cuántos puntos se gana */
 const META = 7;
 
-type Tiro = 'patada' | 'pase' | 'remate' | 'saque';
+type Tiro = 'patada' | 'pase' | 'remate' | 'saque' | 'fuego';
 interface Voleador {
   c: Competidor; fig: Figura; sombra: Phaser.GameObjects.Ellipse;
   x: number; fila: 0 | 1; z: number; vz: number; st: 'piso' | 'aire'; golpeT: number; cool: number;
@@ -39,18 +40,23 @@ interface Bola {
   /** cuántos tiros van: cada tiro nuevo, la máquina vuelve a decidir */
   n: number;
   rastro: Phaser.GameObjects.Particles.ParticleEmitter;
+  fuego: Phaser.GameObjects.Particles.ParticleEmitter;
 }
 
 /**
  * Vóley Playa en Margarita: 2 contra 2 en la arena (que frena al correr), con la red alta. Puño la pasa al otro
- * lado, patada la levanta para el compañero, y saltando cerca de la red con puño sale el remate. Saltar pegado a la
- * red cuando el otro remata es el bloqueo. Cada lado puede tocarla hasta 3 veces. Gana el primero a 7.
+ * lado, patada se la levanta al compañero (y él te la arma junto a la red), y saltando cerca de la red con puño sale
+ * el remate. Saltar pegado a la red cuando el otro remata es el bloqueo. Cada lado puede tocarla hasta 3 veces y
+ * nadie dos seguidas. La barra Nekketsu se llena con los buenos toques y los puntos; llena, especial con la pelota a
+ * tu alcance es el remate de fuego, que no se bloquea ni se saca. Gana el primero a 7.
  * Mientras llegan los packs de vóley sin la pelota pintada, usa los golpes de la pelea para los toques.
  */
 export class Voley extends EventScene {
   private pat: Voleador[] = [];
   private bola!: Bola;
   private marcador: [number, number] = [0, 0];
+  /** las barras Nekketsu de los dos lados */
+  private nek: [number, number] = [0, 0];
   private saca: 0 | 1 = 0;
   private pausaT = 0;
   private clock = 0;
@@ -66,11 +72,12 @@ export class Voley extends EventScene {
 
   constructor() { super('Voley'); }
 
-  preload() { queueEscenario(this, 'margarita'); }
+  preload() { super.preload(); queueEscenario(this, 'margarita'); }
 
   create() {
     this.pat = [];
     this.marcador = [0, 0];
+    this.nek = [0, 0];
     this.saca = 0;
     this.pausaT = 0;
     this.clock = 0;
@@ -83,7 +90,7 @@ export class Voley extends EventScene {
     this.escenario('margarita', 'bg_margarita');
     this.cancha();
     // entrenando: tú solo de este lado y Kenji del otro, que te la devuelve suave
-    const gente: Competidor[] = this.d.practica ? [this.gente[0], { id: 'kenji', team: 1, human: false }] : this.gente;
+    const gente: Competidor[] = this.d.practica ? [this.gente[0], { id: this.rivalEntreno, team: 1, human: false }] : this.gente;
     gente.forEach((c) => {
       const nuestro = c.team === 0;
       const companeros = gente.filter((o) => o.team === c.team);
@@ -101,20 +108,23 @@ export class Voley extends EventScene {
     // un rastro suave detrás dla pelota, para seguirlo con la vista
     const rastro = this.add.particles(0, 0, 'px', { lifespan: 260, scale: { start: 0.6, end: 0 }, alpha: { start: 0.5, end: 0 }, tint: 0xffffff, frequency: 30 }).setDepth(4999);
     rastro.startFollow(spr);
+    const fuego = this.add.particles(0, 0, 'px', { lifespan: 320, scale: { start: 1.5, end: 0 }, alpha: { start: 0.9, end: 0 }, tint: [0xffe040, 0xff6020, 0xffffff], frequency: 12, emitting: false }).setDepth(4998);
+    fuego.startFollow(spr);
     const sombra = this.add.ellipse(0, PISO, 8, 3, 0x000000, 0.3).setDepth(PISO - 20);
     const marca = this.add.ellipse(0, PISO, 22, 7).setStrokeStyle(2, 0xffe040, 0.9).setDepth(PISO - 19).setVisible(false);
-    this.bola = { x: 0, z: 0, vx: 0, vz: 0, en: 'mano', dueño: null, ultimo: null, ultimoTiro: null, lado: 0, toques: 0, spr, sombra, marca, red: false, n: 0, rastro };
+    this.bola = { x: 0, z: 0, vx: 0, vz: 0, en: 'mano', dueño: null, ultimo: null, ultimoTiro: null, lado: 0, toques: 0, spr, sombra, marca, red: false, n: 0, rastro, fuego };
     // entrenando, siempre saca Kenji (suave, hacia ti)
     this.alSaque(this.d.practica ? 1 : 0);
     this.cameras.main.centerOn(260, this.camY);
     this.hud = this.uiAdd(this.add.graphics().setDepth(8000));
     this.scoreTxt = this.uiAdd(txt(this, 320, 16, '0 - 0', 'fuente_titulo', 1).setDepth(8001));
-    this.uiAdd(txt(this, 250, 16, 'FAMILIA GG', 'fuente_ui', 1, 1).setDepth(8001).setTint(0x9ac8ff));
-    this.uiAdd(txt(this, 390, 16, 'INSTITUTO', 'fuente_ui', 1, 0).setDepth(8001).setTint(0xffa0a0));
+    this.uiAdd(txt(this, 250, 16, lado(0).corto, 'fuente_ui', 1, 1).setDepth(8001).setTint(0x9ac8ff));
+    this.uiAdd(txt(this, 390, 16, lado(1).corto, 'fuente_ui', 1, 0).setDepth(8001).setTint(0xffa0a0));
     this.toqueTxt = this.uiAdd(txt(this, 320, 34, '', 'fuente_ui', 1).setDepth(8001).setTint(0xffe080));
     this.tema('playa_margarita');
+    this.ambiente('mar');
     if (this.d.practica) void this.entrenar('VÓLEY PLAYA', this.pasos());
-    else void this.previa('VÓLEY PLAYA', 'PLAYA EL AGUA, MARGARITA', '{MOVER} AL CÍRCULO · {PUÑO} AL OTRO LADO · {PATADA} LA LEVANTA · {SALTO} Y {PUÑO}: REMATE');
+    else void this.previa('VÓLEY PLAYA', 'PLAYA EL AGUA, MARGARITA', '{MOVER} AL CÍRCULO · {PUÑO} AL OTRO LADO · {PATADA} A TU COMPAÑERO · {SALTO} Y {PUÑO}: REMATE · {ESPECIAL}: FUEGO');
   }
 
   private get camY() { return 360 - 180 / ZOOM; }
@@ -202,8 +212,10 @@ export class Voley extends EventScene {
     const c = this.bola;
     if (c.en !== 'aire') return null;
     const paseo = ajustes().nombre === 'PASEO' && p.c.human;
+    // la que te armó tu compañero para el remate: más fácil de alcanzar
+    const armada = p.c.human && c.ultimoTiro === 'pase' && c.ultimo !== p && c.ultimo?.c.team === p.c.team;
     const dx = Math.abs(c.x - p.x), alto = c.z - p.z;
-    if (dx > (paseo ? 34 : 26) || alto < 4 || alto > (p.st === 'aire' ? 84 : paseo ? 78 : 68)) return null;
+    if (dx > (paseo || armada ? 36 : 26) || alto < 4 || alto > (p.st === 'aire' ? 84 : paseo ? 78 : 68)) return null;
     return alto;
   }
 
@@ -217,7 +229,7 @@ export class Voley extends EventScene {
     return puntaje[Math.floor(Math.random() * Math.min(3, puntaje.length))].x;
   }
 
-  private tocar(p: Voleador, quiere: 'patada' | 'pase', forzarMalo = false) {
+  private tocar(p: Voleador, quiere: 'patada' | 'pase' | 'fuego', forzarMalo = false) {
     if (p.golpeT > 0) return;
     const c = this.bola;
     const team = p.c.team, dir = team === 0 ? 1 : -1;
@@ -231,21 +243,38 @@ export class Voley extends EventScene {
       return;
     }
     const alto = this.alcance(p);
-    if (p.st === 'aire') this.golpeAnim(p, 'spike', 'jab');
+    // el fuego sin la pelota a mano no gasta la barra
+    if (quiere === 'fuego' && alto === null) quiere = 'patada';
+    if (p.st === 'aire' || quiere === 'fuego') this.golpeAnim(p, 'spike', 'jab');
     else if (quiere === 'pase') this.golpeAnim(p, 'vb_set', 'uppercut');
     else this.golpeAnim(p, 'vb_bump', 'fight_block');
     if (alto === null) { p.golpeT = 0.25; return; }
     // los toques de este lado: al cuarto, punto para el otro
     if (c.lado !== team) { c.lado = team; c.toques = 0; }
     c.toques++;
+    const paseoDoble = ajustes().nombre === 'PASEO';
     if (c.toques > 3) { this.letrero(p, '¡CUATRO TOQUES!', 0xff8080); this.punto(team === 0 ? 1 : 0, null); return; }
+    // nadie la toca dos veces seguidas (en Paseo, a la persona se le perdona)
+    if (c.ultimo === p && c.toques > 1 && !(paseoDoble && p.c.human) && this.pat.filter((o) => o.c.team === team).length > 1) { this.letrero(p, '¡DOBLE TOQUE!', 0xff8080); this.punto(team === 0 ? 1 : 0, null); return; }
     // la calidad del toque: lo ideal es a media pierna
     const paseo = ajustes().nombre === 'PASEO' && p.c.human;
     const perfecto = alto >= 22 && alto <= 56;
     const malo = forzarMalo || (!paseo && (alto < 10 || alto > 64) && p.st !== 'aire');
     const cercaRed = Math.abs(p.x - RED_X) < 110;
     let tiro: Tiro;
-    if (p.st === 'aire' && cercaRed && quiere === 'patada') {
+    if (quiere === 'fuego') {
+      // el remate de fuego: derecho al hueco, no hay bloqueo ni quien la saque
+      tiro = 'fuego';
+      this.nek[team] = 0;
+      c.z = Math.max(c.z, RED_H + 24);
+      this.lanzar(this.hueco(team), 0, 0.42);
+      this.letrero(p, '¡REMATE DE FUEGO!', 0xff8020);
+      efecto(this, 'aura_nekketsu', p.x, PISO + FILA[p.fila], { depth: PISO + FILA[p.fila] - 0.1 });
+      if (team === 0) void this.banner('¡NEKKETSU!', 'fuente_titulo', 2, 500, 110);
+      this.shake(240, 0.012);
+      flash(this, 120);
+      for (const o of this.pat) if (o.c.team !== team) o.plan = { n: c.n, tipo: 'falla', reaccion: 1, ruido: 0 };
+    } else if (p.st === 'aire' && cercaRed && quiere === 'patada') {
       // el remate: rápido y para abajo
       tiro = 'remate';
       const tx = team === 0 ? Phaser.Math.Between(380, 540) : Phaser.Math.Between(100, 260);
@@ -258,8 +287,10 @@ export class Voley extends EventScene {
       // la levanta alta para el compañero (o para sí mismo, más cerca de la red)
       tiro = 'pase';
       const comp = this.pat.find((o) => o !== p && o.c.team === team);
-      const tx = comp && comp.fila === 1 ? comp.x : Phaser.Math.Clamp(p.x + dir * 40, BORDE[0] + 20, BORDE[1] - 20);
-      this.lanzar(team === 0 ? Math.min(tx, RED_X - 26) : Math.max(tx, RED_X + 26), 128 + Math.random() * 14);
+      // a tu compañero, donde está; si la persona es el compañero, la máquina se la arma junto a la red para el remate
+      let tx = comp ? comp.x : Phaser.Math.Clamp(p.x + dir * 40, BORDE[0] + 20, BORDE[1] - 20);
+      if (comp?.c.human) { tx = RED_X - dir * 44; this.letrero(comp, '¡SALTA Y REMATA!', 0xffe040); }
+      this.lanzar(team === 0 ? Phaser.Math.Clamp(tx, BORDE[0] + 10, RED_X - 26) : Phaser.Math.Clamp(tx, RED_X + 26, BORDE[1] - 10), comp?.c.human ? 136 : 128 + Math.random() * 14);
     } else {
       tiro = 'patada';
       const lejos = team === 0 ? [380, 580] : [60, 260];
@@ -277,8 +308,17 @@ export class Voley extends EventScene {
     c.ultimo = p;
     c.ultimoTiro = tiro;
     p.toques++;
+    if (tiro !== 'fuego' && !malo) this.carga(team, tiro === 'remate' ? 14 : perfecto ? 10 : 6);
     this.sfx('golpe', p.c.human ? 0.35 : 0.2);
     efecto(this, 'chispa_golpe_liviano', c.x, PISO + FILA[p.fila] - c.z, { depth: 5001 });
+  }
+
+  /** Llena la barra de un lado; cuando se llena la tuya, avisa. */
+  private carga(team: 0 | 1, n: number) {
+    const antes = this.nek[team];
+    this.nek[team] = Math.min(100, antes + n);
+    const me = this.pat.find((q) => q.c.human);
+    if (team === 0 && antes < 100 && this.nek[0] >= 100 && me) { this.letrero(me, '¡BARRA LLENA!', 0xffe040); this.sfx('elegir', 0.4); }
   }
 
   /** El golpe con la animación de vóley del kit (lote SP, sin la pelota pintada) desde el contacto, o la de antes. */
@@ -295,10 +335,11 @@ export class Voley extends EventScene {
     const remate = c.ultimoTiro === 'remate' && c.ultimo?.c.team === team;
     const vale = 1;
     this.marcador[team] += vale;
+    this.carga(team, 12);
     if (c.ultimo && c.ultimo.c.team === team) c.ultimo.puntos += vale;
     c.en = 'piso';
     this.pausaT = 1.6;
-    const s = motivo ?? (remate ? '¡REMATE!' : team === 0 ? '¡PUNTO FAMILIA!' : '¡PUNTO INSTITUTO!');
+    const s = motivo ?? (c.ultimoTiro === 'fuego' ? '¡FUEGO!' : remate ? '¡REMATE!' : `¡PUNTO ${lado(team).corto}!`);
     const t = this.uiAdd(txt(this, 320, 90, s, 'fuente_titulo', 1).setDepth(8500).setTint(team === 0 ? 0x9ac8ff : 0xffa0a0));
     this.tweens.add({ targets: t, y: 74, alpha: 0, delay: 900, duration: 500, onComplete: () => t.destroy() });
     chip.blip(team === 0 ? 988 : 330, 0.25, 'sq25', 0.16, team === 0 ? 1318 : 220);
@@ -336,15 +377,16 @@ export class Voley extends EventScene {
     for (const q of this.pat) {
       q.golpeT = Math.max(0, q.golpeT - dt);
       q.cool = Math.max(0, q.cool - dt);
-      let mx = 0, salta = false, patada = false, pase = false, corre = false;
+      let mx = 0, salta = false, patada = false, pase = false, corre = false, fuego = false;
       if (jugando && this.pausaT <= 0) {
-        if (q.c.human) { mx = p.x; corre = p.run; salta = p.pressed.jump; patada = p.pressed.punch; pase = p.pressed.kick; }
-        else ({ mx, salta, patada, pase } = this.cpu(q, dt));
+        if (q.c.human) { mx = p.x; corre = p.run; salta = p.pressed.jump; patada = p.pressed.punch; pase = p.pressed.kick; fuego = p.pressed.special && this.nek[0] >= 100; }
+        else ({ mx, salta, patada, pase, fuego } = this.cpu(q, dt));
       }
       // el que saca no camina con la pelota en la mano: la suelta con un golpe
       if (c.en === 'mano' && c.dueño === q) { if ((patada || pase) && q.cool <= 0) this.tocar(q, 'patada'); mx = 0; }
       else {
-        if (patada) this.tocar(q, 'patada');
+        if (fuego) this.tocar(q, 'fuego');
+        else if (patada) this.tocar(q, 'patada');
         else if (pase) this.tocar(q, 'pase');
       }
       // moverse, sin pasar la red ni salirse
@@ -384,7 +426,7 @@ export class Voley extends EventScene {
       c.z += c.vz * dt;
       // el bloqueo: el que está saltando pegado a la red con las manos arriba la devuelve para abajo
       const cruza = (x0 < RED_X) !== (c.x < RED_X);
-      const bloquea = cruza && c.z >= RED_H ? this.pat.find((o) => o.c.team !== (c.ultimo?.c.team ?? -1) && o.st === 'aire' && Math.abs(o.x - RED_X) < 22 && c.z < o.z + 84) : undefined;
+      const bloquea = cruza && c.z >= RED_H && c.ultimoTiro !== 'fuego' ? this.pat.find((o) => o.c.team !== (c.ultimo?.c.team ?? -1) && o.st === 'aire' && Math.abs(o.x - RED_X) < 22 && c.z < o.z + 84) : undefined;
       if (bloquea) {
         c.x = x0;
         c.vx = -c.vx * 0.6;
@@ -392,12 +434,14 @@ export class Voley extends EventScene {
         c.ultimo = bloquea;
         c.ultimoTiro = 'patada';
         c.lado = bloquea.c.team;
+        // el bloqueo no cuenta como toque: el lado que bloqueó tiene sus tres
+        c.toques = 0;
         this.letrero(bloquea, '¡BLOQUEO!', 0x8ae0ff);
         this.sfx('bloqueo', 0.5);
         if (bloquea.c.human) this.bloqueos++;
       }
       // la red: si cruza por debajo, rebota y cae de este lado
-      else if (cruza && c.z < RED_H) {
+      else if (cruza && c.z < RED_H && c.ultimoTiro !== 'fuego') {
         c.x = x0;
         c.vx *= -0.15;
         c.vz = Math.min(c.vz, 0);
@@ -416,7 +460,7 @@ export class Voley extends EventScene {
   // ------------------------------------------------------------------ la máquina
 
   private cpu(q: Voleador, dt: number) {
-    const r = { mx: 0, salta: false, patada: false, pase: false };
+    const r = { mx: 0, salta: false, patada: false, pase: false, fuego: false };
     const c = this.bola, team = q.c.team;
     q.pensar -= dt;
     // los errores: más en los niveles fáciles; y si la persona va perdiendo por mucho, un poco más
@@ -439,7 +483,9 @@ export class Voley extends EventScene {
       const mio = team === 0 ? xl < RED_X : xl >= RED_X;
       if (mio) {
         const compas = this.pat.filter((o) => o.c.team === team);
-        const yo = compas.length === 1 || compas.sort((a, b) => Math.abs(a.x - xl) - Math.abs(b.x - xl))[0] === q;
+        // va el más cerca de donde cae; pero si la tocó uno de este lado, le toca al otro (nadie la toca dos seguidas)
+        const tocoUnCompa = c.ultimo?.c.team === team && c.lado === team && compas.length > 1;
+        const yo = compas.length === 1 || (tocoUnCompa ? c.ultimo !== q : compas.sort((a, b) => Math.abs(a.x - xl) - Math.abs(b.x - xl))[0] === q);
         if (yo) meta = xl - (team === 0 ? 6 : -6) + q.plan.ruido;
         // el pase del compañero: el de adelante salta a rematar
         if (yo && c.ultimoTiro === 'pase' && c.ultimo?.c.team === team && q.fila === 1 && Math.abs(c.x - q.x) < 30 && c.z > 70 && c.z < 100 && c.vz < 0 && q.st === 'piso' && Math.random() < 0.5 + ajustes().cpuAgresion * 0.4) r.salta = true;
@@ -461,8 +507,12 @@ export class Voley extends EventScene {
           this.tocar(q, 'patada', true);
         } else {
           const compa = this.pat.find((o) => o !== q && o.c.team === team);
-          const armar = !!compa && compa.fila === 1 && q.fila === 0 && c.toques <= 1 && c.lado === team && Math.random() < 0.4;
-          if (armar && q.st === 'piso') r.pase = true; else r.patada = true;
+          // los toques que van de este lado (el que viene será el siguiente)
+          const van = c.lado === team ? c.toques : 0;
+          // con la persona de compañero, casi siempre se la arma para que remate; entre máquinas, a veces
+          const armar = !!compa && van <= 1 && (compa.c.human ? Math.random() < 0.85 : compa.fila === 1 && q.fila === 0 && Math.random() < 0.4);
+          if (this.nek[team] >= 100 && !this.d.practica && (q.st === 'aire' || van >= 1) && Math.random() < 0.6) r.fuego = true;
+          else if (armar && q.st === 'piso') r.pase = true; else r.patada = true;
         }
       }
     }
@@ -477,7 +527,7 @@ export class Voley extends EventScene {
       { texto: 'CUANDO BAJE A TUS MANOS,\n{PUÑO} LA PASA AL OTRO LADO', botones: ['punch'], listo: () => this.pasadas >= 1 },
       { texto: '¡ESO! PÁSALA 3 VECES MÁS', botones: ['stick', 'punch'], listo: () => this.pasadas >= 4 },
       { texto: '{PATADA} LA LEVANTA ALTA. LUEGO, CERCA DE\nLA RED, {SALTO} Y {PUÑO}: ¡EL REMATE!', botones: ['kick', 'jump', 'punch'], listo: () => this.remates >= 1 },
-      { texto: 'AHORA GÁNALE UN PUNTO A KENJI', botones: ['stick', 'punch', 'jump'], listo: () => this.marcador[0] >= 1 },
+      { texto: `AHORA GÁNALE UN PUNTO A ${this.rivalEntrenoNombre}`, botones: ['stick', 'punch', 'jump'], listo: () => this.marcador[0] >= 1 },
     ];
   }
 
@@ -502,6 +552,7 @@ export class Voley extends EventScene {
     c.spr.setPosition(Math.round(c.x), Math.round(PISO + fila - c.z)).setVisible(c.en !== 'piso' || this.pausaT > 0);
     if (c.en === 'aire') c.spr.setRotation(c.spr.rotation + (c.vx > 0 ? 0.25 : -0.25));
     c.rastro.emitting = c.en === 'aire';
+    c.fuego.emitting = c.en === 'aire' && c.ultimoTiro === 'fuego';
     c.sombra.setPosition(Math.round(c.x), PISO).setScale(Math.max(0.4, 1 - c.z / 140)).setVisible(c.en !== 'piso');
     // el círculo: dónde va a caer, cuando viene a tu lado (en Nekketsu no hay ayuda)
     const xl = this.caida();
@@ -515,10 +566,17 @@ export class Voley extends EventScene {
     cam.centerOn(cur + (tx - cur) * 0.07, this.camY);
     // marcador
     this.scoreTxt.setText(`${this.marcador[0]} - ${this.marcador[1]}`);
-    this.toqueTxt.setText(c.en === 'aire' && c.lado === 0 && c.toques > 0 && c.ultimo?.c.team === 0 ? `TOQUE ${c.toques} DE 3` : c.en === 'mano' && c.dueño?.c.human ? rotular('{PUÑO}: SACAR', this.pad.fuente) : '');
+    const llena = this.nek[0] >= 100 ? ' · {ESPECIAL}: ¡FUEGO!' : '';
+    this.toqueTxt.setY(42).setText(rotular(c.en === 'aire' && c.lado === 0 && c.toques > 0 && c.ultimo?.c.team === 0 ? `TOQUE ${c.toques} DE 3${llena}` : c.en === 'mano' && c.dueño?.c.human ? '{PUÑO}: SACAR' : llena.slice(3), this.pad.fuente));
     const g = this.hud;
     g.clear();
     g.fillStyle(0x000000, 0.45).fillRect(170, 6, 300, 20);
+    // las barras Nekketsu, debajo de cada nombre
+    for (const t of [0, 1] as const) {
+      const x = t === 0 ? 176 : 360, lleno = this.nek[t] >= 100;
+      g.fillStyle(0x000000, 0.6).fillRect(x, 28, 104, 6);
+      g.fillStyle(lleno ? (Math.floor(this.time.now / 150) % 2 ? 0xffe040 : 0xff6020) : t === 0 ? 0x5a9af0 : 0xf05a5a).fillRect(x + 2, 29, this.nek[t], 4);
+    }
   }
 
   private sfx(name: string, vol = 0.5) { if (this.cache.audio.exists(name)) this.sound.play(name, { volume: vol }); }
@@ -531,7 +589,7 @@ export class Voley extends EventScene {
   private terminar(ganador: 0 | 1) {
     if (this.terminado) return;
     this.terminado = true;
-    void this.banner(ganador === 0 ? '¡GANA LA FAMILIA GG!' : '¡GANA EL INSTITUTO!', 'fuente_titulo', 2, 1600, 110);
+    void this.banner(`¡${lado(ganador).gana}!`, 'fuente_titulo', 2, 1600, 110);
     this.time.delayedCall(2400, () => {
       for (const q of this.pat) q.fig.set(q.c.team === ganador ? 'victory' : 'sad', true);
       const orden = [...this.pat]

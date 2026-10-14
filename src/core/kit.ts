@@ -110,22 +110,23 @@ export const setKit = (m: Manifest) => { manifest = m; };
 export const texKey = (id: string, pack: string) => `${id}:${pack}`;
 export const frameName = (anim: string, row: Row, i: number) => `${anim}_${row}_${i}`;
 
-/** En qué pack está cada animación de un atleta (el primero que la trae). */
-const packOf = new Map<string, Map<string, string>>();
+/** Las texturas del juego, para saber qué packs de cada atleta están cargados (cada escena carga los suyos). */
+let texturas: Phaser.Textures.TextureManager | null = null;
+
+/**
+ * En qué pack está una animación de un atleta: el preferido si la trae, si no el primero que la trae. Solo cuentan
+ * los packs cargados: lo que la escena no pidió no existe para ella (la figura se queda con lo que tenía).
+ */
 export function findAnim(id: string, anim: string, prefer?: string): { pack: string; data: AnimData } | null {
   const at = kit().atletas[id];
-  if (prefer && at?.packs[prefer]?.anims[anim]) return { pack: prefer, data: at.packs[prefer].anims[anim] };
-  let m = packOf.get(id);
-  if (!m) {
-    m = new Map();
-    if (at) { for (const [p, pd] of Object.entries(at.packs)) for (const n of Object.keys(pd.anims)) if (!m.has(n)) m.set(n, p); }
-    else for (const n of Object.keys(kit().animales[id].anims)) m.set(n, 'animal');
-    packOf.set(id, m);
+  if (!at) {
+    const d = kit().animales[id]?.anims[anim];
+    return d ? { pack: 'animal', data: d } : null;
   }
-  const pack = m.get(anim);
-  if (!pack) return null;
-  if (pack === 'animal') return { pack, data: kit().animales[id].anims[anim] };
-  return { pack, data: at.packs[pack].anims[anim] };
+  const cargado = (p: string) => !texturas || texturas.exists(texKey(id, p));
+  if (prefer && at.packs[prefer]?.anims[anim] && cargado(prefer)) return { pack: prefer, data: at.packs[prefer].anims[anim] };
+  for (const [p, pd] of Object.entries(at.packs)) if (pd.anims[anim] && cargado(p)) return { pack: p, data: pd.anims[anim] };
+  return null;
 }
 
 /**
@@ -171,11 +172,10 @@ export const aves = (): Record<string, Ave> =>
 /** Pone en la cola de carga todo el kit. Se llama con el manifiesto ya cargado. */
 export function queueKit(scene: Phaser.Scene) {
   const m = kit();
+  texturas = scene.textures;
   const atlas = (a: string | object) => (typeof a === 'string' ? KIT + a : a);
-  for (const [id, a] of Object.entries(m.atletas)) {
-    for (const [p, pd] of Object.entries(a.packs)) scene.load.atlas(texKey(id, p), KIT + pd.imagen, atlas(pd.atlas));
-    scene.load.image(`retratos:${id}`, KIT + a.retratos.archivo);
-  }
+  // de los atletas, al arrancar solo los retratos: sus animaciones las pide cada escena (core/carga.ts)
+  for (const [id, a] of Object.entries(m.atletas)) scene.load.image(`retratos:${id}`, KIT + a.retratos.archivo);
   for (const [id, a] of Object.entries(m.animales)) if (a.tipo !== 'ave') scene.load.atlas(texKey(id, 'animal'), KIT + a.imagen, atlas(a.atlas));
   for (const [id, a] of Object.entries(aves())) scene.load.spritesheet(`ave_${id}`, KIT + a.imagen, { frameWidth: a.w, frameHeight: a.h });
   const armas = Object.values(m.objetos)[0];
@@ -240,7 +240,7 @@ export function cutPortraits(scene: Phaser.Scene) {
  * cierra con un marcador de `muestras / frecuencia` segundos, el largo del original: así el relleno del OGG y del M4A
  * no mete un silencio cada vuelta. Devuelve el sonido (o null si el kit no lo trae, o la escena se fue antes).
  */
-export async function bucle(scene: Phaser.Scene, seccion: 'musica' | 'ambientes', n: string, volumen = 0.5): Promise<Phaser.Sound.BaseSound | null> {
+export async function bucle(scene: Phaser.Scene, seccion: 'musica' | 'ambientes', n: string, volumen = 0.5, azar = false): Promise<Phaser.Sound.BaseSound | null> {
   const a = kit().audio[seccion]?.[n];
   if (!a) return null;
   const key = `${seccion === 'musica' ? 'mus' : 'amb'}_${n}`;
@@ -256,7 +256,8 @@ export async function bucle(scene: Phaser.Scene, seccion: 'musica' | 'ambientes'
   const largo = a.muestras && a.frecuencia ? a.muestras / a.frecuencia : 0;
   if (largo > 0) {
     s.addMarker({ name: 'bucle', start: 0, duration: largo, config: { loop: true, volume: volumen } });
-    s.play('bucle');
+    // con `azar`, arranca en cualquier punto del bucle: así no suena igual cada vez que entras
+    s.play('bucle', azar ? { seek: Math.random() * largo * 0.95 } : undefined);
   } else s.play({ loop: true });
   scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => s.destroy());
   return s;

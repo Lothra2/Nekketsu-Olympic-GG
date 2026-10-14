@@ -18,7 +18,7 @@ await p.mouse.click(640, 360);
 await p.waitForTimeout(300);
 let fallas = 0;
 const check = (ok, s) => { if (!ok) fallas++; console.log(`${ok ? 'ok   ' : 'FALLA'} ${s}`); };
-const ir = (e, d) => p.evaluate(([e, d]) => { const g = window.game; g.scene.getScenes(true).forEach((x) => g.scene.stop(x.scene.key)); g.scene.start(e, d); }, [e, d]);
+const ir = (e, d) => p.evaluate(([e, d]) => { const g = window.game; g.scene.getScenes(false).forEach((x) => { const st = x.sys.settings.status; if (st >= 3 && st <= 7) g.scene.stop(x.scene.key); }); g.scene.start(e, d); }, [e, d]);
 const st = () => p.evaluate(() => {
   const s = window.game.scene.getScene('Futbol'), c = s.ctrl, bo = s.bola;
   return {

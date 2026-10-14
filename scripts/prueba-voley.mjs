@@ -18,7 +18,7 @@ await p.waitForFunction(() => window.game?.scene.isActive('Tap'), null, { timeou
 await p.mouse.click(400, 200);
 let fallas = 0;
 const check = (ok, s) => { if (!ok) fallas++; console.log(`${ok ? 'ok   ' : 'FALLA'} ${s}`); };
-const ir = (escena, d) => p.evaluate(([e, d]) => { const g = window.game; g.scene.getScenes(true).forEach((x) => g.scene.stop(x.scene.key)); g.scene.start(e, d); }, [escena, d]);
+const ir = (escena, d) => p.evaluate(([e, d]) => { const g = window.game; g.scene.getScenes(false).forEach((x) => { const st = x.sys.settings.status; if (st >= 3 && st <= 7) g.scene.stop(x.scene.key); }); g.scene.start(e, d); }, [escena, d]);
 
 // el entrenamiento
 await ir('Voley', { jugador: 'alana', practica: true });
@@ -54,6 +54,61 @@ for (const k of [...abajo]) await tecla(k, false);
 const fin = await st();
 check(fin.fase === 'fin', `el entrenamiento se termina (paso ${fin.paso}, ${fin.pasadas} pasadas, ${fin.chilenas} remates, ${fin.m})`);
 await p.screenshot({ path: `${out}/entrenamiento_fin.png` });
+
+// la jugada de 3 toques en un partido: recibes con patada (al compañero), él te la arma junto a la red y rematas
+await ir('Voley', { jugador: 'rick' });
+await p.waitForFunction(() => window.game.scene.getScene('Voley').fase === 'juego', null, { timeout: 20000 });
+const st2 = () => p.evaluate(() => {
+  const s = window.game.scene.getScene('Voley'); const me = s.pat[0]; const c = s.bola;
+  return { x: me.x, z: me.z, aire: me.st === 'aire', c: { en: c.en, x: c.x, z: c.z, vz: c.vz, lado: c.lado, toques: c.toques }, xl: s.caida(), m: s.marcador.join('-'), quien: c.ultimo ? (c.ultimo === me ? 'yo' : c.ultimo.c.team === 0 ? 'compa' : 'rival') : '', tiro: c.ultimoTiro, n: c.n, mano: c.en === 'mano' && c.dueño === me };
+});
+const jugadas = [];
+let previo = '';
+const t2 = Date.now();
+while (Date.now() - t2 < 90000) {
+  const s = await st2();
+  const marca = `${s.n}:${s.quien}:${s.tiro}`;
+  if (marca !== previo && s.quien) { jugadas.push(`${s.quien}-${s.tiro}`); previo = marca; }
+  if (s.mano) { await toque('j'); await p.waitForTimeout(300); continue; }
+  if (s.c.en === 'aire' && s.xl < 320) {
+    const armada = s.quien === 'compa' && s.tiro === 'pase';
+    const meta = armada ? s.xl + 4 : s.xl - 6;
+    await tecla('ArrowRight', s.x < meta - 4);
+    await tecla('ArrowLeft', s.x > meta + 4);
+    const dx = Math.abs(s.c.x - s.x), alto = s.c.z - s.z;
+    if (armada && dx < 30 && s.c.vz < 0 && s.c.z < 112 && s.c.z > 70 && !s.aire) await toque('l');
+    else if (s.aire && dx < 30 && alto < 80 && alto > 4) await toque('j');
+    else if (s.quien !== 'yo' && !armada && dx < 22 && alto > 22 && alto < 54 && s.c.vz < 0) await toque('k');
+  } else { await tecla('ArrowRight', false); await tecla('ArrowLeft', false); }
+  if (jugadas.join(',').includes('yo-pase,compa-pase,yo-remate')) break;
+  await p.waitForTimeout(25);
+}
+for (const k of [...abajo]) await tecla(k, false);
+const seq = jugadas.join(',');
+console.log('toques:', seq.slice(-300));
+check(seq.includes('yo-pase,compa-pase'), 'el compañero recibe tu pase y te la arma');
+check(seq.includes('yo-pase,compa-pase,yo-remate'), 'la jugada de 3 toques termina en tu remate');
+await p.screenshot({ path: `${out}/tres_toques.png` });
+
+// el remate de fuego: con la barra llena, especial
+await p.evaluate(() => { const s = window.game.scene.getScene('Voley'); s.nek[0] = 100; });
+const t3 = Date.now();
+let fuego = false;
+while (Date.now() - t3 < 40000 && !fuego) {
+  const s = await st2();
+  if (s.tiro === 'fuego' && s.quien === 'yo') { fuego = true; break; }
+  if (s.mano) { await toque('j'); await p.waitForTimeout(300); continue; }
+  if (s.c.en === 'aire' && s.xl < 320) {
+    await tecla('ArrowRight', s.x < s.xl - 10); await tecla('ArrowLeft', s.x > s.xl - 2);
+    const dx = Math.abs(s.c.x - s.x), alto = s.c.z - s.z;
+    if (s.quien !== 'yo' && dx < 22 && alto > 22 && alto < 54 && s.c.vz < 0) await toque('u');
+  } else { await tecla('ArrowRight', false); await tecla('ArrowLeft', false); }
+  await p.waitForTimeout(25);
+}
+for (const k of [...abajo]) await tecla(k, false);
+await p.waitForTimeout(400);
+await p.screenshot({ path: `${out}/fuego.png` });
+check(fuego, 'el remate de fuego sale con especial');
 
 // un partido con la máquina de los dos lados, hasta el final
 await ir('Voley', { jugador: 'sophie' });

@@ -16,7 +16,7 @@ await page.waitForTimeout(300);
 let fallas = 0;
 const check = (ok, s, extra = '') => { if (!ok) fallas++; console.log(`${ok ? 'ok   ' : 'FALLA'} ${s}${extra ? ` (${extra})` : ''}`); };
 
-await page.evaluate(() => { const g = window.game; g.scene.getScenes(true).forEach((x) => g.scene.stop(x.scene.key)); g.scene.start('Obstaculos', { jugador: 'sophie' }); });
+await page.evaluate(() => { const g = window.game; g.scene.getScenes(false).forEach((x) => { const st = x.sys.settings.status; if (st >= 3 && st <= 7) g.scene.stop(x.scene.key); }); g.scene.start('Obstaculos', { jugador: 'sophie' }); });
 await page.waitForFunction(() => window.game.scene.getScene('Obstaculos')?.fase === 'juego', null, { timeout: 20000 });
 // los demás quietos lejos, para que nadie se meta
 await page.evaluate(() => { const s = window.game.scene.getScene('Obstaculos'); s.gente2.slice(1).forEach((r) => { r.a.x = 20; r.done = true; }); });
