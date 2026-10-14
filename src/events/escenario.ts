@@ -45,11 +45,26 @@ export interface EscenarioJson {
 const k = (id: string, n: string) => `esc_${id}_${n}`;
 
 /**
+ * Suelta las capas de los escenarios que no son `id`: cada uno pesa decenas de MB en la tarjeta gráfica y en una
+ * gira se van juntando. Cada escena pinta un solo escenario, y la anterior ya se cerró cuando la nueva hace su preload.
+ * El escenario de cada textura es el id más largo que le calza (para no confundir saigon con saigon_hem).
+ */
+function soltarOtros(scene: Phaser.Scene, ids: string[], id: string) {
+  const largos = [...ids].sort((a, b) => b.length - a.length);
+  for (const key of Object.keys(scene.textures.list)) {
+    if (!key.startsWith('esc_')) continue;
+    const de = largos.find((i) => key.startsWith(`esc_${i}_`));
+    if (de && de !== id) scene.textures.remove(key);
+  }
+}
+
+/**
  * Lo pone en la cola de carga si existe. Llamar en el preload de la escena. Si el índice lo marca `junto` (la copia
  * del artifact, que tiene un tope de archivos), los cuatro JSON del escenario vienen en uno solo: `junto.json`.
  */
 export function queueEscenario(scene: Phaser.Scene, id: string) {
   const index = scene.cache.json.get('escenarios') as Record<string, { junto?: boolean }> | undefined;
+  if (index) soltarOtros(scene, Object.keys(index), id);
   if (!index?.[id] || scene.textures.exists(k(id, 'objetos'))) return;
   const dir = `${BASE}${id}/`;
   const imagenes = (e: EscenarioJson) => {
