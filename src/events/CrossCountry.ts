@@ -525,7 +525,7 @@ export class CrossCountry extends EventScene implements World {
       const cont = this.add.container(0, 0);
       for (let yy = f.y0; yy < f.y1 - 4; yy += fk.huella.d + 2) for (let xx = f.x0; xx < f.x1 - 8; xx += fk.huella.w - 6) {
         const x = xx + Math.random() * 6, y = yy + Math.random() * 3;
-        cont.add(this.add.image(Math.round(this.px(x, y)), FT + y, 'veh_frutas_regadas', 0).setOrigin(fk.ancla[0] / fk.w, fk.ancla[1] / fk.h));
+        cont.add(this.add.image(Math.round(this.px(x, y)), FT + y, 'veh_frutas_regadas').setOrigin(fk.ancla[0] / fk.w, fk.ancla[1] / fk.h));
       }
       f.g = cont;
     } else {

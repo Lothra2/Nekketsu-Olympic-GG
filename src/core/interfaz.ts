@@ -88,7 +88,7 @@ export function animarInterfaz(scene: Phaser.Scene) {
 export function spriteVehiculo(scene: Phaser.Scene, id: string, anim: string): Phaser.GameObjects.Sprite | null {
   const v = vehiculos()[id];
   if (!v || !scene.textures.exists(`veh_${id}`)) return null;
-  const s = scene.add.sprite(0, 0, `veh_${id}`, 0).setOrigin(v.ancla[0] / v.w, v.ancla[1] / v.h);
+  const s = scene.add.sprite(0, 0, `veh_${id}`, v.cuadros > 1 ? 0 : undefined).setOrigin(v.ancla[0] / v.w, v.ancla[1] / v.h);
   if (scene.anims.exists(`veh_${id}_${anim}`)) s.play(`veh_${id}_${anim}`);
   return s;
 }
