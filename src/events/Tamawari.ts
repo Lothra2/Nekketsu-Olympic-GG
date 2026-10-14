@@ -107,7 +107,7 @@ export class Tamawari extends EventScene implements World {
   }
 
   private zoom = ZOOM;
-  private get camY() { return 360 - 180 / this.zoom; }
+  private get camY() { return 360 - 180 / this.cameras.main.zoom; }
 
   // ------------------------------------------------------------------ los postes y las bolas
 

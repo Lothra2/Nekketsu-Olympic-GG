@@ -72,12 +72,26 @@ function devolverDatos(id: string, datos: Record<string, Record<string, Record<s
 /** La URL de un archivo del kit: la de siempre, o la que salió de su paquete. */
 export const urlKit = (ruta: string) => desempacados.get(ruta) ?? KIT + ruta;
 
-interface Paquete {
+export interface Paquete {
   archivo: string;
   partes: Record<string, [number, number]>;
   /** la parte con los datos pesados por cuadro (cajas, cuerpo, manos, cabeza, pies) que no van en el manifiesto */
   datos?: string;
   atleta?: string;
+}
+
+/** Desarma un paquete que ya llegó: cada parte queda como URL del navegador (o como atlas armado, o datos de vuelta). */
+export function desarmar(paq: Paquete, datos: ArrayBuffer) {
+  for (const [ruta, [ini, largo]] of Object.entries(paq.partes)) {
+    if (desempacados.has(ruta) || atlasArmados.has(ruta)) continue;
+    const parte = datos.slice(ini, ini + largo);
+    if (ruta === paq.datos && paq.atleta) { devolverDatos(paq.atleta, JSON.parse(new TextDecoder().decode(parte))); desempacados.set(ruta, ''); continue; }
+    if (ruta.endsWith('.json')) {
+      const j = JSON.parse(new TextDecoder().decode(parte)) as { rejilla?: Rejilla; meta?: object };
+      if (j.rejilla) { atlasArmados.set(ruta, armarAtlas(j.rejilla, j.meta ?? {})); continue; }
+      desempacados.set(ruta, URL.createObjectURL(new Blob([parte], { type: 'application/json' })));
+    } else desempacados.set(ruta, URL.createObjectURL(new Blob([parte], { type: 'image/png' })));
+  }
 }
 
 /**
@@ -124,16 +138,7 @@ export function cargarAtletas(scene: Phaser.Scene, ids: string[], packs: string[
       const key = `paq:${paq.archivo}`;
       scene.load.binary(key, KIT + paq.archivo);
       scene.load.once(`filecomplete-binary-${key}`, (_k: string, _t: string, datos: ArrayBuffer) => {
-        for (const [ruta, [ini, largo]] of Object.entries(paq.partes)) {
-          if (desempacados.has(ruta) || atlasArmados.has(ruta)) continue;
-          const parte = datos.slice(ini, ini + largo);
-          if (ruta === paq.datos && paq.atleta) { devolverDatos(paq.atleta, JSON.parse(new TextDecoder().decode(parte))); desempacados.set(ruta, ''); continue; }
-          if (ruta.endsWith('.json')) {
-            const j = JSON.parse(new TextDecoder().decode(parte)) as { rejilla?: Rejilla; meta?: object };
-            if (j.rejilla) { atlasArmados.set(ruta, armarAtlas(j.rejilla, j.meta ?? {})); continue; }
-            desempacados.set(ruta, URL.createObjectURL(new Blob([parte], { type: 'application/json' })));
-          } else desempacados.set(ruta, URL.createObjectURL(new Blob([parte], { type: 'image/png' })));
-        }
+        desarmar(paq, datos);
         scene.cache.binary.remove(key);
         if (--pendientes === 0) encolar();
       });

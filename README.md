@@ -105,6 +105,9 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
 - Ambientes del lugar debajo de la música, cada vez desde un punto distinto del bucle: el mar en Natación y Vóley, el cafetal en Vallas, el llano en Jabalina, el tráfico de Saigón y la Comuna 13 en el Cross, Hội An de noche en el Tama-wari, la llovizna de Bogotá en el Tejo, el lago de noche en el Básquet, la azotea de Caracas en la pelea, el atardecer de Cartagena en Azoteas, el carnaval en el Fútbol, los pinos de Đà Lạt en el Tenis y el recreo del liceo en el Quemado.
 - Cada equipo celebra con su acorde de victoria al ganar una prueba, la pelea o la gira: la fanfarria con cuatro de la Familia (y el ladrido de Thor), el rock del Instituto, el đàn tranh de Rồng Sài Gòn, el torbellino de los Rolos, el joropo de los Panas y la gaita de los Maracuchos.
 - Cada mundo con su tema de PixelForja: Saigón, la Comuna 13, Hội An, Bogotá, Margarita, Đà Lạt, el Carnaval de Barranquilla, la gaita de Maracaibo, Caracas, la champeta de Cartagena, el bambuco del Eje Cafetero, los remeros de Hạ Long, el pajarillo de Apure y el tema del Instituto en el Kachinuki. El judo sigue con la pelea sintetizada.
+- La interfaz de PixelForja (lote G1): la palanca y los botones táctiles con su cuadro apretado, el marcador de la pelea con el panel de cada equipo, el retrato en su marco dorado y las barras de aguante y Nekketsu (la llena brilla), el reloj en números de TV, la caja de diálogo de la intro con su flechita, y los letreros grandes con su fondo: ¡LISTOS!, ¡YA!, ¡META!, ¡GOL!, ¡JONRÓN!, ¡RÉCORD!, quien gana en la cinta dorada y los especiales en la explosión.
+- Los vehículos de PixelForja (lote D2) en el Cross: el ferry del río que anda al cruzar y se queda atracado en el muelle, las motos de cuatro colores que pitan cuando tienes adelante y frenan con polvo cuando atropellan, el xích lô, los jacintos que bajan por el río y la fruta regada cuando alguien tumba un puesto del mercado.
+- Los efectos que se repiten (el aura de fuego de los poderes, el confeti, el rayo del Catatumbo) se apagan solos al rato y no se quedan tapando el juego.
 - Los deportes de pelota usan las animaciones de PixelForja sin la pelota pintada: la pelota la mueve el juego y, mientras alguien la tiene, va donde la pone la animación. En la pelea, cada equipo se burla con su gesto y su frase en un globo.
 
 ## Pantalla
@@ -112,6 +115,7 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
 El juego llena la pantalla en cualquier celular acostado, sin barras negras:
 - Está diseñado en un cuadro de 640 x 360 (16:9). En pantallas más alargadas (19.5:9, 20:9) se estira a los costados hasta 800 de ancho, sin deformar.
 - Lo importante (personajes, textos, menús) queda centrado. Los costados muestran más fondo, y en las carreras y la pelea, más mundo.
+- Las canchas fijas (vóley, tenis, đá cầu, básquet, fútbol, quemado, tejo, tama-wari) miden 640: en las pantallas alargadas la cámara se acerca lo justo para que la cancha llene la pantalla centrada, sin mostrar vacío ni arte repetido a un lado.
 - Los botones táctiles se pegan a los bordes de la pantalla.
 - En tablets, más cuadradas, queda en 16:9 con barras arriba y abajo.
 - Al tocar la primera pantalla en el celular pide pantalla completa y se acuesta solo, si el navegador lo permite.
@@ -167,6 +171,7 @@ node scripts/prueba-celular.mjs http://localhost:5173/ capturas/celular 844 390 
 node scripts/prueba-girar.mjs http://localhost:5173/   # parado pide girar; al girar (y al cambiar de pantalla) todo se acomoda
 node scripts/prueba-palanca.mjs http://localhost:5173/   # la palanca táctil con un dedo de verdad: bajar hasta el borde y volver a subir sin soltar
 node scripts/prueba-aves.mjs http://localhost:4173/ capturas/aves   # las palomas del hẻm despegan y vuelven, el gallo de la Comuna 13 canta y se asusta (hace falta el kit con aves)
+node scripts/prueba-g1d2.mjs http://localhost:4173/ capturas/g1d2   # interfaz G1 y vehículos D2: botones, marcador, reloj de TV, letreros con fondo, ferry, motos, xích lô, jacintos y fruta
 node scripts/prueba-gira.mjs http://localhost:4173/ capturas/gira   # la Olimpiada con Tama-wari, Đá cầu, Tejo y Judo: cada una arranca en gira, reparte puntos y vuelve al medallero
 node scripts/prueba-azoteas.mjs http://localhost:4173/ capturas/azoteas   # el entrenamiento con un bot y tres rondas con el techo alejándose, con caídas
 node scripts/prueba-quemado.mjs http://localhost:4173/ capturas/quemado [partido] [nivel]   # entrenamiento con un bot y un partido 4 contra 4; imprime tiros, golpes, atrapadas y esquivas de cada equipo

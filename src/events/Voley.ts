@@ -127,7 +127,7 @@ export class Voley extends EventScene {
     else void this.previa('VÓLEY PLAYA', 'PLAYA EL AGUA, MARGARITA', '{MOVER} AL CÍRCULO · {PUÑO} AL OTRO LADO · {PATADA} A TU COMPAÑERO · {SALTO} Y {PUÑO}: REMATE · {ESPECIAL}: FUEGO');
   }
 
-  private get camY() { return 360 - 180 / ZOOM; }
+  private get camY() { return 360 - 180 / this.cameras.main.zoom; }
 
   private texturas() {
     if (this.textures.exists('balon_voley')) return;

@@ -893,7 +893,7 @@ export class Actor {
     const hx = this.sx(this.x, this.y) + this.dir * head[0], hy = this.ft + this.y - this.z + head[1] - 8;
     g.setDepth(this.ft + this.y + 1);
     // las estrellas y pajaritos del kit (lote F); si no están, las de siempre
-    if (this.estrellas === undefined || this.estrellas === null) this.estrellas = efecto(this.w.sc, 'estrellas_mareo', hx, hy + 6) ?? undefined;
+    if (this.estrellas === undefined || this.estrellas === null) this.estrellas = efecto(this.w.sc, 'estrellas_mareo', hx, hy + 6, { queda: true }) ?? undefined;
     if (this.estrellas) { this.estrellas.setPosition(Math.round(hx), Math.round(hy + 6)).setDepth(this.ft + this.y + 1); return; }
     const tt = this.w.sc.time.now / 260;
     for (let i = 0; i < 3; i++) {

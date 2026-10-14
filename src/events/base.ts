@@ -4,6 +4,7 @@ import { Input, rotular } from '../core/input';
 import { chip, PELEA } from '../core/music';
 import { kit, bucle } from '../core/kit';
 import { txt, flash, pantallaCarga } from '../core/ui';
+import { letreroGrande } from '../core/interfaz';
 import { Coach, type Paso } from '../core/coach';
 import { nuestros, ellos, conJugador, lado, victoria } from '../core/equipos';
 import { cargarAtletas, packsDe } from '../core/carga';
@@ -118,8 +119,19 @@ export abstract class EventScene extends Phaser.Scene {
     this.cameras.main.fadeIn(250);
     this.registry.set('marchaSonando', false);
     this.ui = this.add.layer().setDepth(10000);
-    this.cameras.main.setZoom(zoom).setBounds(0, 0, worldW, 360);
-    this.cameras.main.ignore(this.ui);
+    const cam = this.cameras.main;
+    cam.setZoom(zoom).setBounds(0, 0, worldW, 360);
+    // en los celulares alargados una cancha fija (640 de mundo) no alcanzaba a cubrir lo ancho de la pantalla: la
+    // cámara la pegaba a la izquierda y a la derecha se veía el vacío o el arte repetido. Se acerca lo justo para
+    // que la cancha llene la pantalla, centrada (y se ven más grandes los atletas)
+    const llenar = () => {
+      const z = Math.max(zoom, this.scale.gameSize.width / worldW);
+      if (Math.abs(cam.zoom - z) > 0.001) cam.setZoom(z);
+    };
+    llenar();
+    this.scale.on(Phaser.Scale.Events.RESIZE, llenar);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.scale.off(Phaser.Scale.Events.RESIZE, llenar));
+    cam.ignore(this.ui);
     this.uiCam = this.cameras.add(0, 0, 640, 360).setName('ui');
     this.pad = new Input(this, undefined, this.ui);
   }
@@ -220,13 +232,9 @@ export abstract class EventScene extends Phaser.Scene {
   }
 
   protected banner(s: string, font: 'fuente_titulo' | 'fuente_titulo_plata' | 'fuente_ui', scale: number, hold: number, y = 150) {
-    return new Promise<void>((res) => {
-      const t = this.uiAdd(txt(this, 320, y, s, font, scale * 2).setDepth(8500).setAlpha(0));
-      this.tweens.add({ targets: t, scale, alpha: 1, duration: 200, ease: 'Back.out' });
-      chip.boom(0.3);
-      this.time.delayedCall(hold, () => this.tweens.add({ targets: t, alpha: 0, scale: scale * 1.3, duration: 200, onComplete: () => { t.destroy(); res(); } }));
-    });
+    return letreroGrande(this, (o) => this.uiAdd(o), s, font, scale, hold, y);
   }
+
 
   /** Nombre de la prueba, lugar y la cuenta regresiva. */
   protected async previa(nombre: string, lugar: string, ayuda: string) {

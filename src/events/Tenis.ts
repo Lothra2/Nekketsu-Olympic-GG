@@ -146,7 +146,7 @@ export class Tenis extends EventScene {
     else void this.previa('TENIS DE DOBLES', 'ĐÀ LẠT, VIETNAM', '{MOVER} AL CÍRCULO · DEJA QUE PIQUE · {PUÑO} DRIVE · {PATADA} GLOBO · EN LA RED {SALTO} Y {PUÑO}: SMASH · {ESPECIAL}: DRIVE NEKKETSU');
   }
 
-  private get camY() { return 360 - 180 / ZOOM; }
+  private get camY() { return 360 - 180 / this.cameras.main.zoom; }
 
   private texturas() {
     if (this.textures.exists('pelota_tenis')) return;

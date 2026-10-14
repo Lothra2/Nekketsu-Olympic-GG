@@ -250,8 +250,9 @@ export class Natacion extends EventScene {
       s.st = 'done';
       s.time = this.clock;
       s.fig.set('tread_water', true);
+      if (s.c.human) void this.banner('¡META!', 'fuente_titulo', 2, 900, 110);
       this.splash.explode(14, FINISH - 6, TOP + LANES[s.lane]);
-      s.ondas = efecto(this, 'ondas', s.x, TOP + LANES[s.lane], { depth: TOP + LANES[s.lane] + 1.5, alpha: 0.8 });
+      s.ondas = efecto(this, 'ondas', s.x, TOP + LANES[s.lane], { depth: TOP + LANES[s.lane] + 1.5, alpha: 0.8, queda: true });
       const lugar = this.swimmers.filter((o) => o.st === 'done').length;
       const t = txt(this, s.x - 4, TOP + LANES[s.lane] - 34, `${lugar}°`, 'fuente_titulo', 1).setDepth(6000);
       this.tweens.add({ targets: t, y: t.y - 8, duration: 400, ease: 'Back.out' });
@@ -279,7 +280,7 @@ export class Natacion extends EventScene {
       const wet = a.data.agua?.[a.frame] != null;
       s.fig.setPosition(Math.round(s.x), Math.round(surf + AGUA - el)).setDepth(wet ? surf : surf + 2);
       // la estela del kit detrás de quien nada rápido
-      if (s.estela === undefined) s.estela = efecto(this, 'estela', s.x, surf, { depth: surf + 1.5 });
+      if (s.estela === undefined) s.estela = efecto(this, 'estela', s.x, surf, { depth: surf + 1.5, queda: true });
       s.estela?.setPosition(Math.round(s.x - 14), surf).setVisible(s.st === 'swim' && s.v > 30);
     }
     const me = this.swimmers[0];

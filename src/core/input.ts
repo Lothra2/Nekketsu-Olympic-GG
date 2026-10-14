@@ -157,8 +157,10 @@ export class Input {
 class TouchPad {
   private stick: { id: number; ox: number; oy: number; x: number; y: number } | null = null;
   private btnDown = new Map<number, Btn>();
-  private base: Phaser.GameObjects.Arc;
-  private knob: Phaser.GameObjects.Arc;
+  private base: Phaser.GameObjects.Arc | Phaser.GameObjects.Sprite;
+  private knob: Phaser.GameObjects.Arc | Phaser.GameObjects.Sprite;
+  /** los controles son las piezas del kit */
+  private kit = false;
   private buttons: { btn: Btn; x: number; y: number; r: number; x640: number; g: Phaser.GameObjects.Container }[] = [];
   /** el ancho de la pantalla ahora */
   private W = 640;
@@ -168,20 +170,32 @@ class TouchPad {
   constructor(private scene: Phaser.Scene, layer?: Phaser.GameObjects.Layer) {
     scene.input.addPointer(3);
     const depth = 10000;
-    this.base = scene.add.circle(78, 286, 38, 0xffffff, 0.08).setStrokeStyle(2, 0xffffff, 0.35).setScrollFactor(0).setDepth(depth);
-    this.knob = scene.add.circle(78, 286, 16, 0xffffff, 0.3).setScrollFactor(0).setDepth(depth);
-    const defs: { btn: Btn; x: number; y: number; r: number; label: string; color: number }[] = [
-      { btn: 'punch', x: 528, y: 302, r: 22, label: 'A', color: 0xe8453c },
-      { btn: 'kick', x: 586, y: 270, r: 22, label: 'B', color: 0x3c7ae8 },
-      { btn: 'jump', x: 586, y: 326, r: 18, label: 'C', color: 0x3cc86a },
-      { btn: 'special', x: 528, y: 246, r: 16, label: '★', color: 0xf2c230 },
+    // con las piezas de PixelForja (lote G1) la palanca y los botones son de verdad; si no, círculos
+    this.kit = scene.textures.exists('ui_control_palanca') && scene.textures.exists('ui_control_a');
+    this.base = this.kit
+      ? scene.add.sprite(78, 286, 'ui_control_palanca', 0).setScale(0.8).setAlpha(0.75).setScrollFactor(0).setDepth(depth)
+      : scene.add.circle(78, 286, 38, 0xffffff, 0.08).setStrokeStyle(2, 0xffffff, 0.35).setScrollFactor(0).setDepth(depth);
+    this.knob = this.kit
+      ? scene.add.sprite(78, 286, 'ui_control_palanca_bola', 0).setScale(0.8).setAlpha(0.85).setScrollFactor(0).setDepth(depth)
+      : scene.add.circle(78, 286, 16, 0xffffff, 0.3).setScrollFactor(0).setDepth(depth);
+    const defs: { btn: Btn; x: number; y: number; r: number; label: string; color: number; pieza: string }[] = [
+      { btn: 'punch', x: 528, y: 302, r: 22, label: 'A', color: 0xe8453c, pieza: 'a' },
+      { btn: 'kick', x: 586, y: 270, r: 22, label: 'B', color: 0x3c7ae8, pieza: 'b' },
+      { btn: 'jump', x: 586, y: 326, r: 18, label: 'C', color: 0x3cc86a, pieza: 'c' },
+      { btn: 'special', x: 528, y: 246, r: 16, label: '★', color: 0xf2c230, pieza: 'especial' },
       // la pausa en la esquina de arriba a la derecha: al centro tapaba el reloj
-      { btn: 'start', x: 624, y: 16, r: 11, label: '‖', color: 0x888888 },
+      { btn: 'start', x: 624, y: 16, r: 11, label: '‖', color: 0x888888, pieza: 'pausa' },
     ];
     for (const d of defs) {
       const c = scene.add.container(d.x, d.y).setScrollFactor(0).setDepth(depth);
-      c.add(scene.add.circle(0, 0, d.r, d.color, 0.35).setStrokeStyle(2, 0xffffff, 0.5));
-      c.add(scene.add.text(0, 0, d.label, { fontFamily: 'monospace', fontSize: `${Math.round(d.r)}px`, color: '#ffffff' }).setOrigin(0.5).setAlpha(0.85));
+      const tex = `ui_control_${d.pieza}`;
+      if (this.kit && scene.textures.exists(tex)) {
+        // el botón del kit mide 48 con el círculo de unos 44: se achica al radio de cada uno, un poco transparente
+        c.add(scene.add.sprite(0, 0, tex, 0).setScale((d.r * 2 + 4) / 48).setAlpha(0.8));
+      } else {
+        c.add(scene.add.circle(0, 0, d.r, d.color, 0.35).setStrokeStyle(2, 0xffffff, 0.5));
+        c.add(scene.add.text(0, 0, d.label, { fontFamily: 'monospace', fontSize: `${Math.round(d.r)}px`, color: '#ffffff' }).setOrigin(0.5).setAlpha(0.85));
+      }
       this.buttons.push({ ...d, x640: d.x, g: c });
     }
     this.acomodar();
@@ -207,9 +221,10 @@ class TouchPad {
 
   private down(p: Phaser.Input.Pointer) {
     const { x, y } = p;
-    for (const b of this.buttons) if (Math.hypot(x - b.x, y - b.y) < b.r + 10) { this.btnDown.set(p.id, b.btn); b.g.setScale(0.9); return; }
+    for (const b of this.buttons) if (Math.hypot(x - b.x, y - b.y) < b.r + 10) { this.btnDown.set(p.id, b.btn); this.apretar(b.g, true); return; }
     if (x < this.W / 2 && !this.stick) {
       this.stick = { id: p.id, ox: x, oy: y, x, y };
+      this.cuadro(this.base, 1); this.cuadro(this.knob, 1);
       this.base.setPosition(x, y);
       this.knob.setPosition(x, y);
     }
@@ -242,9 +257,20 @@ class TouchPad {
       this.runBtn = false;
       this.base.setPosition(78, 286);
       this.knob.setPosition(78, 286);
+      this.cuadro(this.base, 0); this.cuadro(this.knob, 0);
     }
     const b = this.btnDown.get(p.id);
-    if (b) { this.btnDown.delete(p.id); this.buttons.find((x) => x.btn === b)?.g.setScale(1); }
+    if (b) { this.btnDown.delete(p.id); const g = this.buttons.find((x) => x.btn === b)?.g; if (g) this.apretar(g, false); }
+  }
+
+  /** El cuadro presionado (1) o normal (0) de una pieza del kit. */
+  private cuadro(o: Phaser.GameObjects.GameObject, i: number) { if (o instanceof Phaser.GameObjects.Sprite) o.setFrame(i); }
+
+  /** Un botón apretado: su cuadro presionado (los del kit) o más chico (los círculos). */
+  private apretar(c: Phaser.GameObjects.Container, si: boolean) {
+    const s = c.list[0];
+    if (s instanceof Phaser.GameObjects.Sprite) s.setFrame(si ? 1 : 0);
+    c.setScale(si ? 0.92 : 1);
   }
 
   read() {
@@ -277,7 +303,8 @@ class TouchPad {
       this.glow.push(this.scene.tweens.add({ targets: b.g, alpha: 0.35, duration: 280, yoyo: true, repeat: -1 }));
     }
     // la palanca también, si el paso es moverse
-    this.base.setStrokeStyle(2, btns.includes('stick') ? 0xf2c230 : 0xffffff, 0.5);
+    if (this.base instanceof Phaser.GameObjects.Arc) this.base.setStrokeStyle(2, btns.includes('stick') ? 0xf2c230 : 0xffffff, 0.5);
+    else this.base.setTint(btns.includes('stick') ? 0xffe080 : 0xffffff);
   }
 
   setVisible(v: boolean) {

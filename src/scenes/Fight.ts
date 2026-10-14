@@ -8,6 +8,10 @@ import { efecto, talla } from '../core/fx';
 import { Input, rotular } from '../core/input';
 import { chip, PELEA } from '../core/music';
 import { txt, flash, speedLines, pantallaCarga } from '../core/ui';
+import { letreroGrande, MarcadorTV, hayUi, pieza } from '../core/interfaz';
+
+/** El reloj del marcador: el de TV del kit o el texto de siempre. */
+interface Reloj { setText(s: string): Reloj; setTint(c: number): Reloj }
 import { INFO } from './Select';
 import { nuestros, ellos, lado, equipos, conJugador, victoria } from '../core/equipos';
 import { cargarAtletas, packsDe } from '../core/carga';
@@ -112,7 +116,9 @@ export class Fight extends Phaser.Scene implements World {
   private get judo() { return this.data0.modo === 'judo'; }
   /** para el actor: en el tatami la patada agarrando es la proyección */
   get esJudo() { return this.judo; }
-  private relojTxt: Phaser.GameObjects.BitmapText | null = null;
+  private relojTxt: Reloj | null = null;
+  /** las barras del marcador hechas con las piezas del kit (lote G1), una por luchador en el uno contra uno */
+  private hudKit: { a: Actor; right: boolean; vida: Phaser.GameObjects.Image | null; nek: Phaser.GameObjects.Image; llena: Phaser.GameObjects.TileSprite }[] = [];
   private pesado: { it: Item; sombra: Phaser.GameObjects.Ellipse } | null = null;
   /** la arepa que cae de vez en cuando: quien la pisa recupera vida */
   private arepas: { x: number; y: number; g: Phaser.GameObjects.Graphics; t: number }[] = [];
@@ -651,14 +657,10 @@ export class Fight extends Phaser.Scene implements World {
     });
   }
 
-  private banner(s: string, font: 'fuente_titulo' | 'fuente_titulo_plata' | 'fuente_ui', scale: number, hold: number) {
-    return new Promise<void>((res) => {
-      const t = this.uiAdd(txt(this, 320, 150, s, font, scale * 2).setDepth(8500).setAlpha(0));
-      this.tweens.add({ targets: t, scale, alpha: 1, duration: 200, ease: 'Back.out' });
-      chip.boom(0.3);
-      this.time.delayedCall(hold, () => this.tweens.add({ targets: t, alpha: 0, scale: scale * 1.3, duration: 200, onComplete: () => { t.destroy(); res(); } }));
-    });
+  private banner(s: string, font: 'fuente_titulo' | 'fuente_titulo_plata' | 'fuente_ui', scale: number, hold: number, y = 150) {
+    return letreroGrande(this, (o) => this.uiAdd(o), s, font, scale, hold, y);
   }
+
 
   /**
    * Fuegos artificiales al ganar: los del kit, en el cielo que se ve con el acercamiento de la pelea (los del
@@ -786,7 +788,7 @@ export class Fight extends Phaser.Scene implements World {
   private cutIn(a: Actor) {
     this.cut = 1.0;
     // el aura Nekketsu detrás de quien lanza la técnica
-    const aura = efecto(this, 'aura_nekketsu', this.px(a.x, a.y), FLOOR_TOP + a.y, { depth: FLOOR_TOP + a.y - 0.5 });
+    const aura = efecto(this, 'aura_nekketsu', this.px(a.x, a.y), FLOOR_TOP + a.y, { depth: FLOOR_TOP + a.y - 0.5, queda: true });
     if (aura) this.time.delayedCall(1700, () => this.tweens.add({ targets: aura, alpha: 0, duration: 250, onComplete: () => aura.destroy() }));
     if (a.id === 'alana') this.sfx('thor_rescate', 0.6);
     const side = a.team === 0 ? 1 : -1;
@@ -1129,14 +1131,29 @@ export class Fight extends Phaser.Scene implements World {
 
   private buildHud() {
     if (this.limites || this.judo) {
-      this.relojTxt = this.uiAdd(txt(this, 320, 12, '0:00', 'fuente_ui', 2).setDepth(8001));
-      this.hudObjs.push(this.relojTxt);
+      if (MarcadorTV.disponible(this)) {
+        // el reloj en números de marcador de TV, sobre su placa
+        const tv = new MarcadorTV(this, 320, 16).setText('0:00');
+        this.uiAdd(tv.c.setDepth(8001));
+        this.hudObjs.push(tv.c);
+        this.relojTxt = tv;
+      } else {
+        const t = this.uiAdd(txt(this, 320, 12, '0:00', 'fuente_ui', 2).setDepth(8001));
+        this.hudObjs.push(t);
+        this.relojTxt = t;
+      }
     } else this.relojTxt = null;
+    this.hudKit = [];
     const teams = [0, 1].map((tm) => this.actors.filter((a) => a.team === tm));
     teams.forEach((list, tm) => {
       const right = tm === 1;
       if (list.length === 1) {
         const a = list[0];
+        const panel = `panel_${lado(tm).id}`;
+        if (hayUi(this, 'barra_marco') && hayUi(this, 'marco_retrato_40') && hayUi(this, panel)) {
+          this.hudKit.push(this.hudConKit(a, right, panel));
+          return;
+        }
         const x = right ? 640 - 24 : 24;
         this.hudObjs.push(this.uiAdd(this.add.image(x, 26, `retratos:${a.id}`, right ? 'chico_enojo' : 'chico_feliz').setDepth(8001).setFlipX(right)));
         this.hudObjs.push(this.uiAdd(txt(this, right ? 640 - 50 : 50, 10, a.nombre, 'fuente_ui', 1, right ? 1 : 0).setDepth(8001)));
@@ -1150,9 +1167,45 @@ export class Fight extends Phaser.Scene implements World {
     });
   }
 
+  /**
+   * El lado de un luchador con las piezas del kit: el panel en los colores de su equipo, el retrato en su marco
+   * dorado, el nombre, y las barras de aguante y Nekketsu en su marco. Las de la derecha van en espejo.
+   */
+  private hudConKit(a: Actor, right: boolean, panel: string) {
+    const X = (x: number) => (right ? 640 - x : x);
+    const add = <T extends Phaser.GameObjects.GameObject>(o: T) => { this.hudObjs.push(this.uiAdd(o)); return o; };
+    const [l, t, r, b] = pieza(panel)?.nueve ?? [8, 8, 8, 8];
+    add(this.add.nineslice(X(105), 27, `ui_${panel}`, undefined, 208, 52, l, r, t, b).setAlpha(0.92).setDepth(8000));
+    add(this.add.image(X(26), 27, `retratos:${a.id}`, right ? 'chico_enojo' : 'chico_feliz').setDepth(8001).setFlipX(right));
+    add(this.add.image(X(26), 27, 'ui_marco_retrato_40').setDepth(8001));
+    add(txt(this, X(54), 9, a.nombre, 'fuente_ui', 1, right ? 1 : 0).setDepth(8001));
+    const [ml, mr] = pieza('barra_marco')?.tres ?? [4, 4];
+    const marco = (x: number, y: number, w: number) => add(this.add.nineslice(X(x + w / 2), y + 5, 'ui_barra_marco', undefined, w, 10, ml, mr, 0, 0).setDepth(8001));
+    const relleno = (key: string, y: number) => add(this.add.image(X(54), y, key).setOrigin(right ? 1 : 0, 0).setDepth(8002));
+    let vida: Phaser.GameObjects.Image | null = null;
+    if (!this.judo) { marco(52, 17, 152); vida = relleno('ui_barra_aguante', 19); }
+    const yN = 31;
+    marco(52, yN, 102);
+    const nek = relleno('ui_barra_nekketsu', yN + 2);
+    const llena = add(this.add.tileSprite(X(54), yN + 2, 98, 6, 'ui_barra_nekketsu_llena', 0).setOrigin(right ? 1 : 0, 0).setDepth(8002).setVisible(false));
+    return { a, right, vida, nek, llena };
+  }
+
   private drawHud() {
     const g = this.hud;
     g.clear();
+    // las barras del kit: el relleno se estira al valor; el aguante se pone amarillo y rojo al bajar
+    for (const h of this.hudKit) {
+      const v = Phaser.Math.Clamp(h.a.hp / h.a.maxHp, 0, 1);
+      if (h.vida) {
+        h.vida.setDisplaySize(Math.max(0.01, 148 * v), 6).setVisible(v > 0);
+        if (v > 0.5) h.vida.clearTint(); else h.vida.setTint(v > 0.25 ? 0xffe040 : 0xff5040);
+      }
+      const n = Phaser.Math.Clamp(h.a.meter / 100, 0, 1);
+      h.nek.setDisplaySize(Math.max(0.01, 98 * n), 6).setVisible(n > 0 && n < 1);
+      h.llena.setVisible(n >= 1);
+      if (n >= 1) h.llena.setFrame(Math.floor(this.time.now / 83) % 4);
+    }
     const bar = (x: number, y: number, w: number, h: number, v: number, col: number, right: boolean) => {
       g.fillStyle(0x000000, 0.75).fillRect(x - 1, y - 1, w + 2, h + 2);
       g.fillStyle(0x3a2a3a).fillRect(x, y, w, h);
@@ -1167,6 +1220,7 @@ export class Fight extends Phaser.Scene implements World {
       if (list.length === 1) {
         const a = list[0];
         const x = right ? 640 - 50 - 150 : 50;
+        const conKit = this.hudKit.some((h) => h.a === a);
         if (this.judo) {
           // en el judo no hay vida que bajar: tres puntos por lado, el que llega a 3 gana
           for (let k = 0; k < 3; k++) {
@@ -1174,7 +1228,8 @@ export class Fight extends Phaser.Scene implements World {
             g.fillStyle(0x000000, 0.7).fillCircle(cx, 22, 6);
             g.fillStyle(k < this.puntos[tm] ? 0xf2c230 : 0x3a2a3a).fillCircle(cx, 22, 5);
           }
-        } else bar(x, 18, 150, 6, a.hp / a.maxHp, hpCol(a.hp / a.maxHp), right);
+        } else if (!conKit) bar(x, 18, 150, 6, a.hp / a.maxHp, hpCol(a.hp / a.maxHp), right);
+        if (conKit) return;
         const full = a.meter >= 100;
         bar(x + (right ? 50 : 0), 28, 100, 3, a.meter / 100, full ? (Math.floor(this.time.now / 120) % 2 ? 0xffffff : 0xf2c230) : 0xf2c230, right);
       } else {

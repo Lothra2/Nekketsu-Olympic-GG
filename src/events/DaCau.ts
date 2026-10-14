@@ -130,7 +130,7 @@ export class DaCau extends EventScene {
     else void this.previa('ĐÁ CẦU', 'PARQUE TAO ĐÀN, SAIGÓN', '{MOVER} AL CÍRCULO · {PATADA} AL OTRO LADO · {PUÑO} A TU COMPAÑERO · {SALTO} Y {PATADA}: CHILENA · {ESPECIAL}: CHILENA NEKKETSU');
   }
 
-  private get camY() { return 360 - 180 / ZOOM; }
+  private get camY() { return 360 - 180 / this.cameras.main.zoom; }
 
   private texturas() {
     if (this.textures.exists('cau')) return;

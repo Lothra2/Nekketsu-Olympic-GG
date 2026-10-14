@@ -15,6 +15,7 @@ import { hayArte, pintarEscenario, queueEscenario } from './escenario';
 import { efecto, talla } from '../core/fx';
 import { kit, npcs, aves, type Ave } from '../core/kit';
 import { Figura } from '../core/figura';
+import { spriteVehiculo, vehiculos as vehiculosKit } from '../core/interfaz';
 
 /** El formato de layout de PixelForja (PEDIDO 10.2), la parte que el Cross Country usa. */
 interface Caja { x: number; y: number; w: number; d: number; z: number; tipo?: string; subible?: boolean }
@@ -74,11 +75,12 @@ interface Corredor {
   /** para despegar a la máquina si se queda dando vueltas en el mismo lugar */
   mejorX: number; mejorT: number; desatasco: number; desatascoY: number;
 }
-interface Vehiculo { x: number; y: number; v: number; g: Phaser.GameObjects.Container }
+/** `spr` es la tira del kit (lote D2), cuando la hay: la moto pita al acercarse a alguien y frena al atropellar */
+interface Vehiculo { x: number; y: number; v: number; g: Phaser.GameObjects.Container; spr?: Phaser.GameObjects.Sprite; id?: string; anim?: string }
 /** El ferry del río: una plataforma que va y viene entre los muelles y se lleva a quien esté encima. */
-interface Ferry extends Caja { x0: number; x1: number; v: number; espera: number; quieto: number; dir: 1 | -1; g: Phaser.GameObjects.Container }
-interface Jacinto { x: number; y: number; g: Phaser.GameObjects.Graphics; tocados: Set<Actor> }
-interface Fruta { x0: number; x1: number; y0: number; y1: number; t: number; dueño: Actor; g: Phaser.GameObjects.Graphics }
+interface Ferry extends Caja { x0: number; x1: number; v: number; espera: number; quieto: number; dir: 1 | -1; g: Phaser.GameObjects.Container; spr?: Phaser.GameObjects.Sprite | null }
+interface Jacinto { x: number; y: number; g: Phaser.GameObjects.Graphics | Phaser.GameObjects.Sprite; tocados: Set<Actor> }
+interface Fruta { x0: number; x1: number; y0: number; y1: number; t: number; dueño: Actor; g: Phaser.GameObjects.Graphics | Phaser.GameObjects.Container }
 /** Un perro de la calle que duerme en el camino: si lo pisas, despierta, te tumba y te persigue un poco. */
 /**
  * Un perro dormido. Con el del kit (lote C7c): al pisarlo se despierta (`wake`) y embiste (`pounce`), y tumba en el
@@ -491,7 +493,7 @@ export class CrossCountry extends EventScene implements World {
       a.setSt('win', 'victory');
       const lugar = this.gente2.filter((g) => g.done).length;
       this.letrero(a, `¡${lugar}° LUGAR!`, lugar === 1 ? 0xffd040 : 0xffffff);
-      if (a.human) { flash(this, 120); chip.blip(1568, 0.3, 'sq25', 0.2, 2093); }
+      if (a.human) { flash(this, 120); chip.blip(1568, 0.3, 'sq25', 0.2, 2093); void this.banner('¡META!', 'fuente_titulo', 2, 900, 110); }
     }
   }
 
@@ -516,10 +518,23 @@ export class CrossCountry extends EventScene implements World {
     if ((this.derrame.get(c) ?? 0) > this.clock) return;
     this.derrame.set(c, this.clock + 12);
     const f: Fruta = { x0: c.x + c.w, x1: c.x + c.w + 54, y0: c.y, y1: c.y + c.d, t: 10, dueño: a, g: this.add.graphics() };
-    const col = [0xff9a20, 0xffd040, 0x7ac83a, 0xe8403a, 0xb04ad0];
-    for (let i = 0; i < 26; i++) {
-      const x = f.x0 + Math.random() * (f.x1 - f.x0), y = f.y0 + 2 + Math.random() * (f.y1 - f.y0 - 4);
-      f.g.fillStyle(col[i % col.length]).fillCircle(Math.round(this.px(x, y)), Math.round(FT + y), 2 + (i % 2));
+    const fk = vehiculosKit().frutas_regadas;
+    if (fk && this.textures.exists('veh_frutas_regadas')) {
+      // la fruta regada del kit (lote D2), en manchones por todo el pasillo de atrás del puesto
+      f.g.destroy();
+      const cont = this.add.container(0, 0);
+      for (let yy = f.y0; yy < f.y1 - 4; yy += fk.huella.d + 2) for (let xx = f.x0; xx < f.x1 - 8; xx += fk.huella.w - 6) {
+        const x = xx + Math.random() * 6, y = yy + Math.random() * 3;
+        cont.add(this.add.image(Math.round(this.px(x, y)), FT + y, 'veh_frutas_regadas', 0).setOrigin(fk.ancla[0] / fk.w, fk.ancla[1] / fk.h));
+      }
+      f.g = cont;
+    } else {
+      const g = f.g as Phaser.GameObjects.Graphics;
+      const col = [0xff9a20, 0xffd040, 0x7ac83a, 0xe8403a, 0xb04ad0];
+      for (let i = 0; i < 26; i++) {
+        const x = f.x0 + Math.random() * (f.x1 - f.x0), y = f.y0 + 2 + Math.random() * (f.y1 - f.y0 - 4);
+        g.fillStyle(col[i % col.length]).fillCircle(Math.round(this.px(x, y)), Math.round(FT + y), 2 + (i % 2));
+      }
     }
     f.g.setDepth(FT + f.y0 - 0.2);
     this.frutas.push(f);
@@ -1002,6 +1017,15 @@ export class CrossCountry extends EventScene implements World {
     const w = e.w ?? 110, d = e.d ?? 40, z = e.z ?? 12, x0 = e.x0 ?? 0, y = e.y ?? 0;
     const K = this.inclinacion;
     const g = this.add.container(Math.round(this.px(x0, y)), FT + y);
+    // el ferry de PixelForja (lote D2): su ancla es la esquina de atrás a la izquierda de la huella, como el gris
+    const spr = spriteVehiculo(this, 'ferry', 'atracado');
+    if (spr) {
+      g.add(spr);
+      g.setDepth(FT + y + d - 0.5);
+      this.ferry = { x: x0, y, w, d, z, tipo: 'ferry', x0, x1: e.x1 ?? x0 + 400, v: e.velocidad ?? 80, espera: e.espera ?? 2, quieto: e.espera ?? 2, dir: 1, g, spr };
+      this.cajas.push(this.ferry);
+      return;
+    }
     // la cubierta, el casco rojo al frente y su costado izquierdo, en la misma vista inclinada que el resto
     const casco = this.add.graphics();
     const kd = Math.round(K * d);
@@ -1022,6 +1046,9 @@ export class CrossCountry extends EventScene implements World {
     const f = this.ferry;
     if (!f || this.fase !== 'juego') return;
     let dx = 0;
+    // atracado mientras espera en el muelle, andando (con su espuma) mientras cruza
+    const anim = f.quieto > 0 ? 'veh_ferry_atracado' : 'veh_ferry_andando';
+    if (f.spr && f.spr.anims.currentAnim?.key !== anim && this.anims.exists(anim)) f.spr.play(anim);
     if (f.quieto > 0) f.quieto -= dt;
     else {
       const fin = f.dir > 0 ? f.x1 - f.w : f.x0;
@@ -1054,10 +1081,18 @@ export class CrossCountry extends EventScene implements World {
       if (xs.length) {
         const x = Math.min(w.x1 - 10, Math.max(...xs) + 140 + Math.random() * 160);
         const y = (w.y0 ?? 0) + 6 + Math.random() * ((w.y1 ?? DEPTH) - (w.y0 ?? 0) - 12);
-        const g = this.add.graphics();
-        g.fillStyle(0x2a7a3a).fillEllipse(0, 0, 26, 9);
-        g.fillStyle(0x4aa84a).fillEllipse(-4, -1, 14, 6).fillEllipse(6, 0, 10, 5);
-        g.fillStyle(0xb08ae0).fillCircle(-2, -3, 2).fillCircle(5, -2, 1.5);
+        // los del kit (lote D2) flotando, con su ancla corrida para que (x, y) quede en el centro de la huella
+        const jk = vehiculosKit().jacintos;
+        const spr = jk ? spriteVehiculo(this, 'jacintos', 'flotando') : null;
+        let g: Phaser.GameObjects.Graphics | Phaser.GameObjects.Sprite;
+        if (spr && jk) g = spr.setOrigin((jk.ancla[0] + jk.huella.w / 2 + this.inclinacion * jk.huella.d / 2) / jk.w, (jk.ancla[1] - jk.huella.d / 2) / jk.h);
+        else {
+          const gg = this.add.graphics();
+          gg.fillStyle(0x2a7a3a).fillEllipse(0, 0, 26, 9);
+          gg.fillStyle(0x4aa84a).fillEllipse(-4, -1, 14, 6).fillEllipse(6, 0, 10, 5);
+          gg.fillStyle(0xb08ae0).fillCircle(-2, -3, 2).fillCircle(5, -2, 1.5);
+          g = gg;
+        }
         this.jacintos.push({ x, y, g, tocados: new Set() });
       }
     }
@@ -1191,7 +1226,17 @@ export class CrossCountry extends EventScene implements World {
       sombra.fillStyle(0x000000, 0.3).fillEllipse(0, 0, moto ? 44 : 56, 8);
       g.add(sombra);
       const vida = `esc_${L.id}_vida`;
-      if (moto && this.arte && this.textures.exists(vida) && this.textures.get(vida).has('motos_fondo_0')) {
+      // la moto (de un color al azar) o el xích lô de PixelForja (lote D2): (x, y) es el centro de su huella
+      const colores = Object.keys(vehiculosKit()).filter((id) => id.startsWith('moto_'));
+      const id = moto ? colores[Math.floor(Math.random() * colores.length)] : 'xich_lo';
+      const vk = id ? vehiculosKit()[id] : undefined;
+      const spr = vk ? spriteVehiculo(this, id, 'andando') : null;
+      if (spr && vk) {
+        // al doble: los conductores del kit miden 12 px y así se ven del tamaño con que atropellan (40 de largo)
+        const E = 2;
+        spr.setScale(E).setPosition(-Math.round(E * (vk.huella.w / 2 + this.inclinacion * vk.huella.d / 2)), -Math.round(E * vk.huella.d / 2));
+        g.add(spr);
+      } else if (moto && this.arte && this.textures.exists(vida) && this.textures.get(vida).has('motos_fondo_0')) {
         // la moto de PixelForja, la misma que cruza al fondo
         const img = this.add.image(0, 2, vida, 'motos_fondo_0').setOrigin(0.5, 1);
         this.tweens.addCounter({ from: 0, to: 1, duration: 125, repeat: -1, onRepeat: () => img.setFrame(img.frame.name === 'motos_fondo_0' ? 'motos_fondo_1' : 'motos_fondo_0') });
@@ -1211,7 +1256,7 @@ export class CrossCountry extends EventScene implements World {
         body.lineStyle(2, 0x303038).lineBetween(-4, -12, 20, -12);
         g.add([body, txt(this, 0, -48, 'XÍCH LÔ', 'fuente_ui', 1)]);
       }
-      this.vehiculos.push({ x, y, v: moto ? -230 : -110, g });
+      this.vehiculos.push({ x, y, v: moto ? -230 : -110, g, spr: spr ?? undefined, id: spr ? id : undefined, anim: 'andando' });
       chip.blip(moto ? 523 : 880, 0.12, 'sq50', 0.12, moto ? 494 : 988);
       this.time.delayedCall(140, () => chip.blip(moto ? 523 : 880, 0.12, 'sq50', 0.12, moto ? 494 : 988));
       const aviso = this.uiAdd(txt(this, 600, 180 + (y - 60) * 0.8, moto ? '¡MOTO! «' : '¡XÍCH LÔ! «', 'fuente_ui', 2, 1).setDepth(8100).setTint(0xff6060));
@@ -1220,11 +1265,25 @@ export class CrossCountry extends EventScene implements World {
     for (const m of this.vehiculos) {
       m.x += m.v * dt;
       m.g.setPosition(Math.round(this.px(m.x, m.y)), FT + m.y).setDepth(FT + m.y);
+      // la moto pita cuando tiene a alguien adelante en su carril, y anda otra vez cuando pasó
+      if (m.spr && m.id?.startsWith('moto_') && m.anim !== 'frenando') {
+        const alguien = this.gente2.some((r) => Math.abs(r.a.y - m.y) < 14 && r.a.x < m.x && m.x - r.a.x < 110);
+        const quiere = alguien ? 'corneta' : 'andando';
+        if (quiere !== m.anim) { m.anim = quiere; m.spr.play(`veh_${m.id}_${quiere}`); }
+      }
       for (const r of this.gente2) {
         const a = r.a;
         if (Math.abs(a.x - m.x) < 20 && Math.abs(a.y - m.y) < 10 && a.z < 14 && a.canBeHit()) {
           a.hp = Math.max(1, a.hp - 8);
           a.knockdown(-1, 160, 200);
+          // la moto frena de golpe (con su polvo) y sigue al rato
+          if (m.spr && m.id?.startsWith('moto_') && m.anim !== 'frenando') {
+            m.anim = 'frenando';
+            m.spr.play(`veh_${m.id}_frenando`);
+            const v0 = m.v;
+            m.v = v0 * 0.25;
+            this.time.delayedCall(450, () => { if (!m.spr?.active) return; m.v = v0; m.anim = 'andando'; m.spr.play(`veh_${m.id}_andando`); });
+          }
           this.onHit(null, a, 8, true);
           this.sfx('critico', a.human ? 0.5 : 0.2);
           if (a.human) this.letrero(a, m.v < -150 ? '¡PI PI! ¡TE ATROPELLÓ LA MOTO!' : '¡CUIDADO CON EL XÍCH LÔ!', 0xff8080);

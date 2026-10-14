@@ -89168,6 +89168,274 @@
     "base": 17
    },
    "notas": "BMFont XML: this.load.bitmapFont(nombre, png, fnt). fuente_ui (8 px, blanca con sombra, se tiñe con setTint; usar escala entera x2 o x3), fuente_titulo y fuente_titulo_plata (16 px, ya pintadas). Tienen ñ, tildes, ¡, ¿ y todas las letras del vietnamita (ă, â, ê, ô, ơ, ư, đ y los 5 tonos). Las marcas dobles de la breve con tono (ắ) y del circunflejo con tilde (ẫ) suben 2 pixeles de fuente por encima de la línea."
+  },
+  "logo": {
+   "archivo": "ui/logo.png",
+   "w": 320,
+   "h": 112,
+   "cuadros": 8,
+   "columnas": 8,
+   "fps": 10,
+   "loop": true,
+   "texto": "NEKKETSU OLYMPIC GG",
+   "chico": {
+    "archivo": "ui/logo_chico.png",
+    "w": 160,
+    "h": 56,
+    "cuadros": 8,
+    "columnas": 8,
+    "fps": 10,
+    "loop": true
+   }
+  },
+  "interfaz": {
+   "dialogo": {
+    "archivo": "ui/dialogo.png",
+    "w": 24,
+    "h": 24,
+    "nueve": [8,8,8,8],
+    "relleno": [10,8],
+    "retrato": {
+     "x": 8,
+     "y": 8,
+     "marco": "marco_retrato_40"
+    }
+   },
+   "dialogo_flecha": {
+    "archivo": "ui/dialogo_flecha.png",
+    "w": 10,
+    "h": 10,
+    "cuadros": 4,
+    "columnas": 4,
+    "fps": 4,
+    "loop": true,
+    "ancla": "abajo a la derecha de la caja, 6 px adentro"
+   },
+   "panel_familia_gg": {
+    "archivo": "ui/panel_familia_gg.png",
+    "w": 24,
+    "h": 24,
+    "nueve": [8,8,8,8],
+    "colores": ["#2a5bd7","#f2c230"]
+   },
+   "panel_instituto_nekketsu": {
+    "archivo": "ui/panel_instituto_nekketsu.png",
+    "w": 24,
+    "h": 24,
+    "nueve": [8,8,8,8],
+    "colores": ["#353c58","#d42a2a"]
+   },
+   "panel_rong_sai_gon": {
+    "archivo": "ui/panel_rong_sai_gon.png",
+    "w": 24,
+    "h": 24,
+    "nueve": [8,8,8,8],
+    "colores": ["#da251d","#ffcd00"]
+   },
+   "panel_rolos_de_chapinero": {
+    "archivo": "ui/panel_rolos_de_chapinero.png",
+    "w": 24,
+    "h": 24,
+    "nueve": [8,8,8,8],
+    "colores": ["#ffd700","#c8102e"]
+   },
+   "panel_panas_de_caracas": {
+    "archivo": "ui/panel_panas_de_caracas.png",
+    "w": 24,
+    "h": 24,
+    "nueve": [8,8,8,8],
+    "colores": ["#ffcc00","#00247d"]
+   },
+   "panel_maracuchos_del_lago": {
+    "archivo": "ui/panel_maracuchos_del_lago.png",
+    "w": 24,
+    "h": 24,
+    "nueve": [8,8,8,8],
+    "colores": ["#0055a4","#ffd100"]
+   },
+   "barra_marco": {
+    "archivo": "ui/barra_marco.png",
+    "w": 16,
+    "h": 10,
+    "tres": [4,4],
+    "relleno": {
+     "x": 2,
+     "y": 2,
+     "h": 6
+    }
+   },
+   "barra_aguante": {
+    "archivo": "ui/barra_aguante.png",
+    "w": 1,
+    "h": 6,
+    "uso": "se estira al ancho del valor"
+   },
+   "barra_nekketsu": {
+    "archivo": "ui/barra_nekketsu.png",
+    "w": 1,
+    "h": 6,
+    "uso": "se estira al ancho del valor"
+   },
+   "barra_nekketsu_llena": {
+    "archivo": "ui/barra_nekketsu_llena.png",
+    "w": 8,
+    "h": 6,
+    "cuadros": 4,
+    "columnas": 4,
+    "fps": 12,
+    "loop": true,
+    "uso": "mosaico cuando el medidor está lleno"
+   },
+   "marco_retrato_40": {
+    "archivo": "ui/marco_retrato_40.png",
+    "w": 48,
+    "h": 48,
+    "hueco": [4,4,40,40]
+   },
+   "marco_retrato_96": {
+    "archivo": "ui/marco_retrato_96.png",
+    "w": 108,
+    "h": 108,
+    "hueco": [6,6,96,96]
+   },
+   "banner_listos": {
+    "archivo": "ui/banner_listos.png",
+    "w": 256,
+    "h": 80,
+    "texto": [36,24,184,32]
+   },
+   "banner_ya": {
+    "archivo": "ui/banner_ya.png",
+    "w": 256,
+    "h": 80,
+    "texto": [56,22,144,36]
+   },
+   "banner_chao_pescao": {
+    "archivo": "ui/banner_chao_pescao.png",
+    "w": 256,
+    "h": 80,
+    "texto": [36,24,168,30]
+   },
+   "banner_meta": {
+    "archivo": "ui/banner_meta.png",
+    "w": 256,
+    "h": 80,
+    "texto": [60,22,136,36]
+   },
+   "banner_gol": {
+    "archivo": "ui/banner_gol.png",
+    "w": 256,
+    "h": 80,
+    "texto": [56,22,144,36]
+   },
+   "banner_record": {
+    "archivo": "ui/banner_record.png",
+    "w": 256,
+    "h": 80,
+    "texto": [36,24,184,32]
+   },
+   "banner_jonron": {
+    "archivo": "ui/banner_jonron.png",
+    "w": 256,
+    "h": 80,
+    "texto": [44,24,168,32]
+   },
+   "control_palanca": {
+    "archivo": "ui/control_palanca.png",
+    "w": 96,
+    "h": 96,
+    "cuadros": 2,
+    "columnas": 2,
+    "estados": ["normal","presionado"],
+    "recorrido": 30
+   },
+   "control_palanca_bola": {
+    "archivo": "ui/control_palanca_bola.png",
+    "w": 40,
+    "h": 40,
+    "cuadros": 2,
+    "columnas": 2,
+    "estados": ["normal","presionado"]
+   },
+   "control_a": {
+    "archivo": "ui/control_a.png",
+    "w": 48,
+    "h": 48,
+    "cuadros": 2,
+    "columnas": 2,
+    "estados": ["normal","presionado"]
+   },
+   "control_b": {
+    "archivo": "ui/control_b.png",
+    "w": 48,
+    "h": 48,
+    "cuadros": 2,
+    "columnas": 2,
+    "estados": ["normal","presionado"]
+   },
+   "control_c": {
+    "archivo": "ui/control_c.png",
+    "w": 48,
+    "h": 48,
+    "cuadros": 2,
+    "columnas": 2,
+    "estados": ["normal","presionado"]
+   },
+   "control_especial": {
+    "archivo": "ui/control_especial.png",
+    "w": 48,
+    "h": 48,
+    "cuadros": 2,
+    "columnas": 2,
+    "estados": ["normal","presionado"]
+   },
+   "control_pausa": {
+    "archivo": "ui/control_pausa.png",
+    "w": 48,
+    "h": 48,
+    "cuadros": 2,
+    "columnas": 2,
+    "estados": ["normal","presionado"]
+   },
+   "minimapa_barra": {
+    "archivo": "ui/minimapa_barra.png",
+    "w": 16,
+    "h": 8,
+    "tres": [4,4],
+    "pista": {
+     "y": 4
+    }
+   },
+   "minimapa_salida": {
+    "archivo": "ui/minimapa_salida.png",
+    "w": 10,
+    "h": 12
+   },
+   "minimapa_meta": {
+    "archivo": "ui/minimapa_meta.png",
+    "w": 10,
+    "h": 12
+   },
+   "minimapa_marcador": {
+    "archivo": "ui/minimapa_marcador.png",
+    "w": 7,
+    "h": 6,
+    "uso": "teñirlo con el color del equipo (setTint) y ponerlo arriba de la cabecita"
+   },
+   "numeros": {
+    "archivo": "ui/numeros.png",
+    "w": 196,
+    "h": 18,
+    "letras": "0123456789+-:x",
+    "celda": [14,18],
+    "uso": "el cuadro de cada letra está en x = indice * 14; al sumar, el juego cuenta de a poco y hace saltar el número"
+   },
+   "numeros_placa": {
+    "archivo": "ui/numeros_placa.png",
+    "w": 24,
+    "h": 24,
+    "nueve": [6,6,6,6]
+   }
   }
  },
  "audio": {
@@ -89717,6 +89985,268 @@
    }
   },
   "escuchar": "audio/escuchar.html"
+ },
+ "vehiculos": {
+  "ferry": {
+   "archivo": "vehiculos/ferry.png",
+   "w": 134,
+   "h": 86,
+   "cuadros": 6,
+   "ancla": [4,30],
+   "huella": {
+    "w": 110,
+    "d": 40,
+    "z": 12
+   },
+   "anims": {
+    "andando": {
+     "desde": 0,
+     "cuadros": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "atracado": {
+     "desde": 4,
+     "cuadros": 2,
+     "fps": 2,
+     "loop": true
+    }
+   }
+  },
+  "xich_lo": {
+   "archivo": "vehiculos/xich_lo.png",
+   "w": 56,
+   "h": 40,
+   "cuadros": 4,
+   "ancla": [8,33],
+   "huella": {
+    "w": 34,
+    "d": 10,
+    "z": 26
+   },
+   "anims": {
+    "andando": {
+     "desde": 0,
+     "cuadros": 4,
+     "fps": 10,
+     "loop": true
+    }
+   },
+   "mira": "izquierda"
+  },
+  "moto_rojo": {
+   "archivo": "vehiculos/moto_rojo.png",
+   "w": 44,
+   "h": 34,
+   "cuadros": 11,
+   "ancla": [8,28],
+   "huella": {
+    "w": 26,
+    "d": 6,
+    "z": 20
+   },
+   "anims": {
+    "andando": {
+     "desde": 0,
+     "cuadros": 4,
+     "fps": 12,
+     "loop": true
+    },
+    "frenando": {
+     "desde": 4,
+     "cuadros": 3,
+     "fps": 10,
+     "loop": false
+    },
+    "corneta": {
+     "desde": 7,
+     "cuadros": 4,
+     "fps": 10,
+     "loop": true
+    }
+   },
+   "mira": "izquierda"
+  },
+  "moto_azul": {
+   "archivo": "vehiculos/moto_azul.png",
+   "w": 44,
+   "h": 34,
+   "cuadros": 11,
+   "ancla": [8,28],
+   "huella": {
+    "w": 26,
+    "d": 6,
+    "z": 20
+   },
+   "anims": {
+    "andando": {
+     "desde": 0,
+     "cuadros": 4,
+     "fps": 12,
+     "loop": true
+    },
+    "frenando": {
+     "desde": 4,
+     "cuadros": 3,
+     "fps": 10,
+     "loop": false
+    },
+    "corneta": {
+     "desde": 7,
+     "cuadros": 4,
+     "fps": 10,
+     "loop": true
+    }
+   },
+   "mira": "izquierda"
+  },
+  "moto_amarillo": {
+   "archivo": "vehiculos/moto_amarillo.png",
+   "w": 44,
+   "h": 34,
+   "cuadros": 11,
+   "ancla": [8,28],
+   "huella": {
+    "w": 26,
+    "d": 6,
+    "z": 20
+   },
+   "anims": {
+    "andando": {
+     "desde": 0,
+     "cuadros": 4,
+     "fps": 12,
+     "loop": true
+    },
+    "frenando": {
+     "desde": 4,
+     "cuadros": 3,
+     "fps": 10,
+     "loop": false
+    },
+    "corneta": {
+     "desde": 7,
+     "cuadros": 4,
+     "fps": 10,
+     "loop": true
+    }
+   },
+   "mira": "izquierda"
+  },
+  "moto_verde": {
+   "archivo": "vehiculos/moto_verde.png",
+   "w": 44,
+   "h": 34,
+   "cuadros": 11,
+   "ancla": [8,28],
+   "huella": {
+    "w": 26,
+    "d": 6,
+    "z": 20
+   },
+   "anims": {
+    "andando": {
+     "desde": 0,
+     "cuadros": 4,
+     "fps": 12,
+     "loop": true
+    },
+    "frenando": {
+     "desde": 4,
+     "cuadros": 3,
+     "fps": 10,
+     "loop": false
+    },
+    "corneta": {
+     "desde": 7,
+     "cuadros": 4,
+     "fps": 10,
+     "loop": true
+    }
+   },
+   "mira": "izquierda"
+  },
+  "bote_bambu": {
+   "archivo": "vehiculos/bote_bambu.png",
+   "w": 34,
+   "h": 34,
+   "cuadros": 4,
+   "ancla": [6,22],
+   "huella": {
+    "w": 18,
+    "d": 18,
+    "z": 6
+   },
+   "anims": {
+    "meciendo": {
+     "desde": 0,
+     "cuadros": 4,
+     "fps": 6,
+     "loop": true
+    }
+   }
+  },
+  "metrocable": {
+   "archivo": "vehiculos/metrocable.png",
+   "w": 30,
+   "h": 34,
+   "cuadros": 4,
+   "ancla": [6,30],
+   "huella": {
+    "w": 16,
+    "d": 10,
+    "z": 14
+   },
+   "anims": {
+    "colgando": {
+     "desde": 0,
+     "cuadros": 4,
+     "fps": 6,
+     "loop": true
+    }
+   }
+  },
+  "jacintos": {
+   "archivo": "vehiculos/jacintos.png",
+   "w": 26,
+   "h": 16,
+   "cuadros": 2,
+   "ancla": [4,12],
+   "huella": {
+    "w": 18,
+    "d": 6,
+    "z": 6
+   },
+   "anims": {
+    "flotando": {
+     "desde": 0,
+     "cuadros": 2,
+     "fps": 3,
+     "loop": true
+    }
+   }
+  },
+  "frutas_regadas": {
+   "archivo": "vehiculos/frutas_regadas.png",
+   "w": 40,
+   "h": 14,
+   "cuadros": 1,
+   "ancla": [2,10],
+   "huella": {
+    "w": 34,
+    "d": 10,
+    "z": 4
+   },
+   "anims": {
+    "quieta": {
+     "desde": 0,
+     "cuadros": 1,
+     "fps": 1,
+     "loop": false
+    }
+   }
+  },
+  "notas": "Vista inclinada con K = 0.35: el punto (x, y, z) del mundo cae en (x + K y, y - z). Cada tira tiene cuadros de w x h; el cuadro i va en x = i * w. El ancla es dónde cae en el cuadro la esquina de atrás a la izquierda de la huella, en el piso: el juego pone ahí el (x, y) del vehículo. \"mira\" dice hacia dónde va de frente; para el otro lado no sirve el espejo (se vería la cara de la derecha)."
  },
  "npc": {
   "bailarin_1": {

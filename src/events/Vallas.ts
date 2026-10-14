@@ -214,7 +214,7 @@ export class Vallas extends EventScene {
       this.stumble(r);
       this.sound.play('romper', { volume: r.c.human ? 0.45 : 0.15 });
     }
-    if (r.x >= FINISH) { r.st = 'done'; r.time = this.clock; r.fig.set('sprint'); if (r.c.human) { flash(this, 120); chip.blip(1568, 0.3, 'sq25', 0.2, 2093); } }
+    if (r.x >= FINISH) { r.st = 'done'; r.time = this.clock; r.fig.set('sprint'); if (r.c.human) { flash(this, 120); chip.blip(1568, 0.3, 'sq25', 0.2, 2093); void this.banner('¡META!', 'fuente_titulo', 2, 900, 110); } }
   }
 
   /** El carril donde se le ve (mientras cambia, el más cercano). */

@@ -3,6 +3,7 @@ import { margen } from '../core/pantalla';
 import { Figura } from '../core/figura';
 import { chip, MARCHA, PELEA, SAIGON, TENSION } from '../core/music';
 import { txt, typewrite, wait, panel, flash, speedLines } from '../core/ui';
+import { hayUi, pieza } from '../core/interfaz';
 import { Input } from '../core/input';
 import { efecto } from '../core/fx';
 import { kit } from '../core/kit';
@@ -1083,8 +1084,22 @@ export class Intro extends Phaser.Scene {
   /** Caja de diálogo con retrato. `arriba` la pone arriba, para no tapar a nadie. `close` la quita. */
   private dialog(id: string, expr: string, arriba = false) {
     const c = this.add2(this.add.container(0, arriba ? -262 : 0)).setName('dialogo');
-    c.add(panel(this, 20, 286, 600, 64));
-    c.add(this.add.image(54, 318, `retratos:${id}`, `chico_${expr}`).setScale(1));
+    // la caja de diálogo de PixelForja (lote G1): 9-slice estilo NES, el retrato en su marco dorado y la flechita
+    const caja = pieza('dialogo');
+    if (caja?.nueve && hayUi(this, 'dialogo') && hayUi(this, 'marco_retrato_40')) {
+      const [l, t, r, b] = caja.nueve;
+      c.add(this.add.nineslice(320, 318, 'ui_dialogo', undefined, 600, 64, l, r, t, b));
+      c.add(this.add.image(54, 318, `retratos:${id}`, `chico_${expr}`));
+      c.add(this.add.image(54, 318, 'ui_marco_retrato_40'));
+      if (hayUi(this, 'dialogo_flecha')) {
+        const f = this.add.sprite(620 - 11, 350 - 11, 'ui_dialogo_flecha', 0);
+        if (this.anims.exists('ui_dialogo_flecha')) f.play('ui_dialogo_flecha');
+        c.add(f);
+      }
+    } else {
+      c.add(panel(this, 20, 286, 600, 64));
+      c.add(this.add.image(54, 318, `retratos:${id}`, `chico_${expr}`).setScale(1));
+    }
     const nombres: Record<string, string> = { kenji: 'KENJI "TORO" SAKAMOTO', alana: 'ALANA, LA PEQUEÑA TERRIBLE' };
     c.add(txt(this, 86, 300, nombres[id] ?? (kit().atletas[id]?.nombre ?? id), 'fuente_ui', 1, 0).setTint(0xf2c230));
     const text = txt(this, 86, 324, '', 'fuente_ui', 2, 0);

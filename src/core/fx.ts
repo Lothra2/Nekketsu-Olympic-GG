@@ -7,13 +7,21 @@ import { kit } from './kit';
  */
 export interface OpcionesFx {
   flip?: boolean; depth?: number; alpha?: number; scale?: number;
-  /** los que no se repiten quedan en su último cuadro (el "¡!" que salta y se queda): el que llama los borra */
+  /**
+   * Se queda hasta que el que llama lo borra: los que no se repiten, en su último cuadro (el "¡!" que salta y se
+   * queda); los que se repiten, repitiéndose (las estrellas del mareo mientras dura).
+   */
   queda?: boolean;
+  /** los que se repiten y no `queda`: cuánto duran antes de apagarse solos (ms) */
+  dura?: number;
 }
 
 export const hayFx = (id: string) => !!kit().fx?.[id];
 
-/** Pone un efecto y lo borra solo al terminar (los que se repiten quedan: el que llama los borra). */
+/**
+ * Pone un efecto y lo borra solo al terminar. Los que se repiten (el aura de fuego, el confeti) se apagan solos a
+ * los `dura` ms: antes se quedaban para siempre en la pantalla y tapaban el juego. Con `queda`, los borra el que llama.
+ */
 export function efecto(scene: Phaser.Scene, id: string, x: number, y: number, o: OpcionesFx = {}): Phaser.GameObjects.Sprite | null {
   const e = kit().fx?.[id];
   if (!e || !scene.textures.exists(`fx_${id}`)) return null;
@@ -27,6 +35,11 @@ export function efecto(scene: Phaser.Scene, id: string, x: number, y: number, o:
   if (scene.anims.exists(`fx_${id}`)) {
     s.play(`fx_${id}`);
     if (!e.loop && !o.queda) s.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => s.destroy());
+  }
+  if (e.loop && !o.queda) {
+    scene.time.delayedCall(o.dura ?? 1500, () => {
+      if (s.active) scene.tweens.add({ targets: s, alpha: 0, duration: 250, onComplete: () => s.destroy() });
+    });
   }
   return s;
 }

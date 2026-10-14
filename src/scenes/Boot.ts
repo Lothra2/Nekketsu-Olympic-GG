@@ -3,6 +3,7 @@ import { KIT, setKit, queueKit, cutPortraits, makeFxAnims, makeNpcAnims, makeAve
 import { makeBackdrops } from '../gfx/backdrops';
 import { makeMapa } from '../gfx/mapa';
 import { makeUtileria } from '../gfx/utileria';
+import { queueInterfaz, animarInterfaz } from '../core/interfaz';
 
 /** Carga el manifiesto, después todo el kit, y pinta los fondos. */
 export class Boot extends Phaser.Scene {
@@ -32,6 +33,7 @@ export class Boot extends Phaser.Scene {
       makeFxAnims(this);
       makeNpcAnims(this);
       makeAveAnims(this);
+      animarInterfaz(this);
       makeBackdrops(this);
       makeMapa(this);
       makeUtileria(this);
@@ -39,6 +41,7 @@ export class Boot extends Phaser.Scene {
       this.scene.start('Tap');
     });
     queueKit(this);
+    queueInterfaz(this);
     this.load.start();
   }
 }

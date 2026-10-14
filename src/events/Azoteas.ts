@@ -578,7 +578,9 @@ export class Azoteas extends EventScene {
     s.marcas.push(m);
     if (this.d.practica && s.marcas.length > INTENTOS) s.marcas.shift();
     const record = m > s.best && m > 0;
+    const deTodos = !cayo && m > 0 && s.c.human && this.gente2.some((o) => o.best > 0) && this.gente2.every((o) => m > o.best);
     s.best = Math.max(s.best, m);
+    if (deTodos) void this.banner('¡RÉCORD!', 'fuente_titulo', 2, 1000, 90);
     const label = cayo ? '¡NO LLEGÓ!' : `${m.toFixed(2)} M`;
     const t = this.uiAdd(txt(this, 320, this.d.practica ? 200 : 130, label, 'fuente_titulo', 2).setDepth(8500).setTint(cayo ? 0xff6060 : 0xffffff));
     this.tweens.add({ targets: t, scale: { from: 4, to: 2 }, duration: 240, ease: 'Back.out' });

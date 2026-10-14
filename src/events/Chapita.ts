@@ -529,7 +529,7 @@ export class Chapita extends EventScene {
     c.z += c.vz * dt;
     // la casa: por encima es jonrón; en la ventana, ¡crash!; en la pared, rebota
     if (x0 < CASA_X && c.x >= CASA_X && !c.resuelta) {
-      if (c.z > CASA_H) { c.jonron = true; this.anota('¡JONRÓN!', 4, 0xffe040); }
+      if (c.z > CASA_H) { c.jonron = true; this.anota('¡JONRÓN!', 4, 0xffe040); void this.banner('¡JONRÓN!', 'fuente_titulo', 2, 1000, 110); }
       else if (c.z >= VENTANA.z0 && c.z <= VENTANA.z1) { this.ventana(); c.vx = 0; c.vz = -40; c.x = CASA_X + 2; }
       else { c.x = CASA_X - 2; c.vx = -c.vx * 0.25; this.anota('¡A LA PARED! TRIPLE', 3, 0xffe080); }
     }

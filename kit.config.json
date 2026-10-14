@@ -358,7 +358,11 @@
         "en",
         "vi"
       ]
-    }
+    },
+    "logo": {
+      "texto": "NEKKETSU OLYMPIC GG"
+    },
+    "interfaz": true
   },
   "fx": true,
   "audio": {
@@ -539,5 +543,6 @@
         }
       }
     }
-  }
+  },
+  "vehiculos": true
 }

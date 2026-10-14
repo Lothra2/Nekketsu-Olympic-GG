@@ -312,7 +312,10 @@ export class Jabalina extends EventScene {
     // entrenando se tira las veces que haga falta: el tablero muestra las dos últimas
     if (this.d.practica && l.marcas.length > INTENTOS) l.marcas.shift();
     const record = m > l.best && m > 0;
+    // la mejor de todos hasta ahora (y ya había marcas): ¡RÉCORD! con su cinta dorada
+    const deTodos = !this.nulo && m > 0 && l.c.human && this.gente2.some((o) => o.best > 0) && this.gente2.every((o) => m > o.best);
     l.best = Math.max(l.best, m);
+    if (deTodos) void this.banner('¡RÉCORD!', 'fuente_titulo', 2, 1000, 90);
     const s = this.nulo ? '¡NULO!' : `${m.toFixed(2)} M`;
     const t = this.uiAdd(txt(this, 320, this.d.practica ? 200 : 130, s, 'fuente_titulo', 2).setDepth(8500).setTint(this.nulo ? 0xff6060 : 0xffffff));
     this.tweens.add({ targets: t, scale: { from: 4, to: 2 }, duration: 240, ease: 'Back.out' });
