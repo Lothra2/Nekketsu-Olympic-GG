@@ -1,0 +1,29 @@
+{
+ "id": "cartagena",
+ "largo": 880,
+ "franja": {
+  "atras": 340,
+  "adelante": 360
+ },
+ "piso": [
+  {
+   "x0": 0,
+   "x1": 880,
+   "tipo": "baldosa",
+   "nombre": "la calle de adoquín"
+  }
+ ],
+ "huecos": [],
+ "plataformas": [],
+ "muros": [],
+ "escaleras": [],
+ "postes": [],
+ "agua": [],
+ "bajo": [],
+ "solidos": [],
+ "carriles": [
+  {
+   "y": 12
+  }
+ ]
+}

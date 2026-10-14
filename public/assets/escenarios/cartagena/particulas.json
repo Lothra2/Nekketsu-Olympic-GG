@@ -1,0 +1,19 @@
+{
+ "nota": "x e y en pixeles de pantalla a escala 1 (y de pantalla = franja.atras + y del mundo). fx: nombre del efecto del catálogo (manifest.fx).",
+ "particulas": [
+  {
+   "tipo": "confeti",
+   "x0": 0,
+   "x1": 880,
+   "y0": 230,
+   "y1": 300,
+   "color": [
+    "#ec5a9a",
+    "#fff3dc"
+   ],
+   "cada": 0.5,
+   "vida": 3,
+   "nota": "los pétalos de buganvilla que se lleva la brisa del mar"
+  }
+ ]
+}

@@ -1,0 +1,38 @@
+{
+ "id": "halong",
+ "largo": 1460,
+ "franja": {
+  "atras": 226,
+  "adelante": 346
+ },
+ "piso": [
+  {
+   "x0": 0,
+   "x1": 1460,
+   "tipo": "madera",
+   "nombre": "el muelle flotante"
+  }
+ ],
+ "huecos": [],
+ "plataformas": [],
+ "muros": [],
+ "escaleras": [],
+ "postes": [],
+ "agua": [],
+ "bajo": [],
+ "solidos": [],
+ "carriles": [
+  {
+   "y": 24
+  },
+  {
+   "y": 50
+  },
+  {
+   "y": 76
+  },
+  {
+   "y": 102
+  }
+ ]
+}

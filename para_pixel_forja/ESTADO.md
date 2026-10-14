@@ -34,6 +34,8 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
   - **Audio (H2 y H3):** el tema de cada mundo con `bucle()` (Saigón, Comuna 13, Hội An, Bogotá, Margarita, Đà Lạt, Barranquilla, Maracaibo, Caracas en Chapita, Quemado y el 1 contra 1, y el tema del Instituto en el 4 contra 4), y `gallo`, `aleteo`, `mecha_tejo`, `toque_cau`, `caida_tatami`, `pitazo_largo`, `red_voley`, `rebote_balon`, `aro_basket`, `aro_fallo`, `chapa` y `chancleta`. Los sintetizados de antes quedan de respaldo.
   - **Todavía sin conectar:** los vehículos de D2 y los paneles de interfaz de G1.
 
+- **E6 ([pixel_forja#36](https://github.com/Lothra2/pixel_forja/pull/36)) en el juego** (main en f499292, suite 451 de 451): `cartagena` en Azoteas (el techo de enfrente y el carrito son los objetos del arte, movidos por ronda, y la palenquera del kit pregona y reclama), `liceo_patio` en Quemado, `barrio_caracas` en Chapita (la casa y la ventana rota del arte), `cocora` en Vallas, `halong` en Natación y `llanos_apure` en Jabalina. Las 16 pruebas y la pelea ya usan escenarios de PixelForja; los fondos de código quedan solo de respaldo.
+
 - **H4 ([pixel_forja#35](https://github.com/Lothra2/pixel_forja/pull/35)) en el juego** (main en 74b0558, suite 436 de 436): `champeta_murallas` en Azoteas, `cafe_neblina` en Vallas, `halong_remos` en Natación y `pajarillo_llano` en Jabalina, con `bucle()`. Probado: los cuatro cargan y suenan. Solo el judo y el entrenamiento de la pelea siguen con la pelea del chip.
 
 - **Pruebas nuevas: Quemado Nekketsu y Chapita**, con lo que ya trae el kit (el balón de goma, las chapas, el palo de escoba, la chancleta, `weapon_throw`, `weapon_swing` con su `arma` por cuadro, `fight_block` para atrapar). Lo que les falta en arte, para un lote siguiente:

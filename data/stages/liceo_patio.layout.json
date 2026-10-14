@@ -1,0 +1,69 @@
+{
+ "id": "liceo_patio",
+ "pais": "venezuela",
+ "prueba": "quemado",
+ "nombre": "PATIO DEL LICEO, CARACAS",
+ "nota": "Quemado Nekketsu en el patio techado de un liceo de Caracas, al mediodía. Vista inclinada de 0.35, como la pelea, con la franja de Quemado.ts: FT 214 y PROF 100 (filas 214 a 314), 640 de ancho y la cámara fija. La cancha va de x 40 a 560 con la raya del medio en x 300 y el círculo de 16 x 10; los cementerios rayados van de x 4 a 34 y de 566 a 596. Todo eso lo pinta el arte, así el juego quita su cancha() y los dos letreros (U.E. LICEO EL ÁVILA en 270, 75 y CANTINA en 595, 113), que ya vienen pintados en esos puntos.",
+ "largo": 640,
+ "franja": {
+  "atras": 214,
+  "adelante": 314
+ },
+ "hora": "mediodia",
+ "clima": [
+  "despejado",
+  "calor"
+ ],
+ "paralaje": {
+  "cielo": "auto",
+  "lejos": "avila_mediodia",
+  "cerca": "patio_liceo_caracas"
+ },
+ "piso": [
+  {
+   "x0": 0,
+   "x1": 640,
+   "tipo": "cancha",
+   "nombre": "la cancha del patio"
+  }
+ ],
+ "huecos": [],
+ "plataformas": [],
+ "muros": [],
+ "escaleras": [],
+ "postes": [],
+ "agua": [],
+ "bajo": [],
+ "solidos": [],
+ "carriles": [
+  {
+   "y": 20
+  },
+  {
+   "y": 50
+  },
+  {
+   "y": 80
+  }
+ ],
+ "entidades": [],
+ "ranuras_deco": [
+  {
+   "x0": 0,
+   "x1": 640,
+   "capa": "lejos",
+   "tema": "avila_mediodia"
+  },
+  {
+   "x0": 0,
+   "x1": 640,
+   "capa": "cerca",
+   "tema": "liceo_gradas_cantina"
+  }
+ ],
+ "vida": [
+  "publico",
+  "cantina",
+  "bandera"
+ ]
+}

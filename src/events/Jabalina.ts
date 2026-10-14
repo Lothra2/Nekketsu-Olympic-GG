@@ -6,6 +6,7 @@ import { chip } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { Painter, hex } from '../gfx/paint';
 import { EventScene, prueba, type Competidor } from './base';
+import { queueEscenario } from './escenario';
 import type { Paso } from '../core/coach';
 
 const WORLD = 1560;
@@ -49,11 +50,14 @@ export class Jabalina extends EventScene {
   private vLanza = 0;
   private cpuAng = 0;
   private hud!: Phaser.GameObjects.Graphics;
-  private bg!: Phaser.GameObjects.TileSprite;
+  /** el fondo de código que se repite (sin el arte de PixelForja) */
+  private bg?: Phaser.GameObjects.TileSprite;
   private camX = RUN0;
   private skip = false;
 
   constructor() { super('Jabalina'); }
+
+  preload() { queueEscenario(this, 'llanos_apure'); }
 
   create() {
     this.gente2 = [];
@@ -65,8 +69,9 @@ export class Jabalina extends EventScene {
     this.camX = RUN0 + 100;
     this.setup(ZOOM, WORLD);
     this.makeTextures();
-    this.bg = this.fondo('bg_llanos');
-    this.add.image(0, TOP - 6, 'campo').setOrigin(0, 0).setDepth(-5);
+    // el arte de PixelForja trae el cielo, lo lejano con su paralaje y la cancha; sin él, el fondo de código
+    this.bg = undefined;
+    this.escenario('llanos_apure', () => { this.bg = this.fondo('bg_llanos'); this.add.image(0, TOP - 6, 'campo').setOrigin(0, 0).setDepth(-5); });
     for (let m = 10; m * PX_M + FOUL < WORLD - 20; m += 10) this.add.bitmapText(FOUL + m * PX_M, TOP + 112, 'fuente_ui', `${m}`).setOrigin(0.5).setDepth(-4).setTint(0xf4f0e8);
     // el orden: primero los de la máquina, de último tú (así sabes la marca a batir)
     const orden = this.d.practica ? [this.gente[0]] : [this.gente[1], this.gente[2], this.gente[3], this.gente[0]];
@@ -300,7 +305,7 @@ export class Jabalina extends EventScene {
     this.camX += (want - this.camX) * Math.min(1, dt * (this.vuelo ? 10 : 4));
     const cam = this.cameras.main;
     cam.centerOn(this.camX, 360 - 180 / ZOOM);
-    this.bg.tilePositionX = cam.scrollX * 0.2;
+    if (this.bg) this.bg.tilePositionX = cam.scrollX * 0.2;
   }
 
   private marcasTxt: Phaser.GameObjects.BitmapText[][] = [];

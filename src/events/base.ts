@@ -145,11 +145,16 @@ export abstract class EventScene extends Phaser.Scene {
 
   /**
    * El escenario de PixelForja (encolado en el preload con queueEscenario) si llegó, con su vida y sus luces andando
-   * cada cuadro. Si no llegó, el fondo pintado por código de siempre. Devuelve si hay arte.
+   * cada cuadro. Si no llegó, el fondo pintado por código de siempre: una imagen, o lo que arme `respaldo` (los
+   * fondos que se repiten a lo ancho). Devuelve si hay arte.
    */
-  protected escenario(id: string, respaldo: string): boolean {
+  protected escenario(id: string, respaldo: string | (() => void)): boolean {
     this.arteFondo = hayArte(this, id) ? pintarEscenario(this, id, 5000) : null;
-    if (!this.arteFondo) { this.add.image(320, 180, respaldo).setDepth(-10); return false; }
+    if (!this.arteFondo) {
+      if (typeof respaldo === 'string') this.add.image(320, 180, respaldo).setDepth(-10);
+      else respaldo();
+      return false;
+    }
     const tick = (_t: number, dms: number) => this.arteFondo?.tick(Math.min(0.05, dms / 1000), this.cameras.main.scrollX, () => false);
     this.events.on(Phaser.Scenes.Events.UPDATE, tick);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.events.off(Phaser.Scenes.Events.UPDATE, tick));

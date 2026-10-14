@@ -6,6 +6,7 @@ import { chip } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { Painter, hex } from '../gfx/paint';
 import { EventScene, prueba, type Competidor } from './base';
+import { queueEscenario } from './escenario';
 import type { Paso } from '../core/coach';
 import { rotular, type Pad } from '../core/input';
 
@@ -67,7 +68,8 @@ export class Chapita extends EventScene {
   private fieldVx = 0;
   private fieldZ = 0;
   private camX = 230;
-  private bg!: Phaser.GameObjects.TileSprite;
+  /** el fondo de código que se repite (sin el arte de PixelForja) */
+  private bg?: Phaser.GameObjects.TileSprite;
   private palo!: Phaser.GameObjects.Image;
   private chapaMano!: Phaser.GameObjects.Image;
   private vidrio!: Phaser.GameObjects.Image;
@@ -86,6 +88,8 @@ export class Chapita extends EventScene {
 
   constructor() { super('Chapita'); }
 
+  preload() { queueEscenario(this, 'barrio_caracas'); }
+
   create() {
     this.inning = 1; this.abajo = false; this.outs = 0; this.strikes = 0; this.turnos = 0;
     this.orden = [0, 0]; this.carreras = [0, 0]; this.st = 'cambio'; this.espera = 0; this.swing = null; this.quiereLanz = null;
@@ -93,14 +97,20 @@ export class Chapita extends EventScene {
     this.camX = 230;
     this.setup(ZOOM, WORLD);
     this.texturas();
-    this.bg = this.fondo('bg_barrio');
+    this.bg = undefined;
+    const arte = this.escenario('barrio_caracas', () => { this.bg = this.fondo('bg_barrio'); });
     // la calle: el home con tiza y la caja de cartón que hace de receptor
     const tiza = this.add.graphics().setDepth(PISO - 5);
     tiza.lineStyle(1, 0xf4f4ec, 0.8).strokeRect(BAT_X - 6, PISO - 2, 22, 6).lineBetween(PIT_X - 4, PISO + 2, PIT_X + 4, PISO + 2);
     this.add.image(BAT_X - 26, PISO, 'chap_caja').setOrigin(0.5, 1).setDepth(PISO - 2);
-    this.add.image(CASA_X, PISO, 'chap_casa').setOrigin(0, 1).setDepth(PISO - 20);
-    this.add.bitmapText(CASA_X + 110, PISO - 76, 'fuente_ui', 'HIELITOS').setOrigin(0.5).setDepth(PISO - 19).setTint(0x2a5ad0);
-    this.vidrio = this.add.image(VENTANA.x0, PISO - VENTANA.z1, 'chap_vidrio_roto').setOrigin(0, 0).setDepth(PISO - 18).setVisible(false);
+    // la casa del vecino y su ventana rota vienen en los objetos del arte; la rota se esconde hasta el batazo
+    const rota = this.arteFondo?.objetos.find((o) => o.o.id === 'ventana_rota')?.img;
+    if (arte && rota) this.vidrio = rota.setVisible(false);
+    else {
+      this.add.image(CASA_X, PISO, 'chap_casa').setOrigin(0, 1).setDepth(PISO - 20);
+      this.add.bitmapText(CASA_X + 110, PISO - 76, 'fuente_ui', 'HIELITOS').setOrigin(0.5).setDepth(PISO - 19).setTint(0x2a5ad0);
+      this.vidrio = this.add.image(VENTANA.x0, PISO - VENTANA.z1, 'chap_vidrio_roto').setOrigin(0, 0).setDepth(PISO - 18).setVisible(false);
+    }
     this.carmen = this.add.image((VENTANA.x0 + VENTANA.x1) / 2, PISO - VENTANA.z0, 'chap_carmen').setOrigin(0.5, 1).setDepth(PISO - 17).setVisible(false);
     this.armar();
     this.palo = this.add.image(0, 0, 'armas', 'broomstick_mano_0').setDepth(PISO + 1);
@@ -621,7 +631,7 @@ export class Chapita extends EventScene {
     this.camX += (want - this.camX) * Math.min(1, dt * 4);
     const cam = this.cameras.main;
     cam.centerOn(this.camX, 360 - 180 / ZOOM);
-    this.bg.tilePositionX = cam.scrollX * 0.25;
+    if (this.bg) this.bg.tilePositionX = cam.scrollX * 0.25;
   }
 
   private drawHud() {

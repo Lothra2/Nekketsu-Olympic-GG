@@ -1,0 +1,434 @@
+{
+ "generado_con": "PixelForja",
+ "id": "cartagena",
+ "nombre": "AZOTEAS DE CARTAGENA",
+ "escala": 1,
+ "resolucion": [
+  640,
+  360
+ ],
+ "franja": {
+  "atras": 340,
+  "adelante": 360
+ },
+ "largo": 880,
+ "hora": "atardecer",
+ "clima": [
+  "despejado",
+  "viento"
+ ],
+ "inclinacion": 0,
+ "ancho": 880,
+ "vista": "lado",
+ "nota_vista": "de lado: el dibujo va derecho (inclinación 0). El fondo (la capa cerca) va de la fila 0 a franja.atras (340) y es transparente donde se ven lejos y el cielo. El piso va de la fila 340 al borde de abajo de la pantalla: la franja donde se paran los atletas (y del mundo = fila de pantalla - 340) y lo de adelante. Las capas, los objetos y la vida se cargan igual que en la vista oblicua.",
+ "capas": {
+  "cielo": {
+   "archivo": "cielo_atardecer.png",
+   "y": 0,
+   "paralaje": 0,
+   "repetir_x": true
+  },
+  "lejos": {
+   "archivo": "lejos.png",
+   "y": 140,
+   "paralaje": 0.25,
+   "repetir_x": true
+  },
+  "tras_cerca": {
+   "nota": "la vida con capa tras_cerca va aquí: se ve por los callejones"
+  },
+  "cerca": {
+   "archivos": [
+    "cerca_0.png"
+   ],
+   "trozo": 1280,
+   "y": 0,
+   "paralaje": 1
+  },
+  "piso": {
+   "archivos": [
+    "piso_0.png"
+   ],
+   "trozo": 1280,
+   "y": 340,
+   "paralaje": 1,
+   "nota": "de lado: las primeras 20 filas son la franja donde se paran los atletas, las de abajo lo de adelante hasta el borde de la pantalla"
+  },
+  "objetos": {
+   "archivo": "objetos.json",
+   "nota": "entre el piso y el frente, ordenados con los atletas"
+  },
+  "frente": {
+   "archivos": [
+    "frente_0.png"
+   ],
+   "trozo": 1280,
+   "y": 346,
+   "paralaje": 1
+  }
+ },
+ "vida": {
+  "imagen": "vida.png",
+  "piezas": [
+   {
+    "id": "alcatraz_0",
+    "tipo": "alcatraces",
+    "capa": "lejos",
+    "x": 1280,
+    "y": 70,
+    "fps": 3,
+    "recorrido": {
+     "desde": [
+      1280,
+      70
+     ],
+     "hasta": [
+      -20,
+      60
+     ],
+     "segundos": 40,
+     "desfase": 0.4
+    },
+    "cuadros": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 15,
+      "h": 7
+     },
+     {
+      "x": 16,
+      "y": 0,
+      "w": 15,
+      "h": 7
+     }
+    ]
+   },
+   {
+    "id": "alcatraz_1",
+    "tipo": "alcatraces",
+    "capa": "lejos",
+    "x": 1294,
+    "y": 75,
+    "fps": 3,
+    "recorrido": {
+     "desde": [
+      1294,
+      75
+     ],
+     "hasta": [
+      -6,
+      65
+     ],
+     "segundos": 40,
+     "desfase": 0.41000000000000003
+    },
+    "cuadros": [
+     {
+      "x": 32,
+      "y": 0,
+      "w": 15,
+      "h": 7
+     },
+     {
+      "x": 48,
+      "y": 0,
+      "w": 15,
+      "h": 7
+     }
+    ]
+   },
+   {
+    "id": "alcatraz_2",
+    "tipo": "alcatraces",
+    "capa": "lejos",
+    "x": 1308,
+    "y": 80,
+    "fps": 3,
+    "recorrido": {
+     "desde": [
+      1308,
+      80
+     ],
+     "hasta": [
+      8,
+      70
+     ],
+     "segundos": 40,
+     "desfase": 0.42000000000000004
+    },
+    "cuadros": [
+     {
+      "x": 64,
+      "y": 0,
+      "w": 15,
+      "h": 7
+     },
+     {
+      "x": 80,
+      "y": 0,
+      "w": 15,
+      "h": 7
+     }
+    ]
+   },
+   {
+    "id": "velero_0",
+    "tipo": "veleros",
+    "capa": "lejos",
+    "x": 300,
+    "y": 92,
+    "fps": 1,
+    "recorrido": {
+     "desde": [
+      300,
+      92
+     ],
+     "hasta": [
+      800,
+      92
+     ],
+     "segundos": 200,
+     "desfase": 0.1
+    },
+    "cuadros": [
+     {
+      "x": 96,
+      "y": 0,
+      "w": 12,
+      "h": 12
+     }
+    ]
+   },
+   {
+    "id": "velero_1",
+    "tipo": "veleros",
+    "capa": "lejos",
+    "x": 1100,
+    "y": 96,
+    "fps": 1,
+    "recorrido": {
+     "desde": [
+      1100,
+      96
+     ],
+     "hasta": [
+      600,
+      96
+     ],
+     "segundos": 240,
+     "desfase": 0.5
+    },
+    "cuadros": [
+     {
+      "x": 109,
+      "y": 0,
+      "w": 12,
+      "h": 12
+     }
+    ]
+   }
+  ],
+  "nota": "capa cerca y tras_cerca: x, y de pantalla, como siempre. capa lejos: x, y en pixeles de la imagen lejos (que se repite cada su ancho y corre con su paralaje); va de recorrido.desde a recorrido.hasta en recorrido.segundos y vuelve a empezar, adelantada por desfase (0 a 1). capa objeto: va encima de un objeto, con setDepth(franja.atras + orden), como los objetos."
+ },
+ "callejones": [],
+ "superficie": {
+  "archivo": "superficie.png",
+  "y": 340,
+  "leyenda": [
+   {
+    "id": "acera",
+    "color": "#d0d0d0",
+    "paso": "paso_piedra",
+    "resbala": false
+   }
+  ]
+ },
+ "colision": "colision.json",
+ "luces": "luces.json",
+ "particulas": "particulas.json",
+ "paleta": [
+  {
+   "nombre": "tinta",
+   "hex": "#1c1420"
+  },
+  {
+   "nombre": "sombra",
+   "hex": "#3a2434"
+  },
+  {
+   "nombre": "asfalto",
+   "hex": "#584048"
+  },
+  {
+   "nombre": "asfalto_claro",
+   "hex": "#7e6268"
+  },
+  {
+   "nombre": "cemento",
+   "hex": "#b49a88"
+  },
+  {
+   "nombre": "cemento_claro",
+   "hex": "#dcc4a8"
+  },
+  {
+   "nombre": "crema",
+   "hex": "#f6e2bc"
+  },
+  {
+   "nombre": "luz",
+   "hex": "#fff3dc"
+  },
+  {
+   "nombre": "amarillo",
+   "hex": "#f6c64a"
+  },
+  {
+   "nombre": "ocre",
+   "hex": "#d8913c"
+  },
+  {
+   "nombre": "terracota",
+   "hex": "#b65a34"
+  },
+  {
+   "nombre": "rojo",
+   "hex": "#d83e34"
+  },
+  {
+   "nombre": "vino",
+   "hex": "#7a2634"
+  },
+  {
+   "nombre": "salmon",
+   "hex": "#ec5a9a"
+  },
+  {
+   "nombre": "menta",
+   "hex": "#7ad0b8"
+  },
+  {
+   "nombre": "verde",
+   "hex": "#4a9450"
+  },
+  {
+   "nombre": "verde_oscuro",
+   "hex": "#28543a"
+  },
+  {
+   "nombre": "celeste",
+   "hex": "#8a8ed4"
+  },
+  {
+   "nombre": "cielo",
+   "hex": "#f8b884"
+  },
+  {
+   "nombre": "azul",
+   "hex": "#3c5cb0"
+  },
+  {
+   "nombre": "azul_noche",
+   "hex": "#2a2c5c"
+  },
+  {
+   "nombre": "canal",
+   "hex": "#5a6aa8"
+  },
+  {
+   "nombre": "oro",
+   "hex": "#ffad3a"
+  },
+  {
+   "nombre": "bruma",
+   "hex": "#f8946e"
+  }
+ ],
+ "verificacion": "verificacion.md",
+ "layout": {
+  "id": "cartagena",
+  "pais": "colombia",
+  "prueba": "azoteas",
+  "vista": "lado",
+  "nombre": "AZOTEAS DE CARTAGENA",
+  "nota": "Azoteas de Cartagena de lado, al atardecer. Se corre por la azotea del edificio de salida (TECHO 262; las baldosas van de la fila 250 a la 262) hasta el borde en x 440, con la cajita de la garrocha en x 428 (CAJA): las dos las pinta el arte. La franja es la calle de adoquín (filas 340 a 360): el que no llega cae en CALLE 352 (y 12). El techo de enfrente (420 de ancho, con la colchoneta y el balcón que sale 16 px al hueco) y el carrito de frutas van en objetos, porque Azoteas.ts los corre a BORDE + 10 px por metro en cada ronda (4, 5, 6 o 7 m; el layout los trae en 5 m). La palenquera es un NPC del kit. El juego sigue poniendo las banderitas del viento y los metros. Mundo de 880 con zoom 1.5: la cámara ve de la fila 120 para abajo.",
+  "largo": 880,
+  "franja": {
+   "atras": 340,
+   "adelante": 360
+  },
+  "hora": "atardecer",
+  "clima": [
+   "despejado",
+   "viento"
+  ],
+  "paralaje": {
+   "cielo": "auto",
+   "lejos": "bahia_cartagena",
+   "cerca": "azoteas_cartagena"
+  },
+  "piso": [
+   {
+    "x0": 0,
+    "x1": 880,
+    "tipo": "baldosa",
+    "nombre": "la calle de adoquín"
+   }
+  ],
+  "huecos": [],
+  "plataformas": [],
+  "muros": [],
+  "escaleras": [],
+  "postes": [],
+  "agua": [],
+  "bajo": [],
+  "solidos": [],
+  "carriles": [
+   {
+    "y": 12
+   }
+  ],
+  "entidades": [
+   {
+    "tipo": "objeto",
+    "objeto": "techo_enfrente",
+    "x": 490,
+    "y": 12,
+    "nota": "el techo de enfrente a 5 m del borde; el juego lo corre a BORDE + m * 10"
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "carrito_frutas",
+    "x": 475,
+    "y": 12,
+    "nota": "el carrito pegado a la pared de enfrente (x - 15); el juego lo corre con el techo"
+   },
+   {
+    "tipo": "npc",
+    "npc": "palenquera",
+    "x": 432,
+    "y": 12,
+    "nota": "la palenquera en la acera de este lado (BORDE - 8)"
+   }
+  ],
+  "ranuras_deco": [
+   {
+    "x0": 0,
+    "x1": 880,
+    "capa": "lejos",
+    "tema": "bahia_cartagena"
+   },
+   {
+    "x0": 0,
+    "x1": 880,
+    "capa": "cerca",
+    "tema": "ciudad_vieja_azoteas"
+   }
+  ],
+  "vida": [
+   "alcatraces",
+   "veleros"
+  ]
+ }
+}

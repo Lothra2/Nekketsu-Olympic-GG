@@ -5,6 +5,7 @@ import { efecto } from '../core/fx';
 import { chip } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { EventScene, prueba, type Competidor } from './base';
+import { queueEscenario } from './escenario';
 import { FAMILIA, INSTITUTO } from '../scenes/Select';
 import type { Paso } from '../core/coach';
 import type { Pad } from '../core/input';
@@ -70,6 +71,8 @@ export class Quemado extends EventScene {
 
   constructor() { super('Quemado'); }
 
+  preload() { queueEscenario(this, 'liceo_patio'); }
+
   create() {
     this.js = [];
     this.ctrl = null;
@@ -80,10 +83,12 @@ export class Quemado extends EventScene {
     this.golpesKenji = this.atrapadas = this.esquivas = this.pasesFuera = this.paso = 0;
     this.stats = { tiros: [0, 0], golpes: [0, 0], atrapadas: [0, 0], esquivas: [0, 0] };
     this.setup(1, 640);
-    this.add.image(320, 180, 'bg_liceo').setDepth(-10);
-    this.add.bitmapText(270, 75, 'fuente_ui', 'U.E. LICEO EL ÁVILA').setOrigin(0.5).setDepth(-9).setTint(0x2a5aa8).setScale(2);
-    this.add.bitmapText(595, 113, 'fuente_ui', 'CANTINA').setOrigin(0.5).setDepth(-9).setTint(0xfff4d8);
-    this.cancha();
+    // el arte de PixelForja trae el patio, los letreros y la cancha con sus rayas; sin él, los de código
+    if (!this.escenario('liceo_patio', 'bg_liceo')) {
+      this.add.bitmapText(270, 75, 'fuente_ui', 'U.E. LICEO EL ÁVILA').setOrigin(0.5).setDepth(-9).setTint(0x2a5aa8).setScale(2);
+      this.add.bitmapText(595, 113, 'fuente_ui', 'CANTINA').setOrigin(0.5).setDepth(-9).setTint(0xfff4d8);
+      this.cancha();
+    }
     this.armarEquipos();
     const spr = this.add.image(0, 0, 'armas', 'balon_goma_quieto_0').setScale(1.3);
     const sombra = this.add.ellipse(0, 0, 10, 3, 0x000000, 0.3);

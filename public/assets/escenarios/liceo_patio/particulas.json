@@ -1,0 +1,19 @@
+{
+ "nota": "x e y en pixeles de pantalla a escala 1 (y de pantalla = franja.atras + y del mundo). fx: nombre del efecto del catálogo (manifest.fx).",
+ "particulas": [
+  {
+   "tipo": "polvo",
+   "x0": 0,
+   "x1": 640,
+   "y0": 62,
+   "y1": 214,
+   "color": [
+    "#f4a830",
+    "#fbf8ee"
+   ],
+   "cada": 0.9,
+   "vida": 2.5,
+   "nota": "el polvo que flota en la luz que entra de lado"
+  }
+ ]
+}

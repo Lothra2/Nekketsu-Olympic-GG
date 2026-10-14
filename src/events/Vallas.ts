@@ -6,6 +6,7 @@ import { chip } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { Painter, hex } from '../gfx/paint';
 import { EventScene, prueba, type Competidor } from './base';
+import { queueEscenario } from './escenario';
 import type { Paso } from '../core/coach';
 
 const WORLD = 1720;
@@ -36,9 +37,12 @@ export class Vallas extends EventScene {
   private clock = 0;
   private hud!: Phaser.GameObjects.Graphics;
   private timeTxt!: Phaser.GameObjects.BitmapText;
-  private bg!: Phaser.GameObjects.TileSprite;
+  /** el fondo de código que se repite (sin el arte de PixelForja) */
+  private bg?: Phaser.GameObjects.TileSprite;
 
   constructor() { super('Vallas'); }
+
+  preload() { queueEscenario(this, 'cocora'); }
 
   create() {
     this.racers = [];
@@ -49,8 +53,9 @@ export class Vallas extends EventScene {
     this.clock = 0;
     this.setup(ZOOM, WORLD);
     this.makeTextures();
-    this.bg = this.fondo('bg_cocora');
-    this.add.image(0, TOP - 4, 'pista').setOrigin(0, 0).setDepth(-5);
+    // el arte de PixelForja trae el cielo, lo lejano con su paralaje y la pista; sin él, el fondo de código
+    this.bg = undefined;
+    this.escenario('cocora', () => { this.bg = this.fondo('bg_cocora'); this.add.image(0, TOP - 4, 'pista').setOrigin(0, 0).setDepth(-5); });
     for (const [i, y] of LANES.entries()) this.add.bitmapText(START - 30, TOP + y - 4, 'fuente_ui', `${i + 1}`).setOrigin(0.5).setDepth(-4).setTint(0xffffff);
     for (const x of HURDLES) for (const [lane, y] of LANES.entries()) {
       const img = this.add.image(x, TOP + y, 'valla').setOrigin(0.5, 1).setDepth(TOP + y - 0.5);
@@ -271,7 +276,7 @@ export class Vallas extends EventScene {
     const cam = this.cameras.main;
     const cur = cam.midPoint.x || START;
     cam.centerOn(cur + (me.x + 70 - cur) * 0.12, 360 - 180 / ZOOM);
-    this.bg.tilePositionX = cam.scrollX * 0.25;
+    if (this.bg) this.bg.tilePositionX = cam.scrollX * 0.25;
     // marcador
     const g = this.hud;
     g.clear();

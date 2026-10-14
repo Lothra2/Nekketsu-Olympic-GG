@@ -1,0 +1,14 @@
+{
+ "hora": "atardecer",
+ "luces": [
+  {
+   "x": 286,
+   "y": 188,
+   "color": "#ffae3a",
+   "radio": 14,
+   "latido": 2.4,
+   "encendida": true,
+   "nota": "el farol del caney, ya prendido"
+  }
+ ]
+}

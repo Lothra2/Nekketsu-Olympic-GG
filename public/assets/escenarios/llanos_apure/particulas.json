@@ -1,0 +1,33 @@
+{
+ "nota": "x e y en pixeles de pantalla a escala 1 (y de pantalla = franja.atras + y del mundo). fx: nombre del efecto del catálogo (manifest.fx).",
+ "particulas": [
+  {
+   "tipo": "brillo",
+   "x0": 0,
+   "x1": 1560,
+   "y0": 190,
+   "y1": 224,
+   "color": [
+    "#f8cc5a",
+    "#ffae3a"
+   ],
+   "cada": 0.7,
+   "vida": 1.2,
+   "nota": "los cocuyos que prenden en la sabana al caer la tarde"
+  },
+  {
+   "tipo": "polvo",
+   "x0": 1270,
+   "x1": 1470,
+   "y0": 204,
+   "y1": 210,
+   "color": [
+    "#d4b48c",
+    "#f49a6a"
+   ],
+   "cada": 0.6,
+   "vida": 1.5,
+   "nota": "el polvo que levanta el ganado"
+  }
+ ]
+}

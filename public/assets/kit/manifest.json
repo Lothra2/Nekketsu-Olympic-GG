@@ -20267,6 +20267,29 @@
     }
    }
   },
+  "palenquera": {
+   "archivo": "npc/palenquera.png",
+   "w": 48,
+   "h": 48,
+   "ancla": [24,46],
+   "cuadros": 8,
+   "anims": {
+    "pregonar": {
+     "desde": 0,
+     "cuadros": 4,
+     "fps": 8,
+     "loop": true,
+     "vista": "frente"
+    },
+    "reclamar": {
+     "desde": 4,
+     "cuadros": 4,
+     "fps": 8,
+     "loop": false,
+     "vista": "frente"
+    }
+   }
+  },
   "pelota": {
    "archivo": "npc/pelota.png",
    "w": 8,

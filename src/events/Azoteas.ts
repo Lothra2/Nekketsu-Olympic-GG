@@ -6,6 +6,8 @@ import { chip } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { Painter, hex, rng, type RGB } from '../gfx/paint';
 import { EventScene, prueba, type Competidor } from './base';
+import { queueEscenario } from './escenario';
+import { npcs } from '../core/kit';
 import type { Paso } from '../core/coach';
 
 const WORLD = 880;
@@ -62,15 +64,20 @@ export class Azoteas extends EventScene {
   private skip = false;
   private camX = RUN0 + 100;
   private hud!: Phaser.GameObjects.Graphics;
-  private bg!: Phaser.GameObjects.TileSprite;
+  /** el fondo de código que se repite (sin el arte de PixelForja) */
+  private bg?: Phaser.GameObjects.TileSprite;
   private enfrente!: Phaser.GameObjects.Container;
   private banderas: Phaser.GameObjects.Graphics[] = [];
-  private palenquera!: Phaser.GameObjects.Image;
+  private palenquera!: Phaser.GameObjects.Sprite;
+  /** la palenquera es la del kit (pregona y reclama); si no llegó, la pintada por código, que se sacude */
+  private palenqueraKit = false;
   private carrito!: Phaser.GameObjects.Image;
   private metros: Phaser.GameObjects.BitmapText[] = [];
   private saltos = 0;
 
   constructor() { super('Azoteas'); }
+
+  preload() { queueEscenario(this, 'cartagena'); }
 
   create() {
     this.gente2 = [];
@@ -86,17 +93,31 @@ export class Azoteas extends EventScene {
     this.camX = RUN0 + 100;
     this.setup(ZOOM, WORLD);
     this.makeTextures();
-    this.bg = this.fondo('bg_cartagena');
-    // la calle de piedra, la azotea de salida y la de enfrente (se corre según la ronda)
-    this.add.image(0, CALLE - 4, 'cart_calle').setOrigin(0, 0).setDepth(-6);
-    this.add.tileSprite(BORDE, TECHO - 4, 120, CALLE - TECHO, 'cart_callejon').setOrigin(0, 0).setDepth(-7);
-    this.add.image(-40, TECHO - 12, 'cart_salida').setOrigin(0, 0).setDepth(-5);
+    this.bg = undefined;
+    const arte = this.escenario('cartagena', () => { this.bg = this.fondo('bg_cartagena'); });
+    // la azotea de enfrente se corre según la ronda: con el arte es el objeto techo_enfrente (con su balcón), y el
+    // carrito de frutas también es un objeto del arte; sin él, la calle, las azoteas y el carrito de código
+    const obj = (id: string) => this.arteFondo?.objetos.find((o) => o.o.id === id);
+    const techo = obj('techo_enfrente'), carrito = obj('carrito_frutas');
     this.enfrente = this.add.container(0, TECHO - 12).setDepth(-5);
-    this.enfrente.add(this.add.image(0, 0, 'cart_enfrente').setOrigin(0, 0));
-    // el balcón que sobresale hacia el hueco, con sus buganvillas
-    this.enfrente.add(this.add.image(-16, 38, 'cart_balcon').setOrigin(0, 0));
-    this.carrito = this.add.image(0, CALLE, 'cart_carrito').setOrigin(0.5, 1).setDepth(CALLE - 1);
-    this.palenquera = this.add.image(0, CALLE, 'cart_palenquera').setOrigin(0.5, 1).setDepth(CALLE - 1);
+    if (arte && techo && carrito) {
+      this.enfrente.add(techo.img.setPosition(-16, 0));
+      this.carrito = carrito.img.setOrigin(0.5, 1).setPosition(0, carrito.o.y + carrito.o.cuadro.h).setDepth(CALLE - 1);
+    } else {
+      this.add.image(0, CALLE - 4, 'cart_calle').setOrigin(0, 0).setDepth(-6);
+      this.add.tileSprite(BORDE, TECHO - 4, 120, CALLE - TECHO, 'cart_callejon').setOrigin(0, 0).setDepth(-7);
+      this.add.image(-40, TECHO - 12, 'cart_salida').setOrigin(0, 0).setDepth(-5);
+      this.enfrente.add(this.add.image(0, 0, 'cart_enfrente').setOrigin(0, 0));
+      // el balcón que sobresale hacia el hueco, con sus buganvillas
+      this.enfrente.add(this.add.image(-16, 38, 'cart_balcon').setOrigin(0, 0));
+      this.carrito = this.add.image(0, CALLE, 'cart_carrito').setOrigin(0.5, 1).setDepth(CALLE - 1);
+    }
+    // la palenquera del kit pregona en la acera; si no llegó, la de código
+    const pq = npcs().palenquera;
+    this.palenqueraKit = !!pq && this.anims.exists('npc_palenquera_pregonar');
+    this.palenquera = this.palenqueraKit
+      ? this.add.sprite(0, CALLE, 'npc_palenquera', 0).setOrigin((pq.ancla[0] + 0.5) / pq.w, (pq.ancla[1] + 0.5) / pq.h).setDepth(CALLE - 1).play('npc_palenquera_pregonar')
+      : this.add.sprite(0, CALLE, 'cart_palenquera').setOrigin(0.5, 1).setDepth(CALLE - 1);
     // las banderitas del viento sobre la azotea de salida
     for (const bx of [140, 300]) {
       this.add.rectangle(bx, TECHO - 14, 1, 30, 0x5a4a3a).setOrigin(0.5, 1).setDepth(-4);
@@ -446,7 +467,10 @@ export class Azoteas extends EventScene {
       fig.set('land_flat', true);
       efecto(this, 'polvo_caer_grande', this.x, this.y);
       // la palenquera lo regaña
-      this.tweens.add({ targets: this.palenquera, angle: { from: -8, to: 8 }, duration: 120, yoyo: true, repeat: 4, onComplete: () => this.palenquera.setAngle(0) });
+      if (this.palenqueraKit) {
+        this.palenquera.play('npc_palenquera_reclamar');
+        this.palenquera.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => this.palenquera.play('npc_palenquera_pregonar'));
+      } else this.tweens.add({ targets: this.palenquera, angle: { from: -8, to: 8 }, duration: 120, yoyo: true, repeat: 4, onComplete: () => this.palenquera.setAngle(0) });
       const b = this.add.bitmapText(this.palenquera.x + 20, CALLE - 44, 'fuente_ui', '¡AY, MIJO! ¿Y ESE BRINCO?').setY(CALLE - 54).setOrigin(0.5).setDepth(6000).setTint(0xffffff);
       const g = this.add.graphics().setDepth(5999);
       g.fillStyle(0x2a1a2a, 0.85).fillRoundedRect(b.x - b.width / 2 - 4, b.y - 7, b.width + 8, 14, 3);
@@ -528,7 +552,7 @@ export class Azoteas extends EventScene {
     this.camX += (want - this.camX) * Math.min(1, dt * 5);
     const cam = this.cameras.main;
     cam.centerOn(this.camX, 360 - 180 / ZOOM);
-    this.bg.tilePositionX = cam.scrollX * 0.2;
+    if (this.bg) this.bg.tilePositionX = cam.scrollX * 0.2;
   }
 
   private marcasTxt: Phaser.GameObjects.BitmapText[][] = [];

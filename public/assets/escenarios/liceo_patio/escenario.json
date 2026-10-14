@@ -1,0 +1,324 @@
+{
+ "generado_con": "PixelForja",
+ "id": "liceo_patio",
+ "nombre": "PATIO DEL LICEO, CARACAS",
+ "escala": 1,
+ "resolucion": [
+  640,
+  360
+ ],
+ "franja": {
+  "atras": 214,
+  "adelante": 314
+ },
+ "largo": 640,
+ "hora": "mediodia",
+ "clima": [
+  "despejado",
+  "calor"
+ ],
+ "inclinacion": 0.35,
+ "ancho": 675,
+ "nota_inclinacion": "vista inclinada: px = x + 0.35 * y (lo del fondo queda a la izquierda). Las capas largas miden 675 px (largo + 0.35 * fondo de la franja). Los objetos ya vienen corridos: corre a los atletas igual.",
+ "capas": {
+  "cielo": {
+   "archivo": "cielo_mediodia.png",
+   "y": 0,
+   "paralaje": 0,
+   "repetir_x": true
+  },
+  "lejos": {
+   "archivo": "lejos.png",
+   "y": 14,
+   "paralaje": 0.25,
+   "repetir_x": true
+  },
+  "tras_cerca": {
+   "nota": "la vida con capa tras_cerca va aquí: se ve por los callejones"
+  },
+  "cerca": {
+   "archivos": [
+    "cerca_0.png"
+   ],
+   "trozo": 1280,
+   "y": 0,
+   "paralaje": 1
+  },
+  "piso": {
+   "archivos": [
+    "piso_0.png"
+   ],
+   "trozo": 1280,
+   "y": 214,
+   "paralaje": 1,
+   "nota": "las primeras 100 filas son la franja (inclinada), las de abajo el bordillo: la cara del piso que da a la cámara"
+  },
+  "objetos": {
+   "archivo": "objetos.json",
+   "nota": "entre el piso y el frente, ordenados con los atletas"
+  },
+  "frente": {
+   "archivos": [
+    "frente_0.png"
+   ],
+   "trozo": 1280,
+   "y": 300,
+   "paralaje": 1
+  }
+ },
+ "vida": {
+  "imagen": "vida.png",
+  "piezas": [
+   {
+    "id": "publico",
+    "tipo": "publico",
+    "capa": "cerca",
+    "x": 0,
+    "y": 138,
+    "fps": 1.5,
+    "cuadros": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 120,
+      "h": 70
+     },
+     {
+      "x": 121,
+      "y": 0,
+      "w": 120,
+      "h": 70
+     }
+    ]
+   },
+   {
+    "id": "cantina",
+    "tipo": "cantina",
+    "capa": "cerca",
+    "x": 498,
+    "y": 142,
+    "fps": 1,
+    "cuadros": [
+     {
+      "x": 242,
+      "y": 0,
+      "w": 100,
+      "h": 66
+     },
+     {
+      "x": 343,
+      "y": 0,
+      "w": 100,
+      "h": 66
+     }
+    ]
+   },
+   {
+    "id": "bandera",
+    "tipo": "bandera",
+    "capa": "cerca",
+    "x": 140,
+    "y": 92,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 444,
+      "y": 0,
+      "w": 30,
+      "h": 22
+     },
+     {
+      "x": 475,
+      "y": 0,
+      "w": 30,
+      "h": 22
+     }
+    ]
+   }
+  ]
+ },
+ "callejones": [],
+ "superficie": {
+  "archivo": "superficie.png",
+  "y": 214,
+  "leyenda": [
+   {
+    "id": "acera",
+    "color": "#d0d0d0",
+    "paso": "paso_piedra",
+    "resbala": false
+   }
+  ]
+ },
+ "colision": "colision.json",
+ "luces": "luces.json",
+ "particulas": "particulas.json",
+ "paleta": [
+  {
+   "nombre": "tinta",
+   "hex": "#18161e"
+  },
+  {
+   "nombre": "sombra",
+   "hex": "#2e2c3a"
+  },
+  {
+   "nombre": "asfalto",
+   "hex": "#4c4a58"
+  },
+  {
+   "nombre": "asfalto_claro",
+   "hex": "#6e6c7a"
+  },
+  {
+   "nombre": "cemento",
+   "hex": "#9a98a0"
+  },
+  {
+   "nombre": "cemento_claro",
+   "hex": "#c8c4c0"
+  },
+  {
+   "nombre": "crema",
+   "hex": "#efe4cc"
+  },
+  {
+   "nombre": "luz",
+   "hex": "#fbf8ee"
+  },
+  {
+   "nombre": "amarillo",
+   "hex": "#f4c838"
+  },
+  {
+   "nombre": "ocre",
+   "hex": "#c89448"
+  },
+  {
+   "nombre": "terracota",
+   "hex": "#a85c3c"
+  },
+  {
+   "nombre": "rojo",
+   "hex": "#d63a32"
+  },
+  {
+   "nombre": "vino",
+   "hex": "#7c2830"
+  },
+  {
+   "nombre": "salmon",
+   "hex": "#e89a84"
+  },
+  {
+   "nombre": "menta",
+   "hex": "#7ec8a8"
+  },
+  {
+   "nombre": "verde",
+   "hex": "#4c8c66"
+  },
+  {
+   "nombre": "verde_oscuro",
+   "hex": "#2c5a44"
+  },
+  {
+   "nombre": "celeste",
+   "hex": "#7ab4e0"
+  },
+  {
+   "nombre": "cielo",
+   "hex": "#c4e0f2"
+  },
+  {
+   "nombre": "azul",
+   "hex": "#2e5aa8"
+  },
+  {
+   "nombre": "azul_noche",
+   "hex": "#22305a"
+  },
+  {
+   "nombre": "canal",
+   "hex": "#5e8aa0"
+  },
+  {
+   "nombre": "oro",
+   "hex": "#f4a830"
+  },
+  {
+   "nombre": "bruma",
+   "hex": "#e2e6e2"
+  }
+ ],
+ "verificacion": "verificacion.md",
+ "layout": {
+  "id": "liceo_patio",
+  "pais": "venezuela",
+  "prueba": "quemado",
+  "nombre": "PATIO DEL LICEO, CARACAS",
+  "nota": "Quemado Nekketsu en el patio techado de un liceo de Caracas, al mediodía. Vista inclinada de 0.35, como la pelea, con la franja de Quemado.ts: FT 214 y PROF 100 (filas 214 a 314), 640 de ancho y la cámara fija. La cancha va de x 40 a 560 con la raya del medio en x 300 y el círculo de 16 x 10; los cementerios rayados van de x 4 a 34 y de 566 a 596. Todo eso lo pinta el arte, así el juego quita su cancha() y los dos letreros (U.E. LICEO EL ÁVILA en 270, 75 y CANTINA en 595, 113), que ya vienen pintados en esos puntos.",
+  "largo": 640,
+  "franja": {
+   "atras": 214,
+   "adelante": 314
+  },
+  "hora": "mediodia",
+  "clima": [
+   "despejado",
+   "calor"
+  ],
+  "paralaje": {
+   "cielo": "auto",
+   "lejos": "avila_mediodia",
+   "cerca": "patio_liceo_caracas"
+  },
+  "piso": [
+   {
+    "x0": 0,
+    "x1": 640,
+    "tipo": "cancha",
+    "nombre": "la cancha del patio"
+   }
+  ],
+  "huecos": [],
+  "plataformas": [],
+  "muros": [],
+  "escaleras": [],
+  "postes": [],
+  "agua": [],
+  "bajo": [],
+  "solidos": [],
+  "carriles": [
+   {
+    "y": 20
+   },
+   {
+    "y": 50
+   },
+   {
+    "y": 80
+   }
+  ],
+  "entidades": [],
+  "ranuras_deco": [
+   {
+    "x0": 0,
+    "x1": 640,
+    "capa": "lejos",
+    "tema": "avila_mediodia"
+   },
+   {
+    "x0": 0,
+    "x1": 640,
+    "capa": "cerca",
+    "tema": "liceo_gradas_cantina"
+   }
+  ],
+  "vida": [
+   "publico",
+   "cantina",
+   "bandera"
+  ]
+ }
+}

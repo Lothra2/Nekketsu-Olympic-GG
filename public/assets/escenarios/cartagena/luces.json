@@ -1,0 +1,30 @@
+{
+ "hora": "atardecer",
+ "luces": [
+  {
+   "x": 463,
+   "y": 294,
+   "color": "#ffad3a",
+   "radio": 22,
+   "latido": 2.6,
+   "encendida": true,
+   "nota": "el farol de la esquina del callejón"
+  },
+  {
+   "x": 475,
+   "y": 279,
+   "color": "#ffad3a",
+   "radio": 12,
+   "encendida": true,
+   "nota": "una ventana prendida del callejón"
+  },
+  {
+   "x": 617,
+   "y": 275,
+   "color": "#ffad3a",
+   "radio": 12,
+   "encendida": true,
+   "nota": "otra ventana prendida"
+  }
+ ]
+}

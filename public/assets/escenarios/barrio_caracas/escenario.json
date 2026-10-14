@@ -1,0 +1,405 @@
+{
+ "generado_con": "PixelForja",
+ "id": "barrio_caracas",
+ "nombre": "BARRIO DE CARACAS",
+ "escala": 1,
+ "resolucion": [
+  640,
+  360
+ ],
+ "franja": {
+  "atras": 296,
+  "adelante": 336
+ },
+ "largo": 900,
+ "hora": "tarde",
+ "clima": [
+  "despejado",
+  "calor"
+ ],
+ "inclinacion": 0,
+ "ancho": 900,
+ "vista": "lado",
+ "nota_vista": "de lado: el dibujo va derecho (inclinación 0). El fondo (la capa cerca) va de la fila 0 a franja.atras (296) y es transparente donde se ven lejos y el cielo. El piso va de la fila 296 al borde de abajo de la pantalla: la franja donde se paran los atletas (y del mundo = fila de pantalla - 296) y lo de adelante. Las capas, los objetos y la vida se cargan igual que en la vista oblicua.",
+ "capas": {
+  "cielo": {
+   "archivo": "cielo_tarde.png",
+   "y": 0,
+   "paralaje": 0,
+   "repetir_x": true
+  },
+  "lejos": {
+   "archivo": "lejos.png",
+   "y": 96,
+   "paralaje": 0.25,
+   "repetir_x": true
+  },
+  "tras_cerca": {
+   "nota": "la vida con capa tras_cerca va aquí: se ve por los callejones"
+  },
+  "cerca": {
+   "archivos": [
+    "cerca_0.png"
+   ],
+   "trozo": 1280,
+   "y": 0,
+   "paralaje": 1
+  },
+  "piso": {
+   "archivos": [
+    "piso_0.png"
+   ],
+   "trozo": 1280,
+   "y": 296,
+   "paralaje": 1,
+   "nota": "de lado: las primeras 40 filas son la franja donde se paran los atletas, las de abajo lo de adelante hasta el borde de la pantalla"
+  },
+  "objetos": {
+   "archivo": "objetos.json",
+   "nota": "entre el piso y el frente, ordenados con los atletas"
+  },
+  "frente": {
+   "archivos": [
+    "frente_0.png"
+   ],
+   "trozo": 1280,
+   "y": 322,
+   "paralaje": 1
+  }
+ },
+ "vida": {
+  "imagen": "vida.png",
+  "piezas": [
+   {
+    "id": "ropa_tendida",
+    "tipo": "ropa_tendida",
+    "capa": "cerca",
+    "x": 186,
+    "y": 229,
+    "fps": 1.5,
+    "cuadros": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 64,
+      "h": 14
+     },
+     {
+      "x": 65,
+      "y": 0,
+      "w": 64,
+      "h": 14
+     }
+    ]
+   },
+   {
+    "id": "vecinos",
+    "tipo": "vecinos",
+    "capa": "cerca",
+    "x": 300,
+    "y": 256,
+    "fps": 1.2,
+    "cuadros": [
+     {
+      "x": 130,
+      "y": 0,
+      "w": 310,
+      "h": 34
+     },
+     {
+      "x": 441,
+      "y": 0,
+      "w": 310,
+      "h": 34
+     }
+    ]
+   },
+   {
+    "id": "perro",
+    "tipo": "perro",
+    "capa": "cerca",
+    "x": 246,
+    "y": 284,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 752,
+      "y": 0,
+      "w": 20,
+      "h": 12
+     },
+     {
+      "x": 773,
+      "y": 0,
+      "w": 20,
+      "h": 12
+     }
+    ]
+   },
+   {
+    "id": "zamuro_0",
+    "tipo": "zamuros",
+    "capa": "lejos",
+    "x": 200,
+    "y": 30,
+    "fps": 1,
+    "recorrido": {
+     "desde": [
+      200,
+      30
+     ],
+     "hasta": [
+      700,
+      22
+     ],
+     "segundos": 24,
+     "desfase": 0.2
+    },
+    "cuadros": [
+     {
+      "x": 794,
+      "y": 0,
+      "w": 13,
+      "h": 5
+     },
+     {
+      "x": 808,
+      "y": 0,
+      "w": 13,
+      "h": 5
+     }
+    ]
+   },
+   {
+    "id": "zamuro_1",
+    "tipo": "zamuros",
+    "capa": "lejos",
+    "x": 600,
+    "y": 40,
+    "fps": 1,
+    "recorrido": {
+     "desde": [
+      700,
+      40
+     ],
+     "hasta": [
+      1000,
+      34
+     ],
+     "segundos": 30,
+     "desfase": 0.6000000000000001
+    },
+    "cuadros": [
+     {
+      "x": 822,
+      "y": 0,
+      "w": 13,
+      "h": 5
+     },
+     {
+      "x": 836,
+      "y": 0,
+      "w": 13,
+      "h": 5
+     }
+    ]
+   }
+  ],
+  "nota": "capa cerca y tras_cerca: x, y de pantalla, como siempre. capa lejos: x, y en pixeles de la imagen lejos (que se repite cada su ancho y corre con su paralaje); va de recorrido.desde a recorrido.hasta en recorrido.segundos y vuelve a empezar, adelantada por desfase (0 a 1). capa objeto: va encima de un objeto, con setDepth(franja.atras + orden), como los objetos."
+ },
+ "callejones": [],
+ "superficie": {
+  "archivo": "superficie.png",
+  "y": 296,
+  "leyenda": [
+   {
+    "id": "asfalto",
+    "color": "#808080",
+    "paso": "paso_piedra",
+    "resbala": false
+   }
+  ]
+ },
+ "colision": "colision.json",
+ "luces": "luces.json",
+ "particulas": "particulas.json",
+ "paleta": [
+  {
+   "nombre": "tinta",
+   "hex": "#1c1620"
+  },
+  {
+   "nombre": "sombra",
+   "hex": "#3a2c34"
+  },
+  {
+   "nombre": "asfalto",
+   "hex": "#686270"
+  },
+  {
+   "nombre": "asfalto_claro",
+   "hex": "#8a8288"
+  },
+  {
+   "nombre": "cemento",
+   "hex": "#a49a92"
+  },
+  {
+   "nombre": "cemento_claro",
+   "hex": "#cfc4b6"
+  },
+  {
+   "nombre": "crema",
+   "hex": "#f2e2c4"
+  },
+  {
+   "nombre": "luz",
+   "hex": "#fff6e4"
+  },
+  {
+   "nombre": "amarillo",
+   "hex": "#f6cc4a"
+  },
+  {
+   "nombre": "ocre",
+   "hex": "#d4903e"
+  },
+  {
+   "nombre": "terracota",
+   "hex": "#b0583a"
+  },
+  {
+   "nombre": "rojo",
+   "hex": "#d63c34"
+  },
+  {
+   "nombre": "vino",
+   "hex": "#7e2c30"
+  },
+  {
+   "nombre": "salmon",
+   "hex": "#ec7e9a"
+  },
+  {
+   "nombre": "menta",
+   "hex": "#8ed2b0"
+  },
+  {
+   "nombre": "verde",
+   "hex": "#4e9a48"
+  },
+  {
+   "nombre": "verde_oscuro",
+   "hex": "#2a5a36"
+  },
+  {
+   "nombre": "celeste",
+   "hex": "#6aaee6"
+  },
+  {
+   "nombre": "cielo",
+   "hex": "#bcdcf2"
+  },
+  {
+   "nombre": "azul",
+   "hex": "#2e62b0"
+  },
+  {
+   "nombre": "azul_noche",
+   "hex": "#25365e"
+  },
+  {
+   "nombre": "canal",
+   "hex": "#5a8a6e"
+  },
+  {
+   "nombre": "oro",
+   "hex": "#f6a830"
+  },
+  {
+   "nombre": "bruma",
+   "hex": "#e8dcc8"
+  }
+ ],
+ "verificacion": "verificacion.md",
+ "layout": {
+  "id": "barrio_caracas",
+  "pais": "venezuela",
+  "prueba": "chapita",
+  "vista": "lado",
+  "nombre": "BARRIO DE CARACAS",
+  "nota": "Chapita de lado en una calle de barrio de Caracas, en la tarde. Los pies de Chapita.ts van en PISO 316: la franja va de la acera (fila 296) a la 336 y el carril es el y 20. El home de tiza va en x 94 a 116 (filas 314 a 320) y la marca del pitcher en x 326 a 334: los pinta el arte, así el juego quita su tiza. La casa del vecino (x 640 a 810, 100 de alto, con la ventana de x 646 a 682 entre z 40 y 64) y la ventana rota van en dos objetos: el juego prende la rota cuando la chapa rompe la ventana, como hoy con chap_vidrio_roto. La caja de cartón, la señora Carmen y el letrero de HIELITOS ya vienen: la caja y Carmen los sigue poniendo el juego. Mundo de 900 con zoom 1.2: la cámara ve de la fila 60 para abajo.",
+  "largo": 900,
+  "franja": {
+   "atras": 296,
+   "adelante": 336
+  },
+  "hora": "tarde",
+  "clima": [
+   "despejado",
+   "calor"
+  ],
+  "paralaje": {
+   "cielo": "auto",
+   "lejos": "avila_tarde",
+   "cerca": "calle_barrio_caracas"
+  },
+  "piso": [
+   {
+    "x0": 0,
+    "x1": 900,
+    "tipo": "asfalto",
+    "nombre": "la calle del barrio"
+   }
+  ],
+  "huecos": [],
+  "plataformas": [],
+  "muros": [],
+  "escaleras": [],
+  "postes": [],
+  "agua": [],
+  "bajo": [],
+  "solidos": [],
+  "carriles": [
+   {
+    "y": 20
+   }
+  ],
+  "entidades": [
+   {
+    "tipo": "objeto",
+    "objeto": "casa_vecino",
+    "x": 640,
+    "y": 20,
+    "nota": "la casa del vecino de x 640 a 810, parada en la fila 316"
+   },
+   {
+    "tipo": "objeto",
+    "objeto": "ventana_rota",
+    "x": 646,
+    "y": 20,
+    "nota": "la ventana rota, apagada hasta que la chapa rompe la ventana"
+   }
+  ],
+  "ranuras_deco": [
+   {
+    "x0": 0,
+    "x1": 900,
+    "capa": "lejos",
+    "tema": "avila_tarde"
+   },
+   {
+    "x0": 0,
+    "x1": 900,
+    "capa": "cerca",
+    "tema": "ranchos_casas_abasto_mango"
+   }
+  ],
+  "vida": [
+   "ropa_tendida",
+   "vecinos",
+   "perro",
+   "zamuros"
+  ]
+ }
+}

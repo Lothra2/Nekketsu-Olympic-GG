@@ -58,5 +58,29 @@
  "tao_dan": {
   "nombre": "CÔNG VIÊN TAO ĐÀN",
   "generado": "2026-10-13"
+ },
+ "barrio_caracas": {
+  "nombre": "BARRIO DE CARACAS",
+  "generado": "2026-10-14"
+ },
+ "cartagena": {
+  "nombre": "AZOTEAS DE CARTAGENA",
+  "generado": "2026-10-14"
+ },
+ "cocora": {
+  "nombre": "VALLE DE COCORA, QUINDÍO",
+  "generado": "2026-10-14"
+ },
+ "halong": {
+  "nombre": "VỊNH HẠ LONG",
+  "generado": "2026-10-14"
+ },
+ "liceo_patio": {
+  "nombre": "PATIO DEL LICEO, CARACAS",
+  "generado": "2026-10-14"
+ },
+ "llanos_apure": {
+  "nombre": "LLANOS DE APURE",
+  "generado": "2026-10-14"
  }
 }

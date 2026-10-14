@@ -6,6 +6,7 @@ import { chip } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { Painter, hex } from '../gfx/paint';
 import { EventScene, prueba, type Competidor } from './base';
+import { queueEscenario } from './escenario';
 import type { Paso } from '../core/coach';
 
 const WORLD = 1460;
@@ -32,13 +33,16 @@ export class Natacion extends EventScene {
   private clock = 0;
   private hud!: Phaser.GameObjects.Graphics;
   private timeTxt!: Phaser.GameObjects.BitmapText;
-  private bg!: Phaser.GameObjects.TileSprite;
+  /** el fondo de código que se repite (sin el arte de PixelForja) */
+  private bg?: Phaser.GameObjects.TileSprite;
   private water: Phaser.GameObjects.Graphics[] = [];
   private splash!: Phaser.GameObjects.Particles.ParticleEmitter;
   private armed = false;
   private heads: { img: Phaser.GameObjects.Image; s: Swimmer }[] = [];
 
   constructor() { super('Natacion'); }
+
+  preload() { queueEscenario(this, 'halong'); }
 
   create() {
     this.swimmers = [];
@@ -48,8 +52,9 @@ export class Natacion extends EventScene {
     this.armed = false;
     this.setup(ZOOM, WORLD);
     this.makeTextures();
-    this.bg = this.fondo('bg_halong');
-    this.add.image(0, TOP - 6, 'piscina').setOrigin(0, 0).setDepth(-5);
+    // el arte de PixelForja trae el cielo, lo lejano con su paralaje y la piscina; sin él, el fondo de código
+    this.bg = undefined;
+    this.escenario('halong', () => { this.bg = this.fondo('bg_halong'); this.add.image(0, TOP - 6, 'piscina').setOrigin(0, 0).setDepth(-5); });
     // una capa de agua delante de cada carril: tapa lo que va bajo la superficie
     LANES.forEach((y, i) => {
       const g = this.add.graphics().setDepth(TOP + y + 1);
@@ -241,7 +246,7 @@ export class Natacion extends EventScene {
     const cam = this.cameras.main;
     const cur = cam.midPoint.x || START;
     cam.centerOn(cur + (me.x + 60 - cur) * 0.12, 360 - 180 / ZOOM);
-    this.bg.tilePositionX = cam.scrollX * 0.2;
+    if (this.bg) this.bg.tilePositionX = cam.scrollX * 0.2;
     const g = this.hud;
     g.clear();
     g.fillStyle(0x000000, 0.55).fillRect(110, 14, 420, 16);

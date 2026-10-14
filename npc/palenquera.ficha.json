@@ -1,0 +1,158 @@
+{
+  "format": "pixelforja.ficha",
+  "version": 3,
+  "name": "Palenquera de Cartagena (pañuelo, ponchera de frutas en la cabeza y vestido de colores)",
+  "body": {
+    "skeleton": "human",
+    "proportions": {
+      "preset": "chibi",
+      "height": 1.04,
+      "build": 1.18,
+      "legs": 0.98,
+      "arms": 1.05,
+      "head": 1,
+      "shoulders": 1.05,
+      "hips": 1.15
+    }
+  },
+  "palette": {
+    "skin": [
+      "#3a2218",
+      "#5a3424",
+      "#74452e",
+      "#8e5a3c"
+    ],
+    "hair": [
+      "#1e1418",
+      "#2a2026",
+      "#3a2e34",
+      "#4a3c42"
+    ],
+    "eyes": "#2a1c14",
+    "top": [
+      "#8a6a08",
+      "#d8a810",
+      "#f2c230",
+      "#ffe27a"
+    ],
+    "bottom": [
+      "#7a1418",
+      "#b8242a",
+      "#e43434",
+      "#ff7a6a"
+    ],
+    "socks": [
+      "#3a2218",
+      "#5a3424",
+      "#74452e",
+      "#8e5a3c"
+    ],
+    "shoes": [
+      "#3a2a1a",
+      "#5a3e26",
+      "#7a5636",
+      "#9a7048"
+    ],
+    "accessory": [
+      "#0e3a70",
+      "#1e5ab8",
+      "#2a7ae8",
+      "#7ab4ff"
+    ]
+  },
+  "outfit": {
+    "sleeves": "short",
+    "bottom": "skirt",
+    "socks": "none",
+    "shoes": "sandalias",
+    "print": null,
+    "jacket": null,
+    "jacketClosed": false,
+    "neck": null,
+    "pattern": "rayas_h",
+    "pattern2": "#2a52c8",
+    "collar": "redondo"
+  },
+  "face": {
+    "eyes": "round",
+    "mouth": "smile",
+    "blush": false,
+    "brows": true,
+    "glasses": null
+  },
+  "heads": {},
+  "avatar": {
+    "version": 1,
+    "look": "stardew",
+    "skin": "#74452e",
+    "face": {
+      "dome": 1.12,
+      "forehead": 0.58,
+      "eyeNose": 0.6,
+      "noseMouth": 0.3,
+      "mouthChin": 0.52,
+      "cheek": 1.02,
+      "jaw": 0.9,
+      "chin": 2.2,
+      "eyeX": 0.42,
+      "ears": 0.18,
+      "mouth": 0.3
+    },
+    "hair": {
+      "style": "corto",
+      "color": "#1e1418",
+      "params": {
+        "top": 0.22,
+        "side": 0.08,
+        "back": 0.1,
+        "recede": 0,
+        "length": 1,
+        "fringe": 0,
+        "part": 0,
+        "sweep": 0.3,
+        "curl": 0,
+        "tail": "none"
+      }
+    },
+    "eyes": {
+      "style": "brillo",
+      "color": "#2a1810"
+    },
+    "brows": {
+      "style": "normal"
+    },
+    "nose": "normal",
+    "beard": {
+      "style": "ninguna",
+      "color": "#6a665e",
+      "gray": 0
+    },
+    "glasses": {
+      "style": "ninguno",
+      "color": "#1e1e24"
+    },
+    "kit": "lpc",
+    "lpc": {
+      "head": "female",
+      "hair": "cornrows",
+      "brows": null,
+      "nose": null,
+      "beard": null,
+      "mustache": null,
+      "glasses": null,
+      "hat": "ponchera",
+      "hatColor": "#d83e34"
+    },
+    "body": {
+      "age": "adulto",
+      "build": "robusto",
+      "shape": "curvas"
+    }
+  },
+  "headMode": "avatar",
+  "physics": {
+    "hairLag": 1
+  },
+  "movementProfile": "premium",
+  "cell": 64
+}

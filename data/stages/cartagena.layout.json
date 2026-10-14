@@ -1,0 +1,85 @@
+{
+ "id": "cartagena",
+ "pais": "colombia",
+ "prueba": "azoteas",
+ "vista": "lado",
+ "nombre": "AZOTEAS DE CARTAGENA",
+ "nota": "Azoteas de Cartagena de lado, al atardecer. Se corre por la azotea del edificio de salida (TECHO 262; las baldosas van de la fila 250 a la 262) hasta el borde en x 440, con la cajita de la garrocha en x 428 (CAJA): las dos las pinta el arte. La franja es la calle de adoquín (filas 340 a 360): el que no llega cae en CALLE 352 (y 12). El techo de enfrente (420 de ancho, con la colchoneta y el balcón que sale 16 px al hueco) y el carrito de frutas van en objetos, porque Azoteas.ts los corre a BORDE + 10 px por metro en cada ronda (4, 5, 6 o 7 m; el layout los trae en 5 m). La palenquera es un NPC del kit. El juego sigue poniendo las banderitas del viento y los metros. Mundo de 880 con zoom 1.5: la cámara ve de la fila 120 para abajo.",
+ "largo": 880,
+ "franja": {
+  "atras": 340,
+  "adelante": 360
+ },
+ "hora": "atardecer",
+ "clima": [
+  "despejado",
+  "viento"
+ ],
+ "paralaje": {
+  "cielo": "auto",
+  "lejos": "bahia_cartagena",
+  "cerca": "azoteas_cartagena"
+ },
+ "piso": [
+  {
+   "x0": 0,
+   "x1": 880,
+   "tipo": "baldosa",
+   "nombre": "la calle de adoquín"
+  }
+ ],
+ "huecos": [],
+ "plataformas": [],
+ "muros": [],
+ "escaleras": [],
+ "postes": [],
+ "agua": [],
+ "bajo": [],
+ "solidos": [],
+ "carriles": [
+  {
+   "y": 12
+  }
+ ],
+ "entidades": [
+  {
+   "tipo": "objeto",
+   "objeto": "techo_enfrente",
+   "x": 490,
+   "y": 12,
+   "nota": "el techo de enfrente a 5 m del borde; el juego lo corre a BORDE + m * 10"
+  },
+  {
+   "tipo": "objeto",
+   "objeto": "carrito_frutas",
+   "x": 475,
+   "y": 12,
+   "nota": "el carrito pegado a la pared de enfrente (x - 15); el juego lo corre con el techo"
+  },
+  {
+   "tipo": "npc",
+   "npc": "palenquera",
+   "x": 432,
+   "y": 12,
+   "nota": "la palenquera en la acera de este lado (BORDE - 8)"
+  }
+ ],
+ "ranuras_deco": [
+  {
+   "x0": 0,
+   "x1": 880,
+   "capa": "lejos",
+   "tema": "bahia_cartagena"
+  },
+  {
+   "x0": 0,
+   "x1": 880,
+   "capa": "cerca",
+   "tema": "ciudad_vieja_azoteas"
+  }
+ ],
+ "vida": [
+  "alcatraces",
+  "veleros"
+ ]
+}

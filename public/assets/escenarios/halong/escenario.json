@@ -1,0 +1,522 @@
+{
+ "generado_con": "PixelForja",
+ "id": "halong",
+ "nombre": "VỊNH HẠ LONG",
+ "escala": 1,
+ "resolucion": [
+  640,
+  360
+ ],
+ "franja": {
+  "atras": 226,
+  "adelante": 346
+ },
+ "largo": 1460,
+ "hora": "mediodia",
+ "clima": [
+  "despejado"
+ ],
+ "inclinacion": 0,
+ "ancho": 1460,
+ "vista": "lado",
+ "nota_vista": "de lado: el dibujo va derecho (inclinación 0). El fondo (la capa cerca) va de la fila 0 a franja.atras (226) y es transparente donde se ven lejos y el cielo. El piso va de la fila 226 al borde de abajo de la pantalla: la franja donde se paran los atletas (y del mundo = fila de pantalla - 226) y lo de adelante. Las capas, los objetos y la vida se cargan igual que en la vista oblicua.",
+ "capas": {
+  "cielo": {
+   "archivo": "cielo_mediodia.png",
+   "y": 0,
+   "paralaje": 0,
+   "repetir_x": true
+  },
+  "lejos": {
+   "archivo": "lejos.png",
+   "y": 26,
+   "paralaje": 0.25,
+   "repetir_x": true
+  },
+  "tras_cerca": {
+   "nota": "la vida con capa tras_cerca va aquí: se ve por los callejones"
+  },
+  "cerca": {
+   "archivos": [
+    "cerca_0.png",
+    "cerca_1.png"
+   ],
+   "trozo": 1280,
+   "y": 0,
+   "paralaje": 1
+  },
+  "piso": {
+   "archivos": [
+    "piso_0.png",
+    "piso_1.png"
+   ],
+   "trozo": 1280,
+   "y": 226,
+   "paralaje": 1,
+   "nota": "de lado: las primeras 120 filas son la franja donde se paran los atletas, las de abajo lo de adelante hasta el borde de la pantalla"
+  },
+  "objetos": {
+   "archivo": "objetos.json",
+   "nota": "entre el piso y el frente, ordenados con los atletas"
+  },
+  "frente": {
+   "archivos": [
+    "frente_0.png",
+    "frente_1.png"
+   ],
+   "trozo": 1280,
+   "y": 332,
+   "paralaje": 1
+  }
+ },
+ "vida": {
+  "imagen": "vida.png",
+  "piezas": [
+   {
+    "id": "bandera_0",
+    "tipo": "banderas",
+    "capa": "cerca",
+    "x": 229,
+    "y": 174,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 20,
+      "h": 16
+     },
+     {
+      "x": 21,
+      "y": 0,
+      "w": 20,
+      "h": 16
+     }
+    ]
+   },
+   {
+    "id": "bandera_1",
+    "tipo": "banderas",
+    "capa": "cerca",
+    "x": 379,
+    "y": 174,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 42,
+      "y": 0,
+      "w": 20,
+      "h": 16
+     },
+     {
+      "x": 63,
+      "y": 0,
+      "w": 20,
+      "h": 16
+     }
+    ]
+   },
+   {
+    "id": "bandera_2",
+    "tipo": "banderas",
+    "capa": "cerca",
+    "x": 519,
+    "y": 174,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 84,
+      "y": 0,
+      "w": 20,
+      "h": 16
+     },
+     {
+      "x": 105,
+      "y": 0,
+      "w": 20,
+      "h": 16
+     }
+    ]
+   },
+   {
+    "id": "bandera_3",
+    "tipo": "banderas",
+    "capa": "cerca",
+    "x": 879,
+    "y": 174,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 126,
+      "y": 0,
+      "w": 20,
+      "h": 16
+     },
+     {
+      "x": 147,
+      "y": 0,
+      "w": 20,
+      "h": 16
+     }
+    ]
+   },
+   {
+    "id": "bandera_4",
+    "tipo": "banderas",
+    "capa": "cerca",
+    "x": 1179,
+    "y": 174,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 168,
+      "y": 0,
+      "w": 20,
+      "h": 16
+     },
+     {
+      "x": 189,
+      "y": 0,
+      "w": 20,
+      "h": 16
+     }
+    ]
+   },
+   {
+    "id": "publico",
+    "tipo": "publico",
+    "capa": "cerca",
+    "x": 376,
+    "y": 182,
+    "fps": 1.5,
+    "cuadros": [
+     {
+      "x": 210,
+      "y": 0,
+      "w": 320,
+      "h": 30
+     },
+     {
+      "x": 531,
+      "y": 0,
+      "w": 320,
+      "h": 30
+     }
+    ]
+   },
+   {
+    "id": "junco_lejos_0",
+    "tipo": "juncos",
+    "capa": "lejos",
+    "x": -16,
+    "y": 146,
+    "fps": 1,
+    "recorrido": {
+     "desde": [
+      -16,
+      146
+     ],
+     "hasta": [
+      1280,
+      146
+     ],
+     "segundos": 140,
+     "desfase": 0.15
+    },
+    "cuadros": [
+     {
+      "x": 852,
+      "y": 0,
+      "w": 16,
+      "h": 13
+     }
+    ]
+   },
+   {
+    "id": "junco_lejos_1",
+    "tipo": "juncos",
+    "capa": "lejos",
+    "x": 1280,
+    "y": 150,
+    "fps": 1,
+    "recorrido": {
+     "desde": [
+      1280,
+      150
+     ],
+     "hasta": [
+      -16,
+      150
+     ],
+     "segundos": 170,
+     "desfase": 0.7
+    },
+    "cuadros": [
+     {
+      "x": 869,
+      "y": 0,
+      "w": 16,
+      "h": 13
+     }
+    ]
+   },
+   {
+    "id": "gaviota_0",
+    "tipo": "gaviotas",
+    "capa": "lejos",
+    "x": 1280,
+    "y": 104,
+    "fps": 3,
+    "recorrido": {
+     "desde": [
+      1280,
+      104
+     ],
+     "hasta": [
+      -12,
+      112
+     ],
+     "segundos": 34,
+     "desfase": 0.4
+    },
+    "cuadros": [
+     {
+      "x": 886,
+      "y": 0,
+      "w": 11,
+      "h": 5
+     },
+     {
+      "x": 898,
+      "y": 0,
+      "w": 11,
+      "h": 5
+     }
+    ]
+   },
+   {
+    "id": "gaviota_1",
+    "tipo": "gaviotas",
+    "capa": "lejos",
+    "x": 1290,
+    "y": 112,
+    "fps": 3,
+    "recorrido": {
+     "desde": [
+      1296,
+      112
+     ],
+     "hasta": [
+      0,
+      118
+     ],
+     "segundos": 34,
+     "desfase": 0.43
+    },
+    "cuadros": [
+     {
+      "x": 910,
+      "y": 0,
+      "w": 11,
+      "h": 5
+     },
+     {
+      "x": 922,
+      "y": 0,
+      "w": 11,
+      "h": 5
+     }
+    ]
+   }
+  ],
+  "nota": "capa cerca y tras_cerca: x, y de pantalla, como siempre. capa lejos: x, y en pixeles de la imagen lejos (que se repite cada su ancho y corre con su paralaje); va de recorrido.desde a recorrido.hasta en recorrido.segundos y vuelve a empezar, adelantada por desfase (0 a 1). capa objeto: va encima de un objeto, con setDepth(franja.atras + orden), como los objetos."
+ },
+ "callejones": [],
+ "superficie": {
+  "archivo": "superficie.png",
+  "y": 226,
+  "leyenda": [
+   {
+    "id": "madera",
+    "color": "#a06030",
+    "paso": "paso_madera",
+    "resbala": false
+   }
+  ]
+ },
+ "colision": "colision.json",
+ "luces": "luces.json",
+ "particulas": "particulas.json",
+ "paleta": [
+  {
+   "nombre": "tinta",
+   "hex": "#161c22"
+  },
+  {
+   "nombre": "sombra",
+   "hex": "#2a3a40"
+  },
+  {
+   "nombre": "asfalto",
+   "hex": "#4a5658"
+  },
+  {
+   "nombre": "asfalto_claro",
+   "hex": "#768486"
+  },
+  {
+   "nombre": "cemento",
+   "hex": "#a0aaa8"
+  },
+  {
+   "nombre": "cemento_claro",
+   "hex": "#ccd4d0"
+  },
+  {
+   "nombre": "crema",
+   "hex": "#efe6d0"
+  },
+  {
+   "nombre": "luz",
+   "hex": "#fbfcf6"
+  },
+  {
+   "nombre": "amarillo",
+   "hex": "#f4d24a"
+  },
+  {
+   "nombre": "ocre",
+   "hex": "#c8964a"
+  },
+  {
+   "nombre": "terracota",
+   "hex": "#9a5a36"
+  },
+  {
+   "nombre": "rojo",
+   "hex": "#d8402e"
+  },
+  {
+   "nombre": "vino",
+   "hex": "#7a2e26"
+  },
+  {
+   "nombre": "salmon",
+   "hex": "#e89a7a"
+  },
+  {
+   "nombre": "menta",
+   "hex": "#7ad6c0"
+  },
+  {
+   "nombre": "verde",
+   "hex": "#4c9a54"
+  },
+  {
+   "nombre": "verde_oscuro",
+   "hex": "#2a5e3e"
+  },
+  {
+   "nombre": "celeste",
+   "hex": "#7cc0e4"
+  },
+  {
+   "nombre": "cielo",
+   "hex": "#c4e2f0"
+  },
+  {
+   "nombre": "azul",
+   "hex": "#2a78b4"
+  },
+  {
+   "nombre": "azul_noche",
+   "hex": "#1e4268"
+  },
+  {
+   "nombre": "canal",
+   "hex": "#2e9a92"
+  },
+  {
+   "nombre": "oro",
+   "hex": "#f2a83a"
+  },
+  {
+   "nombre": "bruma",
+   "hex": "#dce8e8"
+  }
+ ],
+ "verificacion": "verificacion.md",
+ "layout": {
+  "id": "halong",
+  "pais": "vietnam",
+  "prueba": "natacion",
+  "vista": "lado",
+  "nombre": "VỊNH HẠ LONG",
+  "nota": "Natación de lado en una piscina flotante de la bahía de Hạ Long, al mediodía. La franja de Natacion.ts empieza en TOP 226 y tiene 120 de fondo (filas 226 a 346). La superficie de cada carril va en y 24, 50, 76 y 102 (filas 250, 276, 302 y 328). La piscina la pinta el arte: el agua de y 2 a y 110 entre x 118 y la pared de llegada en x 1360, las corcheras en y 36, 62 y 88 y la marca de 15 m en x 492. El juego quita su 'piscina' y sigue poniendo los poyetes en x 112, los números y la capa de agua de adelante de cada carril. Mundo de 1460 con zoom 1.5: la cámara ve de la fila 120 para abajo.",
+  "largo": 1460,
+  "franja": {
+   "atras": 226,
+   "adelante": 346
+  },
+  "hora": "mediodia",
+  "clima": [
+   "despejado"
+  ],
+  "paralaje": {
+   "cielo": "auto",
+   "lejos": "islotes_halong",
+   "cerca": "bahia_halong"
+  },
+  "piso": [
+   {
+    "x0": 0,
+    "x1": 1460,
+    "tipo": "madera",
+    "nombre": "el muelle flotante"
+   }
+  ],
+  "huecos": [],
+  "plataformas": [],
+  "muros": [],
+  "escaleras": [],
+  "postes": [],
+  "agua": [],
+  "bajo": [],
+  "solidos": [],
+  "carriles": [
+   {
+    "y": 24
+   },
+   {
+    "y": 50
+   },
+   {
+    "y": 76
+   },
+   {
+    "y": 102
+   }
+  ],
+  "entidades": [],
+  "ranuras_deco": [
+   {
+    "x0": 0,
+    "x1": 1460,
+    "capa": "lejos",
+    "tema": "islotes_halong"
+   },
+   {
+    "x0": 0,
+    "x1": 1460,
+    "capa": "cerca",
+    "tema": "islotes_junco_aldea_muelle"
+   }
+  ],
+  "vida": [
+   "banderas",
+   "publico",
+   "juncos",
+   "gaviotas"
+  ]
+ }
+}

@@ -1,0 +1,19 @@
+{
+ "nota": "x e y en pixeles de pantalla a escala 1 (y de pantalla = franja.atras + y del mundo). fx: nombre del efecto del catálogo (manifest.fx).",
+ "particulas": [
+  {
+   "tipo": "polvo",
+   "x0": 0,
+   "x1": 900,
+   "y0": 296,
+   "y1": 326,
+   "color": [
+    "#cfc4b6",
+    "#e8dcc8"
+   ],
+   "cada": 1.5,
+   "vida": 1.2,
+   "nota": "el polvo de la calle que levanta la brisa"
+  }
+ ]
+}

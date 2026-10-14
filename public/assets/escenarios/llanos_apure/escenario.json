@@ -1,0 +1,375 @@
+{
+ "generado_con": "PixelForja",
+ "id": "llanos_apure",
+ "nombre": "LLANOS DE APURE",
+ "escala": 1,
+ "resolucion": [
+  640,
+  360
+ ],
+ "franja": {
+  "atras": 226,
+  "adelante": 346
+ },
+ "largo": 1560,
+ "hora": "atardecer",
+ "clima": [
+  "despejado"
+ ],
+ "inclinacion": 0,
+ "ancho": 1560,
+ "vista": "lado",
+ "nota_vista": "de lado: el dibujo va derecho (inclinación 0). El fondo (la capa cerca) va de la fila 0 a franja.atras (226) y es transparente donde se ven lejos y el cielo. El piso va de la fila 226 al borde de abajo de la pantalla: la franja donde se paran los atletas (y del mundo = fila de pantalla - 226) y lo de adelante. Las capas, los objetos y la vida se cargan igual que en la vista oblicua.",
+ "capas": {
+  "cielo": {
+   "archivo": "cielo_atardecer.png",
+   "y": 0,
+   "paralaje": 0,
+   "repetir_x": true
+  },
+  "lejos": {
+   "archivo": "lejos.png",
+   "y": 26,
+   "paralaje": 0.25,
+   "repetir_x": true
+  },
+  "tras_cerca": {
+   "nota": "la vida con capa tras_cerca va aquí: se ve por los callejones"
+  },
+  "cerca": {
+   "archivos": [
+    "cerca_0.png",
+    "cerca_1.png"
+   ],
+   "trozo": 1280,
+   "y": 0,
+   "paralaje": 1
+  },
+  "piso": {
+   "archivos": [
+    "piso_0.png",
+    "piso_1.png"
+   ],
+   "trozo": 1280,
+   "y": 226,
+   "paralaje": 1,
+   "nota": "de lado: las primeras 120 filas son la franja donde se paran los atletas, las de abajo lo de adelante hasta el borde de la pantalla"
+  },
+  "objetos": {
+   "archivo": "objetos.json",
+   "nota": "entre el piso y el frente, ordenados con los atletas"
+  },
+  "frente": {
+   "archivos": [
+    "frente_0.png",
+    "frente_1.png"
+   ],
+   "trozo": 1280,
+   "y": 332,
+   "paralaje": 1
+  }
+ },
+ "vida": {
+  "imagen": "vida.png",
+  "piezas": [
+   {
+    "id": "estero",
+    "tipo": "estero",
+    "capa": "cerca",
+    "x": 868,
+    "y": 184,
+    "fps": 0.8,
+    "cuadros": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 204,
+      "h": 38
+     },
+     {
+      "x": 205,
+      "y": 0,
+      "w": 204,
+      "h": 38
+     }
+    ]
+   },
+   {
+    "id": "ganado",
+    "tipo": "ganado",
+    "capa": "cerca",
+    "x": 1286,
+    "y": 172,
+    "fps": 0.6,
+    "cuadros": [
+     {
+      "x": 410,
+      "y": 0,
+      "w": 170,
+      "h": 42
+     },
+     {
+      "x": 581,
+      "y": 0,
+      "w": 170,
+      "h": 42
+     }
+    ]
+   },
+   {
+    "id": "garzas",
+    "tipo": "garzas",
+    "capa": "lejos",
+    "x": 1280,
+    "y": 110,
+    "fps": 3,
+    "recorrido": {
+     "desde": [
+      1280,
+      110
+     ],
+     "hasta": [
+      -60,
+      100
+     ],
+     "segundos": 40,
+     "desfase": 0.2
+    },
+    "cuadros": [
+     {
+      "x": 752,
+      "y": 0,
+      "w": 45,
+      "h": 21
+     },
+     {
+      "x": 798,
+      "y": 0,
+      "w": 45,
+      "h": 21
+     }
+    ]
+   },
+   {
+    "id": "corocoras",
+    "tipo": "corocoras",
+    "capa": "lejos",
+    "x": -60,
+    "y": 120,
+    "fps": 3,
+    "recorrido": {
+     "desde": [
+      -60,
+      120
+     ],
+     "hasta": [
+      1280,
+      112
+     ],
+     "segundos": 48,
+     "desfase": 0.6
+    },
+    "cuadros": [
+     {
+      "x": 844,
+      "y": 0,
+      "w": 59,
+      "h": 27
+     },
+     {
+      "x": 904,
+      "y": 0,
+      "w": 59,
+      "h": 27
+     }
+    ]
+   }
+  ],
+  "nota": "capa cerca y tras_cerca: x, y de pantalla, como siempre. capa lejos: x, y en pixeles de la imagen lejos (que se repite cada su ancho y corre con su paralaje); va de recorrido.desde a recorrido.hasta en recorrido.segundos y vuelve a empezar, adelantada por desfase (0 a 1). capa objeto: va encima de un objeto, con setDepth(franja.atras + orden), como los objetos."
+ },
+ "callejones": [],
+ "superficie": {
+  "archivo": "superficie.png",
+  "y": 226,
+  "leyenda": [
+   {
+    "id": "pasto",
+    "color": "#30a030",
+    "paso": "paso_pasto",
+    "resbala": false
+   }
+  ]
+ },
+ "colision": "colision.json",
+ "luces": "luces.json",
+ "particulas": "particulas.json",
+ "paleta": [
+  {
+   "nombre": "tinta",
+   "hex": "#1e1418"
+  },
+  {
+   "nombre": "sombra",
+   "hex": "#3a2428"
+  },
+  {
+   "nombre": "asfalto",
+   "hex": "#5a3a34"
+  },
+  {
+   "nombre": "asfalto_claro",
+   "hex": "#80584a"
+  },
+  {
+   "nombre": "cemento",
+   "hex": "#a88a6e"
+  },
+  {
+   "nombre": "cemento_claro",
+   "hex": "#d4b48c"
+  },
+  {
+   "nombre": "crema",
+   "hex": "#f4dcb0"
+  },
+  {
+   "nombre": "luz",
+   "hex": "#fff4dc"
+  },
+  {
+   "nombre": "amarillo",
+   "hex": "#f8cc5a"
+  },
+  {
+   "nombre": "ocre",
+   "hex": "#d09a40"
+  },
+  {
+   "nombre": "terracota",
+   "hex": "#a85a34"
+  },
+  {
+   "nombre": "rojo",
+   "hex": "#d4482e"
+  },
+  {
+   "nombre": "vino",
+   "hex": "#7c2a30"
+  },
+  {
+   "nombre": "salmon",
+   "hex": "#f08a6a"
+  },
+  {
+   "nombre": "menta",
+   "hex": "#a6c86a"
+  },
+  {
+   "nombre": "verde",
+   "hex": "#6a9a3a"
+  },
+  {
+   "nombre": "verde_oscuro",
+   "hex": "#34582a"
+  },
+  {
+   "nombre": "celeste",
+   "hex": "#8a9ad0"
+  },
+  {
+   "nombre": "cielo",
+   "hex": "#f6b88a"
+  },
+  {
+   "nombre": "azul",
+   "hex": "#4a5aa0"
+  },
+  {
+   "nombre": "azul_noche",
+   "hex": "#2c3062"
+  },
+  {
+   "nombre": "canal",
+   "hex": "#5e7a9a"
+  },
+  {
+   "nombre": "oro",
+   "hex": "#ffae3a"
+  },
+  {
+   "nombre": "bruma",
+   "hex": "#f49a6a"
+  }
+ ],
+ "verificacion": "verificacion.md",
+ "layout": {
+  "id": "llanos_apure",
+  "pais": "venezuela",
+  "prueba": "jabalina",
+  "vista": "lado",
+  "nombre": "LLANOS DE APURE",
+  "nota": "Jabalina Llanera de lado en los Llanos de Apure, al atardecer. La franja de Jabalina.ts empieza en TOP 226 y tiene 120 de fondo (filas 226 a 346). El que lanza corre en y 70 (fila 296) por la pista de impulso de tartán (y 60 a 76) hasta la línea de foul en x 380; los que esperan van en y 18, 30 y 42 al principio. El sector de caída tiene sus orillas en y 0 y y 100 y una raya cada 100 px (10 m) desde la de foul. Todo eso lo pinta el arte, así el juego quita su 'campo'; los números de los metros los sigue poniendo el juego en la fila 338. Mundo de 1560 con zoom 1.5: la cámara ve de la fila 120 para abajo.",
+  "largo": 1560,
+  "franja": {
+   "atras": 226,
+   "adelante": 346
+  },
+  "hora": "atardecer",
+  "clima": [
+   "despejado"
+  ],
+  "paralaje": {
+   "cielo": "auto",
+   "lejos": "horizonte_llano",
+   "cerca": "morichal_apure"
+  },
+  "piso": [
+   {
+    "x0": 0,
+    "x1": 1560,
+    "tipo": "pasto",
+    "nombre": "el campo de lanzamiento"
+   }
+  ],
+  "huecos": [],
+  "plataformas": [],
+  "muros": [],
+  "escaleras": [],
+  "postes": [],
+  "agua": [],
+  "bajo": [],
+  "solidos": [],
+  "carriles": [
+   {
+    "y": 18
+   },
+   {
+    "y": 42
+   },
+   {
+    "y": 70
+   }
+  ],
+  "entidades": [],
+  "ranuras_deco": [
+   {
+    "x0": 0,
+    "x1": 1560,
+    "capa": "lejos",
+    "tema": "horizonte_llano"
+   },
+   {
+    "x0": 0,
+    "x1": 1560,
+    "capa": "cerca",
+    "tema": "morichales_caney_estero"
+   }
+  ],
+  "vida": [
+   "estero",
+   "ganado",
+   "garzas",
+   "corocoras"
+  ]
+ }
+}

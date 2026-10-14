@@ -1,0 +1,38 @@
+{
+ "id": "cocora",
+ "largo": 1720,
+ "franja": {
+  "atras": 228,
+  "adelante": 348
+ },
+ "piso": [
+  {
+   "x0": 0,
+   "x1": 1720,
+   "tipo": "cancha",
+   "nombre": "la pista de tartán"
+  }
+ ],
+ "huecos": [],
+ "plataformas": [],
+ "muros": [],
+ "escaleras": [],
+ "postes": [],
+ "agua": [],
+ "bajo": [],
+ "solidos": [],
+ "carriles": [
+  {
+   "y": 18
+  },
+  {
+   "y": 46
+  },
+  {
+   "y": 74
+  },
+  {
+   "y": 102
+  }
+ ]
+}

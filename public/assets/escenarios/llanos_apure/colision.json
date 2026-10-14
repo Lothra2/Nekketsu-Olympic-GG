@@ -1,0 +1,35 @@
+{
+ "id": "llanos_apure",
+ "largo": 1560,
+ "franja": {
+  "atras": 226,
+  "adelante": 346
+ },
+ "piso": [
+  {
+   "x0": 0,
+   "x1": 1560,
+   "tipo": "pasto",
+   "nombre": "el campo de lanzamiento"
+  }
+ ],
+ "huecos": [],
+ "plataformas": [],
+ "muros": [],
+ "escaleras": [],
+ "postes": [],
+ "agua": [],
+ "bajo": [],
+ "solidos": [],
+ "carriles": [
+  {
+   "y": 18
+  },
+  {
+   "y": 42
+  },
+  {
+   "y": 70
+  }
+ ]
+}

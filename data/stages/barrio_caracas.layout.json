@@ -1,0 +1,80 @@
+{
+ "id": "barrio_caracas",
+ "pais": "venezuela",
+ "prueba": "chapita",
+ "vista": "lado",
+ "nombre": "BARRIO DE CARACAS",
+ "nota": "Chapita de lado en una calle de barrio de Caracas, en la tarde. Los pies de Chapita.ts van en PISO 316: la franja va de la acera (fila 296) a la 336 y el carril es el y 20. El home de tiza va en x 94 a 116 (filas 314 a 320) y la marca del pitcher en x 326 a 334: los pinta el arte, así el juego quita su tiza. La casa del vecino (x 640 a 810, 100 de alto, con la ventana de x 646 a 682 entre z 40 y 64) y la ventana rota van en dos objetos: el juego prende la rota cuando la chapa rompe la ventana, como hoy con chap_vidrio_roto. La caja de cartón, la señora Carmen y el letrero de HIELITOS ya vienen: la caja y Carmen los sigue poniendo el juego. Mundo de 900 con zoom 1.2: la cámara ve de la fila 60 para abajo.",
+ "largo": 900,
+ "franja": {
+  "atras": 296,
+  "adelante": 336
+ },
+ "hora": "tarde",
+ "clima": [
+  "despejado",
+  "calor"
+ ],
+ "paralaje": {
+  "cielo": "auto",
+  "lejos": "avila_tarde",
+  "cerca": "calle_barrio_caracas"
+ },
+ "piso": [
+  {
+   "x0": 0,
+   "x1": 900,
+   "tipo": "asfalto",
+   "nombre": "la calle del barrio"
+  }
+ ],
+ "huecos": [],
+ "plataformas": [],
+ "muros": [],
+ "escaleras": [],
+ "postes": [],
+ "agua": [],
+ "bajo": [],
+ "solidos": [],
+ "carriles": [
+  {
+   "y": 20
+  }
+ ],
+ "entidades": [
+  {
+   "tipo": "objeto",
+   "objeto": "casa_vecino",
+   "x": 640,
+   "y": 20,
+   "nota": "la casa del vecino de x 640 a 810, parada en la fila 316"
+  },
+  {
+   "tipo": "objeto",
+   "objeto": "ventana_rota",
+   "x": 646,
+   "y": 20,
+   "nota": "la ventana rota, apagada hasta que la chapa rompe la ventana"
+  }
+ ],
+ "ranuras_deco": [
+  {
+   "x0": 0,
+   "x1": 900,
+   "capa": "lejos",
+   "tema": "avila_tarde"
+  },
+  {
+   "x0": 0,
+   "x1": 900,
+   "capa": "cerca",
+   "tema": "ranchos_casas_abasto_mango"
+  }
+ ],
+ "vida": [
+  "ropa_tendida",
+  "vecinos",
+  "perro",
+  "zamuros"
+ ]
+}

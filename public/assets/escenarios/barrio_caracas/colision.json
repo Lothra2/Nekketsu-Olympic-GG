@@ -1,0 +1,29 @@
+{
+ "id": "barrio_caracas",
+ "largo": 900,
+ "franja": {
+  "atras": 296,
+  "adelante": 336
+ },
+ "piso": [
+  {
+   "x0": 0,
+   "x1": 900,
+   "tipo": "asfalto",
+   "nombre": "la calle del barrio"
+  }
+ ],
+ "huecos": [],
+ "plataformas": [],
+ "muros": [],
+ "escaleras": [],
+ "postes": [],
+ "agua": [],
+ "bajo": [],
+ "solidos": [],
+ "carriles": [
+  {
+   "y": 20
+  }
+ ]
+}

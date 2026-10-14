@@ -52,7 +52,9 @@ async function bot(s, { atrapa = 0.5, pasa = false, reacciona = 1 } = {}) {
     await mover(0, 0);
     // como juega un niño: a veces reacciona bien y a veces no
     if (decidio === null) decidio = Math.random() < reacciona ? (Math.random() < atrapa ? 'k' : 'l') : '';
-    if (d < 30 && c.st === 'libre' && decidio) { await toque(decidio); decidio = ''; }
+    // el salto sale un poco antes que la atrapada: el bot mira el estado cada tantos milisegundos y el tiro fuerte
+    // cruza en un suspiro la ventana de 30 px
+    if (d < (decidio === 'l' ? 50 : 30) && c.st === 'libre' && decidio) { await toque(decidio); decidio = ''; }
     return;
   }
   decidio = null;

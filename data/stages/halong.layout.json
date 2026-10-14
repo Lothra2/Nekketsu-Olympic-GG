@@ -1,0 +1,73 @@
+{
+ "id": "halong",
+ "pais": "vietnam",
+ "prueba": "natacion",
+ "vista": "lado",
+ "nombre": "VỊNH HẠ LONG",
+ "nota": "Natación de lado en una piscina flotante de la bahía de Hạ Long, al mediodía. La franja de Natacion.ts empieza en TOP 226 y tiene 120 de fondo (filas 226 a 346). La superficie de cada carril va en y 24, 50, 76 y 102 (filas 250, 276, 302 y 328). La piscina la pinta el arte: el agua de y 2 a y 110 entre x 118 y la pared de llegada en x 1360, las corcheras en y 36, 62 y 88 y la marca de 15 m en x 492. El juego quita su 'piscina' y sigue poniendo los poyetes en x 112, los números y la capa de agua de adelante de cada carril. Mundo de 1460 con zoom 1.5: la cámara ve de la fila 120 para abajo.",
+ "largo": 1460,
+ "franja": {
+  "atras": 226,
+  "adelante": 346
+ },
+ "hora": "mediodia",
+ "clima": [
+  "despejado"
+ ],
+ "paralaje": {
+  "cielo": "auto",
+  "lejos": "islotes_halong",
+  "cerca": "bahia_halong"
+ },
+ "piso": [
+  {
+   "x0": 0,
+   "x1": 1460,
+   "tipo": "madera",
+   "nombre": "el muelle flotante"
+  }
+ ],
+ "huecos": [],
+ "plataformas": [],
+ "muros": [],
+ "escaleras": [],
+ "postes": [],
+ "agua": [],
+ "bajo": [],
+ "solidos": [],
+ "carriles": [
+  {
+   "y": 24
+  },
+  {
+   "y": 50
+  },
+  {
+   "y": 76
+  },
+  {
+   "y": 102
+  }
+ ],
+ "entidades": [],
+ "ranuras_deco": [
+  {
+   "x0": 0,
+   "x1": 1460,
+   "capa": "lejos",
+   "tema": "islotes_halong"
+  },
+  {
+   "x0": 0,
+   "x1": 1460,
+   "capa": "cerca",
+   "tema": "islotes_junco_aldea_muelle"
+  }
+ ],
+ "vida": [
+  "banderas",
+  "publico",
+  "juncos",
+  "gaviotas"
+ ]
+}

@@ -1,0 +1,33 @@
+{
+ "nota": "x e y en pixeles de pantalla a escala 1 (y de pantalla = franja.atras + y del mundo). fx: nombre del efecto del catálogo (manifest.fx).",
+ "particulas": [
+  {
+   "tipo": "neblina",
+   "x0": 0,
+   "x1": 1720,
+   "y0": 150,
+   "y1": 200,
+   "color": [
+    "#e4ece6",
+    "#fbfaf2"
+   ],
+   "cada": 1.2,
+   "vida": 4,
+   "nota": "jirones de neblina que bajan por el valle"
+  },
+  {
+   "tipo": "brillo",
+   "x0": 0,
+   "x1": 1720,
+   "y0": 200,
+   "y1": 226,
+   "color": [
+    "#fbfaf2",
+    "#9ed6a0"
+   ],
+   "cada": 0.8,
+   "vida": 0.6,
+   "nota": "el rocío del pasto que brilla con el sol de la mañana"
+  }
+ ]
+}

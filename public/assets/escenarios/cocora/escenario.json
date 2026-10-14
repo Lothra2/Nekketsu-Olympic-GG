@@ -1,0 +1,455 @@
+{
+ "generado_con": "PixelForja",
+ "id": "cocora",
+ "nombre": "VALLE DE COCORA, QUINDÍO",
+ "escala": 1,
+ "resolucion": [
+  640,
+  360
+ ],
+ "franja": {
+  "atras": 228,
+  "adelante": 348
+ },
+ "largo": 1720,
+ "hora": "manana",
+ "clima": [
+  "neblina"
+ ],
+ "inclinacion": 0,
+ "ancho": 1720,
+ "vista": "lado",
+ "nota_vista": "de lado: el dibujo va derecho (inclinación 0). El fondo (la capa cerca) va de la fila 0 a franja.atras (228) y es transparente donde se ven lejos y el cielo. El piso va de la fila 228 al borde de abajo de la pantalla: la franja donde se paran los atletas (y del mundo = fila de pantalla - 228) y lo de adelante. Las capas, los objetos y la vida se cargan igual que en la vista oblicua.",
+ "capas": {
+  "cielo": {
+   "archivo": "cielo_manana.png",
+   "y": 0,
+   "paralaje": 0,
+   "repetir_x": true
+  },
+  "lejos": {
+   "archivo": "lejos.png",
+   "y": 28,
+   "paralaje": 0.25,
+   "repetir_x": true
+  },
+  "tras_cerca": {
+   "nota": "la vida con capa tras_cerca va aquí: se ve por los callejones"
+  },
+  "cerca": {
+   "archivos": [
+    "cerca_0.png",
+    "cerca_1.png"
+   ],
+   "trozo": 1280,
+   "y": 0,
+   "paralaje": 1
+  },
+  "piso": {
+   "archivos": [
+    "piso_0.png",
+    "piso_1.png"
+   ],
+   "trozo": 1280,
+   "y": 228,
+   "paralaje": 1,
+   "nota": "de lado: las primeras 120 filas son la franja donde se paran los atletas, las de abajo lo de adelante hasta el borde de la pantalla"
+  },
+  "objetos": {
+   "archivo": "objetos.json",
+   "nota": "entre el piso y el frente, ordenados con los atletas"
+  },
+  "frente": {
+   "archivos": [
+    "frente_0.png",
+    "frente_1.png"
+   ],
+   "trozo": 1280,
+   "y": 334,
+   "paralaje": 1
+  }
+ },
+ "vida": {
+  "imagen": "vida.png",
+  "piezas": [
+   {
+    "id": "neblina_0",
+    "tipo": "neblina",
+    "capa": "lejos",
+    "x": -300,
+    "y": 118,
+    "fps": 1,
+    "recorrido": {
+     "desde": [
+      -300,
+      118
+     ],
+     "hasta": [
+      1280,
+      114
+     ],
+     "segundos": 100,
+     "desfase": 0.2
+    },
+    "cuadros": [
+     {
+      "x": 0,
+      "y": 0,
+      "w": 300,
+      "h": 20
+     }
+    ]
+   },
+   {
+    "id": "neblina_1",
+    "tipo": "neblina",
+    "capa": "lejos",
+    "x": 1280,
+    "y": 136,
+    "fps": 1,
+    "recorrido": {
+     "desde": [
+      1280,
+      136
+     ],
+     "hasta": [
+      -360,
+      140
+     ],
+     "segundos": 130,
+     "desfase": 0.65
+    },
+    "cuadros": [
+     {
+      "x": 301,
+      "y": 0,
+      "w": 360,
+      "h": 16
+     }
+    ]
+   },
+   {
+    "id": "vaca_0",
+    "tipo": "vacas",
+    "capa": "cerca",
+    "x": 1156,
+    "y": 186,
+    "fps": 0.3,
+    "cuadros": [
+     {
+      "x": 662,
+      "y": 0,
+      "w": 28,
+      "h": 21
+     },
+     {
+      "x": 691,
+      "y": 0,
+      "w": 28,
+      "h": 21
+     }
+    ]
+   },
+   {
+    "id": "vaca_1",
+    "tipo": "vacas",
+    "capa": "cerca",
+    "x": 1184,
+    "y": 182,
+    "fps": 0.4,
+    "cuadros": [
+     {
+      "x": 720,
+      "y": 0,
+      "w": 28,
+      "h": 21
+     },
+     {
+      "x": 749,
+      "y": 0,
+      "w": 28,
+      "h": 21
+     }
+    ]
+   },
+   {
+    "id": "vaca_2",
+    "tipo": "vacas",
+    "capa": "cerca",
+    "x": 1526,
+    "y": 186,
+    "fps": 0.3,
+    "cuadros": [
+     {
+      "x": 778,
+      "y": 0,
+      "w": 28,
+      "h": 21
+     },
+     {
+      "x": 807,
+      "y": 0,
+      "w": 28,
+      "h": 21
+     }
+    ]
+   },
+   {
+    "id": "loros_0",
+    "tipo": "loros",
+    "capa": "lejos",
+    "x": -12,
+    "y": 108,
+    "fps": 6,
+    "recorrido": {
+     "desde": [
+      -12,
+      108
+     ],
+     "hasta": [
+      1280,
+      96
+     ],
+     "segundos": 26,
+     "desfase": 0.3
+    },
+    "cuadros": [
+     {
+      "x": 836,
+      "y": 0,
+      "w": 11,
+      "h": 7
+     },
+     {
+      "x": 848,
+      "y": 0,
+      "w": 11,
+      "h": 7
+     }
+    ]
+   },
+   {
+    "id": "loros_1",
+    "tipo": "loros",
+    "capa": "lejos",
+    "x": -24,
+    "y": 112,
+    "fps": 6,
+    "recorrido": {
+     "desde": [
+      -24,
+      112
+     ],
+     "hasta": [
+      1268,
+      100
+     ],
+     "segundos": 26,
+     "desfase": 0.32
+    },
+    "cuadros": [
+     {
+      "x": 860,
+      "y": 0,
+      "w": 11,
+      "h": 7
+     },
+     {
+      "x": 872,
+      "y": 0,
+      "w": 11,
+      "h": 7
+     }
+    ]
+   }
+  ],
+  "nota": "capa cerca y tras_cerca: x, y de pantalla, como siempre. capa lejos: x, y en pixeles de la imagen lejos (que se repite cada su ancho y corre con su paralaje); va de recorrido.desde a recorrido.hasta en recorrido.segundos y vuelve a empezar, adelantada por desfase (0 a 1). capa objeto: va encima de un objeto, con setDepth(franja.atras + orden), como los objetos."
+ },
+ "callejones": [],
+ "superficie": {
+  "archivo": "superficie.png",
+  "y": 228,
+  "leyenda": [
+   {
+    "id": "acera",
+    "color": "#d0d0d0",
+    "paso": "paso_piedra",
+    "resbala": false
+   }
+  ]
+ },
+ "colision": "colision.json",
+ "luces": "luces.json",
+ "particulas": "particulas.json",
+ "paleta": [
+  {
+   "nombre": "tinta",
+   "hex": "#1a1c1e"
+  },
+  {
+   "nombre": "sombra",
+   "hex": "#2e3a34"
+  },
+  {
+   "nombre": "asfalto",
+   "hex": "#4a5248"
+  },
+  {
+   "nombre": "asfalto_claro",
+   "hex": "#767e70"
+  },
+  {
+   "nombre": "cemento",
+   "hex": "#a8aa9c"
+  },
+  {
+   "nombre": "cemento_claro",
+   "hex": "#d8d6c8"
+  },
+  {
+   "nombre": "crema",
+   "hex": "#f0ead6"
+  },
+  {
+   "nombre": "luz",
+   "hex": "#fbfaf2"
+  },
+  {
+   "nombre": "amarillo",
+   "hex": "#f2cf4a"
+  },
+  {
+   "nombre": "ocre",
+   "hex": "#c79a48"
+  },
+  {
+   "nombre": "terracota",
+   "hex": "#a8553c"
+  },
+  {
+   "nombre": "rojo",
+   "hex": "#cc4a34"
+  },
+  {
+   "nombre": "vino",
+   "hex": "#7a2a2c"
+  },
+  {
+   "nombre": "salmon",
+   "hex": "#e88a72"
+  },
+  {
+   "nombre": "menta",
+   "hex": "#9ed6a0"
+  },
+  {
+   "nombre": "verde",
+   "hex": "#5aa44a"
+  },
+  {
+   "nombre": "verde_oscuro",
+   "hex": "#2e6a3a"
+  },
+  {
+   "nombre": "celeste",
+   "hex": "#8cc4e4"
+  },
+  {
+   "nombre": "cielo",
+   "hex": "#cfe6f0"
+  },
+  {
+   "nombre": "azul",
+   "hex": "#3a6aa8"
+  },
+  {
+   "nombre": "azul_noche",
+   "hex": "#26425e"
+  },
+  {
+   "nombre": "canal",
+   "hex": "#5e8a8a"
+  },
+  {
+   "nombre": "oro",
+   "hex": "#f6b23a"
+  },
+  {
+   "nombre": "bruma",
+   "hex": "#e4ece6"
+  }
+ ],
+ "verificacion": "verificacion.md",
+ "layout": {
+  "id": "cocora",
+  "pais": "colombia",
+  "prueba": "vallas",
+  "vista": "lado",
+  "nombre": "VALLE DE COCORA, QUINDÍO",
+  "nota": "Vallas del Café de lado en el valle de Cocora, en la mañana con neblina. La pista de Vallas.ts empieza en TOP 228: la franja va de 228 a 348 y los carriles corren en y 18, 46, 74 y 102 (filas 246, 274, 302 y 330). Las rayas de la pista van en y 0, 28, 56, 84 y 112, la salida en x 120, la meta a cuadros en x 1570 y las marquitas cada 100 px: las pinta el arte, así el juego quita su 'pista'. Las vallas (x 300 + 145 por cada una, 9 por carril) y los números de los carriles los sigue poniendo el juego. Mundo de 1720 con zoom 1.5: la cámara ve de la fila 120 para abajo.",
+  "largo": 1720,
+  "franja": {
+   "atras": 228,
+   "adelante": 348
+  },
+  "hora": "manana",
+  "clima": [
+   "neblina"
+  ],
+  "paralaje": {
+   "cielo": "auto",
+   "lejos": "cordillera_cocora",
+   "cerca": "valle_cocora"
+  },
+  "piso": [
+   {
+    "x0": 0,
+    "x1": 1720,
+    "tipo": "cancha",
+    "nombre": "la pista de tartán"
+   }
+  ],
+  "huecos": [],
+  "plataformas": [],
+  "muros": [],
+  "escaleras": [],
+  "postes": [],
+  "agua": [],
+  "bajo": [],
+  "solidos": [],
+  "carriles": [
+   {
+    "y": 18
+   },
+   {
+    "y": 46
+   },
+   {
+    "y": 74
+   },
+   {
+    "y": 102
+   }
+  ],
+  "entidades": [],
+  "ranuras_deco": [
+   {
+    "x0": 0,
+    "x1": 1720,
+    "capa": "lejos",
+    "tema": "cordillera_cocora"
+   },
+   {
+    "x0": 0,
+    "x1": 1720,
+    "capa": "cerca",
+    "tema": "palmas_cera_finca_willys"
+   }
+  ],
+  "vida": [
+   "neblina",
+   "vacas",
+   "loros"
+  ]
+ }
+}

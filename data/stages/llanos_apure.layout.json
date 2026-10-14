@@ -1,0 +1,70 @@
+{
+ "id": "llanos_apure",
+ "pais": "venezuela",
+ "prueba": "jabalina",
+ "vista": "lado",
+ "nombre": "LLANOS DE APURE",
+ "nota": "Jabalina Llanera de lado en los Llanos de Apure, al atardecer. La franja de Jabalina.ts empieza en TOP 226 y tiene 120 de fondo (filas 226 a 346). El que lanza corre en y 70 (fila 296) por la pista de impulso de tartán (y 60 a 76) hasta la línea de foul en x 380; los que esperan van en y 18, 30 y 42 al principio. El sector de caída tiene sus orillas en y 0 y y 100 y una raya cada 100 px (10 m) desde la de foul. Todo eso lo pinta el arte, así el juego quita su 'campo'; los números de los metros los sigue poniendo el juego en la fila 338. Mundo de 1560 con zoom 1.5: la cámara ve de la fila 120 para abajo.",
+ "largo": 1560,
+ "franja": {
+  "atras": 226,
+  "adelante": 346
+ },
+ "hora": "atardecer",
+ "clima": [
+  "despejado"
+ ],
+ "paralaje": {
+  "cielo": "auto",
+  "lejos": "horizonte_llano",
+  "cerca": "morichal_apure"
+ },
+ "piso": [
+  {
+   "x0": 0,
+   "x1": 1560,
+   "tipo": "pasto",
+   "nombre": "el campo de lanzamiento"
+  }
+ ],
+ "huecos": [],
+ "plataformas": [],
+ "muros": [],
+ "escaleras": [],
+ "postes": [],
+ "agua": [],
+ "bajo": [],
+ "solidos": [],
+ "carriles": [
+  {
+   "y": 18
+  },
+  {
+   "y": 42
+  },
+  {
+   "y": 70
+  }
+ ],
+ "entidades": [],
+ "ranuras_deco": [
+  {
+   "x0": 0,
+   "x1": 1560,
+   "capa": "lejos",
+   "tema": "horizonte_llano"
+  },
+  {
+   "x0": 0,
+   "x1": 1560,
+   "capa": "cerca",
+   "tema": "morichales_caney_estero"
+  }
+ ],
+ "vida": [
+  "estero",
+  "ganado",
+  "garzas",
+  "corocoras"
+ ]
+}

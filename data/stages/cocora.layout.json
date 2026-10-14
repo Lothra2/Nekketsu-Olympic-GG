@@ -1,0 +1,72 @@
+{
+ "id": "cocora",
+ "pais": "colombia",
+ "prueba": "vallas",
+ "vista": "lado",
+ "nombre": "VALLE DE COCORA, QUINDÍO",
+ "nota": "Vallas del Café de lado en el valle de Cocora, en la mañana con neblina. La pista de Vallas.ts empieza en TOP 228: la franja va de 228 a 348 y los carriles corren en y 18, 46, 74 y 102 (filas 246, 274, 302 y 330). Las rayas de la pista van en y 0, 28, 56, 84 y 112, la salida en x 120, la meta a cuadros en x 1570 y las marquitas cada 100 px: las pinta el arte, así el juego quita su 'pista'. Las vallas (x 300 + 145 por cada una, 9 por carril) y los números de los carriles los sigue poniendo el juego. Mundo de 1720 con zoom 1.5: la cámara ve de la fila 120 para abajo.",
+ "largo": 1720,
+ "franja": {
+  "atras": 228,
+  "adelante": 348
+ },
+ "hora": "manana",
+ "clima": [
+  "neblina"
+ ],
+ "paralaje": {
+  "cielo": "auto",
+  "lejos": "cordillera_cocora",
+  "cerca": "valle_cocora"
+ },
+ "piso": [
+  {
+   "x0": 0,
+   "x1": 1720,
+   "tipo": "cancha",
+   "nombre": "la pista de tartán"
+  }
+ ],
+ "huecos": [],
+ "plataformas": [],
+ "muros": [],
+ "escaleras": [],
+ "postes": [],
+ "agua": [],
+ "bajo": [],
+ "solidos": [],
+ "carriles": [
+  {
+   "y": 18
+  },
+  {
+   "y": 46
+  },
+  {
+   "y": 74
+  },
+  {
+   "y": 102
+  }
+ ],
+ "entidades": [],
+ "ranuras_deco": [
+  {
+   "x0": 0,
+   "x1": 1720,
+   "capa": "lejos",
+   "tema": "cordillera_cocora"
+  },
+  {
+   "x0": 0,
+   "x1": 1720,
+   "capa": "cerca",
+   "tema": "palmas_cera_finca_willys"
+  }
+ ],
+ "vida": [
+  "neblina",
+  "vacas",
+  "loros"
+ ]
+}
