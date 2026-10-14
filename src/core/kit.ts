@@ -10,9 +10,10 @@ export type Box = [number, number, number, number];
 export type Pt = [number, number];
 /**
  * Un evento de una animación. `bote` es la pelota que toca el piso (el dribble), `atrapa` la pelota que llega a la mano
- * (desde ahí `objetos` vuelve a mandar) y `frase` el gesto fuerte de una burla, donde va el globo.
+ * (desde ahí `objetos` vuelve a mandar), `frase` el gesto fuerte de una burla, donde va el globo, y `brazada` el brazo
+ * que entra al agua en los nados.
  */
-export interface Evento { tipo: 'paso' | 'impacto' | 'suelta' | 'despegue' | 'aterriza' | 'bote' | 'atrapa' | 'frase'; cuadro: number; fase: number; pie?: string; punto?: Pt[] }
+export interface Evento { tipo: 'paso' | 'impacto' | 'suelta' | 'despegue' | 'aterriza' | 'bote' | 'atrapa' | 'frase' | 'brazada'; cuadro: number; fase: number; pie?: string; punto?: Pt[] }
 
 /**
  * Un objeto suelto de un cuadro (packs con `sin_props`): la pelota no viene pintada y va aquí, con su centro desde el

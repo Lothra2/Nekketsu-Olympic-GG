@@ -405,7 +405,8 @@ export class Azoteas extends EventScene {
       const t = this.add.bitmapText(this.x, TECHO - 52, 'fuente_ui', que).setOrigin(0.5).setDepth(6000).setTint(this.eff > 0.92 ? 0x8aff8a : 0xffe080);
       this.tweens.add({ targets: t, y: t.y - 10, alpha: 0, delay: 500, duration: 400, onComplete: () => t.destroy() });
     }
-    this.sound.play('esquiva', { volume: this.cur.c.human ? 0.4 : 0.15, rate: 0.8 });
+    // la garrocha del kit: el clavado en la cajita, y el latigazo cae solo cuando la animación llega a la suelta
+    this.suena('garrocha', this.cur.c.human ? 0.55 : 0.2, () => this.sound.play('esquiva', { volume: this.cur.c.human ? 0.4 : 0.15, rate: 0.8 }));
   }
 
   private alcance() {

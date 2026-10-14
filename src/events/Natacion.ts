@@ -134,6 +134,17 @@ export class Natacion extends EventScene {
     this.textures.addCanvas('poyete', b.done());
   }
 
+  /** La salida con su pitazo y el arranque, en vez del blip de la base. */
+  protected sonidoYa() { this.suena('salida_natacion', 0.6, () => super.sonidoYa()); }
+
+  /** A quién se le oyen las brazadas: a la persona mientras nada; si ya llegó, al que va más cerca de la cámara. */
+  private quienSeOye() {
+    const yo = this.swimmers.find((w) => w.c.human && w.st === 'swim');
+    if (yo) return yo;
+    const mitad = this.cameras.main.midPoint.x;
+    return this.swimmers.filter((w) => w.st === 'swim').sort((a, b) => Math.abs(a.x - mitad) - Math.abs(b.x - mitad))[0];
+  }
+
   update(_t: number, dms: number) {
     const dt = Math.min(0.05, dms / 1000);
     const p = this.pad.read();
@@ -172,7 +183,7 @@ export class Natacion extends EventScene {
       if (ev.some((e) => e.tipo === 'impacto')) {
         s.v = 120;
         if (!efecto(this, 'chapuzon_grande', s.x + 8, TOP + LANES[s.lane], { depth: TOP + LANES[s.lane] + 3 })) this.splash.explode(s.c.human ? 26 : 12, s.x + 8, TOP + LANES[s.lane]);
-        this.sound.play('esquiva', { volume: s.c.human ? 0.5 : 0.15, rate: 0.6 });
+        this.suena('chapuzon', s.c.human ? 0.6 : 0.18, () => this.sound.play('esquiva', { volume: s.c.human ? 0.5 : 0.15, rate: 0.6 }));
       }
       if (s.fig.anim.frame >= 6) s.x += s.v * dt;
       if (s.fig.anim.done) { s.st = 'swim'; s.fig.set('swim', true); }
@@ -203,7 +214,9 @@ export class Natacion extends EventScene {
     s.x += dx;
     const want = s.jalon > 2.2 ? 'swim_fly' : s.v < 20 ? 'tread_water' : 'swim';
     if (s.fig.anim.name !== want) s.fig.set(want);
-    s.fig.step(dt, want === 'tread_water' ? undefined : dx);
+    const ev = s.fig.step(dt, want === 'tread_water' ? undefined : dx);
+    // la brazada del kit, solo de quien se oye: cuatro a la vez se vuelven ruido
+    if (ev.some((e) => e.tipo === 'brazada') && s === this.quienSeOye()) this.suena('brazada', 0.3, undefined, 0.95 + Math.random() * 0.1);
     if (s.v > 30 && Math.random() < dt * (s.c.human ? 14 : 6)) this.splash.explode(2, s.x + Phaser.Math.Between(-14, 10), TOP + LANES[s.lane]);
     if (s.x >= FINISH - 14) {
       s.x = FINISH - 14;

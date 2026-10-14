@@ -218,9 +218,12 @@ export abstract class EventScene extends Phaser.Scene {
     await this.banner('EN SUS MARCAS', 'fuente_titulo_plata', 2, 600);
     await this.banner('LISTOS', 'fuente_titulo_plata', 2, 500);
     this.fase = 'juego';
-    chip.blip(1320, 0.25, 'sq50', 0.22, 1760);
+    this.sonidoYa();
     void this.banner('¡YA!', 'fuente_titulo', 5, 500);
   }
+
+  /** El sonido del ¡YA! (la natación lo cambia por su salida). */
+  protected sonidoYa() { chip.blip(1320, 0.25, 'sq50', 0.22, 1760); }
 
   protected nombre(id: string) { return (kit().atletas[id]?.nombre ?? id).split(' ')[0].toUpperCase(); }
 

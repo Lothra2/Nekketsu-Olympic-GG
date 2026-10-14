@@ -294,7 +294,11 @@
       "aro_basket",
       "aro_fallo",
       "chapa",
-      "chancleta"
+      "chancleta",
+      "salida_natacion",
+      "chapuzon",
+      "brazada",
+      "garrocha"
     ],
     "ambientes": [
       "agua"

@@ -1148,6 +1148,18 @@
        "cuadros": 8,
        "fps": 10,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 0,
+         "fase": 0
+        },
+        {
+         "tipo": "brazada",
+         "cuadro": 4,
+         "fase": 0.5
+        }
+       ],
        "avance": 8,
        "rumbo": ["right","down_right","up_right","down_right","up_right"],
        "agua": [42,42,42,42,42,42,42,42],
@@ -1161,6 +1173,13 @@
        "cuadros": 8,
        "fps": 9,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 5,
+         "fase": 0.63
+        }
+       ],
        "avance": 6,
        "rumbo": ["right","down_right","up_right","down_right","up_right"],
        "agua": [42,42,42,42,42,42,42,42],
@@ -1174,6 +1193,18 @@
        "cuadros": 8,
        "fps": 9,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 0,
+         "fase": 0
+        },
+        {
+         "tipo": "brazada",
+         "cuadro": 4,
+         "fase": 0.5
+        }
+       ],
        "avance": 7.2,
        "rumbo": ["left","down_left","up_left","down_right","up_right"],
        "agua": [42,42,42,42,42,42,42,42],
@@ -1187,6 +1218,13 @@
        "cuadros": 8,
        "fps": 10,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 0,
+         "fase": 0
+        }
+       ],
        "avance": 8,
        "rumbo": ["right","down_right","up_right","down_right","up_right"],
        "agua": [42,42,42,42,42,42,42,42],
@@ -3248,6 +3286,18 @@
        "cuadros": 8,
        "fps": 10,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 0,
+         "fase": 0
+        },
+        {
+         "tipo": "brazada",
+         "cuadro": 4,
+         "fase": 0.5
+        }
+       ],
        "avance": 26,
        "rumbo": ["right","down_right","up_right","down_right","up_right"],
        "agua": [53,53,53,53,53,53,53,53],
@@ -3261,6 +3311,13 @@
        "cuadros": 8,
        "fps": 9,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 5,
+         "fase": 0.63
+        }
+       ],
        "avance": 19.5,
        "rumbo": ["right","down_right","up_right","down_right","up_right"],
        "agua": [53,53,53,53,53,53,53,53],
@@ -3274,6 +3331,18 @@
        "cuadros": 8,
        "fps": 9,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 0,
+         "fase": 0
+        },
+        {
+         "tipo": "brazada",
+         "cuadro": 4,
+         "fase": 0.5
+        }
+       ],
        "avance": 23.4,
        "rumbo": ["left","down_left","up_left","down_right","up_right"],
        "agua": [53,53,53,53,53,53,53,53],
@@ -3287,6 +3356,13 @@
        "cuadros": 8,
        "fps": 10,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 0,
+         "fase": 0
+        }
+       ],
        "avance": 26,
        "rumbo": ["right","down_right","up_right","down_right","up_right"],
        "agua": [53,53,53,53,53,53,53,53],
@@ -5348,6 +5424,18 @@
        "cuadros": 8,
        "fps": 10,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 0,
+         "fase": 0
+        },
+        {
+         "tipo": "brazada",
+         "cuadro": 4,
+         "fase": 0.5
+        }
+       ],
        "avance": 16,
        "rumbo": ["right","down_right","up_right","down_right","up_right"],
        "agua": [40,40,40,40,40,40,40,40],
@@ -5361,6 +5449,13 @@
        "cuadros": 8,
        "fps": 9,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 5,
+         "fase": 0.63
+        }
+       ],
        "avance": 12,
        "rumbo": ["right","down_right","up_right","down_right","up_right"],
        "agua": [40,40,40,40,40,40,40,40],
@@ -5374,6 +5469,18 @@
        "cuadros": 8,
        "fps": 9,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 0,
+         "fase": 0
+        },
+        {
+         "tipo": "brazada",
+         "cuadro": 4,
+         "fase": 0.5
+        }
+       ],
        "avance": 14.4,
        "rumbo": ["left","down_left","up_left","down_right","up_right"],
        "agua": [40,40,40,40,40,40,40,40],
@@ -5387,6 +5494,13 @@
        "cuadros": 8,
        "fps": 10,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 0,
+         "fase": 0
+        }
+       ],
        "avance": 16,
        "rumbo": ["right","down_right","up_right","down_right","up_right"],
        "agua": [40,40,40,40,40,40,40,40],
@@ -7449,6 +7563,18 @@
        "cuadros": 8,
        "fps": 10,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 0,
+         "fase": 0
+        },
+        {
+         "tipo": "brazada",
+         "cuadro": 4,
+         "fase": 0.5
+        }
+       ],
        "avance": 16,
        "rumbo": ["right","down_right","up_right","down_right","up_right"],
        "agua": [40,40,40,40,40,40,40,40],
@@ -7462,6 +7588,13 @@
        "cuadros": 8,
        "fps": 9,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 5,
+         "fase": 0.63
+        }
+       ],
        "avance": 12,
        "rumbo": ["right","down_right","up_right","down_right","up_right"],
        "agua": [40,40,40,40,40,40,40,40],
@@ -7475,6 +7608,18 @@
        "cuadros": 8,
        "fps": 9,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 0,
+         "fase": 0
+        },
+        {
+         "tipo": "brazada",
+         "cuadro": 4,
+         "fase": 0.5
+        }
+       ],
        "avance": 14.4,
        "rumbo": ["left","down_left","up_left","down_right","up_right"],
        "agua": [40,40,40,40,40,40,40,40],
@@ -7488,6 +7633,13 @@
        "cuadros": 8,
        "fps": 10,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 0,
+         "fase": 0
+        }
+       ],
        "avance": 16,
        "rumbo": ["right","down_right","up_right","down_right","up_right"],
        "agua": [40,40,40,40,40,40,40,40],
@@ -9549,6 +9701,18 @@
        "cuadros": 8,
        "fps": 10,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 0,
+         "fase": 0
+        },
+        {
+         "tipo": "brazada",
+         "cuadro": 4,
+         "fase": 0.5
+        }
+       ],
        "avance": 16,
        "rumbo": ["right","down_right","up_right","down_right","up_right"],
        "agua": [40,40,40,40,40,40,40,40],
@@ -9562,6 +9726,13 @@
        "cuadros": 8,
        "fps": 9,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 5,
+         "fase": 0.63
+        }
+       ],
        "avance": 12,
        "rumbo": ["right","down_right","up_right","down_right","up_right"],
        "agua": [40,40,40,40,40,40,40,40],
@@ -9575,6 +9746,18 @@
        "cuadros": 8,
        "fps": 9,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 0,
+         "fase": 0
+        },
+        {
+         "tipo": "brazada",
+         "cuadro": 4,
+         "fase": 0.5
+        }
+       ],
        "avance": 14.4,
        "rumbo": ["left","down_left","up_left","down_right","up_right"],
        "agua": [40,40,40,40,40,40,40,40],
@@ -9588,6 +9771,13 @@
        "cuadros": 8,
        "fps": 10,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 0,
+         "fase": 0
+        }
+       ],
        "avance": 16,
        "rumbo": ["right","down_right","up_right","down_right","up_right"],
        "agua": [40,40,40,40,40,40,40,40],
@@ -11650,6 +11840,18 @@
        "cuadros": 8,
        "fps": 10,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 0,
+         "fase": 0
+        },
+        {
+         "tipo": "brazada",
+         "cuadro": 4,
+         "fase": 0.5
+        }
+       ],
        "avance": 12,
        "rumbo": ["right","down_right","up_right","down_right","up_right"],
        "agua": [41,41,41,41,41,41,41,41],
@@ -11663,6 +11865,13 @@
        "cuadros": 8,
        "fps": 9,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 5,
+         "fase": 0.63
+        }
+       ],
        "avance": 9,
        "rumbo": ["right","down_right","up_right","down_right","up_right"],
        "agua": [41,41,41,41,41,41,41,41],
@@ -11676,6 +11885,18 @@
        "cuadros": 8,
        "fps": 9,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 0,
+         "fase": 0
+        },
+        {
+         "tipo": "brazada",
+         "cuadro": 4,
+         "fase": 0.5
+        }
+       ],
        "avance": 10.8,
        "rumbo": ["left","down_left","up_left","down_right","up_right"],
        "agua": [41,41,41,41,41,41,41,41],
@@ -11689,6 +11910,13 @@
        "cuadros": 8,
        "fps": 10,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 0,
+         "fase": 0
+        }
+       ],
        "avance": 12,
        "rumbo": ["right","down_right","up_right","down_right","up_right"],
        "agua": [41,41,41,41,41,41,41,41],
@@ -13751,6 +13979,18 @@
        "cuadros": 8,
        "fps": 10,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 0,
+         "fase": 0
+        },
+        {
+         "tipo": "brazada",
+         "cuadro": 4,
+         "fase": 0.5
+        }
+       ],
        "avance": 16,
        "rumbo": ["right","down_right","up_right","down_right","up_right"],
        "agua": [40,40,40,40,40,40,40,40],
@@ -13764,6 +14004,13 @@
        "cuadros": 8,
        "fps": 9,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 5,
+         "fase": 0.63
+        }
+       ],
        "avance": 12,
        "rumbo": ["right","down_right","up_right","down_right","up_right"],
        "agua": [40,40,40,40,40,40,40,40],
@@ -13777,6 +14024,18 @@
        "cuadros": 8,
        "fps": 9,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 0,
+         "fase": 0
+        },
+        {
+         "tipo": "brazada",
+         "cuadro": 4,
+         "fase": 0.5
+        }
+       ],
        "avance": 14.4,
        "rumbo": ["left","down_left","up_left","down_right","up_right"],
        "agua": [40,40,40,40,40,40,40,40],
@@ -13790,6 +14049,13 @@
        "cuadros": 8,
        "fps": 10,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 0,
+         "fase": 0
+        }
+       ],
        "avance": 16,
        "rumbo": ["right","down_right","up_right","down_right","up_right"],
        "agua": [40,40,40,40,40,40,40,40],
@@ -15851,6 +16117,18 @@
        "cuadros": 8,
        "fps": 10,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 0,
+         "fase": 0
+        },
+        {
+         "tipo": "brazada",
+         "cuadro": 4,
+         "fase": 0.5
+        }
+       ],
        "avance": 12,
        "rumbo": ["right","down_right","up_right","down_right","up_right"],
        "agua": [41,41,41,41,41,41,41,41],
@@ -15864,6 +16142,13 @@
        "cuadros": 8,
        "fps": 9,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 5,
+         "fase": 0.63
+        }
+       ],
        "avance": 9,
        "rumbo": ["right","down_right","up_right","down_right","up_right"],
        "agua": [41,41,41,41,41,41,41,41],
@@ -15877,6 +16162,18 @@
        "cuadros": 8,
        "fps": 9,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 0,
+         "fase": 0
+        },
+        {
+         "tipo": "brazada",
+         "cuadro": 4,
+         "fase": 0.5
+        }
+       ],
        "avance": 10.8,
        "rumbo": ["left","down_left","up_left","down_right","up_right"],
        "agua": [41,41,41,41,41,41,41,41],
@@ -15890,6 +16187,13 @@
        "cuadros": 8,
        "fps": 10,
        "loop": true,
+       "eventos": [
+        {
+         "tipo": "brazada",
+         "cuadro": 0,
+         "fase": 0
+        }
+       ],
        "avance": 12,
        "rumbo": ["right","down_right","up_right","down_right","up_right"],
        "agua": [41,41,41,41,41,41,41,41],
@@ -19887,6 +20191,30 @@
     "duracion": 0.1,
     "muestras": 2205,
     "frecuencia": 22050
+   },
+   "salida_natacion": {
+    "archivo": ["audio/sfx/salida_natacion.ogg","audio/sfx/salida_natacion.m4a"],
+    "duracion": 0.58,
+    "muestras": 12887,
+    "frecuencia": 22050
+   },
+   "chapuzon": {
+    "archivo": ["audio/sfx/chapuzon.ogg","audio/sfx/chapuzon.m4a"],
+    "duracion": 0.84,
+    "muestras": 18563,
+    "frecuencia": 22050
+   },
+   "brazada": {
+    "archivo": ["audio/sfx/brazada.ogg","audio/sfx/brazada.m4a"],
+    "duracion": 0.32,
+    "muestras": 7041,
+    "frecuencia": 22050
+   },
+   "garrocha": {
+    "archivo": ["audio/sfx/garrocha.ogg","audio/sfx/garrocha.m4a"],
+    "duracion": 0.67,
+    "muestras": 14687,
+    "frecuencia": 22050
    }
   },
   "musica": {
@@ -20308,5 +20636,5 @@
   "notas": "Cada NPC es una tira de cuadros de w x h: el cuadro i va en x = i * w. Cada animación empieza en el cuadro \"desde\" y dura \"cuadros\". El ancla es el pixel de los pies: el juego pone ahí el (x, y) del NPC. Van de frente o en 3/4 hacia la calle (\"vista\"); no se espejan. Los que van de lado (\"lado\", la Marimonda que cruza) miran a la derecha: para ir a la izquierda el juego los espeja. eventos: en qué cuadro de la animación pasa algo (en patear, el impacto es cuando el pie le pega a la pelota: ahí el juego la suelta). Un grupo trae \"grupo\" con los de izquierda a derecha."
  },
  "creditos": "CREDITOS.txt",
- "notas": ["Las aves (tipo \"ave\") van en una tira de cuadros de w x h, de lado mirando a la derecha: para la izquierda se espejan con el ancla. El cuadro i va en x = i * w; cada animación empieza en \"desde\" y dura \"cuadros\". El ancla es el pixel de las patas en el piso. Las animaciones se quedan en su sitio (el juego mueve al ave); \"aire\" dice cuántos pixeles sube el ave sobre el ancla en cada cuadro (el salto del gallo, el vuelo de la paloma). eventos: en qué cuadro pasa algo (el canto del gallo, el aleteo que suena).","Hojas: fila = dirección (orden de `filas`), columna = cuadro. El pivote es el punto de apoyo (pies) y no se mueve.","eventos: en qué cuadro cae cada paso, golpe (impacto), despegue, suelta (pelota, bala, jabalina, hechizo) y aterrizaje.","avance: pixeles que avanza el cuerpo en un ciclo sin patinar. Ritmo = velocidad_del_juego * cuadros / (avance * fps).","elevacion: pixeles que el juego sube el sprite en cada cuadro (saltos que no caben en la celda); la sombra queda en el piso.","agua: fila de la superficie en la celda; el juego puede dibujar su piscina detrás y el nadador ya trae el tinte y las gotas.","desplazamiento: en las acciones que avanzan (salto largo, clavado, remate), pixeles que el juego mueve el sprite hacia donde mira, acumulados desde el primer cuadro.","rumbo: en las pruebas de campo, de frente y de espalda se dibuja la diagonal más cercana; rumbo dice hacia dónde moverlo en cada fila.","cajas, manos, cabeza y pies: [fila][cuadro], en pixeles desde el pivote con y hacia abajo. cajas = [x, y, w, h] de lo opaco (null si el cuadro está vacío); manos y pies = [[x, y] cerca, [x, y] lejos].","sin_props (voley, futbol, keeper, basket, tennis, beisbol): estos packs salen sin las pelotas dibujadas, porque el juego las mueve con su física. El cuerpo es el mismo, pixel a pixel, que en un pack con pelota. Lo que va agarrado (raqueta, bate, garrocha, jabalina) sí sale dibujado. objetos: [fila][cuadro] = lista de { tipo, clase, x, y, r, detras } o null si en ese cuadro no hay pelota. tipo = \"pelota\", clase = futbol, voley, basquet, tenis, beisbol, bala. x, y = centro exacto desde el pivote (puede caer en medio pixel), r = radio sin el contorno, detras = 1 si iba detrás del cuerpo. Al espejar, x pasa a -x. pelotas: cada pelota quitada, dibujada igual, en objetos/pelotas.json (cuadro <id>_<celda>, con su contorno y el pivote en el centro exacto): se pone en (x, y) de objetos.","packs: un atlas por pack (JSON Hash de TexturePacker, para this.load.atlas de Phaser). Cada cuadro se llama <anim>_<fila>_<cuadro>, con la fila por nombre (right, down...) y el cuadro desde 0.","retratos.png: arriba los chicos de 40 x 40 (el i en x = i * 40), abajo los grandes de 96 x 96 (el i en x = i * 96, y = 40), en el orden de `expresiones`. El grande es la cabeza y los hombros escalados x3 entero.","objetos: armas del piso. Cuadros <id>_<anim>_<cuadro>. quieto: la base en el pivote de la celda (como un personaje). girando: centrado. mano (16 cuadros): el agarre en el centro de la celda, el cuadro k girado k * 22.5 grados (0 = como en el piso). Para dibujar el arma en la mano usa el dato `arma` [x, y, angulo, detras] de la animación: elige <id>_mano_<k> con k = round(angulo / 22.5) % 16 y pon el centro de la celda en (x, y) desde el pivote del personaje; si detras = 1, dibújala antes que al personaje.","comida: objetos con peso \"comida\" en su propio atlas (objetos/comida.json, celdas de 16). Cuadros <id>_quieto_0 y <id>_humito_0..3 (en bucle a 6 fps), con la base en el pivote (8, 14) y su sombra ya dibujada. `cura` va de 1 a 3. Se come con la animación eat: el evento impacto marca el mordisco."]
+ "notas": ["Las aves (tipo \"ave\") van en una tira de cuadros de w x h, de lado mirando a la derecha: para la izquierda se espejan con el ancla. El cuadro i va en x = i * w; cada animación empieza en \"desde\" y dura \"cuadros\". El ancla es el pixel de las patas en el piso. Las animaciones se quedan en su sitio (el juego mueve al ave); \"aire\" dice cuántos pixeles sube el ave sobre el ancla en cada cuadro (el salto del gallo, el vuelo de la paloma). eventos: en qué cuadro pasa algo (el canto del gallo, el aleteo que suena).","Hojas: fila = dirección (orden de `filas`), columna = cuadro. El pivote es el punto de apoyo (pies) y no se mueve.","eventos: en qué cuadro cae cada paso, golpe (impacto), despegue, suelta (pelota, bala, jabalina, hechizo), aterrizaje y brazada (la mano entra al agua).","avance: pixeles que avanza el cuerpo en un ciclo sin patinar. Ritmo = velocidad_del_juego * cuadros / (avance * fps).","elevacion: pixeles que el juego sube el sprite en cada cuadro (saltos que no caben en la celda); la sombra queda en el piso.","agua: fila de la superficie en la celda; el juego puede dibujar su piscina detrás y el nadador ya trae el tinte y las gotas.","desplazamiento: en las acciones que avanzan (salto largo, clavado, remate), pixeles que el juego mueve el sprite hacia donde mira, acumulados desde el primer cuadro.","rumbo: en las pruebas de campo, de frente y de espalda se dibuja la diagonal más cercana; rumbo dice hacia dónde moverlo en cada fila.","cajas, manos, cabeza y pies: [fila][cuadro], en pixeles desde el pivote con y hacia abajo. cajas = [x, y, w, h] de lo opaco (null si el cuadro está vacío); manos y pies = [[x, y] cerca, [x, y] lejos].","sin_props (voley, futbol, keeper, basket, tennis, beisbol): estos packs salen sin las pelotas dibujadas, porque el juego las mueve con su física. El cuerpo es el mismo, pixel a pixel, que en un pack con pelota. Lo que va agarrado (raqueta, bate, garrocha, jabalina) sí sale dibujado. objetos: [fila][cuadro] = lista de { tipo, clase, x, y, r, detras } o null si en ese cuadro no hay pelota. tipo = \"pelota\", clase = futbol, voley, basquet, tenis, beisbol, bala. x, y = centro exacto desde el pivote (puede caer en medio pixel), r = radio sin el contorno, detras = 1 si iba detrás del cuerpo. Al espejar, x pasa a -x. pelotas: cada pelota quitada, dibujada igual, en objetos/pelotas.json (cuadro <id>_<celda>, con su contorno y el pivote en el centro exacto): se pone en (x, y) de objetos.","packs: un atlas por pack (JSON Hash de TexturePacker, para this.load.atlas de Phaser). Cada cuadro se llama <anim>_<fila>_<cuadro>, con la fila por nombre (right, down...) y el cuadro desde 0.","retratos.png: arriba los chicos de 40 x 40 (el i en x = i * 40), abajo los grandes de 96 x 96 (el i en x = i * 96, y = 40), en el orden de `expresiones`. El grande es la cabeza y los hombros escalados x3 entero.","objetos: armas del piso. Cuadros <id>_<anim>_<cuadro>. quieto: la base en el pivote de la celda (como un personaje). girando: centrado. mano (16 cuadros): el agarre en el centro de la celda, el cuadro k girado k * 22.5 grados (0 = como en el piso). Para dibujar el arma en la mano usa el dato `arma` [x, y, angulo, detras] de la animación: elige <id>_mano_<k> con k = round(angulo / 22.5) % 16 y pon el centro de la celda en (x, y) desde el pivote del personaje; si detras = 1, dibújala antes que al personaje.","comida: objetos con peso \"comida\" en su propio atlas (objetos/comida.json, celdas de 16). Cuadros <id>_quieto_0 y <id>_humito_0..3 (en bucle a 6 fps), con la base en el pivote (8, 14) y su sombra ya dibujada. `cura` va de 1 a 3. Se come con la animación eat: el evento impacto marca el mordisco."]
 }
