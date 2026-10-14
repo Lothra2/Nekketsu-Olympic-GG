@@ -445,7 +445,7 @@ export class Chapita extends EventScene {
     // el swing tarda tres cuadros (a 14 fps) en llegar al impacto
     const ideal = 3 / 14;
     // con la barra llena, el batazo Nekketsu sin error
-    if (!this.d.practica && this.nek[this.bat.c.team] >= 100) return { t: ideal, altura: 'alta', nek: true };
+    if (!this.d.practica && this.nek[this.bat.c.team] >= 100 && Math.random() < 0.5) return { t: ideal, altura: 'alta', nek: true };
     const error = (Math.random() + Math.random() + Math.random() - 1.5) * (0.22 - 0.1 * ag);
     const acierta = this.chapa.tipo === 'recta' || Math.random() < 0.3 + 0.4 * ag;
     const altura: Altura = this.chapa.tipo === 'recta' ? (Math.random() < 0.35 ? 'alta' : 'media') : acierta ? (this.chapa.tipo === 'sube' ? 'alta' : 'baja') : this.chapa.tipo === 'sube' ? 'baja' : 'alta';
@@ -472,10 +472,10 @@ export class Chapita extends EventScene {
     const alturaBien = s.nek || (this.humanoBatea() && ajustes().nombre === 'PASEO') || this.d.practica && this.paso === 0 || (c.z >= a - 2 && c.z <= b + 2);
     if (Math.abs(dx) > ventana || !alturaBien) { this.sound.play('esquiva', { volume: 0.2, rate: 0.8 }); return; }
     const q = s.nek ? 1 : 1 - Math.abs(dx) / ventana;
-    // alta y bien pegada (q de 0.85 para arriba) se va por encima de la casa: jonrón
-    const jonron = s.altura === 'alta' && q >= 0.85;
+    // alta y bien pegada (q de 0.9 para arriba) se va por encima de la casa: jonrón
+    const jonron = s.altura === 'alta' && q >= 0.9;
     const ang = Phaser.Math.DegToRad(q < 0.2 ? 4 : jonron ? ANGULO.alta + (Math.random() - 0.5) * 2 : ANGULO[s.altura] + (Math.random() - 0.5) * 6);
-    const v = q < 0.2 ? 120 : jonron ? 440 + 200 * (q - 0.85) : 150 + 280 * q;
+    const v = q < 0.2 ? 120 : jonron ? 440 + 200 * (q - 0.9) : 150 + 280 * q;
     // el del campo: los flojos los atrapa casi siempre; los duros y altos casi nunca (la máquina, menos en los fáciles)
     const fuerza = q * (s.altura === 'alta' ? 1.1 : s.altura === 'media' ? 0.8 : 0.6);
     const ag = this.d.practica ? 0.5 : ajustes().cpuAgresion;
@@ -495,7 +495,7 @@ export class Chapita extends EventScene {
       efecto(this, 'confeti', CONTACTO, PISO - 50, { depth: 6000 });
       this.cameras.main.shake(260, 0.014);
       chip.boom(1);
-    } else this.carga(this.bat.c.team, 20);
+    } else this.carga(this.bat.c.team, 10);
     if (this.humanoBatea()) { this.contactos++; if (c.tipo !== 'recta') this.contactosCurva++; }
     // el del campo sale corriendo hacia donde va a caer
     this.fieldVx = 0;
@@ -532,7 +532,7 @@ export class Chapita extends EventScene {
     }
     c.x = Phaser.Math.Clamp(c.x, 0, WORLD - 4);
     // el del campo la atrapa en el aire: out (o se le escapa, si era un batazo duro)
-    if (!c.resuelta && !c.escapo && this.field && c.botes === 0 && Math.abs(c.x - this.fx) < 7 && c.z < 30 + this.fieldZ && c.z > 0) {
+    if (!c.resuelta && !c.escapo && this.field && c.botes === 0 && Math.abs(c.x - this.fx) < 9 && c.z < 30 + this.fieldZ && c.z > 0) {
       if (c.escapa) {
         c.escapo = true;
         this.field.fig.set('hit', true);
@@ -560,7 +560,7 @@ export class Chapita extends EventScene {
     let x = c.x, z = c.z, vx = c.vx, vz = c.vz;
     for (let k = 0; k < 200 && z > 14; k++) { vz -= G * 0.02; x += vx * 0.02; z += vz * 0.02; }
     const meta = Phaser.Math.Clamp(x, PIT_X + 20, CASA_X - 10);
-    const vel = (this.d.practica ? 60 : 85 + 15 * ajustes().cpuAgresion) * (f.c.team === 0 ? 1.05 : 1);
+    const vel = (this.d.practica ? 60 : 95 + 22 * ajustes().cpuAgresion) * (f.c.team === 0 ? 1.05 : 1);
     const d = meta - this.fx;
     const mueve = Math.abs(d) > 3;
     if (mueve) this.fx += Math.sign(d) * Math.min(Math.abs(d), vel * dt);
@@ -635,8 +635,8 @@ export class Chapita extends EventScene {
 
   private strike() {
     this.strikes++;
-    this.carga(this.bat.c.team, 10);
-    if (this.strikes >= 3) this.carga(this.pit.c.team, 25);
+    this.carga(this.bat.c.team, 5);
+    if (this.strikes >= 3) this.carga(this.pit.c.team, 20);
     this.letrero(this.strikes >= 3 ? '¡PONCHADO!' : `STRIKE ${this.strikes}`, this.strikes >= 3 ? 0xff6060 : 0xffffff);
     this.chapa.resuelta = true;
     if (this.strikes >= 3) {

@@ -21,7 +21,7 @@ const toque = async (k) => { await p.keyboard.down(k); await p.waitForTimeout(40
 await p.evaluate(() => { const g = window.game; g.scene.getScenes(false).forEach((x) => { const st = x.sys.settings.status; if (st >= 3 && st <= 7) g.scene.stop(x.scene.key); }); g.scene.start('Basket', { jugador: 'rick' }); });
 await p.waitForFunction(() => window.game.scene.getScene('Basket')?.fase === 'juego', null, { timeout: 30000 });
 // congela a la máquina para poner cada jugada a mano
-const pon = (f) => p.evaluate(f);
+const pon = (f, a) => p.evaluate(f, a);
 
 // 1) el robo: un rival bota el balón pegado a ti; puño hasta quitárselo
 let robos = 0;
@@ -29,7 +29,8 @@ for (let k = 0; k < 6 && !robos; k++) {
   await pon(() => {
     const s = window.game.scene.getScene('Basket'); const yo = s.js[0], r = s.js.find((j) => j.team === 1);
     s.pausa = 0; s.limpia = true; s.ataca = 1;
-    yo.x = 420; yo.y = 52; yo.st = 'libre'; yo.empuja = 0; r.x = 432; r.y = 52; r.st = 'libre'; r.aguanta = 0; r.z = 0;
+    for (const o of s.js) if (o.team === 0 && o !== yo) { o.x = 100; o.y = 20; }
+    yo.x = 420; yo.y = 52; yo.st = 'libre'; yo.empuja = 0; r.x = 432; r.y = 52; r.st = 'libre'; r.aguanta = 0; r.z = 0; r.ia.t = 3; r.empuja = 1;
     s.bola.dueño = r; s.bola.tiro = null; s.ctrl = yo;
   });
   await toque('j');
@@ -44,13 +45,15 @@ const clava = async (x, corre) => {
   await pon((x) => {
     const s = window.game.scene.getScene('Basket'); const yo = s.js[0];
     s.pausa = 0; s.limpia = true; s.ataca = 0;
-    for (const o of s.js) if (o.team === 1) { o.x = 380; o.y = 10; o.z = 0; o.vz = 0; }
+    for (const o of s.js) if (o.team === 0 && o !== yo) { o.x = 100; o.y = 20; }
+    for (const o of s.js) if (o.team === 1) { o.x = 380; o.y = 10; o.z = 0; o.vz = 0; o.st = 'caido'; o.t = 3; }
     yo.x = x; yo.y = 52; yo.z = 0; yo.vz = 0; yo.st = 'libre'; s.bola.dueño = yo; s.bola.tiro = null;
   }, x);
   if (corre) await p.keyboard.down('Shift');
   await toque('l');
   if (corre) await p.keyboard.up('Shift');
-  await p.waitForTimeout(1200);
+  for (let i = 0; i < 4; i++) { await p.waitForTimeout(150); if (process.env.TRAZA) console.log(await pon(() => { const s = window.game.scene.getScene('Basket'); const yo = s.js[0]; return `ctrl ${s.ctrl?.id} yo ${yo.id} ${Math.round(yo.x)} z${Math.round(yo.z)} ${yo.st} dueño ${s.bola.dueño?.id} tiro ${!!s.bola.tiro} pausa ${s.pausa.toFixed(2)} pts ${s.puntos}`; })); }
+  await p.waitForTimeout(600);
   return (await pon(() => window.game.scene.getScene('Basket').puntos[0])) - antes;
 };
 let clavo = 0;
@@ -63,7 +66,7 @@ await pon(() => { window.game.scene.getScene('Basket').nek[0] = 100; });
 const antesFuego = await pon(() => window.game.scene.getScene('Basket').puntos[0]);
 await pon(() => {
   const s = window.game.scene.getScene('Basket'); const yo = s.js[0];
-  s.pausa = 0; s.limpia = true; s.ataca = 0; yo.x = 360; yo.y = 52; yo.z = 0; yo.st = 'libre'; s.bola.dueño = yo; s.bola.tiro = null;
+  s.pausa = 0; s.limpia = true; s.ataca = 0; for (const o of s.js) if (o.team === 0 && o !== yo) { o.x = 100; o.y = 20; } yo.x = 360; yo.y = 52; yo.z = 0; yo.st = 'libre'; s.bola.dueño = yo; s.bola.tiro = null;
 });
 await toque('u');
 await p.waitForTimeout(300);
@@ -74,7 +77,7 @@ check((await pon(() => window.game.scene.getScene('Basket').puntos[0])) - antesF
 await pon(() => { const s = window.game.scene.getScene('Basket'); s.nek[0] = 100; });
 await pon(() => {
   const s = window.game.scene.getScene('Basket'); const yo = s.js[0], r = s.js.find((j) => j.team === 1);
-  s.pausa = 0; s.limpia = true; s.ataca = 1; yo.x = 400; yo.y = 52; yo.st = 'libre'; yo.empuja = 0; r.x = 450; r.y = 52; r.st = 'libre'; r.z = 0;
+  s.pausa = 0; s.limpia = true; s.ataca = 1; for (const o of s.js) if (o.team === 0 && o !== yo) { o.x = 100; o.y = 20; } yo.x = 400; yo.y = 52; yo.st = 'libre'; yo.empuja = 0; r.x = 450; r.y = 52; r.st = 'libre'; r.z = 0;
   s.bola.dueño = r; s.bola.tiro = null;
 });
 await toque('u');
