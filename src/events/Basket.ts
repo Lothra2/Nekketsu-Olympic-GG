@@ -125,6 +125,7 @@ export class Basket extends EventScene {
     this.barra = this.add.graphics().setDepth(6001);
     this.posesion(0, true);
     this.tema('gaita_lago');
+    this.ambiente('lago_noche');
     this.cameras.main.centerOn(320, 180);
     if (this.d.practica) void this.entrenar('BÁSQUET', this.pasos(), 40);
     else void this.previa('BÁSQUET 3X3', 'MARACAIBO, VENEZUELA', 'MANTÉN {PATADA} Y SUELTA EN LO VERDE · {SALTO} CERCA DEL ARO: CLAVADA · {PUÑO} PASA O ROBA · BARRA LLENA: {ESPECIAL}');

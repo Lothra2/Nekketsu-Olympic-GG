@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { Figura } from '../core/figura';
-import { kit, type Box, type Objeto } from '../core/kit';
+import { kit, type Box, type Objeto, type Evento } from '../core/kit';
 import { efecto } from '../core/fx';
 import { ATTACKS, DEPTH, FLOOR_TOP, GRAVITY, HP, PESO_DMG, SPEED, XMAX, XMIN, type AttackDef } from './defs';
 
@@ -40,6 +40,8 @@ export interface World {
   multDaño?(from: Actor | null, victim: Actor): number;
   /** un cartelito de cómic sobre alguien (¡BLOQUEO!, ¡ÑAM!) */
   aviso?(a: Actor, s: string, color: number): void;
+  /** el tatami del judo: el agarre es de solapa y manga, y la patada es la proyección (lote B4B6) */
+  esJudo?: boolean;
   /** la comida que hay en el piso (la máquina va por ella si está mal de vida) */
   comida?: { x: number; y: number }[];
   /**
@@ -96,6 +98,8 @@ export class Actor {
   agarra: Actor | null = null;
   agarrador: Actor | null = null;
   private rodillazos = 0;
+  /** el proyectado del judo va detrás de quien lo proyecta mientras vuela en su carga */
+  detras = false;
   /** un ratito después de un golpe (sin caer) se le puede agarrar */
   agarrable = 0;
   /** los golpes que paró la guardia hace poco: al tercero se rompe */
@@ -475,7 +479,7 @@ export class Actor {
     this.setSt('grab', 'grab');
     v.agarrador = this;
     v.left = !this.left;
-    v.setSt('grabbed', 'grabbed');
+    v.setSt('grabbed', this.w.esJudo && v.tiene('judo_grip') ? 'judo_grip' : 'grabbed');
     v.agarrable = 0;
     v.vx = 0;
     this.w.sfx('recoger', 0.4);
@@ -489,7 +493,10 @@ export class Actor {
     if (!v || v.st !== 'grabbed' || v.agarrador !== this) { this.soltar(); this.setSt('idle', 'idle'); return; }
     const ev = this.fig.step(dt);
     const nombre = this.fig.anim.name;
-    if (nombre === 'grab' && this.fig.anim.done) this.play('grab_hold');
+    // en el judo, agarrados de solapa y manga; en la calle, sosteniéndolo
+    const sostener = this.w.esJudo && this.tiene('judo_grip') ? 'judo_grip' : 'grab_hold';
+    if (nombre === 'grab' && this.fig.anim.done) this.play(sostener);
+    if (nombre === 'judo_throw') { this.proyectar(v, ev); return; }
     if (nombre === 'knee_grab') {
       if (ev.some((e) => e.tipo === 'impacto')) {
         this.rodillazos++;
@@ -502,9 +509,15 @@ export class Actor {
         this.w.spark(v.x - this.dir * 4, v.y, 18, ultimo);
         if (ultimo || v.hp <= 0) { this.soltar(); v.knockdown(this.dir, 110, 190); this.setSt('idle', 'idle'); return; }
       }
-      if (this.fig.anim.done) this.play('grab_hold');
+      if (this.fig.anim.done) this.play(sostener);
     } else if (it.punch) this.play(this.tiene('knee_grab') ? 'knee_grab' : 'jab', true);
-    else if (it.kick) {
+    else if (it.kick && this.w.esJudo && this.tiene('judo_throw') && v.tiene('judo_thrown')) {
+      // la proyección: los dos arrancan juntos, cuadro a cuadro
+      this.play('judo_throw', true);
+      v.play('judo_thrown', true);
+      this.w.sfx('esquiva', 0.45);
+      return;
+    } else if (it.kick) {
       // lo bota al piso con todo
       const dmg = 9 * (this.w.multDaño?.(this, v) ?? 1);
       v.hp = Math.max(0, v.hp - dmg);
@@ -522,11 +535,41 @@ export class Actor {
     v.z = this.z;
   }
 
+  /**
+   * La proyección del judo (lote B4B6): el proyectado sigue el mismo cuadro; del 3 al 5 va con su pivote en la carga
+   * de quien proyecta, detrás de él; en el impacto (el 6) cae al tatami y cuenta; después queda tirado delante.
+   */
+  private proyectar(v: Actor, ev: Evento[]) {
+    const a = this.fig.anim;
+    if (v.fig.anim.name === 'judo_thrown') { v.fig.anim.pos = a.pos; v.fig.refresh(); }
+    const c = a.frame >= 3 && a.frame <= 5 ? this.cargaPoint() : null;
+    if (c) { v.x = c[0]; v.z = Math.max(0, c[1]); v.detras = true; }
+    else { v.x = this.x + this.dir * (a.frame > 5 ? 18 : 13); v.z = 0; v.detras = false; }
+    v.y = this.y;
+    if (ev.some((e) => e.tipo === 'impacto')) {
+      const dmg = 12 * (this.w.multDaño?.(this, v) ?? 1);
+      v.hp = Math.max(0, v.hp - dmg);
+      this.meter = Math.min(100, this.meter + 10);
+      this.w.onHit(this, v, dmg, true);
+      this.w.number(v.x, v.y, Math.round(dmg));
+      this.w.dust(v.x, v.y);
+      this.w.shake(220, 0.01);
+    }
+    if (a.done) {
+      v.detras = false;
+      this.soltar();
+      v.knockdown(this.dir, 10, 30);
+      this.setSt('idle', 'idle');
+    }
+  }
+
   /** Agarrado: forcejea; machacando botones se suelta antes. La máquina se suelta sola al rato. */
   private grabbedTick(dt: number, it: Intent) {
     const g = this.agarrador;
     this.fig.step(dt);
-    if (!g || g.agarra !== this || g.st !== 'grab') { this.agarrador = null; this.setSt('idle', 'idle'); return; }
+    if (!g || g.agarra !== this || g.st !== 'grab') { this.agarrador = null; this.detras = false; this.setSt('idle', 'idle'); return; }
+    // volando en la proyección no hay forcejeo: el cuadro lo pone quien proyecta
+    if (g.fig.anim.name === 'judo_throw') return;
     if (it.punch || it.kick || it.jump || (it.x && Math.random() < 0.2)) this.t += 0.22;
     if (this.t > 2.4) {
       // se zafa: empuja al otro y queda libre
@@ -808,7 +851,7 @@ export class Actor {
     const elev = this.fig.anim.data.elevacion?.[this.fig.anim.frame] ?? 0;
     const px = this.sx(this.x, this.y);
     this.fig.setPosition(Math.round(px), Math.round(this.ft + this.y - this.z - elev));
-    const sortY = this.st === 'lifted' && this.carrier ? this.carrier.y + 0.5 : this.y;
+    const sortY = this.st === 'lifted' && this.carrier ? this.carrier.y + 0.5 : this.detras ? this.y - 0.5 : this.y;
     this.fig.setDepth(this.ft + sortY);
     const piso = this.base;
     this.shadow.setPosition(Math.round(px), Math.round(this.ft + this.y - Math.max(0, piso)));

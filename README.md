@@ -32,6 +32,7 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
     - Carrerita alternando puño y patada, y salto en la cajita roja para clavar la garrocha. Clavar tarde o temprano le quita impulso.
     - Salto otra vez arriba del todo es el empuje: estira el salto. Un salto lejos de la cajita no la clava, solo avisa.
     - Corriendo a tope y clavando perfecto se llena la barra Nekketsu: arriba, ★ es la Garrocha Nekketsu, que llega mucho más lejos.
+    - Si en el despegue ya no llega ni con el mejor empuje, la garrocha se queda casi derecha, se le devuelve y cae de espalda en su techo.
     - Las banderitas muestran el viento. El techo de enfrente se aleja en cada ronda: 5, 6 y 7 m.
     - El que no llega cae en el balcón de las buganvillas, en el carrito de frutas o al lado de la palenquera, que lo regaña. Tres rondas, cuenta el mejor salto.
   - *Quemado Nekketsu* (patio techado del liceo, Caracas): el homenaje al primer juego, 4 contra 4.
@@ -39,11 +40,13 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
     - Desde el cementerio también se quema, y si quemas a alguien vuelves a la cancha. Pierde el equipo que se queda sin nadie adentro, con 2 minutos y muerte súbita.
     - Puño lanza (corriendo o saltando sale más fuerte), patada pasa o atrapa (justo antes de que llegue), salto esquiva. Con la barra llena, especial es el tiro Nekketsu, y si te lo tiran a ti sale "¡CUIDADO!".
     - Tus tiros pasan por encima de tus compañeros, y los compañeros de la máquina también esquivan y atrapan.
+    - El salto para esquivar es de bolita, con las rodillas al pecho: arriba de 8 px el balón pasa por debajo.
   - *Chapita* (barrio de Caracas): béisbol de calle con chapas y palo de escoba, 2 contra 2 en tres innings cortos.
     - Bateas con puño un pelito antes de que llegue la chapa. Con la flecha arriba la mandas alta y abajo rasante, para las curvas que suben o bajan.
     - Lanzas con puño (recta) o patada (curva, que sube o baja con la flecha).
     - Tres strikes es ponche y la que atrapa el del campo es out, pero los batazos altos y fuertes se le escapan. Según lo lejos: sencillo, doble o triple. Por encima de la casa del vecino es jonrón. Si rompes la ventana sale la señora Carmen con la chancleta.
     - Barra llena: ★ al batear es el Batazo Nekketsu (jonrón seguro) y al lanzar, la Recta de Fuego.
+    - El bateador espera en guardia meneando el palo de escoba y batea con él a dos manos.
   - *Tama-wari Hội An* (de noche, entre faroles): cada equipo tiene un poste de bambú con una bola de papel arriba. Gana el primero que rompe la bola del otro.
     - Al pie del poste del otro, salto o arriba lo agarra. Machacar puño y patada trepa rápido; mantener arriba trepa despacio.
     - Arriba, puño a la bola, que se raja en 4 estados.
@@ -56,7 +59,7 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
     - Barra llena: ★ es la Chilena Nekketsu, en llamas y doble.
   - *Tejo* (La Candelaria, Bogotá): el deporte nacional de Colombia, 2 contra 2 en 3 rondas.
     - Un botón fija la puntería (la línea que recorre la caja, vista desde arriba) y otro la fuerza (la barra con su raya). Las dos van a velocidad pareja. En lo rojo de arriba el tejo se pasa de la caja.
-    - Lanzas los dos tejos de tu equipo. Barra llena: ★ es el Pulso Nekketsu (la barra va lenta y el bocín cuenta más grande).
+    - Lanzas los dos tejos de tu equipo, por debajo y con el tejo en la mano hasta que lo sueltas. Barra llena: ★ es el Pulso Nekketsu (la barra va lenta y el bocín cuenta más grande).
     - Mecha que revienta: 3. Embocinada, adentro del bocín: 6. Moñona, las dos a la vez: 9, con fuegos artificiales.
     - Si en una ronda nadie suma, el tejo más cerca del bocín se lleva la mano: 1. Empatados al final, desempate.
   - *Vóley playa* (Playa El Agua, Margarita): 2 contra 2 con la red alta, a 7 puntos.
@@ -77,7 +80,7 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
     - Aquí los golpes valen: sin balón, pegado al que lo tiene, puño se lo roba. Saltando frente al que tira, tapón. Abajo un cartel dice lo que puedes hacer ahora.
     - Barra llena, ★: cerca del aro la clavada Nekketsu rompe el tablero, de lejos el tiro de fuego no falla y sin balón la tacleada se lo arranca al rival.
   - *Judo y Vovinam Hà Nội* (tatami frente al lago Hoàn Kiếm): 1 contra 1 con el motor de la pelea y otras reglas.
-    - Agarrar y lanzar con patada: ¡IPPON!, 2 puntos. Tumbar de un golpe: ¡WAZA-ARI!, 1. Gana el primero a 3.
+    - Agarrados de solapa y manga, patada es la proyección: lo carga al hombro y lo azota en el tatami. ¡IPPON!, 2 puntos. Tumbar de un golpe: ¡WAZA-ARI!, 1. Gana el primero a 3.
     - 1:30 de reloj. Si se acaba empatado, punto de oro. Después de cada punto, ¡HAJIME! de nuevo.
 - **Kachinuki Caracas**, la pelea final en una azotea de Parque Central de noche, en 1 contra 1 o 4 contra 4: Familia GG contra el Instituto Nekketsu.
   - Un borde sin baranda: caminando no te sales, pero si te tumban o te lanzan por ahí, quedas fuera.
@@ -96,7 +99,8 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
   - Barra Nekketsu y técnicas con corte de anime: Puño Mach (Rick), Patada Huracán (Steph), Chilena Asesina (Sophie), ¡Thor al Rescate! (Alana), Uppercut del Dragón (Kenji).
   - Cámara lenta en el K.O. final, victoria con fanfarria y "SE ACABÓ LA VAINA" si pierdes.
 - Música original sintetizada en el momento: Marcha Nekketsu, tema de pelea, tensión de la intro y fanfarria.
-- Ambientes del lugar debajo de la música: el mar en Natación y Vóley, el cafetal en Vallas y el llano en Jabalina, cada vez desde un punto distinto del bucle.
+- Ambientes del lugar debajo de la música, cada vez desde un punto distinto del bucle: el mar en Natación y Vóley, el cafetal en Vallas, el llano en Jabalina, el tráfico de Saigón y la Comuna 13 en el Cross, Hội An de noche en el Tama-wari, la llovizna de Bogotá en el Tejo, el lago de noche en el Básquet, la azotea de Caracas en la pelea, el atardecer de Cartagena en Azoteas, el carnaval en el Fútbol, los pinos de Đà Lạt en el Tenis y el recreo del liceo en el Quemado.
+- Cada equipo celebra con su acorde de victoria al ganar una prueba, la pelea o la gira: la fanfarria con cuatro de la Familia (y el ladrido de Thor), el rock del Instituto, el đàn tranh de Rồng Sài Gòn, el torbellino de los Rolos, el joropo de los Panas y la gaita de los Maracuchos.
 - Cada mundo con su tema de PixelForja: Saigón, la Comuna 13, Hội An, Bogotá, Margarita, Đà Lạt, el Carnaval de Barranquilla, la gaita de Maracaibo, Caracas, la champeta de Cartagena, el bambuco del Eje Cafetero, los remeros de Hạ Long, el pajarillo de Apure y el tema del Instituto en el Kachinuki. El judo sigue con la pelea sintetizada.
 - Los deportes de pelota usan las animaciones de PixelForja sin la pelota pintada: la pelota la mueve el juego y, mientras alguien la tiene, va donde la pone la animación. En la pelea, cada equipo se burla con su gesto y su frase en un globo.
 
@@ -166,6 +170,7 @@ node scripts/prueba-quemado.mjs http://localhost:4173/ capturas/quemado [partido
 node scripts/prueba-chapita.mjs http://localhost:4173/ capturas/chapita [juego] [nivel]   # entrenamiento con un bot (batear, curvas, lanzar) y un juego de tres innings
 node scripts/prueba-voley.mjs http://localhost:4173/ capturas/voley   # entrenamiento con un bot, la jugada de 3 toques con tu compañero, el remate de fuego y un partido
 node scripts/prueba-equipos.mjs http://localhost:4173/ capturas/equipos   # la selección (equipo, atleta, rival) con teclas, las 15 pruebas con equipos nuevos, la memoria y las texturas que falten
+node scripts/prueba-b4b6.mjs http://localhost:4173/ capturas/b4b6   # el judo proyectando, el tejo en la mano, el palo de la Chapita, la garrocha que no llega, el salto de bolita, un ambiente y un acorde
 node scripts/prueba-tenis.mjs http://localhost:4173/ capturas/tenis   # entrenamiento con un bot (pique, smash, globo) y un partido de dobles
 node scripts/prueba-futbol.mjs http://localhost:4173/ capturas/futbol [partido] [nivel]   # entrenamiento con un bot y un partido 4 contra 4; imprime tiros, atajadas y robos
 node scripts/prueba-basket.mjs http://localhost:4173/ capturas/basket [partido] [nivel]   # entrenamiento con un bot y un partido a 11; imprime posesiones, tiros, canastas, tumbadas y tapones

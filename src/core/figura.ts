@@ -74,6 +74,24 @@ export class Figura extends Phaser.GameObjects.Sprite {
     return this;
   }
 
+  /**
+   * El arma del piso en la mano en este cuadro (el palo de la Chapita, el tejo): dónde va en pixeles de la escena, el
+   * cuadro de su atlas (`<arma>_mano_<k>`, 16 ángulos) y si va detrás del cuerpo. null si el cuadro no la trae.
+   */
+  arma(): { x: number; y: number; k: number; detras: boolean } | null {
+    const d = this.anim.data?.arma?.[this.rowIndex]?.[this.anim.frame];
+    if (!d) return null;
+    const [ax, ay, ang, detras] = d;
+    return { x: this.x + (this.left ? -ax : ax) * this.scaleX, y: this.y + ay * this.scaleY, k: ((Math.round(ang / 22.5) % 16) + 16) % 16, detras: !!detras };
+  }
+
+  /** Dónde está, en pixeles de la escena, el punto de un evento (la suelta del tejo) en la fila que mira. */
+  puntoDe(tipo: Evento['tipo']): { x: number; y: number } | null {
+    const p = this.anim.data?.eventos?.find((e) => e.tipo === tipo)?.punto?.[this.rowIndex];
+    if (!p) return null;
+    return { x: this.x + (this.left ? -p[0] : p[0]) * this.scaleX, y: this.y + p[1] * this.scaleY };
+  }
+
   /** El cuadro de un evento de la animación que suena (o -1 si no lo trae). */
   cuadroDe(tipo: Evento['tipo']): number {
     return this.anim.data?.eventos?.find((e) => e.tipo === tipo)?.cuadro ?? -1;

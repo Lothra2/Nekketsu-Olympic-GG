@@ -141,6 +141,7 @@ export class Tenis extends EventScene {
     this.uiAdd(txt(this, 390, 16, lado(1).corto, 'fuente_ui', 1, 0).setDepth(8001).setTint(0xffa0a0));
     this.toqueTxt = this.uiAdd(txt(this, 320, 34, '', 'fuente_ui', 1).setDepth(8001).setTint(0xffe080));
     this.tema('dalat_niebla');
+    this.ambiente('pinos_dalat');
     if (this.d.practica) void this.entrenar('TENIS', this.pasos());
     else void this.previa('TENIS DE DOBLES', 'ĐÀ LẠT, VIETNAM', '{MOVER} AL CÍRCULO · DEJA QUE PIQUE · {PUÑO} DRIVE · {PATADA} GLOBO · EN LA RED {SALTO} Y {PUÑO}: SMASH · {ESPECIAL}: DRIVE NEKKETSU');
   }

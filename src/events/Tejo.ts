@@ -70,7 +70,9 @@ export class Tejo extends EventScene {
   private mechas: boolean[] = [];
   private puntosRonda = 0;
   private marcador: [number, number] = [0, 0];
-  private vuelo: { x0: number; z0: number; x1: number; z1: number; t: number; T: number; alto: number; spr: Phaser.GameObjects.Image; final: Disco | null } | null = null;
+  private vuelo: { x0: number; z0: number; x1: number; z1: number; t: number; T: number; alto: number; spr: Phaser.GameObjects.Image; final: Disco | null; espera: number } | null = null;
+  /** el tejo en la mano mientras se lanza (lote B4B6): hasta la suelta va con el arma del cuadro */
+  private enMano: Phaser.GameObjects.Image | null = null;
   private tab!: Phaser.GameObjects.Graphics;
   private hud!: Phaser.GameObjects.Graphics;
   private cara!: Phaser.GameObjects.Graphics;
@@ -103,6 +105,7 @@ export class Tejo extends EventScene {
     this.tejos = [];
     this.marcador = [0, 0];
     this.vuelo = null;
+    this.enMano = null;
     this.nek = [0, 0];
     this.pulso = false;
     this.avisoT = 0;
@@ -133,6 +136,7 @@ export class Tejo extends EventScene {
     this.nekTxt = this.uiAdd(txt(this, 320, 340, '', 'fuente_ui', 1).setDepth(8002).setTint(0xffe040));
     this.nuevaRonda();
     this.tema('ajiaco_rock');
+    this.ambiente('llovizna_bogota');
     if (this.d.practica) void this.entrenar('TEJO', this.pasos(), 40).then(() => this.siguienteTurno());
     else void this.previa('TEJO', 'LA CANDELARIA, BOGOTÁ', 'TOCA UN BOTÓN PARA LA PUNTERÍA Y OTRO PARA LA FUERZA · MECHA 3 · BOCÍN 6 · MOÑONA 9 · BARRA LLENA: {ESPECIAL}').then(() => this.siguienteTurno());
   }
@@ -264,7 +268,8 @@ export class Tejo extends EventScene {
     const ruido = this.tuyo(l) && !this.pulso ? 0.03 : 0;
     const u = this.u + (Math.random() - 0.5) * ruido * 2;
     const v = (this.p - JUSTA) * FUERZA + (Math.random() - 0.5) * ruido * 2;
-    l.fig.set('weapon_throw', true, 1.3);
+    // el lanzamiento del tejo (lote B4B6): por debajo, con el tejo en la mano hasta la suelta; si no, el de antes
+    l.fig.set(l.fig.anim.has('tejo_throw') ? 'tejo_throw' : 'weapon_throw', true, 1.3);
     this.sfx('esquiva', 0.4);
     this.estado = 'vuela';
     if (this.tuyo(l)) this.lanzo++;
@@ -275,7 +280,10 @@ export class Tejo extends EventScene {
     const x1 = dentro ? CARA.x + vv * CARA.largo * 0.7 : vv < 0 ? CAJA - 40 + vv * 20 : CAJA + 46;
     const z1 = dentro ? CARA.z + vv * CARA.largo * 0.7 : 0;
     const spr = this.add.image(LINEA, PISO - 30, 'tejo').setDepth(PISO + 1).setScale(1.4);
-    this.vuelo = { x0: LINEA + 4, z0: 30, x1, z1, t: 0, T: 0.85, alto: 70 + this.p * 50, spr, final: dentro ? { u, v, team: l.c.team as 0 | 1, quien: l } : null };
+    // con la animación del tejo, el vuelo espera la suelta (y sale de la mano); sin ella, sale ya
+    const conSuelta = l.fig.cuadroDe('suelta') >= 0;
+    spr.setVisible(!conSuelta);
+    this.vuelo = { x0: LINEA + 4, z0: 30, x1, z1, t: 0, T: 0.85, alto: 70 + this.p * 50, spr, final: dentro ? { u, v, team: l.c.team as 0 | 1, quien: l }: null, espera: conSuelta ? 1.2 : 0 };
   }
 
   /** El tejo cayó: mecha, bocín, moñona o nada. */
@@ -407,6 +415,17 @@ export class Tejo extends EventScene {
         chip.blip(1320, 0.06, 'sq25', 0.14);
         this.lanzar();
       }
+    } else if (this.estado === 'vuela' && this.vuelo && this.vuelo.espera > 0) {
+      // todavía en la mano: suelta en el cuadro de la suelta (o al rato, si no llega)
+      const v = this.vuelo;
+      v.espera -= dt;
+      const ev = l.fig.step(dt);
+      if (ev.some((e) => e.tipo === 'suelta') || v.espera <= 0) {
+        const pt = l.fig.puntoDe('suelta');
+        if (pt) { v.x0 = pt.x; v.z0 = PISO - pt.y; }
+        v.espera = 0;
+        v.spr.setVisible(true).setPosition(v.x0, PISO - v.z0);
+      }
     } else if (this.estado === 'vuela' && this.vuelo) {
       const v = this.vuelo;
       v.t += dt / v.T;
@@ -415,9 +434,18 @@ export class Tejo extends EventScene {
       v.spr.setPosition(x, PISO - z).setRotation(k * 12);
       if (k >= 1) { this.vuelo = null; this.cae(v); }
     }
-    for (const o of this.lanz) { o.fig.step(dt); if (o.fig.anim.done) o.fig.set('idle'); }
+    for (const o of this.lanz) { if (!(o === l && this.vuelo && this.vuelo.espera > 0)) o.fig.step(dt); if (o.fig.anim.done) o.fig.set('idle'); }
+    this.tejoEnMano(l);
     this.render();
     this.filterUi();
+  }
+
+  /** El tejo en la mano del que lanza, con el arma de cada cuadro, hasta que lo suelta. */
+  private tejoEnMano(l: Lanzador) {
+    const a = this.vuelo && this.vuelo.espera > 0 ? l.fig.arma() : null;
+    if (!a || !this.textures.get('armas').has(`tejo_mano_${a.k}`)) { this.enMano?.setVisible(false); return; }
+    this.enMano ??= this.add.image(0, 0, 'armas', `tejo_mano_${a.k}`);
+    this.enMano.setVisible(true).setFrame(`tejo_mano_${a.k}`).setFlipX(l.fig.left).setPosition(Math.round(a.x), Math.round(a.y)).setDepth(l.fig.depth + (a.detras ? -0.1 : 0.1));
   }
 
   private animar(dt: number) { for (const o of this.lanz) o.fig.step(dt); this.render(); }

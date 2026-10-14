@@ -30,7 +30,7 @@ const HUECO_PRACTICA = 4;
 /** los cuadros de pole_vault: 0 a 2 corre, 3 clava, 7 suelta, 11 cae en la colchoneta */
 const CLAVA = 3, ATERRIZA = 11;
 
-type Caida = 'balcon' | 'carrito' | 'palenquera';
+type Caida = 'balcon' | 'carrito' | 'palenquera' | 'techo';
 interface Saltador { c: Competidor; fig: Figura; best: number; marcas: number[]; top: number; nek: number }
 
 /**
@@ -145,6 +145,7 @@ export class Azoteas extends EventScene {
     });
     this.hud = this.uiAdd(this.add.graphics().setDepth(8000));
     this.tema('champeta_murallas');
+    this.ambiente('atardecer_cartagena');
     this.cameras.main.centerOn(this.camX, 360 - 180 / ZOOM);
     if (this.d.practica) void this.entrenar('AZOTEAS DE CARTAGENA', this.pasos(), 40);
     else void this.previa('AZOTEAS DE CARTAGENA', 'CARTAGENA, COLOMBIA', 'ALTERNA {PUÑO} Y {PATADA} PARA CORRER · {SALTO} EN LA CAJITA PARA CLAVAR · {SALTO} ARRIBA: EMPUJE · BARRA LLENA: {ESPECIAL}');
@@ -341,9 +342,30 @@ export class Azoteas extends EventScene {
         // se pasó del borde sin clavar: para abajo
         if (this.x > BORDE + 2) { this.x0 = this.x; this.xCae = this.x; this.cae('¡SE PASÓ DEL BORDE!'); }
       }
+    } else if (this.st === 'salto' && fig.anim.name === 'vault_fail') {
+      // la garrocha que no llega (lote B4B6): se queda casi derecha, se le devuelve y cae de espalda en su techo
+      const ev = fig.step(dt * (this.skip ? 2 : 1));
+      const u = Phaser.Math.Clamp(fig.anim.pos / Math.max(1, fig.anim.data.cuadros - 1), 0, 1);
+      this.x = Math.min(BORDE - 4, this.x0 + Math.sin(u * Math.PI) * 22 - u * 10);
+      this.y = TECHO - (fig.anim.data.elevacion?.[fig.anim.frame] ?? 0) * 1.4;
+      if (ev.some((e) => e.tipo === 'aterriza')) {
+        efecto(this, 'polvo_caer_medio', this.x, TECHO);
+        this.sound.play('golpe', { volume: human ? 0.5 : 0.18, rate: 0.7 });
+        if (human) this.cameras.main.shake(160, 0.008);
+      }
+      if (fig.anim.done) { this.y = TECHO; this.cierra(0, 'techo'); }
     } else if (this.st === 'salto') {
       const k = this.skip ? 2 : 1;
-      fig.step(dt * k);
+      const evs = fig.step(dt * k);
+      // en el despegue ya se sabe: si ni con el mejor empuje llega, la garrocha no llega (y se le devuelve)
+      if (evs.some((e) => e.tipo === 'despegue') && fig.anim.has('vault_fail') && this.x0 + this.alcanceMax() < this.enfrente.x - 30) {
+        fig.set('vault_fail', true);
+        const d = fig.cuadroDe('despegue');
+        if (d >= 0) { fig.anim.pos = d; fig.refresh(); }
+        if (human) this.consejo('¡NO LLEGA! LA GARROCHA SE QUEDÓ CORTA');
+        fig.setPosition(Math.round(this.x), Math.round(this.y)).setDepth(TECHO + 1);
+        return;
+      }
       const f = fig.anim.frame;
       // el empuje: SALTO otra vez arriba del todo (de la subida al suelte)
       // el empuje: de la subida al suelte; si te apuras, te avisa y puedes volver a intentar
@@ -450,6 +472,16 @@ export class Azoteas extends EventScene {
   private letrero(s: string, tint: number) {
     const t = this.add.bitmapText(this.x, this.y - 56, 'fuente_ui', s).setOrigin(0.5).setDepth(6000).setTint(tint);
     this.tweens.add({ targets: t, y: t.y - 10, alpha: 0, delay: 400, duration: 400, onComplete: () => t.destroy() });
+  }
+
+  /** Lo más lejos que podría llegar este salto con el mejor empuje que tenga a mano. */
+  private alcanceMax() {
+    const antes = { e: this.empuje, n: this.nekketsu };
+    this.empuje = true;
+    this.nekketsu = this.nekketsu || this.cur.nek >= 100 || (!this.cur.c.human && this.cpuNek);
+    const a = this.alcance();
+    this.empuje = antes.e; this.nekketsu = antes.n;
+    return a;
   }
 
   private alcance() {

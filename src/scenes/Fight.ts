@@ -6,10 +6,10 @@ import { Figura } from '../core/figura';
 import { ajustes } from '../core/nivel';
 import { efecto, talla } from '../core/fx';
 import { Input, rotular } from '../core/input';
-import { chip, PELEA, VICTORIA } from '../core/music';
+import { chip, PELEA } from '../core/music';
 import { txt, flash, speedLines } from '../core/ui';
 import { INFO } from './Select';
-import { nuestros, ellos, lado, equipos, conJugador } from '../core/equipos';
+import { nuestros, ellos, lado, equipos, conJugador, victoria } from '../core/equipos';
 import { cargarAtletas, packsDe } from '../core/carga';
 import { PUNTOS, type Gira } from '../events/base';
 import { Coach, type Paso } from '../core/coach';
@@ -110,6 +110,8 @@ export class Fight extends Phaser.Scene implements World {
   private relojJudo = 0;
   private oro = false;
   private get judo() { return this.data0.modo === 'judo'; }
+  /** para el actor: en el tatami la patada agarrando es la proyección */
+  get esJudo() { return this.judo; }
   private relojTxt: Phaser.GameObjects.BitmapText | null = null;
   private pesado: { it: Item; sombra: Phaser.GameObjects.Ellipse } | null = null;
   /** la arepa que cae de vez en cuando: quien la pisa recupera vida */
@@ -253,16 +255,21 @@ export class Fight extends Phaser.Scene implements World {
    */
   private tema() {
     this.temaSonando = null;
+    this.ambienteSonando = null;
     const n = this.judo || this.data0.practica ? null : this.data0.modo === '4v4' ? 'tema_instituto' : 'pana_dale';
     if (!n || !kit().audio.musica?.[n]) { chip.play(PELEA); return; }
     chip.stop(0.2);
     void bucle(this, 'musica', n, 0.4).then((s) => { this.temaSonando = s; if (this.phase === 'end') this.callarTema(); });
+    // la ciudad de noche debajo del tema, en la azotea de Caracas (lote H7)
+    if (!this.judo && kit().audio.ambientes?.azotea_noche) void bucle(this, 'ambientes', 'azotea_noche', 0.3, true).then((s) => { this.ambienteSonando = s; if (this.phase === 'end') this.callarTema(); });
   }
 
+  private ambienteSonando: Phaser.Sound.BaseSound | null = null;
+
   private callarTema() {
-    const s = this.temaSonando;
+    for (const s of [this.temaSonando, this.ambienteSonando]) if (s) this.tweens.add({ targets: s, volume: 0, duration: 300, onComplete: () => s.stop() });
     this.temaSonando = null;
-    if (s) this.tweens.add({ targets: s, volume: 0, duration: 300, onComplete: () => s.stop() });
+    this.ambienteSonando = null;
   }
 
   /** Un efecto del kit si lo trae (los del judo, lote H2). */
@@ -382,7 +389,7 @@ export class Fight extends Phaser.Scene implements World {
   private finPractica() {
     this.phase = 'end';
     this.callarTema();
-    chip.play(VICTORIA);
+    victoria(this, lado(0).id);
     flash(this, 150);
     const g = this.uiAdd(this.add.graphics().setDepth(8400));
     g.fillStyle(0x08081a, 0.88).fillRect(30, 100, 580, 120);
@@ -664,7 +671,7 @@ export class Fight extends Phaser.Scene implements World {
     this.fuegosArtificiales();
     this.phase = 'end';
     this.callarTema();
-    chip.play(VICTORIA);
+    victoria(this, lado(0).id);
     for (const a of this.actors) if (a.team === 0 && a.alive) { a.fig.row = 'down'; a.setSt('win', 'victory'); }
     this.thorFan?.set('celebrate', true);
     this.sfx('ladrido', 0.5);

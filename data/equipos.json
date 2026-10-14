@@ -12,7 +12,8 @@
       "sophie",
       "alana"
     ],
-    "mascota": "thor"
+    "mascota": "thor",
+    "musica": "acorde_familia"
   },
   "instituto_nekketsu": {
     "nombre": "Instituto Nekketsu",
@@ -26,7 +27,8 @@
       "ryu",
       "goro",
       "tetsu"
-    ]
+    ],
+    "musica": "acorde_instituto"
   },
   "rong_sai_gon": {
     "nombre": "Rồng Sài Gòn",
@@ -40,7 +42,8 @@
       "lan",
       "tuan",
       "ba_hoa"
-    ]
+    ],
+    "musica": "acorde_rong"
   },
   "rolos_de_chapinero": {
     "nombre": "Rolos de Chapinero",
@@ -54,7 +57,8 @@
       "camila",
       "pipe",
       "don_hernando"
-    ]
+    ],
+    "musica": "acorde_rolos"
   },
   "panas_de_caracas": {
     "nombre": "Los Panas de Caracas",
@@ -69,7 +73,8 @@
       "yuli",
       "toto",
       "carmen"
-    ]
+    ],
+    "musica": "acorde_panas"
   },
   "maracuchos_del_lago": {
     "nombre": "Maracuchos del Lago",
@@ -84,6 +89,7 @@
       "yusmary",
       "jhonder",
       "abuela_nerva"
-    ]
+    ],
+    "musica": "acorde_maracuchos"
   }
 }

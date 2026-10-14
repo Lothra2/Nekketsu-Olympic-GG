@@ -252,6 +252,7 @@ export class CrossCountry extends EventScene implements World {
     for (const r of this.gente2) this.heads.push({ img: this.uiAdd(this.add.image(0, 22, 'cabecitas', r.c.id).setDepth(8002)), r });
     if (!this.arte) this.uiAdd(txt(this, 14, 326, varios ? `TRAMO ${this.tramo + 1} · ESCENARIO EN GRIS` : 'ESCENARIO EN GRIS', 'fuente_ui', 1, 0).setDepth(8001).setTint(0x8a8ab0));
     this.tema(this.L.id.startsWith('medellin') ? 'parce_corra' : this.L.id.startsWith('saigon') ? 'saigon_chay' : null);
+    if (this.L.id.startsWith('medellin') || this.L.id.startsWith('saigon')) this.ambiente(this.L.id.startsWith('medellin') ? 'comuna' : 'trafico_saigon');
     const p = prueba(this.scene.key);
     if (this.d.practica) { void this.entrenar(p.nombre, this.pasos(), 40); return; }
     const titulo = this.suelto ? `${p.nombre} · TRAMO ${this.tramo + 1}` : this.tramo === 0 ? p.nombre : `TRAMO ${this.tramo + 1} DE ${this.tramos.length}`;

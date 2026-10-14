@@ -16,6 +16,8 @@ const K = 0.35;
 const PROF = 100;
 const X0 = 40, X1 = 560, MID = 300;
 const G = 600;
+/** la velocidad del salto para esquivar */
+const SALTO_V = 190;
 const TIEMPO = 120;
 /** lo rápido de cada tiro */
 const VEL = { normal: 240, corriendo: 310, salto: 290, especial: 410 } as const;
@@ -28,6 +30,8 @@ interface Jug {
   dentro: boolean; quemado: boolean;
   st: 'libre' | 'lanza' | 'pasa' | 'atrapa' | 'golpe';
   catchT: number; catchCool: number; empuje: number;
+  /** saltando con dodge_jump (lote B4B6): la pose de bolita sigue el vuelo del salto */
+  salto?: boolean;
   pend: Tiro | 'pase' | null; quemo: number;
   /** los golpes que aguanta antes de quedar quemado */
   vidas: number;
@@ -112,6 +116,7 @@ export class Quemado extends EventScene {
       });
     }
     this.tema('pana_dale');
+    this.ambiente('liceo');
     this.cameras.main.centerOn(320, 180);
     if (this.d.practica) void this.entrenar('QUEMADO', this.pasos(), 40);
     else void this.previa('QUEMADO NEKKETSU', 'PATIO DEL LICEO, CARACAS', '{PUÑO} LANZA · {PATADA} PASA O ATRAPA · {SALTO} ESQUIVA · {ESPECIAL} CON LA BARRA LLENA');
@@ -249,6 +254,18 @@ export class Quemado extends EventScene {
     j.catchCool = Math.max(0, j.catchCool - dt);
     // el salto
     if (j.z > 0 || j.vz) { j.vz -= G * dt; j.z += j.vz * dt; if (j.z <= 0) { j.z = 0; j.vz = 0; } }
+    if (j.salto) {
+      // el salto de bolita: la altura es la del salto de siempre (generosa para esquivar) y la pose va con el vuelo,
+      // del despegue al aterriza de la animación
+      const a = j.fig.anim;
+      if (a.name !== 'dodge_jump' || (j.z === 0 && j.vz === 0)) j.salto = false;
+      else {
+        const vuelo = Phaser.Math.Clamp(0.5 - j.vz / (2 * SALTO_V), 0, 1);
+        const d = Math.max(0, j.fig.cuadroDe('despegue')), t = j.fig.cuadroDe('aterriza');
+        a.pos = d + ((t > d ? t : a.data.cuadros - 1) - d) * vuelo;
+        j.fig.refresh();
+      }
+    }
     // el empujón del golpe
     if (j.empuje) { j.x += j.empuje * dt; j.empuje *= Math.pow(0.05, dt); if (Math.abs(j.empuje) < 4) j.empuje = 0; }
     if (j.st === 'golpe') {
@@ -283,7 +300,8 @@ export class Quemado extends EventScene {
     const haciaRival: 1 | -1 = (j.team === 0) === j.dentro ? 1 : -1;
     j.dir = this.bola.st === 'suelta' && Math.abs(vx) > 20 ? (vx > 0 ? 1 : -1) : haciaRival;
     const mueve = Math.hypot(vx, vy) > 8;
-    if (j.z > 0) j.fig.set(j.vz > 0 ? 'jump_rise' : 'jump_fall');
+    if (j.salto) { /* la animación del salto sigue sola */ }
+    else if (j.z > 0) j.fig.set(j.vz > 0 ? 'jump_rise' : 'jump_fall');
     else j.fig.set(mueve ? (Math.hypot(vx, vy) > 95 ? 'run' : 'walk') : 'idle');
     j.fig.step(dt, mueve ? Math.hypot(vx, vy) * dt : undefined);
   }
@@ -294,11 +312,17 @@ export class Quemado extends EventScene {
     j.y = Phaser.Math.Clamp(j.y, 4, PROF - 4);
   }
 
+  /** El salto para esquivar: el de bolita del kit (lote B4B6) o el salto de antes. */
+  private saltar(j: Jug) {
+    j.vz = SALTO_V;
+    if (j.fig.anim.has('dodge_jump')) { j.salto = true; j.fig.set('dodge_jump', true, 0); }
+  }
+
   /** Lo que haces tú con el que manejas. */
   private humano(j: Jug, p: Pad): [number, number] {
     const b = this.bola;
     const vel = p.run ? 125 : 78;
-    if (p.pressed.jump && j.z === 0) { j.vz = 190; chip.blip(520, 0.05, 'sq25', 0.12, 780); }
+    if (p.pressed.jump && j.z === 0 && !j.salto) { this.saltar(j); chip.blip(520, 0.05, 'sq25', 0.12, 780); }
     if (b.dueño === j) {
       if (p.pressed.special && this.nek[j.team] >= 100) this.lanzar(j, 'especial');
       else if (p.pressed.punch) this.lanzar(j, j.z > 0 ? 'salto' : p.run && Math.abs(p.x) > 0 ? 'corriendo' : 'normal');
@@ -342,7 +366,7 @@ export class Quemado extends EventScene {
       const cruza = b.y + b.vy * ((j.x - b.x) / (b.vx || 1));
       if (viene && (b.objetivo === j || Math.abs(cruza - j.y) < 12)) {
         if (j.ia.plan === 'atrapa' && d < 30 && j.catchCool <= 0) { this.atrapar(j); return [0, 0]; }
-        if (j.ia.plan === 'salta' && d < 40 && j.z === 0) j.vz = 190;
+        if (j.ia.plan === 'salta' && d < 40 && j.z === 0 && !j.salto) this.saltar(j);
       }
       if (b.objetivo === j) return [0, 0];
     }
@@ -483,13 +507,16 @@ export class Quemado extends EventScene {
       const L = b.lanzador!;
       for (const o of this.js) {
         if (o === L || o.st === 'golpe' || o.quemado || b.st !== 'tiro') continue;
-        if (Math.abs(o.x - b.x) > 9 || Math.abs(o.y - b.y) > 8 || b.z < o.z - 2 || b.z > o.z + 40) continue;
+        if (Math.abs(o.x - b.x) > 9 || Math.abs(o.y - b.y) > 8) continue;
+        // en el salto de bolita, con la elevación por encima de 8 px, el balón pasa por debajo
+        const bolita = o.z > 8 && o.team !== L.team && o.dentro;
+        if (!bolita && (b.z < o.z - 2 || b.z > o.z + 40)) continue;
         // el tiro pasa por encima de tus compañeros en la cancha (no lo tapan); el del cementerio, detrás del rival,
         // sí recibe el que pasó de largo
         if (o.team === L.team) { if (!o.dentro && b.t > 0.2) this.agarra(o); continue; }
         if (!o.dentro) continue;
         if (o.st === 'atrapa' && (!b.especial || Math.random() < 0.15)) this.agarra(o, true);
-        else if (o.z > 12) { this.stats.esquivas[o.team]++; if (o.team === 0 && o === b.objetivo) { this.esquivas++; this.letrero(o, '¡ESQUIVÓ!', 0x8ae0ff); } }
+        else if (bolita || o.z > 12) { this.stats.esquivas[o.team]++; if (o.team === 0 && o === b.objetivo) { this.esquivas++; this.letrero(o, '¡ESQUIVÓ!', 0x8ae0ff); } }
         else this.golpe(o);
       }
       if (b.st === 'tiro') this.bordes(b);

@@ -1,11 +1,11 @@
 import Phaser from 'phaser';
 import { MAX_W } from '../core/pantalla';
 import { Input, rotular } from '../core/input';
-import { chip, VICTORIA, PELEA } from '../core/music';
+import { chip, PELEA } from '../core/music';
 import { kit, bucle } from '../core/kit';
 import { txt, flash } from '../core/ui';
 import { Coach, type Paso } from '../core/coach';
-import { nuestros, ellos, conJugador } from '../core/equipos';
+import { nuestros, ellos, conJugador, lado, victoria } from '../core/equipos';
 import { cargarAtletas, packsDe } from '../core/carga';
 import { hayArte, pintarEscenario } from './escenario';
 
@@ -258,7 +258,8 @@ export abstract class EventScene extends Phaser.Scene {
   protected resultados(titulo: string, orden: { c: Competidor; valor: string }[]) {
     this.fase = 'fin';
     this.callarTema();
-    chip.play(VICTORIA);
+    // el acorde del equipo que ganó la prueba
+    victoria(this, lado(orden[0]?.c.team ?? 0).id);
     flash(this, 150);
     const g = this.uiAdd(this.add.graphics().setDepth(8400));
     g.fillStyle(0x08081a, 0.9).fillRect(140, 60, 360, 220);
@@ -324,7 +325,7 @@ export abstract class EventScene extends Phaser.Scene {
   private finPractica() {
     this.fase = 'fin';
     this.callarTema();
-    chip.play(VICTORIA);
+    victoria(this, lado(0).id);
     flash(this, 150);
     const g = this.uiAdd(this.add.graphics().setDepth(8400));
     g.fillStyle(0x08081a, 0.88).fillRect(30, 110, 580, 120);

@@ -81,7 +81,10 @@
       "knee_grab",
       "break_free",
       "umbrella_block",
-      "fan_gust"
+      "fan_gust",
+      "judo_grip",
+      "judo_throw",
+      "judo_thrown"
     ],
     "atletismo": [
       "idle",
@@ -94,7 +97,8 @@
       "pole_vault",
       "celebrate",
       "sad",
-      "hit"
+      "hit",
+      "vault_fail"
     ],
     "natacion": [
       "idle",
@@ -168,7 +172,11 @@
     "beisbol": {
       "anims": [
         "pitch",
-        "catch"
+        "catch",
+        "bat_stance",
+        "bat_swing",
+        "dodge_jump",
+        "tejo_throw"
       ],
       "sin_props": true
     }
@@ -312,7 +320,17 @@
       "agua",
       "mar",
       "cafetal",
-      "llano"
+      "llano",
+      "trafico_saigon",
+      "hoian_noche",
+      "llovizna_bogota",
+      "lago_noche",
+      "azotea_noche",
+      "atardecer_cartagena",
+      "comuna",
+      "carnaval",
+      "pinos_dalat",
+      "liceo"
     ],
     "musica": [
       "marcha_nekketsu",
@@ -329,7 +347,13 @@
       "champeta_murallas",
       "cafe_neblina",
       "halong_remos",
-      "pajarillo_llano"
+      "pajarillo_llano",
+      "acorde_familia",
+      "acorde_instituto",
+      "acorde_rong",
+      "acorde_rolos",
+      "acorde_panas",
+      "acorde_maracuchos"
     ]
   },
   "npc": {

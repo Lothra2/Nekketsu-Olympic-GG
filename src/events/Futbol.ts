@@ -129,6 +129,7 @@ export class Futbol extends EventScene {
     this.flecha = this.add.triangle(0, 0, 0, 0, 8, 0, 4, 6, 0xffe040).setDepth(6000);
     this.saqueDe(0);
     this.tema('carnaval_quilla');
+    this.ambiente('carnaval');
     this.cameras.main.centerOn(320, 180);
     if (this.d.practica) void this.entrenar('FÚTBOL', this.pasos(), 40);
     else void this.previa('FÚTBOL CALLEJERO', 'CARNAVAL DE BARRANQUILLA, COLOMBIA', '{PUÑO} PASE (O HOMBRO SIN BALÓN) · {PATADA} TIRO (O BARRIDA) · {SALTO} CABEZAZO · {ESPECIAL} CON LA BARRA LLENA');

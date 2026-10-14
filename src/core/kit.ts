@@ -240,6 +240,28 @@ export function cutPortraits(scene: Phaser.Scene) {
  * cierra con un marcador de `muestras / frecuencia` segundos, el largo del original: así el relleno del OGG y del M4A
  * no mete un silencio cada vuelta. Devuelve el sonido (o null si el kit no lo trae, o la escena se fue antes).
  */
+/**
+ * Toca una vez una música corta del kit (el acorde de victoria de un equipo), cargándola la primera vez. Devuelve
+ * false si el kit no la trae o no se pudo tocar.
+ */
+export async function unaVez(scene: Phaser.Scene, n: string, volumen = 0.6): Promise<boolean> {
+  const a = kit().audio.musica?.[n];
+  if (!a) return false;
+  const key = `mus_${n}`;
+  if (!scene.cache.audio.exists(key)) {
+    await new Promise<void>((res) => {
+      scene.load.audio(key, rutas(a));
+      scene.load.once(Phaser.Loader.Events.COMPLETE, () => res());
+      scene.load.start();
+    });
+  }
+  if (!scene.sys.isActive() || !scene.cache.audio.exists(key)) return false;
+  const s = scene.sound.add(key, { volume: volumen });
+  s.once(Phaser.Sound.Events.COMPLETE, () => s.destroy());
+  scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { if (!s.pendingRemove) s.destroy(); });
+  return s.play();
+}
+
 export async function bucle(scene: Phaser.Scene, seccion: 'musica' | 'ambientes', n: string, volumen = 0.5, azar = false): Promise<Phaser.Sound.BaseSound | null> {
   const a = kit().audio[seccion]?.[n];
   if (!a) return null;

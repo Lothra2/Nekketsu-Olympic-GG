@@ -23,7 +23,7 @@ export const PACKS: Record<string, string[]> = {
   Jabalina: ['ngg_mov', 'ngg_golpe', 'atletismo'],
   Natacion: ['ngg_mov', 'ngg_golpe', 'natacion'],
   DaCau: ['ngg_mov', 'ngg_golpe', 'futbol'],
-  Tejo: ['ngg_mov', 'ngg_carga'],
+  Tejo: ['ngg_mov', 'ngg_carga', 'beisbol'],
   Quemado: ['ngg_mov', 'ngg_golpe', 'ngg_carga', 'beisbol'],
   Chapita: ['ngg_mov', 'ngg_golpe', 'ngg_carga', 'beisbol'],
   Voley: ['ngg_mov', 'ngg_golpe', 'voley'],

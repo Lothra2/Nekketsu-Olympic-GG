@@ -1,4 +1,6 @@
-import { kit } from './kit';
+import Phaser from 'phaser';
+import { kit, unaVez } from './kit';
+import { chip, VICTORIA } from './music';
 
 /**
  * Los seis equipos del juego. Los atletas, los colores y la mascota salen del kit (`equipos` del manifiesto, que viene
@@ -23,6 +25,8 @@ export interface Equipo {
   claro: number;
   bandera: string;
   mascota?: string;
+  /** el acorde de victoria del equipo (lote H7), en `audio.musica` del kit */
+  musica?: string;
 }
 
 const TEXTOS: Record<string, Pick<Equipo, 'corto' | 'con' | 'gana' | 'copa' | 'frases' | 'bandera'>> = {
@@ -50,14 +54,14 @@ let cache: Record<string, Equipo> | null = null;
 /** Todos los equipos que trae el kit, con sus textos. */
 export function equipos(): Record<string, Equipo> {
   if (cache) return cache;
-  const delKit = ((kit() as unknown as { equipos?: Record<string, { nombre: string; colores: string[]; atletas: string[]; mascota?: string }> }).equipos) ?? {};
+  const delKit = ((kit() as unknown as { equipos?: Record<string, { nombre: string; colores: string[]; atletas: string[]; mascota?: string; musica?: string }> }).equipos) ?? {};
   cache = {};
   for (const [id, e] of Object.entries(delKit)) {
     const t = TEXTOS[id] ?? { corto: e.nombre.toUpperCase(), con: e.nombre.toUpperCase(), gana: `GANA ${e.nombre.toUpperCase()}`, copa: `${e.nombre.toUpperCase()} SE LLEVA LA COPA`, frases: ['¡JA!'], bandera: 'flag_ve' };
     // los atletas que de verdad vinieron en el kit (si uno falta, el equipo juega con los que hay)
     const atletas = e.atletas.filter((a) => kit().atletas[a]);
     const color = hex(e.colores?.[0] ?? '#808080');
-    cache[id] = { id, nombre: e.nombre, ...t, atletas, color, claro: aclarar(color), mascota: e.mascota };
+    cache[id] = { id, nombre: e.nombre, ...t, atletas, color, claro: aclarar(color), mascota: e.mascota, musica: e.musica };
   }
   return cache;
 }
@@ -92,4 +96,15 @@ export function conJugador(jugador: string) {
     const suyo = equipoDe(jugador).id;
     lados = [suyo, lados[1] === suyo ? (suyo === 'instituto_nekketsu' ? 'familia_gg' : 'instituto_nekketsu') : lados[1]];
   }
+}
+
+/**
+ * La música de victoria del equipo que ganó: su acorde (lote H7) si el kit lo trae, y si no, la fanfarria del chip
+ * de siempre. Va donde antes sonaba `chip.play(VICTORIA)`.
+ */
+export function victoria(scene: Phaser.Scene, equipoId: string | undefined) {
+  const n = equipoId ? equipos()[equipoId]?.musica : undefined;
+  if (!n || !kit().audio.musica?.[n]) { chip.play(VICTORIA); return; }
+  chip.stop(0.1);
+  void unaVez(scene, n).then((ok) => { if (!ok && scene.sys.isActive()) chip.play(VICTORIA); });
 }

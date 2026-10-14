@@ -101,6 +101,7 @@ export class Tamawari extends EventScene implements World {
     this.uiAdd(txt(this, 18, 12, `BOLA ${lado(0).corto}`, 'fuente_ui', 1, 0).setDepth(8001).setTint(0x9ac8ff));
     this.uiAdd(txt(this, 622, 12, `BOLA ${lado(1).corto}`, 'fuente_ui', 1, 1).setDepth(8001).setTint(0xffa0a0));
     this.tema('hoian_noche');
+    this.ambiente('hoian_noche');
     if (this.d.practica) void this.entrenar('TAMA-WARI', this.pasos());
     else void this.previa('TAMA-WARI HỘI AN', 'HỘI AN, VIETNAM', 'ROMPE LA BOLA DEL OTRO POSTE · {SALTO} AGARRA EL POSTE · {PUÑO} Y {PATADA} TREPAN Y PEGAN');
   }

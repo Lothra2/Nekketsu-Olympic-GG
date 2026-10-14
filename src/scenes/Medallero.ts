@@ -1,10 +1,10 @@
 import Phaser from 'phaser';
 import { Figura } from '../core/figura';
 import { Input } from '../core/input';
-import { chip, MARCHA, VICTORIA } from '../core/music';
+import { chip, MARCHA } from '../core/music';
 import { txt, panel, flash } from '../core/ui';
 import { pruebasDe, type Gira, type PruebaGira } from '../events/base';
-import { nuestros, ellos, lado, setPartido } from '../core/equipos';
+import { nuestros, ellos, lado, setPartido, victoria } from '../core/equipos';
 import { cargarAtletas, packsDe } from '../core/carga';
 import { fireworks } from './logo';
 
@@ -96,7 +96,7 @@ export class Medallero extends Phaser.Scene {
   private final() {
     const g = this.gira;
     const gana = g.puntos[0] >= g.puntos[1] ? 0 : 1;
-    chip.play(VICTORIA);
+    victoria(this, lado(gana).id);
     flash(this, 300);
     this.add.image(320, 180, 'bg_caracas');
     this.add.image(320, 280, 'bg_azotea');
