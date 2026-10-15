@@ -448,7 +448,10 @@
       "salida_natacion",
       "chapuzon",
       "brazada",
-      "garrocha"
+      "garrocha",
+      "trueno",
+      "furro",
+      "corneta_moto"
     ],
     "ambientes": [
       "agua",
@@ -467,7 +470,10 @@
       "liceo",
       "parque_tao_dan",
       "barrio_caracas",
-      "dojo_hanoi"
+      "dojo_hanoi",
+      "mercado",
+      "rio",
+      "estadio"
     ],
     "musica": [
       "marcha_nekketsu",

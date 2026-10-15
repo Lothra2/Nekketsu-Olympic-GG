@@ -7,6 +7,7 @@ import { pruebasDe, type Gira, type PruebaGira } from '../events/base';
 import { nuestros, ellos, lado, setPartido, victoria } from '../core/equipos';
 import { cargarAtletas, packsDe } from '../core/carga';
 import { fireworks } from './logo';
+import { hayUi, pieza } from '../core/interfaz';
 
 /**
  * Entre prueba y prueba de la Olimpiada Express: el marcador por equipos, lo que va de gira y la que viene.
@@ -70,7 +71,8 @@ export class Medallero extends Phaser.Scene {
       txt(this, 112, y + 9, p.lugar, 'fuente_ui', 1, 0).setTint(0x8a8ab0);
       if (hecha) {
         const oro = hecha.podio[0];
-        this.add.circle(470, y, 8, 0xffd040);
+        if (hayUi(this, 'medallas_16')) this.add.image(470, y, 'ui_medallas_16', 0);
+        else this.add.circle(470, y, 8, 0xffd040);
         this.add.image(496, y, 'cabecitas', oro);
         txt(this, 512, y, oro.toUpperCase(), 'fuente_ui', 1, 0);
       } else if (viene) {
@@ -98,8 +100,10 @@ export class Medallero extends Phaser.Scene {
     const gana = g.puntos[0] >= g.puntos[1] ? 0 : 1;
     victoria(this, lado(gana).id);
     flash(this, 300);
-    this.add.image(320, 180, 'bg_caracas');
-    this.add.image(320, 280, 'bg_azotea');
+    // el podio del estadio (800 de ancho, la parte de 640 de x 80 a 720); sin él, Caracas y su azotea
+    const podioKit = hayUi(this, 'podio');
+    if (podioKit) this.add.image(-80, 0, 'ui_podio').setOrigin(0);
+    else { this.add.image(320, 180, 'bg_caracas'); this.add.image(320, 280, 'bg_azotea'); }
     fireworks(this);
     txt(this, 320, 30, gana === 0 ? '¡CAMPEONES DE LA GIRA!' : `${lado(1).gana}...`, gana === 0 ? 'fuente_titulo' : 'fuente_titulo_plata', 2);
     txt(this, 320, 58, gana === 0 ? lado(0).copa : '¡LA REVANCHA ES PERSONAL, CHAMO!', 'fuente_ui', 2).setTint(0xffe080);
@@ -109,13 +113,21 @@ export class Medallero extends Phaser.Scene {
     txt(this, 320, 96, 'PTS', 'fuente_ui', 1).setTint(0xf2c230);
     // podio con los cuatro del equipo ganador
     const team = gana === 0 ? nuestros() : ellos();
-    const podio = this.add.graphics();
-    podio.fillStyle(0xf2c230).fillRect(280, 268, 80, 60);
-    podio.fillStyle(0xd0d8e8).fillRect(200, 284, 80, 44);
-    podio.fillStyle(0xd08a40).fillRect(360, 296, 80, 32);
-    txt(this, 320, 296, '1', 'fuente_titulo', 2).setTint(0x8a5a10);
-    txt(this, 240, 306, '2', 'fuente_titulo', 2).setTint(0x6a6a7a);
-    txt(this, 400, 312, '3', 'fuente_titulo', 2).setTint(0x6a3a10);
+    if (podioKit) this.banderas(lado(gana).idBandera);
+    else {
+      const podio = this.add.graphics();
+      podio.fillStyle(0xf2c230).fillRect(280, 268, 80, 60);
+      podio.fillStyle(0xd0d8e8).fillRect(200, 284, 80, 44);
+      podio.fillStyle(0xd08a40).fillRect(360, 296, 80, 32);
+      txt(this, 320, 296, '1', 'fuente_titulo', 2).setTint(0x8a5a10);
+      txt(this, 240, 306, '2', 'fuente_titulo', 2).setTint(0x6a6a7a);
+      txt(this, 400, 312, '3', 'fuente_titulo', 2).setTint(0x6a3a10);
+    }
+    // la medalla de oro grande a cada lado del marcador, meciéndose
+    if (hayUi(this, 'medallas_64')) for (const x of [120, 520]) {
+      const m = this.add.image(x, 72, 'ui_medallas_64', 0).setOrigin(0.5, 0.1);
+      this.tweens.add({ targets: m, angle: { from: -7, to: 7 }, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.inOut', delay: x === 120 ? 0 : 450 });
+    }
     const pos: [number, number][] = [[320, 268], [240, 284], [400, 296], [470, 330]];
     const lider = gana === 0 ? g.jugador : ellos()[0];
     const orden = [lider, ...team.filter((id) => id !== lider)];
@@ -128,6 +140,20 @@ export class Medallero extends Phaser.Scene {
     const go = txt(this, 320, 346, 'PRESIONA START PARA VOLVER', 'fuente_ui', 1);
     this.tweens.add({ targets: go, alpha: 0.2, duration: 450, yoyo: true, repeat: -1 });
     this.sound.play(gana === 0 ? 'subir_nivel' : 'enemigo_muere', { volume: 0.5 });
+  }
+
+  /** Las banderas del equipo campeón suben por los tres mástiles del podio, ondeando, la del primero de última. */
+  private banderas(id?: string) {
+    const tex = `ui_bandera_${id}_32_ondea`;
+    const mastiles = (pieza('podio') as { mastiles?: { puesto: string; x: number; arriba: number; abajo: number }[] } | undefined)?.mastiles;
+    if (!id || !mastiles || !this.textures.exists(tex)) return;
+    const orden = ['tercero', 'segundo', 'primero'];
+    for (const m of mastiles) {
+      // la punta izquierda de la tela va pegada al palo, de `abajo` a `arriba`
+      const b = this.add.sprite(m.x - 80, m.abajo, tex, 0).setOrigin(0, 0);
+      if (this.anims.exists(tex)) b.play(tex);
+      this.tweens.add({ targets: b, y: m.arriba, duration: 2600, ease: 'Sine.out', delay: 400 + Math.max(0, orden.indexOf(m.puesto)) * 500 });
+    }
   }
 
   private seguir() {

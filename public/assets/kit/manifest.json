@@ -13,42 +13,67 @@
    "colores": ["#2a5bd7","#f2c230"],
    "atletas": ["rick","steph","sophie","alana"],
    "mascota": "thor",
-   "musica": "acorde_familia"
+   "musica": "acorde_familia",
+   "bandera": "venezuela",
+   "escudo": {
+    "emblema": "letras",
+    "texto": "GG"
+   }
   },
   "instituto_nekketsu": {
    "nombre": "Instituto Nekketsu",
    "pais": "japon",
    "colores": ["#353c58","#d42a2a"],
    "atletas": ["kenji","ryu","goro","tetsu"],
-   "musica": "acorde_instituto"
+   "musica": "acorde_instituto",
+   "bandera": "japon",
+   "escudo": {
+    "emblema": "llama"
+   }
   },
   "rong_sai_gon": {
    "nombre": "Rồng Sài Gòn",
    "pais": "vietnam",
    "colores": ["#da251d","#ffcd00"],
    "atletas": ["minh","lan","tuan","ba_hoa"],
-   "musica": "acorde_rong"
+   "musica": "acorde_rong",
+   "bandera": "vietnam",
+   "escudo": {
+    "emblema": "dragon"
+   }
   },
   "rolos_de_chapinero": {
    "nombre": "Rolos de Chapinero",
    "pais": "colombia",
    "colores": ["#ffd700","#c8102e"],
    "atletas": ["andres","camila","pipe","don_hernando"],
-   "musica": "acorde_rolos"
+   "musica": "acorde_rolos",
+   "bandera": "bogota",
+   "escudo": {
+    "emblema": "bicicleta"
+   }
   },
   "panas_de_caracas": {
    "nombre": "Los Panas de Caracas",
    "pais": "venezuela",
    "colores": ["#ffcc00","#00247d","#cf142b"],
    "atletas": ["gabo","yuli","toto","carmen"],
-   "musica": "acorde_panas"
+   "musica": "acorde_panas",
+   "bandera": "venezuela",
+   "escudo": {
+    "emblema": "montana"
+   }
   },
   "maracuchos_del_lago": {
    "nombre": "Maracuchos del Lago",
    "pais": "venezuela",
    "colores": ["#0055a4","#ffd100","#1e1e24"],
    "atletas": ["ender","yusmary","jhonder","abuela_nerva"],
-   "musica": "acorde_maracuchos"
+   "musica": "acorde_maracuchos",
+   "bandera": "zulia",
+   "escudo": {
+    "emblema": "rayo"
+   }
   }
  },
  "atletas": {
@@ -1222,6 +1247,12 @@
          "cuadro": 0,
          "fase": 0,
          "pie": "cerca"
+        },
+        {
+         "tipo": "impacto",
+         "cuadro": 2,
+         "fase": 0.17,
+         "punto": [[10,-36],[11,-34],[-11,-34],[11,-34],[-11,-34]]
         },
         {
          "tipo": "suelta",
@@ -4189,7 +4220,7 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 3
+    "escala_grande": 1
    },
    "cabecita": "ui/cabecitas.png#abuela_nerva"
   },
@@ -5375,6 +5406,12 @@
          "cuadro": 0,
          "fase": 0,
          "pie": "cerca"
+        },
+        {
+         "tipo": "impacto",
+         "cuadro": 2,
+         "fase": 0.17,
+         "punto": [[8,-29],[9,-28],[-10,-28],[9,-28],[-10,-28]]
         },
         {
          "tipo": "suelta",
@@ -8342,7 +8379,7 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 3
+    "escala_grande": 1
    },
    "cabecita": "ui/cabecitas.png#alana"
   },
@@ -9515,6 +9552,12 @@
          "cuadro": 0,
          "fase": 0,
          "pie": "cerca"
+        },
+        {
+         "tipo": "impacto",
+         "cuadro": 2,
+         "fase": 0.17,
+         "punto": [[10,-36],[11,-34],[-11,-34],[11,-34],[-11,-34]]
         },
         {
          "tipo": "suelta",
@@ -12482,7 +12525,7 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 3
+    "escala_grande": 1
    },
    "cabecita": "ui/cabecitas.png#andres"
   },
@@ -13656,6 +13699,12 @@
          "cuadro": 0,
          "fase": 0,
          "pie": "cerca"
+        },
+        {
+         "tipo": "impacto",
+         "cuadro": 2,
+         "fase": 0.17,
+         "punto": [[11,-36],[12,-34],[-12,-34],[12,-34],[-12,-34]]
         },
         {
          "tipo": "suelta",
@@ -16623,7 +16672,7 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 3
+    "escala_grande": 1
    },
    "cabecita": "ui/cabecitas.png#ba_hoa"
   },
@@ -17796,6 +17845,12 @@
          "cuadro": 0,
          "fase": 0,
          "pie": "cerca"
+        },
+        {
+         "tipo": "impacto",
+         "cuadro": 2,
+         "fase": 0.17,
+         "punto": [[9,-36],[10,-34],[-10,-34],[10,-34],[-10,-34]]
         },
         {
          "tipo": "suelta",
@@ -20763,7 +20818,7 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 3
+    "escala_grande": 1
    },
    "cabecita": "ui/cabecitas.png#camila"
   },
@@ -21936,6 +21991,12 @@
          "cuadro": 0,
          "fase": 0,
          "pie": "cerca"
+        },
+        {
+         "tipo": "impacto",
+         "cuadro": 2,
+         "fase": 0.17,
+         "punto": [[11,-36],[12,-34],[-12,-34],[12,-34],[-12,-34]]
         },
         {
          "tipo": "suelta",
@@ -24903,7 +24964,7 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 3
+    "escala_grande": 1
    },
    "cabecita": "ui/cabecitas.png#carmen"
   },
@@ -26076,6 +26137,12 @@
          "cuadro": 0,
          "fase": 0,
          "pie": "cerca"
+        },
+        {
+         "tipo": "impacto",
+         "cuadro": 2,
+         "fase": 0.17,
+         "punto": [[17,-52],[19,-50],[-19,-50],[19,-50],[-19,-50]]
         },
         {
          "tipo": "suelta",
@@ -29043,7 +29110,7 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 3
+    "escala_grande": 1
    },
    "cabecita": "ui/cabecitas.png#don_hernando"
   },
@@ -30217,6 +30284,12 @@
          "cuadro": 0,
          "fase": 0,
          "pie": "cerca"
+        },
+        {
+         "tipo": "impacto",
+         "cuadro": 2,
+         "fase": 0.17,
+         "punto": [[12,-36],[13,-34],[-13,-34],[13,-34],[-13,-34]]
         },
         {
          "tipo": "suelta",
@@ -33184,7 +33257,7 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 3
+    "escala_grande": 1
    },
    "cabecita": "ui/cabecitas.png#ender"
   },
@@ -34357,6 +34430,12 @@
          "cuadro": 0,
          "fase": 0,
          "pie": "cerca"
+        },
+        {
+         "tipo": "impacto",
+         "cuadro": 2,
+         "fase": 0.17,
+         "punto": [[10,-36],[11,-34],[-11,-34],[11,-34],[-11,-34]]
         },
         {
          "tipo": "suelta",
@@ -37324,7 +37403,7 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 3
+    "escala_grande": 1
    },
    "cabecita": "ui/cabecitas.png#gabo"
   },
@@ -38498,6 +38577,12 @@
          "cuadro": 0,
          "fase": 0,
          "pie": "cerca"
+        },
+        {
+         "tipo": "impacto",
+         "cuadro": 2,
+         "fase": 0.17,
+         "punto": [[17,-52],[19,-50],[-19,-50],[19,-50],[-19,-50]]
         },
         {
          "tipo": "suelta",
@@ -41465,7 +41550,7 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 3
+    "escala_grande": 1
    },
    "cabecita": "ui/cabecitas.png#goro"
   },
@@ -42639,6 +42724,12 @@
          "cuadro": 0,
          "fase": 0,
          "pie": "cerca"
+        },
+        {
+         "tipo": "impacto",
+         "cuadro": 2,
+         "fase": 0.17,
+         "punto": [[9,-33],[10,-31],[-10,-31],[10,-31],[-10,-31]]
         },
         {
          "tipo": "suelta",
@@ -45606,7 +45697,7 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 3
+    "escala_grande": 1
    },
    "cabecita": "ui/cabecitas.png#jhonder"
   },
@@ -46780,6 +46871,12 @@
          "cuadro": 0,
          "fase": 0,
          "pie": "cerca"
+        },
+        {
+         "tipo": "impacto",
+         "cuadro": 2,
+         "fase": 0.17,
+         "punto": [[12,-36],[13,-34],[-13,-34],[13,-34],[-13,-34]]
         },
         {
          "tipo": "suelta",
@@ -49747,7 +49844,7 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 3
+    "escala_grande": 1
    },
    "cabecita": "ui/cabecitas.png#kenji"
   },
@@ -50921,6 +51018,12 @@
          "cuadro": 0,
          "fase": 0,
          "pie": "cerca"
+        },
+        {
+         "tipo": "impacto",
+         "cuadro": 2,
+         "fase": 0.17,
+         "punto": [[9,-33],[10,-31],[-10,-31],[10,-31],[-10,-31]]
         },
         {
          "tipo": "suelta",
@@ -53888,7 +53991,7 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 3
+    "escala_grande": 1
    },
    "cabecita": "ui/cabecitas.png#lan"
   },
@@ -55062,6 +55165,12 @@
          "cuadro": 0,
          "fase": 0,
          "pie": "cerca"
+        },
+        {
+         "tipo": "impacto",
+         "cuadro": 2,
+         "fase": 0.17,
+         "punto": [[10,-36],[11,-34],[-11,-34],[11,-34],[-11,-34]]
         },
         {
          "tipo": "suelta",
@@ -58029,7 +58138,7 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 3
+    "escala_grande": 1
    },
    "cabecita": "ui/cabecitas.png#minh"
   },
@@ -59202,6 +59311,12 @@
          "cuadro": 0,
          "fase": 0,
          "pie": "cerca"
+        },
+        {
+         "tipo": "impacto",
+         "cuadro": 2,
+         "fase": 0.17,
+         "punto": [[9,-33],[10,-31],[-10,-31],[10,-31],[-10,-31]]
         },
         {
          "tipo": "suelta",
@@ -62169,7 +62284,7 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 3
+    "escala_grande": 1
    },
    "cabecita": "ui/cabecitas.png#pipe"
   },
@@ -63355,6 +63470,12 @@
          "cuadro": 0,
          "fase": 0,
          "pie": "cerca"
+        },
+        {
+         "tipo": "impacto",
+         "cuadro": 2,
+         "fase": 0.17,
+         "punto": [[10,-36],[11,-34],[-11,-34],[11,-34],[-11,-34]]
         },
         {
          "tipo": "suelta",
@@ -66322,7 +66443,7 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 3
+    "escala_grande": 1
    },
    "cabecita": "ui/cabecitas.png#rick"
   },
@@ -67496,6 +67617,12 @@
          "cuadro": 0,
          "fase": 0,
          "pie": "cerca"
+        },
+        {
+         "tipo": "impacto",
+         "cuadro": 2,
+         "fase": 0.17,
+         "punto": [[9,-36],[10,-34],[-10,-34],[10,-34],[-10,-34]]
         },
         {
          "tipo": "suelta",
@@ -70463,7 +70590,7 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 3
+    "escala_grande": 1
    },
    "cabecita": "ui/cabecitas.png#ryu"
   },
@@ -71649,6 +71776,12 @@
          "cuadro": 0,
          "fase": 0,
          "pie": "cerca"
+        },
+        {
+         "tipo": "impacto",
+         "cuadro": 2,
+         "fase": 0.17,
+         "punto": [[7,-32],[8,-31],[-9,-31],[8,-31],[-9,-31]]
         },
         {
          "tipo": "suelta",
@@ -74616,7 +74749,7 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 3
+    "escala_grande": 1
    },
    "cabecita": "ui/cabecitas.png#sophie"
   },
@@ -75802,6 +75935,12 @@
          "cuadro": 0,
          "fase": 0,
          "pie": "cerca"
+        },
+        {
+         "tipo": "impacto",
+         "cuadro": 2,
+         "fase": 0.17,
+         "punto": [[9,-36],[10,-34],[-10,-34],[10,-34],[-10,-34]]
         },
         {
          "tipo": "suelta",
@@ -78769,7 +78908,7 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 3
+    "escala_grande": 1
    },
    "cabecita": "ui/cabecitas.png#steph"
   },
@@ -79943,6 +80082,12 @@
          "cuadro": 0,
          "fase": 0,
          "pie": "cerca"
+        },
+        {
+         "tipo": "impacto",
+         "cuadro": 2,
+         "fase": 0.17,
+         "punto": [[9,-33],[10,-31],[-10,-31],[10,-31],[-10,-31]]
         },
         {
          "tipo": "suelta",
@@ -82910,7 +83055,7 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 3
+    "escala_grande": 1
    },
    "cabecita": "ui/cabecitas.png#tetsu"
   },
@@ -84083,6 +84228,12 @@
          "cuadro": 0,
          "fase": 0,
          "pie": "cerca"
+        },
+        {
+         "tipo": "impacto",
+         "cuadro": 2,
+         "fase": 0.17,
+         "punto": [[9,-29],[10,-28],[-11,-28],[10,-28],[-11,-28]]
         },
         {
          "tipo": "suelta",
@@ -87050,7 +87201,7 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 3
+    "escala_grande": 1
    },
    "cabecita": "ui/cabecitas.png#toto"
   },
@@ -88224,6 +88375,12 @@
          "cuadro": 0,
          "fase": 0,
          "pie": "cerca"
+        },
+        {
+         "tipo": "impacto",
+         "cuadro": 2,
+         "fase": 0.17,
+         "punto": [[7,-29],[8,-28],[-9,-28],[8,-28],[-9,-28]]
         },
         {
          "tipo": "suelta",
@@ -91191,7 +91348,7 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 3
+    "escala_grande": 1
    },
    "cabecita": "ui/cabecitas.png#tuan"
   },
@@ -92364,6 +92521,12 @@
          "cuadro": 0,
          "fase": 0,
          "pie": "cerca"
+        },
+        {
+         "tipo": "impacto",
+         "cuadro": 2,
+         "fase": 0.17,
+         "punto": [[8,-33],[9,-31],[-9,-31],[9,-31],[-9,-31]]
         },
         {
          "tipo": "suelta",
@@ -95331,7 +95494,7 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 3
+    "escala_grande": 1
    },
    "cabecita": "ui/cabecitas.png#yuli"
   },
@@ -96506,6 +96669,12 @@
          "cuadro": 0,
          "fase": 0,
          "pie": "cerca"
+        },
+        {
+         "tipo": "impacto",
+         "cuadro": 2,
+         "fase": 0.17,
+         "punto": [[10,-36],[11,-34],[-11,-34],[11,-34],[-11,-34]]
         },
         {
          "tipo": "suelta",
@@ -99473,7 +99642,7 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 3
+    "escala_grande": 1
    },
    "cabecita": "ui/cabecitas.png#yusmary"
   }
@@ -102541,6 +102710,381 @@
     "w": 24,
     "h": 24,
     "nueve": [6,6,6,6]
+   },
+   "medallas_16": {
+    "archivo": "ui/medallas_16.png",
+    "w": 16,
+    "h": 16,
+    "cuadros": 3,
+    "columnas": 3,
+    "orden": ["oro","plata","bronce"],
+    "nota": "Un cuadro por medalla: 0 oro, 1 plata, 2 bronce. La cinta arriba, el disco abajo."
+   },
+   "medallas_32": {
+    "archivo": "ui/medallas_32.png",
+    "w": 32,
+    "h": 32,
+    "cuadros": 3,
+    "columnas": 3,
+    "orden": ["oro","plata","bronce"],
+    "nota": "Un cuadro por medalla: 0 oro, 1 plata, 2 bronce. La cinta arriba, el disco abajo."
+   },
+   "medallas_64": {
+    "archivo": "ui/medallas_64.png",
+    "w": 64,
+    "h": 64,
+    "cuadros": 3,
+    "columnas": 3,
+    "orden": ["oro","plata","bronce"],
+    "nota": "Un cuadro por medalla: 0 oro, 1 plata, 2 bronce. La cinta arriba, el disco abajo."
+   },
+   "bandera_vietnam_16": {
+    "archivo": "ui/bandera_vietnam_16.png",
+    "w": 18,
+    "h": 15,
+    "asta": "a la izquierda: el borde de la tela que va pegado al palo"
+   },
+   "bandera_vietnam_16_ondea": {
+    "archivo": "ui/bandera_vietnam_16_ondea.png",
+    "w": 18,
+    "h": 15,
+    "cuadros": 8,
+    "columnas": 8,
+    "fps": 10,
+    "loop": true
+   },
+   "bandera_colombia_16": {
+    "archivo": "ui/bandera_colombia_16.png",
+    "w": 18,
+    "h": 15,
+    "asta": "a la izquierda: el borde de la tela que va pegado al palo"
+   },
+   "bandera_colombia_16_ondea": {
+    "archivo": "ui/bandera_colombia_16_ondea.png",
+    "w": 18,
+    "h": 15,
+    "cuadros": 8,
+    "columnas": 8,
+    "fps": 10,
+    "loop": true
+   },
+   "bandera_venezuela_16": {
+    "archivo": "ui/bandera_venezuela_16.png",
+    "w": 18,
+    "h": 15,
+    "asta": "a la izquierda: el borde de la tela que va pegado al palo"
+   },
+   "bandera_venezuela_16_ondea": {
+    "archivo": "ui/bandera_venezuela_16_ondea.png",
+    "w": 18,
+    "h": 15,
+    "cuadros": 8,
+    "columnas": 8,
+    "fps": 10,
+    "loop": true
+   },
+   "bandera_japon_16": {
+    "archivo": "ui/bandera_japon_16.png",
+    "w": 18,
+    "h": 15,
+    "asta": "a la izquierda: el borde de la tela que va pegado al palo"
+   },
+   "bandera_japon_16_ondea": {
+    "archivo": "ui/bandera_japon_16_ondea.png",
+    "w": 18,
+    "h": 15,
+    "cuadros": 8,
+    "columnas": 8,
+    "fps": 10,
+    "loop": true
+   },
+   "bandera_bogota_16": {
+    "archivo": "ui/bandera_bogota_16.png",
+    "w": 18,
+    "h": 15,
+    "asta": "a la izquierda: el borde de la tela que va pegado al palo"
+   },
+   "bandera_bogota_16_ondea": {
+    "archivo": "ui/bandera_bogota_16_ondea.png",
+    "w": 18,
+    "h": 15,
+    "cuadros": 8,
+    "columnas": 8,
+    "fps": 10,
+    "loop": true
+   },
+   "bandera_zulia_16": {
+    "archivo": "ui/bandera_zulia_16.png",
+    "w": 18,
+    "h": 15,
+    "asta": "a la izquierda: el borde de la tela que va pegado al palo"
+   },
+   "bandera_zulia_16_ondea": {
+    "archivo": "ui/bandera_zulia_16_ondea.png",
+    "w": 18,
+    "h": 15,
+    "cuadros": 8,
+    "columnas": 8,
+    "fps": 10,
+    "loop": true
+   },
+   "bandera_vietnam_32": {
+    "archivo": "ui/bandera_vietnam_32.png",
+    "w": 34,
+    "h": 26,
+    "asta": "a la izquierda: el borde de la tela que va pegado al palo"
+   },
+   "bandera_vietnam_32_ondea": {
+    "archivo": "ui/bandera_vietnam_32_ondea.png",
+    "w": 34,
+    "h": 26,
+    "cuadros": 8,
+    "columnas": 8,
+    "fps": 10,
+    "loop": true
+   },
+   "bandera_colombia_32": {
+    "archivo": "ui/bandera_colombia_32.png",
+    "w": 34,
+    "h": 26,
+    "asta": "a la izquierda: el borde de la tela que va pegado al palo"
+   },
+   "bandera_colombia_32_ondea": {
+    "archivo": "ui/bandera_colombia_32_ondea.png",
+    "w": 34,
+    "h": 26,
+    "cuadros": 8,
+    "columnas": 8,
+    "fps": 10,
+    "loop": true
+   },
+   "bandera_venezuela_32": {
+    "archivo": "ui/bandera_venezuela_32.png",
+    "w": 34,
+    "h": 26,
+    "asta": "a la izquierda: el borde de la tela que va pegado al palo"
+   },
+   "bandera_venezuela_32_ondea": {
+    "archivo": "ui/bandera_venezuela_32_ondea.png",
+    "w": 34,
+    "h": 26,
+    "cuadros": 8,
+    "columnas": 8,
+    "fps": 10,
+    "loop": true
+   },
+   "bandera_japon_32": {
+    "archivo": "ui/bandera_japon_32.png",
+    "w": 34,
+    "h": 26,
+    "asta": "a la izquierda: el borde de la tela que va pegado al palo"
+   },
+   "bandera_japon_32_ondea": {
+    "archivo": "ui/bandera_japon_32_ondea.png",
+    "w": 34,
+    "h": 26,
+    "cuadros": 8,
+    "columnas": 8,
+    "fps": 10,
+    "loop": true
+   },
+   "bandera_bogota_32": {
+    "archivo": "ui/bandera_bogota_32.png",
+    "w": 34,
+    "h": 26,
+    "asta": "a la izquierda: el borde de la tela que va pegado al palo"
+   },
+   "bandera_bogota_32_ondea": {
+    "archivo": "ui/bandera_bogota_32_ondea.png",
+    "w": 34,
+    "h": 26,
+    "cuadros": 8,
+    "columnas": 8,
+    "fps": 10,
+    "loop": true
+   },
+   "bandera_zulia_32": {
+    "archivo": "ui/bandera_zulia_32.png",
+    "w": 34,
+    "h": 26,
+    "asta": "a la izquierda: el borde de la tela que va pegado al palo"
+   },
+   "bandera_zulia_32_ondea": {
+    "archivo": "ui/bandera_zulia_32_ondea.png",
+    "w": 34,
+    "h": 26,
+    "cuadros": 8,
+    "columnas": 8,
+    "fps": 10,
+    "loop": true
+   },
+   "podio": {
+    "archivo": "ui/podio.png",
+    "w": 800,
+    "h": 360,
+    "margen": 80,
+    "puestos": {
+     "primero": [400,268],
+     "segundo": [320,284],
+     "tercero": [480,296]
+    },
+    "cajones": {
+     "primero": [360,268,80],
+     "segundo": [280,284,80],
+     "tercero": [440,296,80]
+    },
+    "mastiles": [
+     {
+      "puesto": "segundo",
+      "x": 300,
+      "arriba": 138,
+      "abajo": 236
+     },
+     {
+      "puesto": "primero",
+      "x": 400,
+      "arriba": 124,
+      "abajo": 220
+     },
+     {
+      "puesto": "tercero",
+      "x": 500,
+      "arriba": 146,
+      "abajo": 244
+     }
+    ],
+    "calma": [80,0,640,116],
+    "nota": "Imagen de 800 x 360: la parte de 640 va de x 80 a 720 (ponla en x -80). Los pies del ganador en `puestos.primero`. Cada bandera sube por su mástil con la punta izquierda de la tela de `abajo` a `arriba`."
+   },
+   "iconos_prueba": {
+    "archivo": "ui/iconos_prueba.png",
+    "w": 32,
+    "h": 32,
+    "cuadros": 18,
+    "columnas": 18,
+    "orden": ["cross_country","obstaculos","vallas","natacion","jabalina","azoteas","tamawari","da_cau","tejo","quemado","chapita","voley","tenis","futbol","basket","judo","kachinuki","pelea"],
+    "nota": "Un cuadro por prueba, en el orden de `orden`."
+   },
+   "iconos_prueba_16": {
+    "archivo": "ui/iconos_prueba_16.png",
+    "w": 16,
+    "h": 16,
+    "cuadros": 18,
+    "columnas": 18,
+    "orden": ["cross_country","obstaculos","vallas","natacion","jabalina","azoteas","tamawari","da_cau","tejo","quemado","chapita","voley","tenis","futbol","basket","judo","kachinuki","pelea"],
+    "nota": "Los mismos a 16 x 16 (cada 2 x 2 se queda con su color más repetido), para filas angostas."
+   },
+   "tarjeta_familia_gg": {
+    "archivo": "ui/tarjeta_familia_gg.png",
+    "w": 184,
+    "h": 104,
+    "texto": [42,6,104,20],
+    "retratos": [8,32,168,48],
+    "bandera": "venezuela"
+   },
+   "escudo_familia_gg": {
+    "archivo": "ui/escudo_familia_gg.png",
+    "w": 48,
+    "h": 56
+   },
+   "tarjeta_instituto_nekketsu": {
+    "archivo": "ui/tarjeta_instituto_nekketsu.png",
+    "w": 184,
+    "h": 104,
+    "texto": [42,6,104,20],
+    "retratos": [8,32,168,48],
+    "bandera": "japon"
+   },
+   "escudo_instituto_nekketsu": {
+    "archivo": "ui/escudo_instituto_nekketsu.png",
+    "w": 48,
+    "h": 56
+   },
+   "tarjeta_rong_sai_gon": {
+    "archivo": "ui/tarjeta_rong_sai_gon.png",
+    "w": 184,
+    "h": 104,
+    "texto": [42,6,104,20],
+    "retratos": [8,32,168,48],
+    "bandera": "vietnam"
+   },
+   "escudo_rong_sai_gon": {
+    "archivo": "ui/escudo_rong_sai_gon.png",
+    "w": 48,
+    "h": 56
+   },
+   "tarjeta_rolos_de_chapinero": {
+    "archivo": "ui/tarjeta_rolos_de_chapinero.png",
+    "w": 184,
+    "h": 104,
+    "texto": [42,6,104,20],
+    "retratos": [8,32,168,48],
+    "bandera": "bogota"
+   },
+   "escudo_rolos_de_chapinero": {
+    "archivo": "ui/escudo_rolos_de_chapinero.png",
+    "w": 48,
+    "h": 56
+   },
+   "tarjeta_panas_de_caracas": {
+    "archivo": "ui/tarjeta_panas_de_caracas.png",
+    "w": 184,
+    "h": 104,
+    "texto": [42,6,104,20],
+    "retratos": [8,32,168,48],
+    "bandera": "venezuela"
+   },
+   "escudo_panas_de_caracas": {
+    "archivo": "ui/escudo_panas_de_caracas.png",
+    "w": 48,
+    "h": 56
+   },
+   "tarjeta_maracuchos_del_lago": {
+    "archivo": "ui/tarjeta_maracuchos_del_lago.png",
+    "w": 184,
+    "h": 104,
+    "texto": [42,6,104,20],
+    "retratos": [8,32,168,48],
+    "bandera": "zulia"
+   },
+   "escudo_maracuchos_del_lago": {
+    "archivo": "ui/escudo_maracuchos_del_lago.png",
+    "w": 48,
+    "h": 56
+   },
+   "marco_vs_4": {
+    "archivo": "ui/marco_vs_4.png",
+    "w": 800,
+    "h": 360,
+    "margen": 80,
+    "huecos": [[116,102,96,96],[232,102,96,96],[472,102,96,96],[588,102,96,96]],
+    "vs": [340,106,120,88],
+    "texto": [216,22,368,34],
+    "nombres": 246,
+    "frases": 268,
+    "costura": [[440,0],[360,360]],
+    "nota": "Imagen de 800 x 360 (la parte de 640 de x 80 a 720). Los retratos grandes van en `huecos`: los dos primeros de un equipo, los dos últimos del otro. Los nombres centrados bajo cada hueco en y `nombres`."
+   },
+   "pantalla_pausa": {
+    "archivo": "ui/pantalla_pausa.png",
+    "w": 800,
+    "h": 360,
+    "margen": 80,
+    "calma": [180,85,440,150]
+   },
+   "pantalla_se_acabo": {
+    "archivo": "ui/pantalla_se_acabo.png",
+    "w": 800,
+    "h": 360,
+    "margen": 80,
+    "calma": [180,85,440,150]
+   },
+   "pantalla_otra_partidita": {
+    "archivo": "ui/pantalla_otra_partidita.png",
+    "w": 800,
+    "h": 360,
+    "margen": 80,
+    "calma": [180,85,440,150]
    }
   }
  },
@@ -102845,6 +103389,24 @@
     "duracion": 0.67,
     "muestras": 14687,
     "frecuencia": 22050
+   },
+   "trueno": {
+    "archivo": ["audio/sfx/trueno.ogg","audio/sfx/trueno.m4a"],
+    "duracion": 2.14,
+    "muestras": 47262,
+    "frecuencia": 22050
+   },
+   "furro": {
+    "archivo": ["audio/sfx/furro.ogg","audio/sfx/furro.m4a"],
+    "duracion": 1,
+    "muestras": 21980,
+    "frecuencia": 22050
+   },
+   "corneta_moto": {
+    "archivo": ["audio/sfx/corneta_moto.ogg","audio/sfx/corneta_moto.m4a"],
+    "duracion": 0.55,
+    "muestras": 12171,
+    "frecuencia": 22050
    }
   },
   "musica": {
@@ -103105,6 +103667,27 @@
    },
    "dojo_hanoi": {
     "archivo": ["audio/ambiente/dojo_hanoi.ogg","audio/ambiente/dojo_hanoi.m4a"],
+    "duracion": 12,
+    "bucle": true,
+    "muestras": 264600,
+    "frecuencia": 22050
+   },
+   "mercado": {
+    "archivo": ["audio/ambiente/mercado.ogg","audio/ambiente/mercado.m4a"],
+    "duracion": 12,
+    "bucle": true,
+    "muestras": 264600,
+    "frecuencia": 22050
+   },
+   "rio": {
+    "archivo": ["audio/ambiente/rio.ogg","audio/ambiente/rio.m4a"],
+    "duracion": 12,
+    "bucle": true,
+    "muestras": 264600,
+    "frecuencia": 22050
+   },
+   "estadio": {
+    "archivo": ["audio/ambiente/estadio.ogg","audio/ambiente/estadio.m4a"],
     "duracion": 12,
     "bucle": true,
     "muestras": 264600,
@@ -103676,5 +104259,5 @@
   "notas": "Cada NPC es una tira de cuadros de w x h: el cuadro i va en x = i * w. Cada animación empieza en el cuadro \"desde\" y dura \"cuadros\". El ancla es el pixel de los pies: el juego pone ahí el (x, y) del NPC. Van de frente o en 3/4 hacia la calle (\"vista\"); no se espejan. Los que van de lado (\"lado\", la Marimonda que cruza) miran a la derecha: para ir a la izquierda el juego los espeja. eventos: en qué cuadro de la animación pasa algo (en patear, el impacto es cuando el pie le pega a la pelota: ahí el juego la suelta). Un grupo trae \"grupo\" con los de izquierda a derecha."
  },
  "creditos": "CREDITOS.txt",
- "notas": ["Las aves (tipo \"ave\") van en una tira de cuadros de w x h, de lado mirando a la derecha: para la izquierda se espejan con el ancla. El cuadro i va en x = i * w; cada animación empieza en \"desde\" y dura \"cuadros\". El ancla es el pixel de las patas en el piso. Las animaciones se quedan en su sitio (el juego mueve al ave); \"aire\" dice cuántos pixeles sube el ave sobre el ancla en cada cuadro (el salto del gallo, el vuelo de la paloma). eventos: en qué cuadro pasa algo (el canto del gallo, el aleteo que suena).","Hojas: fila = dirección (orden de `filas`), columna = cuadro. El pivote es el punto de apoyo (pies) y no se mueve.","eventos: en qué cuadro cae cada paso, golpe (impacto), despegue, suelta (pelota, bala, jabalina, hechizo), aterrizaje y brazada (la mano entra al agua).","avance: pixeles que avanza el cuerpo en un ciclo sin patinar. Ritmo = velocidad_del_juego * cuadros / (avance * fps).","elevacion: pixeles que el juego sube el sprite en cada cuadro (saltos que no caben en la celda); la sombra queda en el piso.","agua: fila de la superficie en la celda; el juego puede dibujar su piscina detrás y el nadador ya trae el tinte y las gotas.","desplazamiento: en las acciones que avanzan (salto largo, clavado, remate), pixeles que el juego mueve el sprite hacia donde mira, acumulados desde el primer cuadro.","rumbo: en las pruebas de campo, de frente y de espalda se dibuja la diagonal más cercana; rumbo dice hacia dónde moverlo en cada fila.","cajas, manos, cabeza y pies: [fila][cuadro], en pixeles desde el pivote con y hacia abajo. cajas = [x, y, w, h] de lo opaco (null si el cuadro está vacío); manos y pies = [[x, y] cerca, [x, y] lejos].","sin_props (voley, futbol, keeper, basket, tennis, beisbol): estos packs salen sin las pelotas dibujadas, porque el juego las mueve con su física. El cuerpo es el mismo, pixel a pixel, que en un pack con pelota. Lo que va agarrado (raqueta, bate, garrocha, jabalina) sí sale dibujado. objetos: [fila][cuadro] = lista de { tipo, clase, x, y, r, detras } o null si en ese cuadro no hay pelota. tipo = \"pelota\", clase = futbol, voley, basquet, tenis, beisbol, bala. x, y = centro exacto desde el pivote (puede caer en medio pixel), r = radio sin el contorno, detras = 1 si iba detrás del cuerpo. Al espejar, x pasa a -x. pelotas: cada pelota quitada, dibujada igual, en objetos/pelotas.json (cuadro <id>_<celda>, con su contorno y el pivote en el centro exacto): se pone en (x, y) de objetos.","packs: un atlas por pack (JSON Hash de TexturePacker, para this.load.atlas de Phaser). Cada cuadro se llama <anim>_<fila>_<cuadro>, con la fila por nombre (right, down...) y el cuadro desde 0.","girado: [cuadro] true o false. En los cuadros con true el sprite viene dibujado mirando al otro lado: el juego lo espeja (flipX al revés de como esté) junto con sus datos de ese cuadro (x pasa a -x; en cajas y cuerpo, x pasa a -(x + w)). Si el último cuadro está girado, el personaje termina mirando al otro lado.","retratos.png: arriba los chicos de 40 x 40 (el i en x = i * 40), abajo los grandes de 96 x 96 (el i en x = i * 96, y = 40), en el orden de `expresiones`. El grande es la cabeza y los hombros escalados x3 entero.","objetos: armas del piso. Cuadros <id>_<anim>_<cuadro>. quieto: la base en el pivote de la celda (como un personaje). girando: centrado. mano (16 cuadros): el agarre en el centro de la celda, el cuadro k girado k * 22.5 grados (0 = como en el piso). Para dibujar el arma en la mano usa el dato `arma` [x, y, angulo, detras] de la animación: elige <id>_mano_<k> con k = round(angulo / 22.5) % 16 y pon el centro de la celda en (x, y) desde el pivote del personaje; si detras = 1, dibújala antes que al personaje.","comida: objetos con peso \"comida\" en su propio atlas (objetos/comida.json, celdas de 16). Cuadros <id>_quieto_0 y <id>_humito_0..3 (en bucle a 6 fps), con la base en el pivote (8, 14) y su sombra ya dibujada. `cura` va de 1 a 3. Se come con la animación eat: el evento impacto marca el mordisco."]
+ "notas": ["Las aves (tipo \"ave\") van en una tira de cuadros de w x h, de lado mirando a la derecha: para la izquierda se espejan con el ancla. El cuadro i va en x = i * w; cada animación empieza en \"desde\" y dura \"cuadros\". El ancla es el pixel de las patas en el piso. Las animaciones se quedan en su sitio (el juego mueve al ave); \"aire\" dice cuántos pixeles sube el ave sobre el ancla en cada cuadro (el salto del gallo, el vuelo de la paloma). eventos: en qué cuadro pasa algo (el canto del gallo, el aleteo que suena).","Hojas: fila = dirección (orden de `filas`), columna = cuadro. El pivote es el punto de apoyo (pies) y no se mueve.","eventos: en qué cuadro cae cada paso, golpe (impacto), despegue, suelta (pelota, bala, jabalina, hechizo), aterrizaje y brazada (la mano entra al agua).","avance: pixeles que avanza el cuerpo en un ciclo sin patinar. Ritmo = velocidad_del_juego * cuadros / (avance * fps).","elevacion: pixeles que el juego sube el sprite en cada cuadro (saltos que no caben en la celda); la sombra queda en el piso.","agua: fila de la superficie en la celda; el juego puede dibujar su piscina detrás y el nadador ya trae el tinte y las gotas.","desplazamiento: en las acciones que avanzan (salto largo, clavado, remate), pixeles que el juego mueve el sprite hacia donde mira, acumulados desde el primer cuadro.","rumbo: en las pruebas de campo, de frente y de espalda se dibuja la diagonal más cercana; rumbo dice hacia dónde moverlo en cada fila.","cajas, manos, cabeza y pies: [fila][cuadro], en pixeles desde el pivote con y hacia abajo. cajas = [x, y, w, h] de lo opaco (null si el cuadro está vacío); manos y pies = [[x, y] cerca, [x, y] lejos].","sin_props (voley, futbol, keeper, basket, tennis, beisbol): estos packs salen sin las pelotas dibujadas, porque el juego las mueve con su física. El cuerpo es el mismo, pixel a pixel, que en un pack con pelota. Lo que va agarrado (raqueta, bate, garrocha, jabalina) sí sale dibujado. objetos: [fila][cuadro] = lista de { tipo, clase, x, y, r, detras } o null si en ese cuadro no hay pelota. tipo = \"pelota\", clase = futbol, voley, basquet, tenis, beisbol, bala. x, y = centro exacto desde el pivote (puede caer en medio pixel), r = radio sin el contorno, detras = 1 si iba detrás del cuerpo. Al espejar, x pasa a -x. pelotas: cada pelota quitada, dibujada igual, en objetos/pelotas.json (cuadro <id>_<celda>, con su contorno y el pivote en el centro exacto): se pone en (x, y) de objetos.","packs: un atlas por pack (JSON Hash de TexturePacker, para this.load.atlas de Phaser). Cada cuadro se llama <anim>_<fila>_<cuadro>, con la fila por nombre (right, down...) y el cuadro desde 0.","girado: [cuadro] true o false. En los cuadros con true el sprite viene dibujado mirando al otro lado: el juego lo espeja (flipX al revés de como esté) junto con sus datos de ese cuadro (x pasa a -x; en cajas y cuerpo, x pasa a -(x + w)). Si el último cuadro está girado, el personaje termina mirando al otro lado.","retratos.png: arriba los chicos de 40 x 40 (el i en x = i * 40), abajo los grandes de 96 x 96 (el i en x = i * 96, y = 40), en el orden de `expresiones`. El grande es la cabeza y los hombros redibujados a 96, con contorno de un pixel (escala_grande 1: ya no es el sprite x3).","objetos: armas del piso. Cuadros <id>_<anim>_<cuadro>. quieto: la base en el pivote de la celda (como un personaje). girando: centrado. mano (16 cuadros): el agarre en el centro de la celda, el cuadro k girado k * 22.5 grados (0 = como en el piso). Para dibujar el arma en la mano usa el dato `arma` [x, y, angulo, detras] de la animación: elige <id>_mano_<k> con k = round(angulo / 22.5) % 16 y pon el centro de la celda en (x, y) desde el pivote del personaje; si detras = 1, dibújala antes que al personaje.","comida: objetos con peso \"comida\" en su propio atlas (objetos/comida.json, celdas de 16). Cuadros <id>_quieto_0 y <id>_humito_0..3 (en bucle a 6 fps), con la base en el pivote (8, 14) y su sombra ya dibujada. `cura` va de 1 a 3. Se come con la animación eat: el evento impacto marca el mordisco."]
 }

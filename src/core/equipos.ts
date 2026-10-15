@@ -24,6 +24,8 @@ export interface Equipo {
   color: number;
   claro: number;
   bandera: string;
+  /** la bandera del kit (lote G2): `ui_bandera_<idBandera>_16`, `_32` y su `_ondea` */
+  idBandera?: string;
   mascota?: string;
   /** el acorde de victoria del equipo (lote H7), en `audio.musica` del kit */
   musica?: string;
@@ -54,14 +56,14 @@ let cache: Record<string, Equipo> | null = null;
 /** Todos los equipos que trae el kit, con sus textos. */
 export function equipos(): Record<string, Equipo> {
   if (cache) return cache;
-  const delKit = ((kit() as unknown as { equipos?: Record<string, { nombre: string; colores: string[]; atletas: string[]; mascota?: string; musica?: string }> }).equipos) ?? {};
+  const delKit = ((kit() as unknown as { equipos?: Record<string, { nombre: string; colores: string[]; atletas: string[]; mascota?: string; musica?: string; bandera?: string; pais?: string }> }).equipos) ?? {};
   cache = {};
   for (const [id, e] of Object.entries(delKit)) {
     const t = TEXTOS[id] ?? { corto: e.nombre.toUpperCase(), con: e.nombre.toUpperCase(), gana: `GANA ${e.nombre.toUpperCase()}`, copa: `${e.nombre.toUpperCase()} SE LLEVA LA COPA`, frases: ['¡JA!'], bandera: 'flag_ve' };
     // los atletas que de verdad vinieron en el kit (si uno falta, el equipo juega con los que hay)
     const atletas = e.atletas.filter((a) => kit().atletas[a]);
     const color = hex(e.colores?.[0] ?? '#808080');
-    cache[id] = { id, nombre: e.nombre, ...t, atletas, color, claro: aclarar(color), mascota: e.mascota, musica: e.musica };
+    cache[id] = { id, nombre: e.nombre, ...t, atletas, color, claro: aclarar(color), mascota: e.mascota, musica: e.musica, idBandera: e.bandera ?? e.pais };
   }
   return cache;
 }

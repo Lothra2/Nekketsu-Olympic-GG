@@ -4,7 +4,7 @@ import { Input, rotular } from '../core/input';
 import { chip, PELEA } from '../core/music';
 import { kit, bucle } from '../core/kit';
 import { txt, flash, pantallaCarga } from '../core/ui';
-import { letreroGrande, MarcadorTV } from '../core/interfaz';
+import { letreroGrande, MarcadorTV, hayUi } from '../core/interfaz';
 import { Coach, type Paso } from '../core/coach';
 import { nuestros, ellos, conJugador, lado, victoria } from '../core/equipos';
 import { cargarAtletas, packsDe } from '../core/carga';
@@ -167,6 +167,8 @@ export abstract class EventScene extends Phaser.Scene {
 
   /** El ambiente del lugar (lote H6: mar, cafetal, llano) en bucle, bajito y desde un punto al azar. Se calla con el tema. */
   protected ambiente(n: string) {
+    // el anterior se calla: el Cross cambia de ambiente en cada tramo
+    this.ambienteSonando?.stop();
     this.ambienteSonando = null;
     if (!kit().audio.ambientes?.[n]) return;
     void bucle(this, 'ambientes', n, 0.3, true).then((s) => { this.ambienteSonando = s; if (this.fase === 'fin') this.callarTema(); });
@@ -310,8 +312,12 @@ export abstract class EventScene extends Phaser.Scene {
     const gira = this.registry.get('gira') as Gira | undefined;
     orden.forEach((o, i) => {
       const y = 116 + i * 34;
-      g.fillStyle(medal[i]).fillCircle(170, y, 10);
-      this.uiAdd(txt(this, 170, y, `${i + 1}`, 'fuente_ui', 1).setDepth(8500).setTint(0x101018));
+      // oro, plata y bronce del kit (cuadros 0, 1 y 2); el cuarto se queda con su círculo y su número
+      if (i < 3 && hayUi(this, 'medallas_32')) this.uiAdd(this.add.image(170, y, 'ui_medallas_32', i).setDepth(8500));
+      else {
+        g.fillStyle(medal[i]).fillCircle(170, y, 10);
+        this.uiAdd(txt(this, 170, y, `${i + 1}`, 'fuente_ui', 1).setDepth(8500).setTint(0x101018));
+      }
       this.uiAdd(this.add.image(206, y, `retratos:${o.c.id}`, i === 0 ? 'chico_feliz' : i === 3 ? 'chico_triste' : 'chico_neutral').setScale(0.7).setDepth(8500));
       this.uiAdd(txt(this, 232, y, this.nombre(o.c.id), 'fuente_ui', 2, 0).setDepth(8500).setTint(o.c.human ? 0xffe040 : o.c.team === 0 ? 0x9ac8ff : 0xffa0a0));
       this.uiAdd(txt(this, 480, y, o.valor, 'fuente_ui', 2, 1).setDepth(8500));

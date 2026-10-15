@@ -13,7 +13,12 @@
       "alana"
     ],
     "mascota": "thor",
-    "musica": "acorde_familia"
+    "musica": "acorde_familia",
+    "bandera": "venezuela",
+    "escudo": {
+      "emblema": "letras",
+      "texto": "GG"
+    }
   },
   "instituto_nekketsu": {
     "nombre": "Instituto Nekketsu",
@@ -28,7 +33,11 @@
       "goro",
       "tetsu"
     ],
-    "musica": "acorde_instituto"
+    "musica": "acorde_instituto",
+    "bandera": "japon",
+    "escudo": {
+      "emblema": "llama"
+    }
   },
   "rong_sai_gon": {
     "nombre": "Rồng Sài Gòn",
@@ -43,7 +52,11 @@
       "tuan",
       "ba_hoa"
     ],
-    "musica": "acorde_rong"
+    "musica": "acorde_rong",
+    "bandera": "vietnam",
+    "escudo": {
+      "emblema": "dragon"
+    }
   },
   "rolos_de_chapinero": {
     "nombre": "Rolos de Chapinero",
@@ -58,7 +71,11 @@
       "pipe",
       "don_hernando"
     ],
-    "musica": "acorde_rolos"
+    "musica": "acorde_rolos",
+    "bandera": "bogota",
+    "escudo": {
+      "emblema": "bicicleta"
+    }
   },
   "panas_de_caracas": {
     "nombre": "Los Panas de Caracas",
@@ -74,7 +91,11 @@
       "toto",
       "carmen"
     ],
-    "musica": "acorde_panas"
+    "musica": "acorde_panas",
+    "bandera": "venezuela",
+    "escudo": {
+      "emblema": "montana"
+    }
   },
   "maracuchos_del_lago": {
     "nombre": "Maracuchos del Lago",
@@ -90,6 +111,10 @@
       "jhonder",
       "abuela_nerva"
     ],
-    "musica": "acorde_maracuchos"
+    "musica": "acorde_maracuchos",
+    "bandera": "zulia",
+    "escudo": {
+      "emblema": "rayo"
+    }
   }
 }

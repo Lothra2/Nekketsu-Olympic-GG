@@ -142,6 +142,8 @@ export class CrossCountry extends EventScene implements World {
   private jacintos: Jacinto[] = [];
   /** los que están saltando de lado porque una moto les pasó rozando */
   private esquivas: { a: Actor; y0: number; y1: number; listo: boolean }[] = [];
+  /** cuándo pitó la última moto (el pito dura 0,55 s) */
+  private cornetaT = -9999;
   private jacT = 0;
   private frutas: Fruta[] = [];
   private derrame = new Map<Caja, number>();
@@ -257,7 +259,10 @@ export class CrossCountry extends EventScene implements World {
     for (const r of this.gente2) this.heads.push({ img: this.uiAdd(this.add.image(0, 22, 'cabecitas', r.c.id).setDepth(8002)), r });
     if (!this.arte) this.uiAdd(txt(this, 14, 326, varios ? `TRAMO ${this.tramo + 1} · ESCENARIO EN GRIS` : 'ESCENARIO EN GRIS', 'fuente_ui', 1, 0).setDepth(8001).setTint(0x8a8ab0));
     this.tema(this.L.id.startsWith('medellin') ? 'parce_corra' : this.L.id.startsWith('saigon') ? 'saigon_chay' : null);
-    if (this.L.id.startsWith('medellin') || this.L.id.startsWith('saigon')) this.ambiente(this.L.id.startsWith('medellin') ? 'comuna' : 'trafico_saigon');
+    // el ambiente de cada tramo (H6 y H2 corto): el mercado de Bến Thành, el río, el estadio; el tráfico en el hẻm y las azoteas
+    const AMB: Record<string, string> = { saigon_benthanh: 'mercado', saigon_rio: 'rio', saigon_estadio: 'estadio' };
+    const amb = AMB[this.L.id] && kit().audio.ambientes?.[AMB[this.L.id]] ? AMB[this.L.id] : this.L.id.startsWith('medellin') ? 'comuna' : this.L.id.startsWith('saigon') ? 'trafico_saigon' : null;
+    if (amb) this.ambiente(amb);
     const p = prueba(this.scene.key);
     if (this.d.practica) { void this.entrenar(p.nombre, this.pasos(), 40); return; }
     const titulo = this.suelto ? `${p.nombre} · TRAMO ${this.tramo + 1}` : this.tramo === 0 ? p.nombre : `TRAMO ${this.tramo + 1} DE ${this.tramos.length}`;
@@ -1273,7 +1278,12 @@ export class CrossCountry extends EventScene implements World {
       if (m.spr && m.id?.startsWith('moto_') && m.anim !== 'frenando') {
         const alguien = this.gente2.some((r) => Math.abs(r.a.y - m.y) < 14 && r.a.x < m.x && m.x - r.a.x < 110);
         const quiere = alguien ? 'corneta' : 'andando';
-        if (quiere !== m.anim) { m.anim = quiere; m.spr.play(`veh_${m.id}_${quiere}`); }
+        if (quiere !== m.anim) {
+          m.anim = quiere;
+          m.spr.play(`veh_${m.id}_${quiere}`);
+          // el pito de la moto, sin repetirlo antes de que termine
+          if (quiere === 'corneta' && this.time.now - this.cornetaT > 550) { this.cornetaT = this.time.now; this.suena('corneta_moto', 0.45); }
+        }
       }
       for (const r of this.gente2) {
         const a = r.a;

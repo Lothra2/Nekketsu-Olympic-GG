@@ -8,6 +8,7 @@ import { buildLogo, fireworks } from './logo';
 import { prueba } from '../events/base';
 import { FAMILIA, INSTITUTO } from './Select';
 import { cargarAtletas, packsDe } from '../core/carga';
+import { hayUi, pieza } from '../core/interfaz';
 
 /** Menú en dos niveles para que quepa entre los dos equipos sin tapar a nadie. */
 const MENUS: Record<string, { id: string; label: string }[]> = {
@@ -83,6 +84,8 @@ export class Title extends Phaser.Scene {
   private celdas: { x: number; y: number; w: number }[] = [];
   private marco?: Phaser.GameObjects.Graphics;
   private lugar?: Phaser.GameObjects.BitmapText;
+  /** el ícono de 32 de la prueba elegida, junto al lugar (no cabe en la fila de 24) */
+  private icono?: Phaser.GameObjects.Image;
   private logo!: Phaser.GameObjects.Container;
   private get grilla() { return this.opciones.length > 8; }
   private figs: Figura[] = [];
@@ -145,6 +148,7 @@ export class Title extends Phaser.Scene {
     this.menu.removeAll(true);
     this.marco = undefined;
     this.lugar = undefined;
+    this.icono = undefined;
     // las listas largas (las pruebas, el entrenamiento) van en dos columnas, con la bandera de cada una; el logo y los
     // equipos se apagan un poco para que la grilla se lea bien
     const grilla = this.grilla;
@@ -212,6 +216,10 @@ export class Title extends Phaser.Scene {
     });
     this.lugar = txt(this, 320, top + filas * lh + 14, '', 'fuente_ui', 1).setTint(0xffe080);
     this.menu.add(this.lugar);
+    if (hayUi(this, 'iconos_prueba')) {
+      this.icono = this.add.image(320, this.lugar.y, 'ui_iconos_prueba', 0).setVisible(false);
+      this.menu.add(this.icono);
+    }
     this.cursor = txt(this, -100, -100, '', 'fuente_ui', 1);
     this.menu.add(this.cursor);
   }
@@ -239,9 +247,28 @@ export class Title extends Phaser.Scene {
       this.marco.clear().fillStyle(0xf2c230, 0.16).fillRoundedRect(c.x - c.w / 2, c.y - 11, c.w, 22, 4).lineStyle(1, 0xf2c230, 0.9).strokeRoundedRect(c.x - c.w / 2, c.y - 11, c.w, 22, 4);
       const p = this.pruebaDe(this.opciones[this.sel].id);
       this.lugar?.setText(this.opciones[this.sel].id === '<' ? 'VOLVER AL MENÚ' : p ? p.lugar : '');
+      this.ponIcono(this.opciones[this.sel].id, p?.id);
       return;
     }
     this.cursor.setPosition(t.x - t.width / 2 - 14, t.y);
+  }
+
+  /** El ícono de la prueba elegida a la izquierda del lugar, y el lugar corrido para que el par quede centrado. */
+  private ponIcono(op: string, escena?: string) {
+    if (!this.icono || !this.lugar) return;
+    const ICONO: Record<string, string> = {
+      CrossCountry: 'cross_country', Obstaculos: 'obstaculos', Vallas: 'vallas', Natacion: 'natacion', Jabalina: 'jabalina',
+      Azoteas: 'azoteas', Tamawari: 'tamawari', DaCau: 'da_cau', Tejo: 'tejo', Quemado: 'quemado', Chapita: 'chapita',
+      Voley: 'voley', Tenis: 'tenis', Futbol: 'futbol', Basket: 'basket', Judo: 'judo', Fight: 'kachinuki',
+    };
+    const limpio = op.replace(/^practica:/, '').replace(/^>/, '').replace(/@\d+$/, '');
+    // las peleas sueltas del menú de peleas llevan el de la pelea; el Kachinuki de la gira, el suyo
+    const id = escena ? ICONO[escena] : ['1v1', '2v2', '4v4', 'fight', 'pelea'].includes(limpio) ? 'pelea' : undefined;
+    const k = id ? ((pieza('iconos_prueba') as { orden?: string[] } | undefined)?.orden ?? []).indexOf(id) : -1;
+    if (k < 0) { this.icono.setVisible(false); this.lugar.setX(320); return; }
+    const w = this.lugar.width;
+    this.icono.setFrame(k).setVisible(true).setPosition(320 - (w + 36) / 2 + 16, this.lugar.y);
+    this.lugar.setX(320 + 18);
   }
 
   /** En la grilla: la opción más cerca en esa dirección (arriba, abajo, izquierda o derecha). */

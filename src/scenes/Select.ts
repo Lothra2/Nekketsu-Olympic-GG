@@ -7,6 +7,7 @@ import { txt } from '../core/ui';
 import { sortearGira, type Gira } from '../events/base';
 import { elegibles, equipo, equipoDe, setPartido, type Equipo } from '../core/equipos';
 import { cargarAtletas } from '../core/carga';
+import { hayUi, pieza } from '../core/interfaz';
 
 /** Los cuatro de la Familia y los cuatro del Instituto (el equipo de la intro y del título). */
 export const FAMILIA = ['rick', 'steph', 'sophie', 'alana'];
@@ -127,10 +128,25 @@ export class Select extends Phaser.Scene {
       const x = 320 + (col - (enFila - 1) / 2) * 200, y = 108 + fila * 118;
       const c = this.add.container(x, y);
       const g = this.add.graphics();
-      c.add(g);
-      if (this.textures.exists(e.bandera)) c.add(this.add.image(-74, -36, e.bandera).setScale(0.55));
-      c.add(txt(this, 6, -36, e.corto, 'fuente_ui', 2).setTint(e.claro));
-      e.atletas.forEach((a, k) => c.add(this.add.image(-60 + k * 40, 6, `retratos:${a}`, 'chico_feliz')));
+      const tar = pieza(`tarjeta_${e.id}`);
+      if (tar && hayUi(this, `tarjeta_${e.id}`)) {
+        // la tarjeta del equipo de PixelForja (lote G2): fondo, escudo y bandera pintados; el nombre en su `texto` y
+        // las cuatro caras en su franja (x 12, 52, 92 y 132, y 36 desde la esquina)
+        c.add(this.add.image(0, 0, `ui_tarjeta_${e.id}`));
+        const [tx, ty, tw, th] = tar.texto ?? [42, 6, 104, 20];
+        // el nombre se queda entre la bandera y el escudo: si no cabe a 2, va a 1
+        const nom = txt(this, -92 + tx + tw / 2, -52 + ty + th / 2, e.corto, 'fuente_ui', 2).setTint(e.claro);
+        if (nom.width > tw) nom.setScale(1);
+        c.add(nom);
+        e.atletas.forEach((a, k) => c.add(this.add.image(-92 + 12 + k * 40, -52 + 36, `retratos:${a}`, 'chico_feliz').setOrigin(0)));
+        c.add(g);
+        c.setData('kit', true);
+      } else {
+        c.add(g);
+        if (this.textures.exists(e.bandera)) c.add(this.add.image(-74, -36, e.bandera).setScale(0.55));
+        c.add(txt(this, 6, -36, e.corto, 'fuente_ui', 2).setTint(e.claro));
+        e.atletas.forEach((a, k) => c.add(this.add.image(-60 + k * 40, 6, `retratos:${a}`, 'chico_feliz')));
+      }
       c.setData('g', g).setData('color', e.color);
       c.setSize(184, 104).setInteractive().on('pointerdown', () => { if (this.sel === i) this.confirm(); else { this.sel = i; this.refresh(); } });
       this.cards.push(c);
@@ -162,7 +178,10 @@ export class Select extends Phaser.Scene {
       const g = c.getData('g') as Phaser.GameObjects.Graphics;
       const on = i === this.sel;
       g.clear();
-      if (equipos) {
+      if (equipos && c.getData('kit')) {
+        // la tarjeta del kit ya trae su fondo: solo el borde de la elegida
+        if (on) g.lineStyle(3, 0xffffff, 0.9).strokeRoundedRect(-94, -54, 188, 108, 6);
+      } else if (equipos) {
         g.fillStyle(0x08081a, 0.88).fillRoundedRect(-92, -52, 184, 104, 6);
         g.lineStyle(on ? 3 : 1, on ? c.getData('color') : 0x4a4a6a).strokeRoundedRect(-92, -52, 184, 104, 6);
       } else {

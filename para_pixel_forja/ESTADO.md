@@ -19,7 +19,7 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 | 9 | B2, C2, D2, E2 | Cross Country completo y equipos nacionales | E1 | E2 en curso: fichas de arte en puerta 1, faltan las postales y el PR (rama `claude/olimpico-lote-e2`) | |
 | 10 | B3, E3 | Obstáculos, Tama-wari, Kachinuki | E1 | pendiente | |
 | 11 | B4, E4 | Pruebas de 1992 | E1 | pendiente | |
-| 12 | G2, H2 | Envoltorio y audio completo | | pendiente | |
+| 12 | G2, H2 | Envoltorio y audio completo | | G2 y H2_CORTO en el juego; falta el resto de H2 | [#48](https://github.com/Lothra2/pixel_forja/pull/48), [#49](https://github.com/Lothra2/pixel_forja/pull/49) |
 | 13 | B5, E5 | Pruebas de pelota | E1 | pendiente | |
 | 14 | B6, B7, C3, E6 | Tradicionales, técnicas, secretos y Barrio Nekketsu | E1 | pendiente | |
 | 15 | J | Estudio | Todo | pendiente | |
@@ -37,8 +37,24 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 | E4 | Las 8 canchas a 800 de ancho | en el juego | [#44](https://github.com/Lothra2/pixel_forja/pull/44) |
 | D3 | Motos y xích lô a escala de atleta | en el juego | [#45](https://github.com/Lothra2/pixel_forja/pull/45) |
 | rayo_cielo | El relámpago vertical | en el juego | [#46](https://github.com/Lothra2/pixel_forja/pull/46) |
+| RAYO_PUNTA | El punto `impacto` en la punta de `javelin_rayo` | en el juego | [#47](https://github.com/Lothra2/pixel_forja/pull/47) |
+| H2_CORTO | trueno, furro, corneta_moto y los ambientes mercado, río y estadio | en el juego | [#48](https://github.com/Lothra2/pixel_forja/pull/48) |
+| G2 | El envoltorio: retratos a 96, medallas, banderas, podio, íconos, tarjetas, VS de 4 y pantallas | en el juego | [#49](https://github.com/Lothra2/pixel_forja/pull/49) |
 
 ## Lo último del lado del juego
+- **RAYO_PUNTA, H2_CORTO y G2 en el juego** (pixel_forja `main` en 91f6d48: #47 a #49). `equipos.json` lleva `bandera` y `escudo` en los 6 equipos; el kit suma `trueno`, `furro` y `corneta_moto` y los ambientes `mercado`, `rio` y `estadio`. El artifact queda en 500 archivos: los 6 audios son lo único nuevo, todo G2 va en `ui/paquete.wasm`.
+  - **RAYO_PUNTA:** `puntaJabalina()` usa `puntoDe('impacto')` de `javelin_rayo`; sin el punto, la mano más 16 como antes.
+  - **H2_CORTO:** el trueno en el cuadro 2 de `rayo_cielo`, en la jabalina y en Maracaibo (`relampago()` solo truena si no hay `rayo_cielo`); el furro en el `impacto` de `play_drum`; la corneta cuando la moto pasa a `corneta`, nunca dos antes de 0,55 s. En el Cross, `mercado` en `saigon_benthanh`, `rio` en `saigon_rio` y `estadio` en `saigon_estadio`; el hẻm y las azoteas siguen con `trafico_saigon`. Al cambiar de tramo se calla el ambiente anterior.
+  - **G2:**
+    - Selección: `ui_tarjeta_<equipo>` en lugar del rectángulo, el nombre corto en `texto` y las 4 caras de 40 en x 12, 52, 92 y 132, y 36. Sin bandera chiquita: viene pintada. La elegida lleva un borde blanco.
+    - Menú de pruebas: el ícono de 32 de la prueba elegida junto al lugar (la opción b). Las peleas sueltas llevan `pelea`, la final `kachinuki`; ATRÁS va sin ícono.
+    - Medallas: `medallas_16` en cada prueba ganada del medallero, `medallas_32` en la tabla de resultados (el cuarto sigue con su círculo gris y su número) y dos `medallas_64` meciéndose a los lados del marcador de la final.
+    - Podio: `ui_podio` en x -80 en lugar de Caracas y su azotea, los atletas donde estaban, y tres `bandera_<bandera del campeón>_32_ondea` subiendo por `mastiles` de `abajo` a `arriba` (x - 80), el tercero primero y el primero de último.
+    - VS: `ui_marco_vs_4` en x -80, `grande_enojo` en los 4 `huecos`. En el 4v4, los dos primeros de cada equipo; en el 1v1 y el judo, el que pelea y el siguiente de su equipo. VS en `vs`, la prueba en `texto` (KACHINUKI CARACAS, KACHINUKI FINAL, JUDO Y VOVINAM o PELEA CALLEJERA) y los nombres bajo cada hueco en y 246. Las frases en 268, una por lado.
+    - Pantallas en x -80: la pausa tramada en lugar del velo, SE ACABÓ LA VAINA bajo la lluvia y, 1,8 s después, ¿OTRA PARTIDITA? aparte en su pantalla de arcade con la cuenta grande. En la gira no hay otra partidita: el +20 sale sobre la lluvia.
+  - **Lo que se ve raro en el arte:** nada que bloquee. Una nota: en la tarjeta, el rectángulo `texto` de 104 no le cabe a RỒNG SÀI GÒN ni a MARACUCHOS con la letra a 2 (se montaban sobre la bandera y el escudo). El juego los baja a la letra de 1. Si Forja quiere el nombre grande en todas, hace falta un `texto` más ancho o la bandera y el escudo más chicos.
+  - Probado con `scripts/prueba-g2.mjs`.
+
 - **B7, E4, D3 y rayo_cielo en el juego** (pixel_forja `main` en 884c143: #43 a #46). Estaban como PR abiertos; el juego los probó juntos (526 de 526) y los unió en orden.
   - **E4:** los 8 layouts de las canchas (Margarita, Đà Lạt, Tao Đàn, Maracaibo, Barranquilla, el liceo, la Candelaria y Hội An) a 800 con `margen` 80. `pintarEscenario` corre todo lo pintado el margen y la paralaje va con `scrollX + margen`. La cámara va de -80 a 720, sin el acercamiento de antes, centrada en la cancha de 640 en las pruebas que no siguen la pelota. El Tama-wari resta el margen a sus postes y ahora también monta el arte con la cámara y la paralaje.
   - **D3:** motos y xích lô a escala 1. El atropello usa la huella (`|dx| < w/2`, `|dy| < d/2 + 4`) y la sombra es del ancho de la huella.

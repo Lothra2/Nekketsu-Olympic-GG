@@ -290,7 +290,7 @@ export class Basket extends EventScene {
       const tablero = Math.random() < 0.5;
       const x = (tablero ? px + 12 : px) + Phaser.Math.Between(-5, 5), y = tablero ? py - 84 : py - ARO.z;
       efecto(this, 'rayo_cielo', x, y, { depth: FT + ARO.y + 0.5 });
-      this.time.delayedCall(125, () => { this.cameras.main.flash(120, 200, 180, 255); this.suena('critico', 0.25); });
+      this.time.delayedCall(125, () => { this.cameras.main.flash(120, 200, 180, 255); this.suena('trueno', 0.5, () => this.sound.play('critico', { volume: 0.25 })); });
       this.time.delayedCall(265, () => this.cameras.main.flash(80, 160, 140, 230));
       return;
     }

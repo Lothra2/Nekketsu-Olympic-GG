@@ -641,6 +641,7 @@ export class Fight extends Phaser.Scene implements World {
 
   /** La pantalla del VS antes de pelear: los dos retratos, sus nombres y lo que se dicen. */
   private vs() {
+    if (hayUi(this, 'marco_vs_4')) return this.vs4();
     return new Promise<void>((res) => {
       const yo = this.player, el = this.actors.find((a) => a.team === 1)!;
       const objs: Phaser.GameObjects.GameObject[] = [];
@@ -665,6 +666,58 @@ export class Fight extends Phaser.Scene implements World {
       this.time.delayedCall(2300, () => this.tweens.add({ targets: objs, alpha: 0, duration: 220, onComplete: () => { objs.forEach((o) => o.destroy()); res(); } }));
     });
   }
+
+  /**
+   * El VS de dos contra dos (lote G2): el marco de 800 en x -80, dos retratos grandes por lado en sus `huecos`, la
+   * palabra VS en `vs`, la prueba en `texto` y cada nombre bajo su hueco. En el 4v4 van los dos primeros de cada
+   * equipo; en el 1v1 y el judo, el que pelea y el siguiente de su equipo.
+   */
+  private vs4() {
+    return new Promise<void>((res) => {
+      type Marco = { huecos: [number, number, number, number][]; vs: [number, number, number, number]; texto: [number, number, number, number]; nombres: number; frases: number };
+      const m = pieza('marco_vs_4') as unknown as Marco;
+      const yo = this.player, el = this.actors.find((a) => a.team === 1)!;
+      const compa = (id: string) => {
+        const eq = (kit().atletas[id] as { equipo?: string } | undefined)?.equipo;
+        return Object.entries(kit().atletas).find(([o, a]) => o !== id && eq && (a as { equipo?: string }).equipo === eq)?.[0];
+      };
+      const par = (a: Actor) => {
+        const mismos = this.actors.filter((b) => b.team === a.team && b !== a).map((b) => b.id);
+        return [a.id, mismos[0] ?? compa(a.id)].filter((x): x is string => !!x && this.textures.exists(`retratos:${x}`));
+      };
+      const lados = [par(yo), par(el)];
+      const objs: Phaser.GameObjects.GameObject[] = [];
+      const add = <T extends Phaser.GameObjects.GameObject>(o: T) => { objs.push(this.uiAdd(o)); return o; };
+      add(this.add.image(-80, 0, 'ui_marco_vs_4').setOrigin(0).setDepth(8600));
+      const [tx, ty, tw, th] = m.texto;
+      const nombre = this.judo ? 'JUDO Y VOVINAM' : this.data0.modo === '4v4' ? (this.data0.gira ? 'KACHINUKI FINAL' : 'KACHINUKI CARACAS') : 'PELEA CALLEJERA';
+      add(txt(this, tx - 80 + tw / 2, ty + th / 2, nombre, 'fuente_titulo', 1).setDepth(8604));
+      lados.forEach((ids, t) => ids.forEach((id, k) => {
+        const [hx, hy, hw, hh] = m.huecos[t * 2 + k];
+        const cx = hx - 80 + hw / 2, cy = hy + hh / 2;
+        // entran desde su lado y se quedan dentro del marco
+        const r = add(this.add.image(t ? 760 : -120, cy, `retratos:${id}`, 'grande_enojo').setDepth(8603).setFlipX(t === 1));
+        const esc = Math.min(1, (hw - 4) / r.width, (hh - 4) / r.height);
+        r.setScale(esc);
+        this.tweens.add({ targets: r, x: cx, duration: 260, ease: 'Back.out', delay: t * 120 + k * 60 });
+        const n = add(txt(this, cx, m.nombres, this.nombreDe(id), 'fuente_ui', 2).setDepth(8604).setTint(t ? 0xffa0a0 : 0x9ac8ff));
+        if (n.width > hw - 6) n.setScale(1);
+      }));
+      // la frase de cada uno que pelea, centrada bajo su pareja
+      const centro = (t: number) => { const a = m.huecos[t * 2], b = m.huecos[t * 2 + 1]; return (a[0] + b[0] + b[2]) / 2 - 80; };
+      const fa = add(txt(this, centro(0), m.frases, FRASE[yo.id] ?? '¡VAMOS!', 'fuente_ui', 1).setDepth(8604).setAlpha(0));
+      const fb = add(txt(this, centro(1), m.frases, FRASE[el.id] ?? '¡VEN!', 'fuente_ui', 1).setDepth(8604).setAlpha(0));
+      this.tweens.add({ targets: fa, alpha: 1, delay: 500, duration: 150 });
+      this.tweens.add({ targets: fb, alpha: 1, delay: 1000, duration: 150 });
+      const [vx, vy, vw, vh] = m.vs;
+      const v = add(txt(this, vx - 80 + vw / 2, vy + vh / 2, 'VS', 'fuente_titulo', 4).setDepth(8605).setAlpha(0));
+      this.time.delayedCall(320, () => { v.setAlpha(1); this.tweens.add({ targets: v, scale: { from: 9, to: 4 }, duration: 220, ease: 'Back.out' }); chip.boom(0.6); this.shake(150, 0.006); });
+      this.time.delayedCall(2300, () => this.tweens.add({ targets: objs, alpha: 0, duration: 220, onComplete: () => { objs.forEach((o) => o.destroy()); res(); } }));
+    });
+  }
+
+  /** El nombre corto de un atleta, como en su tarjeta. */
+  private nombreDe(id: string) { return (kit().atletas[id]?.nombre ?? id).split(' ')[0].toUpperCase(); }
 
   private banner(s: string, font: 'fuente_titulo' | 'fuente_titulo_plata' | 'fuente_ui', scale: number, hold: number, y = 150) {
     return letreroGrande(this, (o) => this.uiAdd(o), s, font, scale, hold, y);
@@ -712,13 +765,39 @@ export class Fight extends Phaser.Scene implements World {
     chip.stop(0.6);
     chip.blip(330, 0.5, 'tri', 0.25, 110);
     for (const a of this.actors) if (a.team === 1 && a.alive) { a.fig.row = 'down'; a.setSt('win', 'victory'); }
+    // la noche con lluvia del kit detrás (800 de ancho, en x -80); sin ella, la pelea congelada
+    const fondo = hayUi(this, 'pantalla_se_acabo') ? this.uiAdd(this.add.image(-80, 0, 'ui_pantalla_se_acabo').setOrigin(0).setDepth(8450).setAlpha(0)) : null;
+    if (fondo) this.tweens.add({ targets: fondo, alpha: 1, duration: 400 });
     const t = this.uiAdd(txt(this, 320, 110, 'SE ACABÓ LA VAINA', 'fuente_titulo_plata', 2).setDepth(8500));
     this.tweens.add({ targets: t, scale: { from: 4, to: 2 }, duration: 260, ease: 'Back.out' });
     if (this.data0.gira) { this.cierraGira(1); return; }
+    // con su pantalla de arcade, el ¿OTRA PARTIDITA? va aparte, después de la lluvia
+    if (fondo && hayUi(this, 'pantalla_otra_partidita')) { this.time.delayedCall(1800, () => this.otraPartidita([fondo, t])); return; }
     let n = 9;
     const c = this.uiAdd(txt(this, 320, 150, '¿OTRA PARTIDITA? 9', 'fuente_ui', 2).setDepth(8500));
     const ev = this.time.addEvent({ delay: 1000, loop: true, callback: () => { n--; c.setText(`¿OTRA PARTIDITA? ${n}`); chip.blip(440, 0.06); if (n <= 0) { ev.remove(); this.toMenu(); } } });
     this.endMenu(['SÍ, DALE', 'MENÚ'], () => ev.remove());
+  }
+
+  /** La pantalla de arcade: ¿OTRA PARTIDITA?, la cuenta grande del 9 al 0 y SÍ, DALE o MENÚ. */
+  private otraPartidita(antes: Phaser.GameObjects.GameObject[]) {
+    const f = this.uiAdd(this.add.image(-80, 0, 'ui_pantalla_otra_partidita').setOrigin(0).setDepth(8460).setAlpha(0));
+    this.tweens.add({ targets: f, alpha: 1, duration: 300, onComplete: () => antes.forEach((o) => o.destroy()) });
+    chip.blip(988, 0.08, 'sq25', 0.2, 1320);
+    const t = this.uiAdd(txt(this, 320, 122, '¿OTRA PARTIDITA?', 'fuente_titulo', 2).setDepth(8500));
+    this.tweens.add({ targets: t, scale: { from: 4, to: 2 }, duration: 260, ease: 'Back.out' });
+    let n = 9;
+    const c = this.uiAdd(txt(this, 320, 166, '9', 'fuente_titulo', 3).setDepth(8500));
+    const ev = this.time.addEvent({
+      delay: 1000, loop: true, callback: () => {
+        n--;
+        c.setText(`${n}`);
+        this.tweens.add({ targets: c, scale: { from: 4.5, to: 3 }, duration: 180, ease: 'Back.out' });
+        chip.blip(440, 0.06);
+        if (n <= 0) { ev.remove(); this.toMenu(); }
+      },
+    });
+    this.endMenu(['SÍ, DALE', 'MENÚ'], () => ev.remove(), undefined, 208);
   }
 
   /**
@@ -782,7 +861,8 @@ export class Fight extends Phaser.Scene implements World {
     this.pauseObjs = [];
     if (this.paused) {
       chip.music.gain.value = 0.15;
-      this.pauseObjs.push(this.uiAdd(this.add.rectangle(320, 180, 800, 360, 0x000000, 0.6).setDepth(9000)));
+      // la pausa del kit va tramada: la pelea congelada se ve por los huecos; sin ella, el velo negro
+      this.pauseObjs.push(this.uiAdd(hayUi(this, 'pantalla_pausa') ? this.add.image(-80, 0, 'ui_pantalla_pausa').setOrigin(0).setDepth(9000) : this.add.rectangle(320, 180, 800, 360, 0x000000, 0.6).setDepth(9000)));
       this.pauseObjs.push(this.uiAdd(txt(this, 320, 150, '¡ÉPALE, PAUSA!', 'fuente_titulo', 2).setDepth(9001)));
       const seguir = this.uiAdd(txt(this, 270, 196, 'SEGUIR', 'fuente_ui', 2).setDepth(9001).setInteractive());
       const menu = this.uiAdd(txt(this, 370, 196, 'MENÚ', 'fuente_ui', 2).setDepth(9001).setInteractive().setTint(0x8a8aa8));
@@ -941,7 +1021,7 @@ export class Fight extends Phaser.Scene implements World {
       if (eq === 'maracuchos_del_lago') {
         // el Furrazo: el retumbo tumba a todos los de cerca
         efecto(this, 'onda_furro', this.px(a.x, a.y), FLOOR_TOP + a.y, { depth: FLOOR_TOP + a.y + 0.3 });
-        this.sfx('jefe_pisoton', 0.8);
+        if (this.cache.audio.exists('furro')) this.suena('furro', 0.9); else this.sfx('jefe_pisoton', 0.8);
         this.shake(320, 0.016);
         for (const o of this.actors) if (o.team !== a.team && o.canBeHit() && Math.abs(o.x - a.x) < 80 && Math.abs(o.y - a.y) < 26) o.takeHit(a, { dmg: 16, kd: true, push: 160, launch: 190 }, o.x >= a.x ? 1 : -1);
       } else if (eq === 'panas_de_caracas') {

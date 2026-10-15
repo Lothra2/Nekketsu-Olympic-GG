@@ -275,11 +275,12 @@ export class Jabalina extends EventScene {
     }
     flash(this, 140, 0xc8e0ff);
     this.cameras.main.shake(160, 0.006);
-    this.sound.play('critico', { volume: 0.35, rate: 0.7 });
+    // sin rayo_cielo, el golpe al bajar; con él, el trueno en su cuadro 2 (rayoTick)
+    if (!this.rayo) this.suena('trueno', 0.5, () => this.sound.play('critico', { volume: 0.35, rate: 0.7 }));
   }
 
   /** el rayo_cielo de la lanza del Catatumbo: t desde que bajó, y desde cuándo se apaga (la suelta) */
-  private rayo: { s: Phaser.GameObjects.Sprite; t: number; suelta: number } | null = null;
+  private rayo: { s: Phaser.GameObjects.Sprite; t: number; suelta: number; trueno?: boolean } | null = null;
 
   /**
    * La punta de la jabalina en alto: la mano cercana (manos[fila][cuadro][0]) un tercio de la celda más arriba, 16 px
@@ -287,6 +288,9 @@ export class Jabalina extends EventScene {
    */
   private puntaJabalina(): [number, number] {
     const f = this.cur.fig, a = f.anim;
+    // la punta de verdad (lote rayo_punta): el punto del impacto de javelin_rayo en la fila que mira
+    const p = a.name === 'javelin_rayo' ? f.puntoDe('impacto') : null;
+    if (p) return [p.x, p.y];
     const m = a.data.manos?.[f.rowIndex]?.[a.frame]?.[0] ?? [6, -30];
     return [this.x + (f.espejo ? -m[0] : m[0]), TOP + RUN_Y + m[1] - 16 * (f.celda / 48)];
   }
@@ -307,6 +311,8 @@ export class Jabalina extends EventScene {
     }
     const k = Math.floor(r.t * fps);
     r.s.setFrame(k < 3 ? k : 3 + ((k - 3) % 4));
+    // el trueno arranca en el chasquido, cuando el rayo pega (cuadro 2)
+    if (k >= 2 && !r.trueno) { r.trueno = true; this.suena('trueno', 0.55, () => this.sound.play('critico', { volume: 0.35, rate: 0.7 })); }
     const f = this.cur.fig.anim;
     if (f.name === 'javelin_rayo' && f.frame >= 2 && f.frame <= 3) r.s.setPosition(...this.puntaJabalina().map(Math.round) as [number, number]);
   }

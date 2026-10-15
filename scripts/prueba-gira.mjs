@@ -33,7 +33,7 @@ await page.evaluate((pruebas) => {
 }, lista);
 let suma = 0;
 for (const [i, id] of lista.slice(0, 4).entries()) {
-  await page.waitForTimeout(1300);
+  await esperar(() => page.evaluate(() => !!window.game.scene.getScene('Medallero')?.listo));
   await page.screenshot({ path: `${out}/medallero_${i}.png` });
   await enter();
   const esc = id === 'Judo' ? 'Fight' : id;
