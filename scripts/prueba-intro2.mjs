@@ -78,7 +78,9 @@ let rv = await rival();
 console.log('  bogotá:', JSON.stringify(rv));
 check(rv.pres >= 0 && rv.pres < rv.primera && rv.lluvia > rv.primera, 'bogotá: la escena, la presentación, los retratos y la lluvia encima');
 check(rv.caras.length === 4 && rv.caras.every((c) => c.endsWith('color')) && rv.caras.every((c) => c.split(',')[1].startsWith('180')), 'bogotá: los 4 revelados en sus huecos de y 132');
-check(rv.nombres.length === 4 && rv.nombres.every((n) => Number(n.split(':')[1]) <= 104), 'bogotá: los nombres caben en su placa de 104', rv.nombres.join(' '));
+// los de 8 letras o menos a 2, los más largos a 1,5, y todos dentro de la placa de 112
+const escala = (n) => { const [t, r] = n.split('@'); const [e, w] = r.split(':').map(Number); return w <= 112 && e === (t.length > 8 ? 1.5 : 2); };
+check(rv.nombres.length === 4 && rv.nombres.every(escala) && rv.nombres.some((n) => n.startsWith('DON HERNANDO@1.5')), 'bogotá: DON HERNANDO a 1,5 y los cortos a 2 en su placa de 112', rv.nombres.join(' '));
 await p.screenshot({ path: `${out}/bogota.png` });
 await p.waitForFunction(() => window.tomaFin, null, { timeout: 10000 }).catch(() => {});
 await toma('rivales', ['intro_maracaibo', null, 'maracuchos_del_lago', 'MARACAIBO · LOS MARACUCHOS']);
@@ -87,7 +89,7 @@ rv = await rival();
 console.log('  maracaibo:', JSON.stringify(rv));
 const hm = await ev(() => window.game.cache.json.get('manifest').ui.interfaz.intro_maracaibo.huecos?.map(([x, y, w, h]) => `${x - 80 + w / 2},${y + h / 2}`));
 check(rv.pres >= 0 && rv.lluvia < 0 && hm && rv.caras.map((c) => c.split(':')[0]).join(' ') === hm.join(' '), 'maracaibo: sus propios huecos, con la presentación y sin lluvia', hm?.join(' '));
-check(rv.nombres.length === 4 && rv.nombres.every((n) => Number(n.split(':')[1]) <= 104), 'maracaibo: los nombres caben (ABUELA NERVA a 1,5)', rv.nombres.join(' '));
+check(rv.nombres.length === 4 && rv.nombres.every(escala) && rv.nombres.some((n) => n.startsWith('ABUELA NERVA@1.5')), 'maracaibo: ABUELA NERVA a 1,5 y los cortos a 2 en su placa de 112', rv.nombres.join(' '));
 await p.screenshot({ path: `${out}/maracaibo.png` });
 await p.waitForFunction(() => window.tomaFin, null, { timeout: 10000 }).catch(() => {});
 

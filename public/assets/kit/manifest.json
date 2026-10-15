@@ -103257,7 +103257,8 @@
     "marco": 6,
     "franja": [164,116,472,152],
     "nombres": 252,
-    "nota": "Va entre intro_bogota o intro_maracaibo y los retratos. Los retratos de 96 en `huecos` (en silueta con setTintFill y después de color), el nombre de cada uno centrado en y `nombres`."
+    "placa": 112,
+    "nota": "Va entre intro_bogota o intro_maracaibo y los retratos. Los retratos de 96 en `huecos` (en silueta con setTintFill y después de color), el nombre de cada uno centrado en x hueco + 48 y en y `nombres`. Cada placa mide `placa` de ancho: a 1,5 caben 108 px de texto."
    },
    "intro_desayuno": {
     "archivo": "ui/intro_desayuno.png",

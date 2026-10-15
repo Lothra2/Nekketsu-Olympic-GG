@@ -1186,12 +1186,13 @@ export class Intro extends Phaser.Scene {
       const [x, y, w, h] = huecos[i];
       return this.add2(this.add.image(x - 80 + w / 2, y + h / 2, `retratos:${id}`, 'grande_enojo').setTintFill(0x14101e));
     });
-    // el nombre en su placa (104 de ancho): a 2 caben 8 letras; los más largos, a 1,5
+    // el nombre en su placa (112 de ancho desde AJUSTES2): a 2 caben 8 letras; los más largos, a 1,5
+    const placa = (pieza('intro_presentacion') as unknown as { placa?: number } | undefined)?.placa ?? 104;
     const nombres = pf?.nombres !== undefined ? ids.map((id, i) => {
       const n = nombreCorto(id);
       const t = txt(this, huecos[i][0] + 48 - 80, pf.nombres!, n, 'fuente_ui', n.length > 8 ? 1.5 : 2).setTint(0xffe080).setVisible(false);
-      // DON HERNANDO a 1,5 mide 108: el que aun así no cabe, a 1
-      if (t.width > 104) t.setScale(1);
+      // con la placa vieja de 104, DON HERNANDO a 1,5 no cabe: ese respaldo lo baja a 1
+      if (t.width > placa) t.setScale(1);
       return this.add2(t);
     }) : [];
     if (capa && hayUi(this, capa)) {
