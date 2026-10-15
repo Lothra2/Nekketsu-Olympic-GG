@@ -641,7 +641,8 @@ export class Fight extends Phaser.Scene implements World {
 
   /** La pantalla del VS antes de pelear: los dos retratos, sus nombres y lo que se dicen. */
   private vs() {
-    if (hayUi(this, 'marco_vs_4')) return this.vs4();
+    if (this.data0.modo === '4v4') { if (hayUi(this, 'marco_vs_4')) return this.vs4(); }
+    else if (hayUi(this, 'marco_vs_2')) return this.vs2();
     return new Promise<void>((res) => {
       const yo = this.player, el = this.actors.find((a) => a.team === 1)!;
       const objs: Phaser.GameObjects.GameObject[] = [];
@@ -709,6 +710,38 @@ export class Fight extends Phaser.Scene implements World {
       const fb = add(txt(this, centro(1), m.frases, FRASE[el.id] ?? '¡VEN!', 'fuente_ui', 1).setDepth(8604).setAlpha(0));
       this.tweens.add({ targets: fa, alpha: 1, delay: 500, duration: 150 });
       this.tweens.add({ targets: fb, alpha: 1, delay: 1000, duration: 150 });
+      const [vx, vy, vw, vh] = m.vs;
+      const v = add(txt(this, vx - 80 + vw / 2, vy + vh / 2, 'VS', 'fuente_titulo', 4).setDepth(8605).setAlpha(0));
+      this.time.delayedCall(320, () => { v.setAlpha(1); this.tweens.add({ targets: v, scale: { from: 9, to: 4 }, duration: 220, ease: 'Back.out' }); chip.boom(0.6); this.shake(150, 0.006); });
+      this.time.delayedCall(2300, () => this.tweens.add({ targets: objs, alpha: 0, duration: 220, onComplete: () => { objs.forEach((o) => o.destroy()); res(); } }));
+    });
+  }
+
+  /**
+   * El VS de uno contra uno (lote VS2), para el 1v1 y el judo: el marco de 800 en x -80, un retrato grande por lado
+   * en su hueco, a escala 1 (el de la derecha mirando al centro), la prueba en `texto`, VS en `vs`, y el nombre y la
+   * frase de cada uno debajo. Sin compañeros: solo los que pelean.
+   */
+  private vs2() {
+    return new Promise<void>((res) => {
+      type Marco = { huecos: [number, number, number, number][]; vs: [number, number, number, number]; texto: [number, number, number, number]; nombres: number; frases: number };
+      const m = pieza('marco_vs_2') as unknown as Marco;
+      const yo = this.player, el = this.actors.find((a) => a.team === 1)!;
+      const objs: Phaser.GameObjects.GameObject[] = [];
+      const add = <T extends Phaser.GameObjects.GameObject>(o: T) => { objs.push(this.uiAdd(o)); return o; };
+      add(this.add.image(-80, 0, 'ui_marco_vs_2').setOrigin(0).setDepth(8600));
+      const [tx, ty, tw, th] = m.texto;
+      add(txt(this, tx - 80 + tw / 2, ty + th / 2, this.judo ? 'JUDO Y VOVINAM' : 'PELEA CALLEJERA', 'fuente_titulo', 1).setDepth(8604));
+      [yo, el].forEach((a, t) => {
+        const [hx, hy, hw, hh] = m.huecos[t];
+        const cx = hx - 80 + hw / 2, cy = hy + hh / 2;
+        const r = add(this.add.image(t ? 760 : -120, cy, `retratos:${a.id}`, 'grande_enojo').setDepth(8603).setFlipX(t === 1));
+        this.tweens.add({ targets: r, x: cx, duration: 260, ease: 'Back.out', delay: t * 120 });
+        const n = add(txt(this, cx, m.nombres, this.nombreDe(a.id), 'fuente_ui', 2).setDepth(8604).setTint(t ? 0xffa0a0 : 0x9ac8ff));
+        if (n.width > 200) n.setScale(1);
+        const f = add(txt(this, cx, m.frases, FRASE[a.id] ?? (t ? '¡VEN!' : '¡VAMOS!'), 'fuente_ui', 1).setDepth(8604).setAlpha(0));
+        this.tweens.add({ targets: f, alpha: 1, delay: 500 + t * 500, duration: 150 });
+      });
       const [vx, vy, vw, vh] = m.vs;
       const v = add(txt(this, vx - 80 + vw / 2, vy + vh / 2, 'VS', 'fuente_titulo', 4).setDepth(8605).setAlpha(0));
       this.time.delayedCall(320, () => { v.setAlpha(1); this.tweens.add({ targets: v, scale: { from: 9, to: 4 }, duration: 220, ease: 'Back.out' }); chip.boom(0.6); this.shake(150, 0.006); });

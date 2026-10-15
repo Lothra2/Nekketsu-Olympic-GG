@@ -40,8 +40,26 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 | RAYO_PUNTA | El punto `impacto` en la punta de `javelin_rayo` | en el juego | [#47](https://github.com/Lothra2/pixel_forja/pull/47) |
 | H2_CORTO | trueno, furro, corneta_moto y los ambientes mercado, río y estadio | en el juego | [#48](https://github.com/Lothra2/pixel_forja/pull/48) |
 | G2 | El envoltorio: retratos a 96, medallas, banderas, podio, íconos, tarjetas, VS de 4 y pantallas | en el juego | [#49](https://github.com/Lothra2/pixel_forja/pull/49) |
+| VS2 | marco_vs_2, el VS de 1 contra 1 | en el juego; PR abierto | [#50](https://github.com/Lothra2/pixel_forja/pull/50) |
+| CINTA | cinta_16 y cinta_32, el cuarto puesto | en el juego; PR abierto | [#51](https://github.com/Lothra2/pixel_forja/pull/51) |
+| GIRA | mapa_gira, la ruta del avión, mapas de región y sellos | en el juego; PR abierto | [#52](https://github.com/Lothra2/pixel_forja/pull/52) |
+| INTRO | azotea con Kenji de espaldas, Bogotá, Maracaibo y el desayuno | en el juego; PR abierto | [#53](https://github.com/Lothra2/pixel_forja/pull/53) |
 
 ## Lo último del lado del juego
+- **VS2, CINTA, GIRA e INTRO en el juego**, generados desde una unión local de los PR #50 a #53. **Los cuatro siguen abiertos y chocan entre sí:** salieron del mismo main (91f6d48) y cada uno suma su parte a las mismas listas (`UI_PARTS`, `PARTES_ENVOLTORIO`, el tipo `ui` de la configuración, el esquema, KIT_A_MEDIDA.md, INTERFAZ.md, el ejemplo de `kit.config.json` y los conteos de `custom.test.ts` y `ui_audio.test.ts`). Todos los choques son uniones: con los cuatro juntos la suite pasa 566 de 566. Forja tiene que unirlos en su main; el submódulo del juego queda en 91f6d48 hasta entonces.
+  - `kit.config.json` suma `ui.gira.paradas` (tokio, saigon, bogota, caracas) e `ui.intro.espaldas` (kenji). El artifact sigue en 500.
+  - **VS de 1 contra 1:** el 1v1 y el judo usan `vs2()` con `ui_marco_vs_2` en x -80; cada retrato `grande_enojo` en su hueco menos 80, en (150, 150) y (490, 150), el de la derecha volteado; la prueba en `texto`, VS en `vs`, nombres en 246 y frases en 268. El 4v4 sigue con el de 4.
+  - **Cinta:** `ui_cinta_32` en (170, y) para el cuarto de la tabla de resultados, sin círculo ni número.
+  - **Mapa de la gira:** `ui_mapa_gira` en x -80 dentro del contenedor del zoom; `ui_mapa_gira_ruta` encima, destapada con una máscara que sigue al zoom; el avión vuela por `tramos[i]` menos 80. Los sellos son `ui_sellos_pasaporte` con su cuadro, el país y GIRA NEKKETSU a 1 en `texto`, con su tinta. `mapa_vietnam` y `mapa_colombia_venezuela` quedan sin conectar hasta que Rick decida el medallero en el mapa.
+  - **Intro:** la azotea con `ui_intro_azotea` y Kenji de espaldas animado con su `ancla` en (380, 334), el diálogo arriba; cuando se voltea queda el sprite de frente a escala 3. El desayuno abre la toma de la Familia: fondo, los cuatro retratos y la mesa animada; Alana grita que Thor se comió su arepa (cara de susto) y Rick y Sophie se burlan. Después de la ruta, dos tomas nuevas de 1,5 s: los Rolos en Bogotá con lluvia y los Maracuchos en Maracaibo, en silueta y después de color.
+  - **Rick:** su ficha (`data/fichas/rick.ficha.json`) pasa del peinado `swept_back` (sale de `high_and_tight`, con los lados rapados) a `parted2`, con pelo a los lados. Lo pidió Rick.
+  - **Lo que no calzó (para Forja):**
+    1. La rosa de los vientos de `mapa_gira` está en (512, 297) del 800 y la barra del pasaporte del juego empieza en y 311: la mitad de abajo de la rosa queda tapada. Subirla a y 270 o menos, o moverla a la esquina de arriba a la derecha.
+    2. `intro_maracaibo` no trae `huecos`: el juego usa los de `intro_bogota` (188, 296, 404 y 512, en y 150). Hace falta `huecos` propios, o sprites en `malecon`.
+    3. En `intro_bogota` los huecos (y 150 a 246) caen sobre el techo de la buseta (y 236): los retratos, cortados en el pecho, quedan flotando. Igual en Maracaibo sobre la baranda. Un marco o una franja detrás de cada hueco lo resolvería.
+    4. La cara `grande_enojo` se lee como bigote en las mujeres y los niños: Sophie, Yusmary, la abuela Nerva y Kenji salen con una raya oscura bajo la nariz en el VS y en las tomas de los rivales. Es la boca de enojo redibujada a 96.
+  - Probado con `scripts/prueba-intro2.mjs`.
+
 - **RAYO_PUNTA, H2_CORTO y G2 en el juego** (pixel_forja `main` en 91f6d48: #47 a #49). `equipos.json` lleva `bandera` y `escudo` en los 6 equipos; el kit suma `trueno`, `furro` y `corneta_moto` y los ambientes `mercado`, `rio` y `estadio`. El artifact queda en 500 archivos: los 6 audios son lo único nuevo, todo G2 va en `ui/paquete.wasm`.
   - **RAYO_PUNTA:** `puntaJabalina()` usa `puntoDe('impacto')` de `javelin_rayo`; sin el punto, la mano más 16 como antes.
   - **H2_CORTO:** el trueno en el cuadro 2 de `rayo_cielo`, en la jabalina y en Maracaibo (`relampago()` solo truena si no hay `rayo_cielo`); el furro en el `impacto` de `play_drum`; la corneta cuando la moto pasa a `corneta`, nunca dos antes de 0,55 s. En el Cross, `mercado` en `saigon_benthanh`, `rio` en `saigon_rio` y `estadio` en `saigon_estadio`; el hẻm y las azoteas siguen con `trafico_saigon`. Al cambiar de tramo se calla el ambiente anterior.

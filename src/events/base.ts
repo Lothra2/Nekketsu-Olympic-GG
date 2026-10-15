@@ -312,8 +312,10 @@ export abstract class EventScene extends Phaser.Scene {
     const gira = this.registry.get('gira') as Gira | undefined;
     orden.forEach((o, i) => {
       const y = 116 + i * 34;
-      // oro, plata y bronce del kit (cuadros 0, 1 y 2); el cuarto se queda con su círculo y su número
+      // oro, plata y bronce del kit (cuadros 0, 1 y 2)
       if (i < 3 && hayUi(this, 'medallas_32')) this.uiAdd(this.add.image(170, y, 'ui_medallas_32', i).setDepth(8500));
+      // y el cuarto, su cinta de participación (lote CINTA)
+      else if (i === 3 && hayUi(this, 'cinta_32')) this.uiAdd(this.add.image(170, y, 'ui_cinta_32').setDepth(8500));
       else {
         g.fillStyle(medal[i]).fillCircle(170, y, 10);
         this.uiAdd(txt(this, 170, y, `${i + 1}`, 'fuente_ui', 1).setDepth(8500).setTint(0x101018));

@@ -393,7 +393,9 @@
     "logo": {
       "texto": "NEKKETSU OLYMPIC GG"
     },
-    "interfaz": true
+    "interfaz": true,
+    "gira": { "paradas": ["tokio", "saigon", "bogota", "caracas"] },
+    "intro": { "espaldas": "kenji" }
   },
   "fx": true,
   "audio": {

@@ -255,6 +255,11 @@ export class Intro extends Phaser.Scene {
     if (!alive()) return;
     await this.ruta(alive);
     if (!alive()) return;
+    // los rivales en su ciudad: los Rolos bajo la lluvia de Bogotá y los Maracuchos en el calor de Maracaibo
+    await this.rivales(alive, 'intro_bogota', 'intro_bogota_lluvia', 'rolos_de_chapinero', 'BOGOTÁ · LOS ROLOS');
+    if (!alive()) return;
+    await this.rivales(alive, 'intro_maracaibo', null, 'maracuchos_del_lago', 'MARACAIBO · LOS MARACUCHOS');
+    if (!alive()) return;
 
     // 4. Saigón: la Familia GG, cada uno a su manera
     await this.familia(alive);
@@ -380,16 +385,35 @@ export class Intro extends Phaser.Scene {
   private async azotea(alive: () => boolean) {
     this.clear();
     this.cameras.main.fadeIn(600);
-    this.add2(this.add.image(320, 180, 'bg_japon'));
+    // la azotea de Tokio del kit (800 de ancho, en x -80) con Kenji de espaldas mirando el sol; sin ella, la de antes
+    const pz = pieza('intro_azotea') as unknown as { pie?: [number, number] } | undefined;
+    const pe = pieza('intro_espaldas') as unknown as { w: number; h: number; ancla?: [number, number] } | undefined;
+    const conKit = hayUi(this, 'intro_azotea');
+    if (conKit) this.add2(this.add.image(-80, 0, 'ui_intro_azotea').setOrigin(0));
+    else this.add2(this.add.image(320, 180, 'bg_japon'));
     this.petals(0xffb7d0);
-    const kenji = this.fig('kenji', 320, 262, 'idle', 2);
-    kenji.row = 'up';
+    let espaldas: Phaser.GameObjects.Sprite | null = null;
+    let kenji: Figura;
+    if (conKit && hayUi(this, 'intro_espaldas') && pz?.pie && pe?.ancla) {
+      const [px, py] = [pz.pie[0] - 80, pz.pie[1]];
+      espaldas = this.add2(this.add.sprite(px, py, 'ui_intro_espaldas', 0).setOrigin(pe.ancla[0] / pe.w, pe.ancla[1] / pe.h));
+      if (this.anims.exists('ui_intro_espaldas')) espaldas.play('ui_intro_espaldas');
+      // el Kenji que se voltea, del tamaño del de espaldas (redibujado a 3)
+      kenji = this.fig('kenji', px, py, 'idle', 3).setVisible(false);
+    } else {
+      kenji = this.fig('kenji', 320, 262, 'idle', 2);
+      kenji.row = 'up';
+    }
+    const base = espaldas ? 3 : 2;
     await wait(this, 1300);
-    const box = this.dialog('kenji', 'enojo');
+    const box = this.dialog('kenji', 'enojo', !!espaldas);
     await typewrite(this, box.text, '¿NADIE EN JAPÓN NOS AGUANTA?', 26, 330);
     this.reac(kenji, 'vena_enojo', 1600);
     await wait(this, 800);
     if (!alive()) return;
+    // se voltea: el de espaldas se va y queda el sprite de frente
+    espaldas?.destroy();
+    kenji.setVisible(true);
     kenji.row = 'down';
     kenji.set('taunt', true);
     // rayo, trueno y Kenji se agranda (el cuadro de diálogo queda quieto)
@@ -399,9 +423,9 @@ export class Intro extends Phaser.Scene {
     const aura = this.add2(speedLines(this, 1, 0xff4040));
     aura.setAlpha(0.45);
     this.alFrente(kenji);
-    this.tweens.add({ targets: kenji, scale: 3, duration: 380, ease: 'Back.out' });
+    this.tweens.add({ targets: kenji, scale: base + 1, duration: 380, ease: 'Back.out' });
     await typewrite(this, box.text, '¡ENTONCES NOS VAMOS DE GIRA!', 26, 330);
-    this.tweens.add({ targets: kenji, scale: 2, duration: 300 });
+    this.tweens.add({ targets: kenji, scale: base, duration: 300 });
     aura.destroy();
     for (const [i, id] of ['ryu', 'goro'].entries()) {
       const fromLeft = i === 0, tx = [210, 440][i];
@@ -438,6 +462,9 @@ export class Intro extends Phaser.Scene {
   private async familia(alive: () => boolean) {
     this.clear();
     chip.play(SAIGON);
+    await this.desayuno(alive);
+    if (!alive()) return;
+    this.clear();
     this.add2(this.add.image(320, 180, 'bg_saigon'));
     const cap = this.add2(txt(this, 320, 22, 'SAIGÓN, VIETNAM', 'fuente_titulo', 1));
     cap.setAlpha(0);
@@ -972,9 +999,23 @@ export class Intro extends Phaser.Scene {
   private async ruta(alive: () => boolean) {
     this.clear();
     const world = this.add2(this.add.container(0, 0));
-    world.add(this.add.image(0, 0, 'mapa_mundo').setOrigin(0));
+    // el mapa de la gira del kit (800 de ancho, en x -80, con la misma proyección del juego); sin él, el de antes
+    const conMapa = hayUi(this, 'mapa_gira');
+    world.add(conMapa ? this.add.image(-80, 0, 'ui_mapa_gira').setOrigin(0) : this.add.image(0, 0, 'mapa_mundo').setOrigin(0));
     const trail = this.add.graphics();
     world.add(trail);
+    // la ruta del avión del kit, descubierta tramo a tramo con una máscara que sigue al zoom del mapa
+    const pr = pieza('mapa_gira_ruta') as unknown as { tramos?: [number, number][][] } | undefined;
+    const tramos = conMapa && hayUi(this, 'mapa_gira_ruta') && pr?.tramos?.length === PARADAS.length - 1 ? pr.tramos.map((t) => t.map(([x, y]) => [x - 80, y] as [number, number])) : null;
+    let destapa: ((x: number, y: number, r?: number) => void) | null = null;
+    if (tramos) {
+      const g = this.make.graphics({}, false);
+      this.masks.push(g);
+      world.add(this.add.image(-80, 0, 'ui_mapa_gira_ruta').setOrigin(0).setMask(g.createGeometryMask()));
+      g.fillStyle(0xffffff);
+      destapa = (x, y, r = 7) => { g.fillCircle(x, y, r); };
+      this.tick.push(() => g.setPosition(world.x, world.y).setScale(world.scaleX));
+    }
     // nubes que pasan sobre el mapa
     const nubes = [0, 1, 2, 3].map((i) => this.add.image(80 + i * 170, 60 + (i % 2) * 150, i % 2 ? 'nube_0' : 'nube_2').setAlpha(0.45));
     world.add(nubes);
@@ -1017,13 +1058,24 @@ export class Intro extends Phaser.Scene {
       this.tweens.add({ targets: name, alpha: 1, duration: 200, delay: 200 });
       chip.blip(880 + i * 120, 0.08, 'sq25', 0.16);
       await wait(this, 260);
-      // sello del pasaporte
+      destapa?.(x, y, 10);
+      // sello del pasaporte: el del kit (128 x 40, uno por país, con el texto en su franja y su tinta) o el dibujado
       const sx = 136 + i * 136, sy = 336, rot = [-0.12, 0.08, -0.05, 0.14][i];
       const sello = this.add2(this.add.container(sx, sy));
-      const g = this.add.graphics();
-      g.lineStyle(2, 0xd02a2a).strokeRoundedRect(-56, -17, 112, 34, 5);
-      g.lineStyle(1, 0xd02a2a).strokeRoundedRect(-52, -13, 104, 26, 3);
-      sello.add([g, txt(this, 0, -4, p.pais, 'fuente_ui', 2).setTint(0xe03a3a), txt(this, 0, 9, 'GIRA NEKKETSU', 'fuente_ui', 1).setTint(0xe03a3a)]);
+      const ps = pieza('sellos_pasaporte') as unknown as { w: number; h: number; orden?: string[]; tintas?: Record<string, string>; texto?: [number, number, number, number] } | undefined;
+      const pais = ({ jp: 'japon', vn: 'vietnam', co: 'colombia', ve: 'venezuela' } as Record<string, string>)[p.k];
+      const cuadro = ps?.orden?.indexOf(pais) ?? -1;
+      if (hayUi(this, 'sellos_pasaporte') && ps?.texto && cuadro >= 0) {
+        const [tx, ty, tw, th] = ps.texto;
+        const tinta = Phaser.Display.Color.HexStringToColor(ps.tintas?.[pais] ?? '#d02a2a').color;
+        const cx = -ps.w / 2 + tx + tw / 2, cy = -ps.h / 2 + ty + th / 2;
+        sello.add([this.add.image(0, 0, 'ui_sellos_pasaporte', cuadro), txt(this, cx, cy - 6, p.pais, 'fuente_ui', 1).setTint(tinta), txt(this, cx, cy + 6, 'GIRA NEKKETSU', 'fuente_ui', 1).setTint(tinta)]);
+      } else {
+        const g = this.add.graphics();
+        g.lineStyle(2, 0xd02a2a).strokeRoundedRect(-56, -17, 112, 34, 5);
+        g.lineStyle(1, 0xd02a2a).strokeRoundedRect(-52, -13, 104, 26, 3);
+        sello.add([g, txt(this, 0, -4, p.pais, 'fuente_ui', 2).setTint(0xe03a3a), txt(this, 0, 9, 'GIRA NEKKETSU', 'fuente_ui', 1).setTint(0xe03a3a)]);
+      }
       sello.setRotation(rot).setScale(3).setAlpha(0);
       this.tweens.add({ targets: sello, scale: 1, alpha: 0.92, duration: 170, ease: 'Quad.in', onComplete: () => { chip.boom(0.45); this.cameras.main.shake(110, 0.006); } });
       await wait(this, 380);
@@ -1040,11 +1092,23 @@ export class Intro extends Phaser.Scene {
         targets: o, t: 1, duration: ms, ease: 'Sine.inOut',
         onUpdate: () => {
           const t = o.t, u = 1 - t;
-          const x = u * u * x0 + 2 * u * t * mx + t * t * x1, y = u * u * y0 + 2 * u * t * my + t * t * y1;
-          const dx = 2 * u * (mx - x0) + 2 * t * (x1 - mx), dy = 2 * u * (my - y0) + 2 * t * (y1 - my);
-          pon(x, y, Math.atan2(dy, dx));
-          const k = Math.floor(t * ms / 30);
-          if (k !== last) { last = k; if (k % 2 === 0) trail.fillStyle(0xffffff, 0.9).fillRect(Math.round(x) - 0.5, Math.round(y) - 0.5, 1.5, 1.5); }
+          let x: number, y: number;
+          const pts = tramos?.[a];
+          if (pts) {
+            // por los puntos del vuelo del kit (uno cada 5 px), destapando la ruta detrás del avión
+            const f = t * (pts.length - 1), k = Math.min(pts.length - 2, Math.floor(f)), r = f - k;
+            const [ax, ay] = pts[k], [bx, by] = pts[k + 1];
+            x = ax + (bx - ax) * r; y = ay + (by - ay) * r;
+            pon(x, y, Math.atan2(by - ay, bx - ax));
+            for (let j = last + 1; j <= k + 1; j++) destapa?.(pts[j][0], pts[j][1]);
+            last = Math.max(last, k + 1);
+          } else {
+            x = u * u * x0 + 2 * u * t * mx + t * t * x1; y = u * u * y0 + 2 * u * t * my + t * t * y1;
+            const dx = 2 * u * (mx - x0) + 2 * t * (x1 - mx), dy = 2 * u * (my - y0) + 2 * t * (y1 - my);
+            pon(x, y, Math.atan2(dy, dx));
+            const k = Math.floor(t * ms / 30);
+            if (k !== last) { last = k; if (k % 2 === 0) trail.fillStyle(0xffffff, 0.9).fillRect(Math.round(x) - 0.5, Math.round(y) - 0.5, 1.5, 1.5); }
+          }
           view.cx = x; view.cy = y;
           if (z) view.z = t < 0.5 ? z[0] + (z[1] - z[0]) * (t / 0.5) : z[1] + (z[2] - z[1]) * ((t - 0.5) / 0.5);
         },
@@ -1071,6 +1135,68 @@ export class Intro extends Phaser.Scene {
     lema.setScale(8);
     this.tweens.add({ targets: lema, scale: 2, duration: 200, ease: 'Quad.in', onComplete: () => { chip.boom(0.8); flash(this, 120); this.cameras.main.shake(220, 0.014); } });
     await wait(this, 1400);
+  }
+
+  /**
+   * El desayuno en Saigón (lote INTRO), antes de que salgan a la calle: el fondo, los cuatro de la Familia en sus
+   * `huecos` y la mesa animada encima, que les tapa los hombros. Alana habla y le cambia la cara. Sin el arte, nada.
+   */
+  private async desayuno(alive: () => boolean) {
+    const pd = pieza('intro_desayuno') as unknown as { huecos?: [number, number, number, number][]; texto?: [number, number, number, number] } | undefined;
+    if (!hayUi(this, 'intro_desayuno') || !hayUi(this, 'intro_desayuno_mesa') || !pd?.huecos) return;
+    this.add2(this.add.image(-80, 0, 'ui_intro_desayuno').setOrigin(0));
+    const caras = FAMILIA.map((m, i) => {
+      const [x, y, w, h] = pd.huecos![i];
+      return this.add2(this.add.image(x - 80 + w / 2, y + h / 2, `retratos:${m.id}`, 'grande_feliz'));
+    });
+    const mesa = this.add2(this.add.sprite(-80, 0, 'ui_intro_desayuno_mesa', 0).setOrigin(0));
+    if (this.anims.exists('ui_intro_desayuno_mesa')) mesa.play('ui_intro_desayuno_mesa');
+    const [tx, ty, tw, th] = pd.texto ?? [180, 8, 440, 26];
+    const cap = this.add2(txt(this, tx - 80 + tw / 2, ty + th / 2, 'SAIGÓN, VIETNAM', 'fuente_titulo', 1));
+    await wait(this, 1100);
+    if (!alive()) return;
+    // a Alana le roban la arepa: el que habla cambia de cara (el diálogo va arriba, donde estaba el título)
+    cap.setVisible(false);
+    const box = this.dialog('alana', 'susto', true);
+    caras[3].setFrame('grande_susto');
+    await typewrite(this, box.text, '¡THOR SE COMIÓ MI AREPA!', 24, 330);
+    caras[0].setFrame('grande_burla');
+    caras[2].setFrame('grande_burla');
+    this.sound.play('ladrido', { volume: 0.5 });
+    await wait(this, 1000);
+    box.close();
+  }
+
+  /**
+   * Los rivales en su ciudad (lote INTRO), una toma corta de 1,5 s: el fondo, los cuatro retratos en silueta que
+   * después se revelan, y encima la capa animada (la lluvia de Bogotá). Maracaibo no trae huecos: van en los de Bogotá.
+   */
+  private async rivales(alive: () => boolean, fondo: string, capa: string | null, equipo: string, titulo: string) {
+    const pb = pieza('intro_bogota') as unknown as { huecos?: [number, number, number, number][] } | undefined;
+    const pf = pieza(fondo) as unknown as { texto?: [number, number, number, number] } | undefined;
+    if (!hayUi(this, fondo) || !pb?.huecos) return;
+    this.clear();
+    const bg = this.add2(this.add.sprite(-80, 0, `ui_${fondo}`, 0).setOrigin(0));
+    if (this.anims.exists(`ui_${fondo}`)) bg.play(`ui_${fondo}`);
+    const ids = Object.entries(kit().atletas).filter(([, a]) => (a as { equipo?: string }).equipo === equipo).map(([id]) => id).slice(0, 4);
+    const caras = ids.map((id, i) => {
+      const [x, y, w, h] = pb.huecos![i];
+      return this.add2(this.add.image(x - 80 + w / 2, y + h / 2, `retratos:${id}`, 'grande_enojo').setTintFill(0x14101e));
+    });
+    if (capa && hayUi(this, capa)) {
+      const c = this.add2(this.add.sprite(-80, 0, `ui_${capa}`, 0).setOrigin(0));
+      if (this.anims.exists(`ui_${capa}`)) c.play(`ui_${capa}`);
+    }
+    const [tx, ty, tw, th] = pf?.texto ?? [180, 14, 440, 34];
+    this.add2(txt(this, tx - 80 + tw / 2, ty + th / 2, titulo, 'fuente_titulo', 1));
+    chip.blip(220, 0.25, 'saw', 0.12, 110);
+    await wait(this, 650);
+    if (!alive()) return;
+    // se revelan de golpe
+    caras.forEach((c) => c.clearTint());
+    flash(this, 90);
+    chip.boom(0.5);
+    await wait(this, 850);
   }
 
   /** Máscara con la forma de un panel. */

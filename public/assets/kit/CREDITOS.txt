@@ -140,7 +140,7 @@ Estas piezas exigen dar crédito a sus autores. Si las modificas y las compartes
 
 head/heads/human/male_gaunt/idle.png: Stephen Challener (Redshrike),bluecarrot16. OGA-BY 3.0,CC-BY-SA 3.0,GPL 3.0. https://opengameart.org/content/liberated-pixel-cup-lpc-base-assets-sprites-map-tiles,https://opengameart.org/content/lpc-folk
 head/faces/male/neutral/idle.png: JaidynReiman,ElizaWy,Stephen Challener (Redshrike). OGA-BY 3.0. https://github.com/ElizaWy/LPC/tree/main/Characters/Head,https://opengameart.org/content/ulpc-expanded-expressions
-pixelforja/hair/swept_back/idle.png: Skorpio,bluecarrot16,PixelForja (edición del peinado high_and_tight). CC-BY-SA 3.0,GPL 3.0. https://opengameart.org/content/lpc-skorpios-scifi-sprite-pack,https://opengameart.org/content/lpc-hair
+hair/parted2/adult/idle.png: Skorpio,bluecarrot16. CC-BY-SA 3.0,GPL 3.0. https://opengameart.org/content/lpc-skorpios-scifi-sprite-pack,https://opengameart.org/content/lpc-hair
 eyes/eyebrows/thick/adult/idle.png: ElizaWy. OGA-BY 3.0. https://github.com/ElizaWy/LPC/tree/main/Characters/Hair,https://opengameart.org/content/lpc-expanded-sit-run-jump-more
 head/nose/straight/adult/idle.png: Thane Brimhall (pennomi),laetissima,Matthew Krohn (makrohn). GPL 3.0,CC-BY-SA 3.0. https://opengameart.org/content/lpc-base-character-expressions
 beards/beard/basic/idle.png: JaidynReiman,Carlo Enrico Victoria (Nemisys). CC-BY-SA 3.0,GPL 3.0. https://opengameart.org/content/lpc-white-beard
