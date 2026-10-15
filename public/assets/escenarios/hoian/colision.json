@@ -1,6 +1,6 @@
 {
  "id": "hoian",
- "largo": 640,
+ "largo": 800,
  "franja": {
   "atras": 246,
   "adelante": 344
@@ -8,20 +8,20 @@
  "piso": [
   {
    "x0": 0,
-   "x1": 640,
+   "x1": 800,
    "tipo": "baldosa",
    "nombre": "calle de piedra"
   },
   {
    "x0": 0,
-   "x1": 640,
+   "x1": 800,
    "y0": 0,
    "y1": 14,
    "tipo": "acera"
   },
   {
    "x0": 0,
-   "x1": 640,
+   "x1": 800,
    "y0": 84,
    "y1": 98,
    "tipo": "madera",
@@ -34,27 +34,27 @@
  "escaleras": [],
  "postes": [
   {
-   "x": 110,
+   "x": 190,
    "y": 49,
    "alto": 170,
    "tipo": "poste_tamawari",
    "nota": "el de la Familia GG: bambú con su bola de papel arriba"
   },
   {
-   "x": 530,
+   "x": 610,
    "y": 49,
    "alto": 170,
    "tipo": "poste_tamawari",
    "nota": "el del Instituto Nekketsu"
   },
   {
-   "x": 20,
+   "x": 100,
    "y": 2,
    "alto": 110,
    "tipo": "poste_faroles"
   },
   {
-   "x": 620,
+   "x": 700,
    "y": 2,
    "alto": 110,
    "tipo": "poste_faroles"
@@ -63,8 +63,8 @@
  "agua": [],
  "bajo": [
   {
-   "x0": 20,
-   "x1": 620,
+   "x0": 100,
+   "x1": 700,
    "y0": 0,
    "y1": 98,
    "z": 124,
@@ -74,7 +74,7 @@
  ],
  "solidos": [
   {
-   "x": 102,
+   "x": 182,
    "y": 43,
    "w": 16,
    "d": 12,
@@ -82,7 +82,7 @@
    "tipo": "base_poste"
   },
   {
-   "x": 522,
+   "x": 602,
    "y": 43,
    "w": 16,
    "d": 12,

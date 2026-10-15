@@ -2,7 +2,7 @@
  "hora": "amanecer",
  "luces": [
   {
-   "x": 203,
+   "x": 283,
    "y": 250,
    "color": "#f6d27a",
    "radio": 70,
@@ -11,7 +11,7 @@
    "nota": "el rayo de sol del amanecer que entra entre los troncos"
   },
   {
-   "x": 383,
+   "x": 463,
    "y": 250,
    "color": "#f6d27a",
    "radio": 70,
@@ -20,7 +20,7 @@
    "nota": "el rayo de sol del amanecer que entra entre los troncos"
   },
   {
-   "x": 623,
+   "x": 703,
    "y": 250,
    "color": "#f6d27a",
    "radio": 70,

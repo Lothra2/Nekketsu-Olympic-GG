@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { Figura } from '../core/figura';
 import { pelotaKit } from '../core/kit';
 import { ajustes } from '../core/nivel';
-import { efecto } from '../core/fx';
+import { hayFx, efecto } from '../core/fx';
 import { txt, flash } from '../core/ui';
 import { MarcadorPartido } from '../core/interfaz';
 import { rotular } from '../core/input';
@@ -283,6 +283,17 @@ export class Basket extends EventScene {
     this.rayoT -= dt;
     if (this.rayoT > 0) return;
     this.rayoT = 9 + Math.random() * 9;
+    // el relámpago del cielo (rayo_cielo) le cae al aro o al tablero, unos pixeles corrido cada vez; el destello de
+    // la cámara, en el golpe (cuadro 2). Sin él, el de lado del Catatumbo en el cielo, como antes
+    if (hayFx('rayo_cielo')) {
+      const px = ARO.x + K * ARO.y, py = FT + ARO.y;
+      const tablero = Math.random() < 0.5;
+      const x = (tablero ? px + 12 : px) + Phaser.Math.Between(-5, 5), y = tablero ? py - 84 : py - ARO.z;
+      efecto(this, 'rayo_cielo', x, y, { depth: FT + ARO.y + 0.5 });
+      this.time.delayedCall(125, () => { this.cameras.main.flash(120, 200, 180, 255); this.suena('critico', 0.25); });
+      this.time.delayedCall(265, () => this.cameras.main.flash(80, 160, 140, 230));
+      return;
+    }
     const x = Phaser.Math.Between(60, 580);
     efecto(this, 'rayo_catatumbo', x, 70, { depth: -9 });
     this.cameras.main.flash(120, 200, 180, 255);

@@ -2,7 +2,7 @@
  "hora": "mediodia",
  "luces": [
   {
-   "x": 109,
+   "x": 29,
    "y": 42,
    "color": "#fbf8ee",
    "radio": 26,
@@ -11,7 +11,7 @@
    "nota": "el tubo fluorescente del techo"
   },
   {
-   "x": 269,
+   "x": 189,
    "y": 42,
    "color": "#fbf8ee",
    "radio": 26,
@@ -20,7 +20,16 @@
    "nota": "el tubo fluorescente del techo"
   },
   {
-   "x": 429,
+   "x": 349,
+   "y": 42,
+   "color": "#fbf8ee",
+   "radio": 26,
+   "latido": 0,
+   "encendida": true,
+   "nota": "el tubo fluorescente del techo"
+  },
+  {
+   "x": 509,
    "y": 42,
    "color": "#fbf8ee",
    "radio": 26,
@@ -30,7 +39,16 @@
    "parpadeo": 3.1
   },
   {
-   "x": 569,
+   "x": 649,
+   "y": 42,
+   "color": "#fbf8ee",
+   "radio": 26,
+   "latido": 0,
+   "encendida": true,
+   "nota": "el tubo fluorescente del techo"
+  },
+  {
+   "x": 779,
    "y": 42,
    "color": "#fbf8ee",
    "radio": 26,

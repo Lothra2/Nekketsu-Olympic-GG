@@ -2,7 +2,7 @@
  "hora": "tarde",
  "luces": [
   {
-   "x": 120,
+   "x": 46,
    "y": 91,
    "color": "#f0a040",
    "radio": 56,
@@ -11,7 +11,7 @@
    "nota": "el bombillo colgado de la viga: alumbra la cancha en la tarde nublada"
   },
   {
-   "x": 330,
+   "x": 200,
    "y": 91,
    "color": "#f0a040",
    "radio": 56,
@@ -20,7 +20,25 @@
    "nota": "el bombillo colgado de la viga: alumbra la cancha en la tarde nublada"
   },
   {
-   "x": 560,
+   "x": 410,
+   "y": 91,
+   "color": "#f0a040",
+   "radio": 56,
+   "latido": 0.3,
+   "encendida": true,
+   "nota": "el bombillo colgado de la viga: alumbra la cancha en la tarde nublada"
+  },
+  {
+   "x": 640,
+   "y": 91,
+   "color": "#f0a040",
+   "radio": 56,
+   "latido": 0.3,
+   "encendida": true,
+   "nota": "el bombillo colgado de la viga: alumbra la cancha en la tarde nublada"
+  },
+  {
+   "x": 752,
    "y": 91,
    "color": "#f0a040",
    "radio": 56,

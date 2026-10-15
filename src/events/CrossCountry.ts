@@ -76,7 +76,7 @@ interface Corredor {
   mejorX: number; mejorT: number; desatasco: number; desatascoY: number;
 }
 /** `spr` es la tira del kit (lote D2), cuando la hay: la moto pita al acercarse a alguien y frena al atropellar */
-interface Vehiculo { x: number; y: number; v: number; g: Phaser.GameObjects.Container; spr?: Phaser.GameObjects.Sprite; id?: string; anim?: string }
+interface Vehiculo { x: number; y: number; v: number; g: Phaser.GameObjects.Container; spr?: Phaser.GameObjects.Sprite; id?: string; anim?: string; huella: { w: number; d: number }; esquivados: Set<Actor> }
 /** El ferry del río: una plataforma que va y viene entre los muelles y se lleva a quien esté encima. */
 interface Ferry extends Caja { x0: number; x1: number; v: number; espera: number; quieto: number; dir: 1 | -1; g: Phaser.GameObjects.Container; spr?: Phaser.GameObjects.Sprite | null }
 interface Jacinto { x: number; y: number; g: Phaser.GameObjects.Graphics | Phaser.GameObjects.Sprite; tocados: Set<Actor> }
@@ -140,6 +140,8 @@ export class CrossCountry extends EventScene implements World {
   private vehT: number[] = [];
   private ferry: Ferry | null = null;
   private jacintos: Jacinto[] = [];
+  /** los que están saltando de lado porque una moto les pasó rozando */
+  private esquivas: { a: Actor; y0: number; y1: number; listo: boolean }[] = [];
   private jacT = 0;
   private frutas: Fruta[] = [];
   private derrame = new Map<Caja, number>();
@@ -197,6 +199,7 @@ export class CrossCountry extends EventScene implements World {
     this.aguaPies.clear();
     this.siluetas.clear();
     this.vehiculos = [];
+    this.esquivas = [];
     this.jacintos = [];
     this.frutas = [];
     this.derrame.clear();
@@ -1222,19 +1225,20 @@ export class CrossCountry extends EventScene implements World {
       const x = Math.min(x1 + 40, me.x + 420);
       const moto = v.vehiculo !== 'xich_lo';
       const g = this.add.container(this.px(x, y), FT + y);
-      const sombra = this.add.graphics();
-      sombra.fillStyle(0x000000, 0.3).fillEllipse(0, 0, moto ? 44 : 56, 8);
-      g.add(sombra);
       const vida = `esc_${L.id}_vida`;
-      // la moto (de un color al azar) o el xích lô de PixelForja (lote D2): (x, y) es el centro de su huella
+      // la moto (de un color al azar) o el xích lô de PixelForja (lotes D2 y D3): (x, y) es el centro de su huella
       const colores = Object.keys(vehiculosKit()).filter((id) => id.startsWith('moto_'));
       const id = moto ? colores[Math.floor(Math.random() * colores.length)] : 'xich_lo';
       const vk = id ? vehiculosKit()[id] : undefined;
       const spr = vk ? spriteVehiculo(this, id, 'andando') : null;
+      // la huella del kit manda: el atropello y la sombra son de su tamaño (sin el kit, los de antes)
+      const huella = vk && spr ? { w: vk.huella.w, d: vk.huella.d } : { w: 40, d: 12 };
+      const sombra = this.add.graphics();
+      sombra.fillStyle(0x000000, 0.3).fillEllipse(0, 0, vk && spr ? huella.w : moto ? 44 : 56, 8);
+      g.add(sombra);
       if (spr && vk) {
-        // al doble: los conductores del kit miden 12 px y así se ven del tamaño con que atropellan (40 de largo)
-        const E = 2;
-        spr.setScale(E).setPosition(-Math.round(E * (vk.huella.w / 2 + this.inclinacion * vk.huella.d / 2)), -Math.round(E * vk.huella.d / 2));
+        // a escala 1 (lote D3): el conductor mide lo mismo que un atleta; el ancla del manifiesto en la esquina
+        spr.setPosition(-Math.round(vk.huella.w / 2 + this.inclinacion * vk.huella.d / 2), -Math.round(vk.huella.d / 2));
         g.add(spr);
       } else if (moto && this.arte && this.textures.exists(vida) && this.textures.get(vida).has('motos_fondo_0')) {
         // la moto de PixelForja, la misma que cruza al fondo
@@ -1256,7 +1260,7 @@ export class CrossCountry extends EventScene implements World {
         body.lineStyle(2, 0x303038).lineBetween(-4, -12, 20, -12);
         g.add([body, txt(this, 0, -48, 'XÍCH LÔ', 'fuente_ui', 1)]);
       }
-      this.vehiculos.push({ x, y, v: moto ? -230 : -110, g, spr: spr ?? undefined, id: spr ? id : undefined, anim: 'andando' });
+      this.vehiculos.push({ x, y, v: moto ? -230 : -110, g, spr: spr ?? undefined, id: spr ? id : undefined, anim: 'andando', huella, esquivados: new Set() });
       chip.blip(moto ? 523 : 880, 0.12, 'sq50', 0.12, moto ? 494 : 988);
       this.time.delayedCall(140, () => chip.blip(moto ? 523 : 880, 0.12, 'sq50', 0.12, moto ? 494 : 988));
       const aviso = this.uiAdd(txt(this, 600, 180 + (y - 60) * 0.8, moto ? '¡MOTO! «' : '¡XÍCH LÔ! «', 'fuente_ui', 2, 1).setDepth(8100).setTint(0xff6060));
@@ -1273,7 +1277,7 @@ export class CrossCountry extends EventScene implements World {
       }
       for (const r of this.gente2) {
         const a = r.a;
-        if (Math.abs(a.x - m.x) < 20 && Math.abs(a.y - m.y) < 10 && a.z < 14 && a.canBeHit()) {
+        if (Math.abs(a.x - m.x) < m.huella.w / 2 && Math.abs(a.y - m.y) < m.huella.d / 2 + 4 && a.z < 14 && a.canBeHit()) {
           a.hp = Math.max(1, a.hp - 8);
           a.knockdown(-1, 160, 200);
           // la moto frena de golpe (con su polvo) y sigue al rato
@@ -1287,10 +1291,35 @@ export class CrossCountry extends EventScene implements World {
           this.onHit(null, a, 8, true);
           this.sfx('critico', a.human ? 0.5 : 0.2);
           if (a.human) this.letrero(a, m.v < -150 ? '¡PI PI! ¡TE ATROPELLÓ LA MOTO!' : '¡CUIDADO CON EL XÍCH LÔ!', 0xff8080);
+        } else if (!m.esquivados.has(a) && Math.abs(a.x - m.x) < m.huella.w / 2 && Math.abs(a.y - m.y) < m.huella.d / 2 + 16) {
+          // pasó rozando sin atropellarlo: el susto, el salto de lado y el reclamo (lote B7)
+          m.esquivados.add(a);
+          this.esquivar(a, a.y < m.y ? -1 : 1);
         }
       }
     }
+    // los que esquivan: saltan de lado, de carril, entre el despegue y el aterriza
+    for (const e of this.esquivas) {
+      const a = e.a;
+      if (a.st !== 'frozen' || a.fig.anim.name !== 'traffic_dodge') { e.listo = true; continue; }
+      a.fig.step(dt);
+      const d = a.fig.cuadroDe('despegue'), t = a.fig.cuadroDe('aterriza');
+      const u = Phaser.Math.Clamp((a.fig.anim.pos - d) / Math.max(1, t - d), 0, 1);
+      a.y = e.y0 + (e.y1 - e.y0) * u;
+      if (a.fig.anim.done) { a.setSt('idle', 'idle'); e.listo = true; }
+    }
+    this.esquivas = this.esquivas.filter((e) => !e.listo);
     this.vehiculos = this.vehiculos.filter((m) => { if (m.x < me.x - 500 || m.x < -60) { m.g.destroy(); return false; } return true; });
+  }
+
+  /** El salto de lado cuando una moto pasa rozando: de carril, lejos de la moto, si el kit lo trae y está libre. */
+  private esquivar(a: Actor, lado: -1 | 1) {
+    if (!a.fig.anim.has('traffic_dodge') || !a.grounded || a.z > 1 || !['idle', 'walk', 'run'].includes(a.st)) return;
+    const y1 = Phaser.Math.Clamp(a.y + lado * 16, 4, DEPTH - 4);
+    a.vx = 0;
+    a.setSt('frozen', 'traffic_dodge');
+    this.esquivas.push({ a, y0: a.y, y1, listo: false });
+    if (a.human) this.letrero(a, '¡UY! ¡CASI!', 0xffe080);
   }
 
   private letrero(a: Actor, s: string, color: number) {

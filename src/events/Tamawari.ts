@@ -14,7 +14,8 @@ import hoian from '../../data/stages/hoian.layout.json';
 
 const FT = FLOOR_TOP;
 /** los dos postes del layout: el de la Familia GG a la izquierda y el del Instituto a la derecha */
-const POSTES = hoian.postes.filter((p) => p.tipo === 'poste_tamawari');
+// (el layout de Hội An va a 800 con la cancha en los 640 del medio, lote E4: el juego resta el margen)
+const POSTES = hoian.postes.filter((p) => p.tipo === 'poste_tamawari').map((p) => ({ ...p, x: p.x - ((hoian as { margen?: number }).margen ?? 0) }));
 const ZOOM = 1.3;
 /** lo que dura como mucho: si nadie rompe la bola, gana el que le hizo más daño a la del otro */
 const TIEMPO = 120;
@@ -77,6 +78,9 @@ export class Tamawari extends EventScene implements World {
     this.zoom = this.d.practica ? 1 : ZOOM;
     this.setup(this.zoom, 640);
     this.arte = hayArte(this, 'hoian') ? pintarEscenario(this, 'hoian', 5000) : null;
+    // Hội An a 800 (lote E4): la cámara con el margen y la paralaje del arte, como las demás canchas
+    this.arteFondo = this.arte;
+    this.montarArte();
     this.inclinacion = this.arte?.inclinacion ?? 0;
     if (!this.arte) {
       this.add.image(320, 100, 'bg_hoian_lejos').setScrollFactor(0.5, 1).setDepth(-12);

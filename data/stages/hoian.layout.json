@@ -3,8 +3,9 @@
  "pais": "vietnam",
  "prueba": "tamawari",
  "nombre": "HỘI AN",
- "nota": "Tama-wari de noche en la ciudad vieja: dos postes de bambú con su bola de papel arriba, uno por equipo. Misma franja que la pelea (246 a 344).",
- "largo": 640,
+ "nota": "Tama-wari de noche en la ciudad vieja: dos postes de bambú con su bola de papel arriba, uno por equipo. Misma franja que la pelea (246 a 344). Mide 800: la cancha va en los 640 del medio (margen 80) y a cada lado hay 80 de Hội An, el río con otro bote a la izquierda y la calle con otra casa a la derecha. Los postes del Tama-wari van en x 190 y 610 y los de faroles en 100 y 700. En las coordenadas de 640 del juego es lo mismo menos 80.",
+ "largo": 800,
+ "margen": 80,
  "franja": {
   "atras": 246,
   "adelante": 344
@@ -21,20 +22,20 @@
  "piso": [
   {
    "x0": 0,
-   "x1": 640,
+   "x1": 800,
    "tipo": "baldosa",
    "nombre": "calle de piedra"
   },
   {
    "x0": 0,
-   "x1": 640,
+   "x1": 800,
    "y0": 0,
    "y1": 14,
    "tipo": "acera"
   },
   {
    "x0": 0,
-   "x1": 640,
+   "x1": 800,
    "y0": 84,
    "y1": 98,
    "tipo": "madera",
@@ -47,27 +48,27 @@
  "escaleras": [],
  "postes": [
   {
-   "x": 110,
+   "x": 190,
    "y": 49,
    "alto": 170,
    "tipo": "poste_tamawari",
    "nota": "el de la Familia GG: bambú con su bola de papel arriba"
   },
   {
-   "x": 530,
+   "x": 610,
    "y": 49,
    "alto": 170,
    "tipo": "poste_tamawari",
    "nota": "el del Instituto Nekketsu"
   },
   {
-   "x": 20,
+   "x": 100,
    "y": 2,
    "alto": 110,
    "tipo": "poste_faroles"
   },
   {
-   "x": 620,
+   "x": 700,
    "y": 2,
    "alto": 110,
    "tipo": "poste_faroles"
@@ -76,8 +77,8 @@
  "agua": [],
  "bajo": [
   {
-   "x0": 20,
-   "x1": 620,
+   "x0": 100,
+   "x1": 700,
    "y0": 0,
    "y1": 98,
    "z": 124,
@@ -87,7 +88,7 @@
  ],
  "solidos": [
   {
-   "x": 102,
+   "x": 182,
    "y": 43,
    "w": 16,
    "d": 12,
@@ -95,7 +96,7 @@
    "tipo": "base_poste"
   },
   {
-   "x": 522,
+   "x": 602,
    "y": 43,
    "w": 16,
    "d": 12,
@@ -120,16 +121,16 @@
  "entidades": [
   {
    "tipo": "salida",
-   "x": 60
+   "x": 140
   },
   {
    "tipo": "meta",
-   "x": 580
+   "x": 660
   },
   {
    "tipo": "npc",
    "npc": "bola_tama",
-   "x": 110,
+   "x": 190,
    "y": 49,
    "z": 170,
    "equipo": "familia_gg",
@@ -138,7 +139,7 @@
   {
    "tipo": "npc",
    "npc": "bola_tama",
-   "x": 530,
+   "x": 610,
    "y": 49,
    "z": 170,
    "equipo": "instituto_nekketsu"
@@ -146,38 +147,38 @@
   {
    "tipo": "npc",
    "npc": "vendedora_faroles",
-   "x": 320,
+   "x": 400,
    "y": 4
   },
   {
    "tipo": "objeto",
    "objeto": "abanico",
-   "x": 260,
+   "x": 340,
    "y": 60
   },
   {
    "tipo": "objeto",
    "objeto": "non_la",
-   "x": 380,
+   "x": 460,
    "y": 30
   }
  ],
  "ranuras_deco": [
   {
    "x0": 0,
-   "x1": 640,
+   "x1": 800,
    "capa": "lejos",
    "tema": "rio_thu_bon_puente_japones"
   },
   {
    "x0": 0,
-   "x1": 640,
+   "x1": 800,
    "capa": "cerca",
    "tema": "casas_amarillas_faroles"
   },
   {
    "x0": 0,
-   "x1": 640,
+   "x1": 800,
    "capa": "frente",
    "tema": "velitas_en_el_rio"
   }

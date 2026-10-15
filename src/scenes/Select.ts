@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { Figura } from '../core/figura';
 import { Input } from '../core/input';
 import { chip } from '../core/music';
-import { kit } from '../core/kit';
+import { kit, findAnim } from '../core/kit';
 import { txt } from '../core/ui';
 import { sortearGira, type Gira } from '../events/base';
 import { elegibles, equipo, equipoDe, setPartido, type Equipo } from '../core/equipos';
@@ -13,6 +13,23 @@ export const FAMILIA = ['rick', 'steph', 'sophie', 'alana'];
 export const INSTITUTO = ['kenji', 'ryu', 'goro', 'tetsu'];
 
 /** El apodo y la técnica de cada uno (la técnica sale en grande cuando la usa en la pelea). */
+/** La técnica de equipo de PixelForja (lote B7), una por equipo, y su nombre en el corte. */
+export const TECNICA_EQUIPO: Record<string, string> = {
+  familia_gg: '¡CHANCLETAZO SUPREMO!',
+  instituto_nekketsu: '¡COPETAZO!',
+  rong_sai_gon: '¡SILLA VOLADORA!',
+  rolos_de_chapinero: '¡CICLOVÍA INFERNAL!',
+  panas_de_caracas: '¡BATAZO DE JONRÓN!',
+  maracuchos_del_lago: '¡FURRAZO!',
+};
+
+/** La técnica que usa: la de su equipo si el kit se la trae (`tecnica_<equipo>`), si no la suya de siempre. */
+export function nombreTecnica(id: string): string {
+  const eq = (kit().atletas[id] as { equipo?: string } | undefined)?.equipo ?? '';
+  if (eq && TECNICA_EQUIPO[eq] && findAnim(id, `tecnica_${eq}`)) return TECNICA_EQUIPO[eq];
+  return INFO[id]?.tecnica ?? '¡TÉCNICA!';
+}
+
 export const INFO: Record<string, { apodo: string; tecnica: string }> = {
   rick: { apodo: 'EL CAPITÁN', tecnica: 'PUÑO MACH' },
   steph: { apodo: 'LA VELOZ', tecnica: 'PATADA HURACÁN' },
@@ -161,7 +178,7 @@ export class Select extends Phaser.Scene {
       this.info.setY(334).setText(e.nombre.toUpperCase()).setTint(e.claro);
     } else {
       const id = this.atletasDelPaso[this.sel];
-      this.info.setY(220).setText(`${INFO[id]?.apodo ?? ''} · ${INFO[id]?.tecnica ?? ''}`).setTint(this.paso === 'jugador' ? 0xffe080 : 0xff8080);
+      this.info.setY(220).setText(`${INFO[id]?.apodo ?? ''} · ${nombreTecnica(id)}`).setTint(this.paso === 'jugador' ? 0xffe080 : 0xff8080);
       this.mostrar(id);
     }
     chip.blip(660 + this.sel * 80, 0.04, 'sq25', 0.14);

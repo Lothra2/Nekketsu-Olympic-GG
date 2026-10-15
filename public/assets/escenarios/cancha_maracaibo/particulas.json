@@ -3,8 +3,8 @@
  "particulas": [
   {
    "tipo": "brillo",
-   "x0": 72,
-   "x1": 120,
+   "x0": 152,
+   "x1": 200,
    "y0": 36,
    "y1": 62,
    "color": [
@@ -17,8 +17,8 @@
   },
   {
    "tipo": "brillo",
-   "x0": 312,
-   "x1": 360,
+   "x0": 392,
+   "x1": 440,
    "y0": 30,
    "y1": 56,
    "color": [
@@ -31,8 +31,8 @@
   },
   {
    "tipo": "brillo",
-   "x0": 576,
-   "x1": 624,
+   "x0": 656,
+   "x1": 704,
    "y0": 36,
    "y1": 62,
    "color": [
@@ -44,9 +44,23 @@
    "nota": "las polillas que dan vueltas alrededor del bombillo"
   },
   {
-   "tipo": "calor",
+   "tipo": "brillo",
    "x0": 40,
-   "x1": 640,
+   "x1": 70,
+   "y0": 52,
+   "y1": 74,
+   "color": [
+    "#ffd84a",
+    "#fff8e4"
+   ],
+   "cada": 0.7,
+   "vida": 0.6,
+   "nota": "las polillas del poste de alumbrado de la calle"
+  },
+  {
+   "tipo": "calor",
+   "x0": 120,
+   "x1": 800,
    "y0": 200,
    "y1": 300,
    "color": [

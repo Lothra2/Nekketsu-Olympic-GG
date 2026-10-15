@@ -86,7 +86,7 @@ await shot('chapita_batazo');
 await ir('Jabalina', { jugador: 'sophie' });
 await p.waitForFunction(() => { const s = window.game.scene.getScene('Jabalina'); return s?.fase === 'juego' && s.st === 'carrera' && s.cur?.c.human; }, null, { timeout: 40000 }).catch(() => {});
 await ev(() => { const s = window.game.scene.getScene('Jabalina'); s.catatumbo = true; s.x = 300; s.v = 260; s.ang = 40; s.lanza(); });
-m = await muestras(() => { const s = window.game.scene.getScene('Jabalina'); const rayo = s.children.list.some((o) => o.texture?.key === 'fx_rayo_catatumbo' && o.active); return { a: s.cur.fig.anim.name, f: s.cur.fig.anim.frame, rayo, vuela: !!s.vuelo }; }, 16);
+m = await muestras(() => { const s = window.game.scene.getScene('Jabalina'); const rayo = s.children.list.some((o) => /fx_rayo_(catatumbo|cielo)/.test(o.texture?.key ?? '') && o.active); return { a: s.cur.fig.anim.name, f: s.cur.fig.anim.frame, rayo, vuela: !!s.vuelo }; }, 16);
 console.log('  lanza:', m.map((q) => `${q.a}:${q.f}${q.rayo ? ' RAYO' : ''}${q.vuela ? ' vuela' : ''}`).join(' | '));
 check(m.some((q) => q.a === 'javelin_rayo'), 'jabalina: la lanza del Catatumbo es javelin_rayo');
 check(m.some((q) => q.rayo && !q.vuela), 'jabalina: el relámpago cae con la jabalina en alto, antes de soltarla');

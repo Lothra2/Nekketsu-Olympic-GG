@@ -3,7 +3,7 @@
  "nota": "x, y: esquina de arriba a la izquierda en pantalla a escala 1 (con la inclinación ya puesta). orden: la profundidad para ordenar con los atletas (se dibuja después de todo atleta con y menor). En Phaser: setDepth(franja.atras + orden). Las caras izquierdas de las cajas (tipo *_cara) van con orden y + 0.1: detrás de quien pasa a su lado.",
  "objetos": [
   {
-   "id": "arco_piedra_26_atras",
+   "id": "arco_piedra_106_atras",
    "tipo": "arco_piedra",
    "origen": "entidades",
    "cuadro": {
@@ -12,12 +12,12 @@
     "w": 31,
     "h": 76
    },
-   "x": 30,
+   "x": 110,
    "y": 210,
    "orden": 35
   },
   {
-   "id": "arco_piedra_600_atras",
+   "id": "arco_piedra_680_atras",
    "tipo": "arco_piedra",
    "origen": "entidades",
    "cuadro": {
@@ -26,12 +26,12 @@
     "w": 31,
     "h": 76
    },
-   "x": 604,
+   "x": 684,
    "y": 210,
    "orden": 35
   },
   {
-   "id": "arco_piedra_26",
+   "id": "arco_piedra_106",
    "tipo": "arco_piedra",
    "origen": "entidades",
    "cuadro": {
@@ -40,12 +40,12 @@
     "w": 31,
     "h": 76
    },
-   "x": 30,
+   "x": 110,
    "y": 210,
    "orden": 71
   },
   {
-   "id": "arco_piedra_600",
+   "id": "arco_piedra_680",
    "tipo": "arco_piedra",
    "origen": "entidades",
    "cuadro": {
@@ -54,7 +54,7 @@
     "w": 31,
     "h": 76
    },
-   "x": 604,
+   "x": 684,
    "y": 210,
    "orden": 71
   }

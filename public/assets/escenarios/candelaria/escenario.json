@@ -11,14 +11,16 @@
   "atras": 286,
   "adelante": 310
  },
- "largo": 640,
+ "largo": 800,
  "hora": "tarde",
  "clima": [
   "nublado",
   "llovizna"
  ],
  "inclinacion": 0,
- "ancho": 640,
+ "ancho": 800,
+ "margen": 80,
+ "nota_margen": "la cancha va de x 80 a 720 (los 640 px del medio) y hay 80 px de escenario a cada lado: centra la cámara en la cancha. Las x del layout ya vienen corridas.",
  "vista": "lado",
  "nota_vista": "de lado: el dibujo va derecho (inclinación 0). El fondo (la capa cerca) va de la fila 0 a franja.atras (286) y es transparente donde se ven lejos y el cielo. El piso va de la fila 286 al borde de abajo de la pantalla: la franja donde se paran los atletas (y del mundo = fila de pantalla - 286) y lo de adelante. Las capas, los objetos y la vida se cargan igual que en la vista oblicua.",
  "capas": {
@@ -81,13 +83,13 @@
      {
       "x": 0,
       "y": 0,
-      "w": 640,
+      "w": 800,
       "h": 34
      },
      {
-      "x": 641,
+      "x": 801,
       "y": 0,
-      "w": 640,
+      "w": 800,
       "h": 34
      }
     ]
@@ -96,19 +98,19 @@
     "id": "publico",
     "tipo": "publico",
     "capa": "cerca",
-    "x": 128,
+    "x": 208,
     "y": 226,
     "fps": 1.5,
     "cuadros": [
      {
-      "x": 1282,
+      "x": 1602,
       "y": 0,
       "w": 240,
       "h": 40
      },
      {
-      "x": 1523,
-      "y": 0,
+      "x": 0,
+      "y": 41,
       "w": 240,
       "h": 40
      }
@@ -118,25 +120,25 @@
     "id": "llovizna_0",
     "tipo": "llovizna",
     "capa": "cerca",
-    "x": 148,
+    "x": 228,
     "y": 112,
     "fps": 6,
     "cuadros": [
      {
-      "x": 1764,
-      "y": 0,
+      "x": 241,
+      "y": 41,
       "w": 88,
       "h": 92
      },
      {
-      "x": 1853,
-      "y": 0,
+      "x": 330,
+      "y": 41,
       "w": 88,
       "h": 92
      },
      {
-      "x": 1942,
-      "y": 0,
+      "x": 419,
+      "y": 41,
       "w": 88,
       "h": 92
      }
@@ -146,27 +148,55 @@
     "id": "llovizna_1",
     "tipo": "llovizna",
     "capa": "cerca",
-    "x": 396,
+    "x": 476,
     "y": 104,
     "fps": 6,
     "cuadros": [
      {
-      "x": 0,
-      "y": 93,
+      "x": 508,
+      "y": 41,
       "w": 64,
       "h": 68
      },
      {
-      "x": 65,
-      "y": 93,
+      "x": 573,
+      "y": 41,
       "w": 64,
       "h": 68
      },
      {
-      "x": 130,
-      "y": 93,
+      "x": 638,
+      "y": 41,
       "w": 64,
       "h": 68
+     }
+    ]
+   },
+   {
+    "id": "llovizna_2",
+    "tipo": "llovizna",
+    "capa": "cerca",
+    "x": 36,
+    "y": 120,
+    "fps": 6,
+    "cuadros": [
+     {
+      "x": 703,
+      "y": 41,
+      "w": 16,
+      "h": 52
+     },
+     {
+      "x": 720,
+      "y": 41,
+      "w": 16,
+      "h": 52
+     },
+     {
+      "x": 737,
+      "y": 41,
+      "w": 16,
+      "h": 52
      }
     ]
    }
@@ -293,8 +323,9 @@
   "prueba": "tejo",
   "vista": "lado",
   "nombre": "CANCHA DE TEJO LA CANDELARIA",
-  "nota": "Tejo de lado en una cancha techada de La Candelaria, Bogotá, en la tarde nublada. El piso de Tejo.ts está en la fila 300: la franja va de 286 a 310. Los que esperan se paran en la fila 296 (y 10) y el que lanza en la 300 (y 14), detrás de la raya de x 104. La caja de greda va de x 534 a 584, como la que dibuja el juego.",
-  "largo": 640,
+  "nota": "Tejo de lado en una cancha techada de La Candelaria, Bogotá, en la tarde nublada. El piso de Tejo.ts está en la fila 300: la franja va de 286 a 310. Mide 800: la cancha va en los 640 del medio (margen 80) y a cada lado hay 80 más de la cancha techada, la banca de los de la pola a la izquierda y el portón de la calle a la derecha. Los que esperan se paran en la fila 296 (y 10) y el que lanza en la 300 (y 14), detrás de la raya de x 184. La caja de greda va de x 614 a 664, como la que dibuja el juego. En las coordenadas de 640 de Tejo.ts es lo mismo menos 80 (la raya en 104 y la caja de 534 a 584).",
+  "largo": 800,
+  "margen": 80,
   "franja": {
    "atras": 286,
    "adelante": 310
@@ -312,7 +343,7 @@
   "piso": [
    {
     "x0": 0,
-    "x1": 640,
+    "x1": 800,
     "tipo": "tierra",
     "nombre": "la cancha de tierra"
    }
@@ -326,13 +357,13 @@
   "bajo": [],
   "solidos": [
    {
-    "x": 534,
+    "x": 614,
     "y": 8,
     "w": 50,
     "d": 6,
     "z": 52,
     "tipo": "caja_greda",
-    "nota": "la caja de tejo vista de lado: la cara de greda sube de (534, 300) a (582, 250) y el palo de atrás llega a la fila 248, como la de Tejo.ts. El bocín, en (548, 280)"
+    "nota": "la caja de tejo vista de lado: la cara de greda sube de (614, 300) a (662, 250) y el palo de atrás llega a la fila 248, como la de Tejo.ts (de (534, 300) a (582, 250) en sus x de 640). El bocín, en (628, 280), que en Tejo.ts es (548, 280)"
    }
   ],
   "carriles": [
@@ -347,21 +378,21 @@
    {
     "tipo": "objeto",
     "objeto": "raya_tejo",
-    "x": 104,
+    "x": 184,
     "y": 14,
-    "nota": "la raya de lanzamiento (LINEA de Tejo.ts)"
+    "nota": "la raya de lanzamiento (LINEA 104 de Tejo.ts más el margen)"
    }
   ],
   "ranuras_deco": [
    {
     "x0": 0,
-    "x1": 640,
+    "x1": 800,
     "capa": "lejos",
     "tema": "monserrate_casas_coloniales"
    },
    {
     "x0": 0,
-    "x1": 640,
+    "x1": 800,
     "capa": "cerca",
     "tema": "cancha_techada_madera"
    }

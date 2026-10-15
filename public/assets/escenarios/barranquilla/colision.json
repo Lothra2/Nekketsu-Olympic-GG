@@ -1,6 +1,6 @@
 {
  "id": "barranquilla",
- "largo": 640,
+ "largo": 800,
  "franja": {
   "atras": 212,
   "adelante": 316
@@ -8,7 +8,7 @@
  "piso": [
   {
    "x0": 0,
-   "x1": 640,
+   "x1": 800,
    "tipo": "cancha",
    "nombre": "la calle de asfalto"
   }

@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { Figura } from '../core/figura';
 import { pelotaKit } from '../core/kit';
 import { ajustes } from '../core/nivel';
-import { efecto } from '../core/fx';
+import { efecto, talla } from '../core/fx';
 import { chip } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { rotular } from '../core/input';
@@ -438,11 +438,15 @@ export class Voley extends EventScene {
       // la animación: caminar, correr o quieto, cuando no está pegando ni celebrando (moverse corta la celebración)
       if (q.st === 'piso' && q.golpeT <= 0) {
         // quieto, en guardia de vóley si el kit la trae
-        const quiere = mx ? (corre ? 'run' : 'walk') : q.fig.anim.has('vb_ready') ? 'vb_ready' : 'idle';
-        const libre = ['idle', 'vb_ready', 'walk', 'run'].includes(q.fig.anim.name) || q.fig.anim.done || mx !== 0;
+        // corriendo en la arena, el paso pesado de la playa (lote B7) si el kit lo trae
+        const correr = q.fig.anim.has('beach_run') ? 'beach_run' : 'run';
+        const quiere = mx ? (corre ? correr : 'walk') : q.fig.anim.has('vb_ready') ? 'vb_ready' : 'idle';
+        const libre = ['idle', 'vb_ready', 'walk', 'run', 'beach_run'].includes(q.fig.anim.name) || q.fig.anim.done || mx !== 0;
         if (libre && q.fig.anim.name !== quiere) q.fig.set(quiere);
       }
       const ev = q.fig.step(dt, Math.abs(mx) * vel * dt);
+      // en cada paso de la arena se levanta un poquito
+      if (q.fig.anim.name === 'beach_run' && q.st === 'piso' && ev.some((e) => e.tipo === 'paso')) efecto(this, `polvo_correr_${talla(q.fig.celda)}`, q.x, PISO + FILA[q.fila], { flip: q.fig.left, depth: PISO + FILA[q.fila] - 0.2 })?.setTint(0xf2dcaa);
       if (this.fuegoPend?.p === q && ev.some((e) => e.tipo === 'impacto')) this.soltarFuego();
     }
     // la pelota

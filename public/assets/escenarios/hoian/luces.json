@@ -2,7 +2,7 @@
  "hora": "noche",
  "luces": [
   {
-   "x": 189,
+   "x": 269,
    "y": 194,
    "color": "#ffa62a",
    "radio": 24,
@@ -11,7 +11,7 @@
    "nota": "el farol de la puerta: alumbra la pared amarilla y la piedra"
   },
   {
-   "x": 308,
+   "x": 388,
    "y": 194,
    "color": "#ffa62a",
    "radio": 24,
@@ -20,7 +20,7 @@
    "nota": "el farol de la puerta: alumbra la pared amarilla y la piedra"
   },
   {
-   "x": 417,
+   "x": 497,
    "y": 194,
    "color": "#ffa62a",
    "radio": 24,
@@ -29,7 +29,7 @@
    "nota": "el farol de la puerta: alumbra la pared amarilla y la piedra"
   },
   {
-   "x": 333,
+   "x": 413,
    "y": 204,
    "color": "#ffa62a",
    "radio": 40,
@@ -37,7 +37,7 @@
    "nota": "el puesto de faroles"
   },
   {
-   "x": 622,
+   "x": 719,
    "y": 204,
    "color": "#ffa62a",
    "radio": 40,
@@ -45,7 +45,7 @@
    "nota": "el puesto de faroles"
   },
   {
-   "x": 21,
+   "x": 101,
    "y": 150,
    "color": "#e2382a",
    "radio": 32,
@@ -54,7 +54,7 @@
    "nota": "los faroles del poste"
   },
   {
-   "x": 621,
+   "x": 701,
    "y": 150,
    "color": "#e2382a",
    "radio": 32,
@@ -63,7 +63,7 @@
    "nota": "los faroles del poste"
   },
   {
-   "x": 48,
+   "x": 128,
    "y": 155,
    "color": "#74c864",
    "radio": 26,
@@ -72,7 +72,7 @@
    "nota": "farol de seda de la cuerda: se mece con su vida"
   },
   {
-   "x": 254,
+   "x": 334,
    "y": 189,
    "color": "#e2382a",
    "radio": 26,
@@ -81,7 +81,7 @@
    "nota": "farol de seda de la cuerda: se mece con su vida"
   },
   {
-   "x": 443,
+   "x": 523,
    "y": 189,
    "color": "#ffa62a",
    "radio": 26,

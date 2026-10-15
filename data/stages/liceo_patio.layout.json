@@ -3,8 +3,9 @@
  "pais": "venezuela",
  "prueba": "quemado",
  "nombre": "PATIO DEL LICEO, CARACAS",
- "nota": "Quemado Nekketsu en el patio techado de un liceo de Caracas, al mediodía. Vista inclinada de 0.35, como la pelea, con la franja de Quemado.ts: FT 214 y PROF 100 (filas 214 a 314), 640 de ancho y la cámara fija. La cancha va de x 40 a 560 con la raya del medio en x 300 y el círculo de 16 x 10; los cementerios rayados van de x 4 a 34 y de 566 a 596. Todo eso lo pinta el arte, así el juego quita su cancha() y los dos letreros (U.E. LICEO EL ÁVILA en 270, 75 y CANTINA en 595, 113), que ya vienen pintados en esos puntos.",
- "largo": 640,
+ "nota": "Quemado Nekketsu en el patio techado de un liceo de Caracas, al mediodía. Vista inclinada de 0.35, como la pelea, con la franja de Quemado.ts: FT 214 y PROF 100 (filas 214 a 314) y la cámara fija. Mide 800: la cancha va en los 640 del medio (margen 80) y a cada lado hay 80 de patio, las gradas a la izquierda y la dirección a la derecha. La cancha va de x 120 a 640 con la raya del medio en x 380 y el círculo de 16 x 10; los cementerios rayados van de x 84 a 114 y de 646 a 676. Todo eso lo pinta el arte, así el juego quita su cancha() y los dos letreros (U.E. LICEO EL ÁVILA en 350, 75 y CANTINA en 675, 113), que ya vienen pintados en esos puntos. En las coordenadas de 640 de Quemado.ts es lo mismo menos 80.",
+ "largo": 800,
+ "margen": 80,
  "franja": {
   "atras": 214,
   "adelante": 314
@@ -22,7 +23,7 @@
  "piso": [
   {
    "x0": 0,
-   "x1": 640,
+   "x1": 800,
    "tipo": "cancha",
    "nombre": "la cancha del patio"
   }
@@ -50,13 +51,13 @@
  "ranuras_deco": [
   {
    "x0": 0,
-   "x1": 640,
+   "x1": 800,
    "capa": "lejos",
    "tema": "avila_mediodia"
   },
   {
    "x0": 0,
-   "x1": 640,
+   "x1": 800,
    "capa": "cerca",
    "tema": "liceo_gradas_cantina"
   }

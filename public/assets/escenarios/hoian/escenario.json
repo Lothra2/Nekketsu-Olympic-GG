@@ -11,14 +11,16 @@
   "atras": 246,
   "adelante": 344
  },
- "largo": 640,
+ "largo": 800,
  "hora": "noche",
  "clima": [
   "despejado"
  ],
  "inclinacion": 0.35,
- "ancho": 674,
- "nota_inclinacion": "vista inclinada: px = x + 0.35 * y (lo del fondo queda a la izquierda). Las capas largas miden 674 px (largo + 0.35 * fondo de la franja). Los objetos ya vienen corridos: corre a los atletas igual.",
+ "ancho": 834,
+ "margen": 80,
+ "nota_margen": "la cancha va de x 80 a 720 (los 640 px del medio) y hay 80 px de escenario a cada lado: centra la cámara en la cancha. Las x del layout ya vienen corridas.",
+ "nota_inclinacion": "vista inclinada: px = x + 0.35 * y (lo del fondo queda a la izquierda). Las capas largas miden 834 px (largo + 0.35 * fondo de la franja). Los objetos ya vienen corridos: corre a los atletas igual.",
  "capas": {
   "cielo": {
    "archivo": "cielo_noche.png",
@@ -72,7 +74,7 @@
     "id": "faroles_cuerda_0",
     "tipo": "faroles_meciendose",
     "capa": "objeto",
-    "x": 19,
+    "x": 99,
     "y": 134,
     "fps": 3,
     "orden": 98.05,
@@ -107,7 +109,7 @@
     "id": "faroles_poste_0",
     "tipo": "faroles_meciendose",
     "capa": "objeto",
-    "x": 4,
+    "x": 84,
     "y": 133,
     "fps": 3,
     "orden": 2.05,
@@ -142,7 +144,7 @@
     "id": "faroles_poste_1",
     "tipo": "faroles_meciendose",
     "capa": "objeto",
-    "x": 604,
+    "x": 684,
     "y": 133,
     "fps": 3,
     "orden": 2.05,
@@ -185,19 +187,19 @@
      {
       "x": 885,
       "y": 72,
-      "w": 674,
+      "w": 834,
       "h": 11
      },
      {
       "x": 0,
       "y": 144,
-      "w": 674,
+      "w": 834,
       "h": 11
      },
      {
-      "x": 675,
+      "x": 835,
       "y": 144,
-      "w": 674,
+      "w": 834,
       "h": 11
      }
     ]
@@ -206,18 +208,18 @@
     "id": "bote_rio",
     "tipo": "botes_con_faroles",
     "capa": "cerca",
-    "x": 54,
+    "x": 134,
     "y": 209,
     "fps": 1,
     "cuadros": [
      {
-      "x": 1350,
+      "x": 1670,
       "y": 144,
       "w": 56,
       "h": 24
      },
      {
-      "x": 1407,
+      "x": 1727,
       "y": 144,
       "w": 56,
       "h": 24
@@ -245,13 +247,13 @@
     },
     "cuadros": [
      {
-      "x": 1464,
+      "x": 1784,
       "y": 144,
       "w": 54,
       "h": 24
      },
      {
-      "x": 1519,
+      "x": 1839,
       "y": 144,
       "w": 54,
       "h": 24
@@ -262,19 +264,19 @@
     "id": "publico_0",
     "tipo": "publico",
     "capa": "cerca",
-    "x": 174,
+    "x": 254,
     "y": 144,
     "fps": 2,
     "cuadros": [
      {
-      "x": 1574,
+      "x": 1894,
       "y": 144,
       "w": 106,
       "h": 30
      },
      {
-      "x": 1681,
-      "y": 144,
+      "x": 0,
+      "y": 175,
       "w": 106,
       "h": 30
      }
@@ -284,20 +286,42 @@
     "id": "publico_1",
     "tipo": "publico",
     "capa": "cerca",
-    "x": 400,
+    "x": 480,
     "y": 144,
     "fps": 2,
     "cuadros": [
      {
-      "x": 1788,
-      "y": 144,
+      "x": 107,
+      "y": 175,
       "w": 116,
       "h": 30
      },
      {
-      "x": 1905,
-      "y": 144,
+      "x": 224,
+      "y": 175,
       "w": 116,
+      "h": 30
+     }
+    ]
+   },
+   {
+    "id": "publico_2",
+    "tipo": "publico",
+    "capa": "cerca",
+    "x": 762,
+    "y": 144,
+    "fps": 2,
+    "cuadros": [
+     {
+      "x": 341,
+      "y": 175,
+      "w": 64,
+      "h": 30
+     },
+     {
+      "x": 406,
+      "y": 175,
+      "w": 64,
       "h": 30
      }
     ]
@@ -431,8 +455,9 @@
   "pais": "vietnam",
   "prueba": "tamawari",
   "nombre": "HỘI AN",
-  "nota": "Tama-wari de noche en la ciudad vieja: dos postes de bambú con su bola de papel arriba, uno por equipo. Misma franja que la pelea (246 a 344).",
-  "largo": 640,
+  "nota": "Tama-wari de noche en la ciudad vieja: dos postes de bambú con su bola de papel arriba, uno por equipo. Misma franja que la pelea (246 a 344). Mide 800: la cancha va en los 640 del medio (margen 80) y a cada lado hay 80 de Hội An, el río con otro bote a la izquierda y la calle con otra casa a la derecha. Los postes del Tama-wari van en x 190 y 610 y los de faroles en 100 y 700. En las coordenadas de 640 del juego es lo mismo menos 80.",
+  "largo": 800,
+  "margen": 80,
   "franja": {
    "atras": 246,
    "adelante": 344
@@ -449,20 +474,20 @@
   "piso": [
    {
     "x0": 0,
-    "x1": 640,
+    "x1": 800,
     "tipo": "baldosa",
     "nombre": "calle de piedra"
    },
    {
     "x0": 0,
-    "x1": 640,
+    "x1": 800,
     "y0": 0,
     "y1": 14,
     "tipo": "acera"
    },
    {
     "x0": 0,
-    "x1": 640,
+    "x1": 800,
     "y0": 84,
     "y1": 98,
     "tipo": "madera",
@@ -475,27 +500,27 @@
   "escaleras": [],
   "postes": [
    {
-    "x": 110,
+    "x": 190,
     "y": 49,
     "alto": 170,
     "tipo": "poste_tamawari",
     "nota": "el de la Familia GG: bambú con su bola de papel arriba"
    },
    {
-    "x": 530,
+    "x": 610,
     "y": 49,
     "alto": 170,
     "tipo": "poste_tamawari",
     "nota": "el del Instituto Nekketsu"
    },
    {
-    "x": 20,
+    "x": 100,
     "y": 2,
     "alto": 110,
     "tipo": "poste_faroles"
    },
    {
-    "x": 620,
+    "x": 700,
     "y": 2,
     "alto": 110,
     "tipo": "poste_faroles"
@@ -504,8 +529,8 @@
   "agua": [],
   "bajo": [
    {
-    "x0": 20,
-    "x1": 620,
+    "x0": 100,
+    "x1": 700,
     "y0": 0,
     "y1": 98,
     "z": 124,
@@ -515,7 +540,7 @@
   ],
   "solidos": [
    {
-    "x": 102,
+    "x": 182,
     "y": 43,
     "w": 16,
     "d": 12,
@@ -523,7 +548,7 @@
     "tipo": "base_poste"
    },
    {
-    "x": 522,
+    "x": 602,
     "y": 43,
     "w": 16,
     "d": 12,
@@ -548,16 +573,16 @@
   "entidades": [
    {
     "tipo": "salida",
-    "x": 60
+    "x": 140
    },
    {
     "tipo": "meta",
-    "x": 580
+    "x": 660
    },
    {
     "tipo": "npc",
     "npc": "bola_tama",
-    "x": 110,
+    "x": 190,
     "y": 49,
     "z": 170,
     "equipo": "familia_gg",
@@ -566,7 +591,7 @@
    {
     "tipo": "npc",
     "npc": "bola_tama",
-    "x": 530,
+    "x": 610,
     "y": 49,
     "z": 170,
     "equipo": "instituto_nekketsu"
@@ -574,38 +599,38 @@
    {
     "tipo": "npc",
     "npc": "vendedora_faroles",
-    "x": 320,
+    "x": 400,
     "y": 4
    },
    {
     "tipo": "objeto",
     "objeto": "abanico",
-    "x": 260,
+    "x": 340,
     "y": 60
    },
    {
     "tipo": "objeto",
     "objeto": "non_la",
-    "x": 380,
+    "x": 460,
     "y": 30
    }
   ],
   "ranuras_deco": [
    {
     "x0": 0,
-    "x1": 640,
+    "x1": 800,
     "capa": "lejos",
     "tema": "rio_thu_bon_puente_japones"
    },
    {
     "x0": 0,
-    "x1": 640,
+    "x1": 800,
     "capa": "cerca",
     "tema": "casas_amarillas_faroles"
    },
    {
     "x0": 0,
-    "x1": 640,
+    "x1": 800,
     "capa": "frente",
     "tema": "velitas_en_el_rio"
    }

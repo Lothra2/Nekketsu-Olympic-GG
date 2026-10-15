@@ -11,15 +11,17 @@
   "atras": 212,
   "adelante": 316
  },
- "largo": 640,
+ "largo": 800,
  "hora": "noche",
  "clima": [
   "despejado",
   "calor"
  ],
  "inclinacion": 0.35,
- "ancho": 676,
- "nota_inclinacion": "vista inclinada: px = x + 0.35 * y (lo del fondo queda a la izquierda). Las capas largas miden 676 px (largo + 0.35 * fondo de la franja). Los objetos ya vienen corridos: corre a los atletas igual.",
+ "ancho": 836,
+ "margen": 80,
+ "nota_margen": "la cancha va de x 80 a 720 (los 640 px del medio) y hay 80 px de escenario a cada lado: centra la cámara en la cancha. Las x del layout ya vienen corridas.",
+ "nota_inclinacion": "vista inclinada: px = x + 0.35 * y (lo del fondo queda a la izquierda). Las capas largas miden 836 px (largo + 0.35 * fondo de la franja). Los objetos ya vienen corridos: corre a los atletas igual.",
  "capas": {
   "cielo": {
    "archivo": "cielo_noche.png",
@@ -73,7 +75,7 @@
     "id": "relampago_catatumbo",
     "tipo": "relampago",
     "capa": "cerca",
-    "x": 466,
+    "x": 526,
     "y": 48,
     "fps": 4,
     "cuadros": [
@@ -131,7 +133,7 @@
     "id": "gaiteros",
     "tipo": "gaiteros",
     "capa": "cerca",
-    "x": 512,
+    "x": 592,
     "y": 170,
     "fps": 3,
     "cuadros": [
@@ -153,7 +155,7 @@
     "id": "publico",
     "tipo": "publico",
     "capa": "cerca",
-    "x": 8,
+    "x": 88,
     "y": 150,
     "fps": 2,
     "cuadros": [
@@ -293,8 +295,9 @@
   "pais": "venezuela",
   "prueba": "basket",
   "nombre": "CANCHA LA CHINITA, MARACAIBO",
-  "nota": "Básquet 3x3 en una cancha de barrio de Maracaibo, de noche. Vista inclinada de 0.35, como la pelea, con la franja de Basket.ts: FT 212 y 104 de fondo (filas 212 a 316). La media cancha va de x 40 a 596, el aro en (566, 52) a 58 de alto y el área de x 496 a 596 entre y 32 y 72. El aro, el tablero y el poste los dibuja el juego, que los rompe con la clavada Nekketsu. Los relámpagos del Catatumbo van en la vida (la nube del fondo) y el juego suma el rayo_catatumbo y el destello de la cámara.",
-  "largo": 640,
+  "nota": "Básquet 3x3 en una cancha de barrio de Maracaibo, de noche. Vista inclinada de 0.35, como la pelea, con la franja de Basket.ts: FT 212 y 104 de fondo (filas 212 a 316). Mide 800: la cancha va en los 640 del medio (margen 80) y a cada lado hay 80 de barrio. La media cancha va de x 120 a 676, el aro en (646, 52) a 58 de alto y el área de x 576 a 676 entre y 32 y 72. En las coordenadas de 640 de Basket.ts es lo mismo menos 80. El aro, el tablero y el poste los dibuja el juego, que los rompe con la clavada Nekketsu. Los relámpagos del Catatumbo van en la vida (la nube del fondo) y el juego suma el rayo_catatumbo y el destello de la cámara.",
+  "largo": 800,
+  "margen": 80,
   "franja": {
    "atras": 212,
    "adelante": 316
@@ -312,7 +315,7 @@
   "piso": [
    {
     "x0": 0,
-    "x1": 640,
+    "x1": 800,
     "tipo": "cancha",
     "nombre": "la cancha de concreto pintada"
    }
@@ -340,7 +343,7 @@
    {
     "tipo": "objeto",
     "objeto": "aro",
-    "x": 566,
+    "x": 646,
     "y": 52,
     "nota": "el aro, el tablero y el poste los dibuja el juego (se rompen con la clavada Nekketsu)"
    }
@@ -348,13 +351,13 @@
   "ranuras_deco": [
    {
     "x0": 0,
-    "x1": 640,
+    "x1": 800,
     "capa": "lejos",
     "tema": "lago_puente_urdaneta_catatumbo"
    },
    {
     "x0": 0,
-    "x1": 640,
+    "x1": 800,
     "capa": "cerca",
     "tema": "malla_muro_gaiteros"
    }

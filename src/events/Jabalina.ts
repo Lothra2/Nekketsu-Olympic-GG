@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { Figura } from '../core/figura';
 import { ajustes } from '../core/nivel';
-import { efecto } from '../core/fx';
+import { efecto, hayFx } from '../core/fx';
 import { chip } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { rotular } from '../core/input';
@@ -213,12 +213,15 @@ export class Jabalina extends EventScene {
       if (this.cur.fig.anim.done && this.vuelo == null && this.st === 'lanza') this.cierra(0);
     }
     this.cur.fig.setPosition(Math.round(this.x), TOP + RUN_Y).setDepth(TOP + RUN_Y);
+    this.rayoTick(dt);
     if (this.vuelo) this.vuela(dt);
   }
 
   /** Le toca al siguiente: sale a la pista. */
   private prepara() {
     this.cur = this.gente2[this.turno];
+    this.rayo?.s.destroy();
+    this.rayo = null;
     this.x = RUN0; this.v = 0; this.boost = 0; this.dist = 0; this.ang = 0; this.holding = false; this.nulo = false; this.skip = false;
     this.cur.fig.row = 'right';
     this.cur.fig.set('javelin', true);
@@ -262,11 +265,50 @@ export class Jabalina extends EventScene {
   /** El relámpago del Catatumbo que le cae a la jabalina en alto, antes de soltarla. */
   private relampago() {
     const f = this.cur.fig;
-    // el rayo del kit sale de la mano hacia un lado: parado, baja del cielo a la punta de la jabalina en alto
-    efecto(this, 'rayo_catatumbo', this.x + (f.left ? -6 : 6), TOP + RUN_Y - 40, { depth: 6000, dura: 450 })?.setAngle(-90);
+    if (hayFx('rayo_cielo')) {
+      // el relámpago que baja del cielo (rayo_cielo) a la punta de la jabalina en alto; lo mueve rayoTick
+      const s = efecto(this, 'rayo_cielo', ...this.puntaJabalina(), { depth: 6000, queda: true });
+      if (s) { s.anims.stop(); s.setFrame(0); this.rayo = { s, t: 0, suelta: -1 }; }
+    } else {
+      // sin él, el rayo del Catatumbo de lado, girado para que baje
+      efecto(this, 'rayo_catatumbo', this.x + (f.left ? -6 : 6), TOP + RUN_Y - 40, { depth: 6000, dura: 450 })?.setAngle(-90);
+    }
     flash(this, 140, 0xc8e0ff);
     this.cameras.main.shake(160, 0.006);
     this.sound.play('critico', { volume: 0.35, rate: 0.7 });
+  }
+
+  /** el rayo_cielo de la lanza del Catatumbo: t desde que bajó, y desde cuándo se apaga (la suelta) */
+  private rayo: { s: Phaser.GameObjects.Sprite; t: number; suelta: number } | null = null;
+
+  /**
+   * La punta de la jabalina en alto: la mano cercana (manos[fila][cuadro][0]) un tercio de la celda más arriba, 16 px
+   * a 48, en pixeles de la escena.
+   */
+  private puntaJabalina(): [number, number] {
+    const f = this.cur.fig, a = f.anim;
+    const m = a.data.manos?.[f.rowIndex]?.[a.frame]?.[0] ?? [6, -30];
+    return [this.x + (f.espejo ? -m[0] : m[0]), TOP + RUN_Y + m[1] - 16 * (f.celda / 48)];
+  }
+
+  /**
+   * El relámpago cuadro a cuadro: baja (0 a 2), carga repitiendo del 3 al 6 mientras la tiene en alto y, al soltar,
+   * el 7 y se apaga. En los cuadros 2 y 3 de javelin_rayo sigue la punta.
+   */
+  private rayoTick(dt: number) {
+    const r = this.rayo;
+    if (!r) return;
+    r.t += dt;
+    const fps = 16;
+    if (r.suelta >= 0) {
+      r.s.setFrame(7);
+      if (r.t - r.suelta > 0.2) { r.s.destroy(); this.rayo = null; }
+      return;
+    }
+    const k = Math.floor(r.t * fps);
+    r.s.setFrame(k < 3 ? k : 3 + ((k - 3) % 4));
+    const f = this.cur.fig.anim;
+    if (f.name === 'javelin_rayo' && f.frame >= 2 && f.frame <= 3) r.s.setPosition(...this.puntaJabalina().map(Math.round) as [number, number]);
   }
 
   private suelta([px, py]: [number, number]) {
@@ -280,7 +322,12 @@ export class Jabalina extends EventScene {
     this.vuelo = { x, z, vx: Math.cos(a) * fuerza, vz: Math.sin(a) * fuerza, img, sombra };
     if (this.catatumbo) {
       // el rayo del Catatumbo cae sobre la lanza (si no le cayó ya en la mano) y la lanza va en llamas
-      if (this.cur.fig.anim.name !== 'javelin_rayo') {
+      if (this.rayo) { this.rayo.suelta = this.rayo.t; }
+      else if (hayFx('rayo_cielo')) {
+        // sin la carga en alto, el relámpago cae sobre la lanza recién soltada
+        efecto(this, 'rayo_cielo', Math.round(x), Math.round(TOP + RUN_Y - z), { depth: 6000 });
+        flash(this, 120);
+      } else {
         efecto(this, 'rayo_catatumbo', x + 30, TOP - 40, { depth: 6000 });
         flash(this, 120);
       }

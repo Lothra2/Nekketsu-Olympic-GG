@@ -46,7 +46,8 @@
       "stagger",
       "laugh",
       "point",
-      "guard"
+      "guard",
+      "traffic_dodge"
     ],
     "ngg_golpe": [
       "jab",
@@ -81,7 +82,14 @@
       "knee_grab",
       "break_free",
       "umbrella_block",
-      "fan_gust"
+      "fan_gust",
+      "play_drum",
+      "bike_charge",
+      "cap_bat_power",
+      "chair_spin_throw",
+      "slipper_storm",
+      "comb_hair",
+      "bike_charged"
     ],
     "atletismo": [
       "idle",
@@ -125,7 +133,8 @@
         "serve",
         "vb_dive",
         "vb_ready",
-        "spike_fuego"
+        "spike_fuego",
+        "beach_run"
       ],
       "sin_props": true
     },
@@ -184,7 +193,8 @@
         "bat_nekketsu",
         "cap_pitch",
         "dodge_throw",
-        "dodge_hit"
+        "dodge_hit",
+        "dodge_catch"
       ],
       "sin_props": true
     },
@@ -297,7 +307,13 @@
     "burla_rong_sai_gon": "burla_dragon",
     "burla_rolos_de_chapinero": "burla_risa_tapada",
     "burla_panas_de_caracas": "burla_salsa",
-    "burla_maracuchos_del_lago": "burla_hombros"
+    "burla_maracuchos_del_lago": "burla_hombros",
+    "tecnica_familia_gg": "slipper_storm",
+    "tecnica_instituto_nekketsu": "comb_hair",
+    "tecnica_rong_sai_gon": "chair_spin_throw",
+    "tecnica_rolos_de_chapinero": "bike_charge",
+    "tecnica_panas_de_caracas": "cap_bat_power",
+    "tecnica_maracuchos_del_lago": "play_drum"
   },
   "pruebas": {
     "pelea": [

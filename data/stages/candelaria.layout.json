@@ -4,8 +4,9 @@
  "prueba": "tejo",
  "vista": "lado",
  "nombre": "CANCHA DE TEJO LA CANDELARIA",
- "nota": "Tejo de lado en una cancha techada de La Candelaria, Bogotá, en la tarde nublada. El piso de Tejo.ts está en la fila 300: la franja va de 286 a 310. Los que esperan se paran en la fila 296 (y 10) y el que lanza en la 300 (y 14), detrás de la raya de x 104. La caja de greda va de x 534 a 584, como la que dibuja el juego.",
- "largo": 640,
+ "nota": "Tejo de lado en una cancha techada de La Candelaria, Bogotá, en la tarde nublada. El piso de Tejo.ts está en la fila 300: la franja va de 286 a 310. Mide 800: la cancha va en los 640 del medio (margen 80) y a cada lado hay 80 más de la cancha techada, la banca de los de la pola a la izquierda y el portón de la calle a la derecha. Los que esperan se paran en la fila 296 (y 10) y el que lanza en la 300 (y 14), detrás de la raya de x 184. La caja de greda va de x 614 a 664, como la que dibuja el juego. En las coordenadas de 640 de Tejo.ts es lo mismo menos 80 (la raya en 104 y la caja de 534 a 584).",
+ "largo": 800,
+ "margen": 80,
  "franja": {
   "atras": 286,
   "adelante": 310
@@ -23,7 +24,7 @@
  "piso": [
   {
    "x0": 0,
-   "x1": 640,
+   "x1": 800,
    "tipo": "tierra",
    "nombre": "la cancha de tierra"
   }
@@ -37,13 +38,13 @@
  "bajo": [],
  "solidos": [
   {
-   "x": 534,
+   "x": 614,
    "y": 8,
    "w": 50,
    "d": 6,
    "z": 52,
    "tipo": "caja_greda",
-   "nota": "la caja de tejo vista de lado: la cara de greda sube de (534, 300) a (582, 250) y el palo de atrás llega a la fila 248, como la de Tejo.ts. El bocín, en (548, 280)"
+   "nota": "la caja de tejo vista de lado: la cara de greda sube de (614, 300) a (662, 250) y el palo de atrás llega a la fila 248, como la de Tejo.ts (de (534, 300) a (582, 250) en sus x de 640). El bocín, en (628, 280), que en Tejo.ts es (548, 280)"
   }
  ],
  "carriles": [
@@ -58,21 +59,21 @@
   {
    "tipo": "objeto",
    "objeto": "raya_tejo",
-   "x": 104,
+   "x": 184,
    "y": 14,
-   "nota": "la raya de lanzamiento (LINEA de Tejo.ts)"
+   "nota": "la raya de lanzamiento (LINEA 104 de Tejo.ts más el margen)"
   }
  ],
  "ranuras_deco": [
   {
    "x0": 0,
-   "x1": 640,
+   "x1": 800,
    "capa": "lejos",
    "tema": "monserrate_casas_coloniales"
   },
   {
    "x0": 0,
-   "x1": 640,
+   "x1": 800,
    "capa": "cerca",
    "tema": "cancha_techada_madera"
   }

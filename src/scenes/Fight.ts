@@ -12,7 +12,7 @@ import { letreroGrande, MarcadorTV, hayUi, pieza } from '../core/interfaz';
 
 /** El reloj del marcador: el de TV del kit o el texto de siempre. */
 interface Reloj { setText(s: string): Reloj; setTint(c: number): Reloj }
-import { INFO } from './Select';
+import { nombreTecnica } from './Select';
 import { nuestros, ellos, lado, equipos, conJugador, victoria } from '../core/equipos';
 import { cargarAtletas, packsDe } from '../core/carga';
 import { PUNTOS, type Gira } from '../events/base';
@@ -86,7 +86,11 @@ export class Fight extends Phaser.Scene implements World {
   private thorFan: Figura | null = null;
   private thorRun: { f: Figura; x: number; owner: Actor; hit: Set<Actor>; dir: number } | null = null;
   /** las técnicas en curso; la tijera del vovinam lleva a su rival (`v`), que cae cuadro a cuadro con ella */
-  private specials = new Map<Actor, { kind: string; n: number; t: number; v?: Actor }>();
+  private specials = new Map<Actor, { kind: string; n: number; t: number; v?: Actor; arma?: string; sueltas?: number; objetivo?: Actor }>();
+  /** el aura de fuego de cada uno mientras hace su técnica */
+  private auras = new Map<Actor, Phaser.GameObjects.Sprite>();
+  /** el arma en la mano durante una técnica de equipo (el furro, el palo, la silla, la chancleta) */
+  private tecArma: Phaser.GameObjects.Image | null = null;
   private fullMeter = new Set<Actor>();
   private ui!: Phaser.GameObjects.Layer;
   private uiCam!: Phaser.Cameras.Scene2D.Camera;
@@ -139,6 +143,7 @@ export class Fight extends Phaser.Scene implements World {
     this.items = [];
     this.brains.clear();
     this.specials.clear();
+    this.auras.clear();
     this.fullMeter.clear();
     this.stop = 0; this.cut = 0; this.slow = 0;
     this.phase = 'intro';
@@ -793,7 +798,11 @@ export class Fight extends Phaser.Scene implements World {
     this.cut = 1.0;
     // el aura Nekketsu detrás de quien lanza la técnica
     const aura = efecto(this, 'aura_nekketsu', this.px(a.x, a.y), FLOOR_TOP + a.y, { depth: FLOOR_TOP + a.y - 0.5, queda: true });
-    if (aura) this.time.delayedCall(1700, () => this.tweens.add({ targets: aura, alpha: 0, duration: 250, onComplete: () => aura.destroy() }));
+    if (aura) {
+      // el aura va con quien hace la técnica (si avanza, no se queda una llama sola atrás)
+      this.auras.set(a, aura);
+      this.time.delayedCall(1700, () => this.tweens.add({ targets: aura, alpha: 0, duration: 250, onComplete: () => { aura.destroy(); if (this.auras.get(a) === aura) this.auras.delete(a); } }));
+    }
     if (a.id === 'alana') this.sfx('thor_rescate', 0.6);
     const side = a.team === 0 ? 1 : -1;
     const dark = this.uiAdd(this.add.rectangle(320, 180, 800, 360, 0x000000, 0.65).setDepth(8600));
@@ -801,7 +810,7 @@ export class Fight extends Phaser.Scene implements World {
     const lines = this.uiAdd(speedLines(this, 8602));
     const por = this.uiAdd(this.add.image(320 - side * 400, 150, `retratos:${a.id}`, 'grande_enojo').setDepth(8603));
     this.tweens.add({ targets: por, x: 320 - side * 160, duration: 220, ease: 'Back.out' });
-    const name = this.uiAdd(txt(this, 320 + side * 90, 136, (this.judo && a.tiene('vovinam_scissor') ? '¡TIJERA VOVINAM!' : INFO[a.id]?.tecnica ?? '¡TÉCNICA!'), 'fuente_titulo', 2).setDepth(8604).setScale(5).setAlpha(0));
+    const name = this.uiAdd(txt(this, 320 + side * 90, 136, (this.judo && a.tiene('vovinam_scissor') ? '¡TIJERA VOVINAM!' : nombreTecnica(a.id)), 'fuente_titulo', 2).setDepth(8604).setScale(5).setAlpha(0));
     this.tweens.add({ targets: name, scale: 2, alpha: 1, duration: 200, delay: 150 });
     const who = this.uiAdd(txt(this, 320 + side * 90, 172, a.nombre, 'fuente_ui', 2).setDepth(8604).setTint(0xffe080));
     this.cutObjs = [dark, band, lines, por, name, who];
@@ -818,6 +827,9 @@ export class Fight extends Phaser.Scene implements World {
     // en el tatami, con la barra llena, la tijera del vovinam (lote B7H8) contra el rival más cerca
     const v = this.judo && a.tiene('vovinam_scissor') ? this.rivalTijera(a) : null;
     if (v) { this.tijera(a, v); return; }
+    // la técnica de su equipo (lote B7), si el kit se la trae: `tecnica_<equipo>`, igual que la burla
+    const eq = (kit().atletas[a.id] as { equipo?: string } | undefined)?.equipo;
+    if (!this.judo && eq && a.tiene(`tecnica_${eq}`)) { this.tecnicaEquipo(a, eq); return; }
     const kind = TECNICA[a.id] ?? 'mach';
     this.specials.set(a, { kind, n: 0, t: 0 });
     a.hitThisAttack.clear();
@@ -835,6 +847,131 @@ export class Fight extends Phaser.Scene implements World {
       this.thorRun = { f, x, owner: a, hit: new Set(), dir };
       if (this.thorFan) this.thorFan.setVisible(false);
       this.sfx('ladrido', 0.7);
+    }
+  }
+
+  /**
+   * Arranca la técnica de equipo. Cada una tiene su arma y su golpe: el Furrazo y el Batazo de Jonrón pegan en el
+   * impacto con el furro o el palo, la Silla Voladora y el Chancletazo lanzan en cada suelta, el Copetazo embiste con
+   * la cabeza y la Ciclovía arranca junto con su rival (`bike_charged`), que sale volando.
+   */
+  private tecnicaEquipo(a: Actor, eq: string) {
+    const anim = `tecnica_${eq}`;
+    const ARMA: Record<string, string> = { maracuchos_del_lago: 'furro', panas_de_caracas: 'broomstick', rong_sai_gon: 'silla_plastica', familia_gg: 'chancleta' };
+    a.hitThisAttack.clear();
+    a.play(anim, true);
+    const s: { kind: string; n: number; t: number; v?: Actor; arma?: string; sueltas?: number; objetivo?: Actor } = { kind: 'equipo', n: 0, t: 0, arma: ARMA[eq], sueltas: 0 };
+    // las que pegan en el sitio (el furro, el palo, el copete) se le acercan al rival mientras preparan el golpe
+    if (['maracuchos_del_lago', 'panas_de_caracas', 'instituto_nekketsu'].includes(eq)) {
+      const o = this.rivalTijera(a);
+      if (o) { s.objetivo = o; a.left = o.x < a.x; }
+    }
+    // la ciclovía: el rival de pie delante, a media celda del punto del impacto, y arrancan juntos
+    if (eq === 'rolos_de_chapinero') {
+      const v = this.rivalTijera(a);
+      if (v && v.tiene('bike_charged')) {
+        v.soltar(); v.vx = v.vy = v.vz = 0; v.z = 0;
+        a.left = v.x < a.x;
+        const d = a.fig.anim.data, imp = a.fig.cuadroDe('impacto');
+        const p = d.eventos?.find((e) => e.tipo === 'impacto')?.punto?.[a.fig.rowIndex] ?? [20, -20];
+        const avance = imp >= 0 ? d.desplazamiento?.[imp] ?? 0 : 0;
+        v.x = Phaser.Math.Clamp(a.x + a.dir * (avance + p[0] + a.fig.celda / 2), XMIN, XMAX);
+        v.y = a.y;
+        v.left = !a.left;
+        v.dropAll();
+        v.setSt('frozen', 'bike_charged');
+        s.v = v;
+      }
+    }
+    this.specials.set(a, s);
+  }
+
+  /** Lo que vuela en cada suelta de la técnica (la silla, cada chancleta), desde su punto. */
+  private lanzarDeTecnica(a: Actor, kind: string, punto: [number, number] | undefined, fuerte: boolean) {
+    const [px, py] = punto ?? [10, -24];
+    const it = new Item(this, kind, a.x + (a.fig.espejo ? -px : px), a.y, Math.max(8, -py));
+    it.fuerte = fuerte;
+    it.launch(a, it.x, a.y, it.z, a.dir * (kind === 'silla_plastica' ? 260 : 320), kind === 'silla_plastica' ? 90 : 60);
+    this.items.push(it);
+    this.sfx('esquiva', 0.5);
+    // lo lanzado por la técnica no se queda tirado en la azotea
+    this.time.delayedCall(2600, () => { if (it.st === 'floor' || it.st === 'falling') { it.x = -9999; it.st = 'floor'; } });
+  }
+
+  /** La técnica de equipo cuadro a cuadro. */
+  private tecnicaTick(a: Actor, s: { kind: string; n: number; t: number; v?: Actor; arma?: string; sueltas?: number; objetivo?: Actor }, dt: number, done: () => void) {
+    const eq = a.fig.anim.name.replace('tecnica_', '');
+    const before = a.fig.anim.frame;
+    const ev = a.fig.step(dt);
+    const now = a.fig.anim.frame;
+    // avanza lo que dice su desplazamiento (la bici, el copetazo)
+    const d = a.fig.anim.data.desplazamiento ?? [];
+    if (now !== before) a.x = Phaser.Math.Clamp(a.x + a.dir * ((d[now] ?? 0) - (d[before] ?? 0)), XMIN, XMAX);
+    // el arma en la mano, con el dato `arma` de cada cuadro (espejada en los cuadros girados de la silla)
+    const w = s.arma ? a.fig.arma() : null;
+    if (w && s.arma) {
+      if (!this.tecArma || !this.tecArma.active) this.tecArma = this.add.image(0, 0, 'armas', `${s.arma}_mano_0`).setOrigin(0.5, 0.5);
+      this.tecArma.setVisible(true).setFrame(`${s.arma}_mano_${w.k}`).setFlipX(a.fig.espejo).setPosition(Math.round(w.x), Math.round(w.y)).setDepth(a.fig.depth + (w.detras ? -0.2 : 0.2));
+    } else this.tecArma?.setVisible(false);
+    const v = s.v;
+    if (v && v.fig.anim.name === 'bike_charged') { v.fig.anim.pos = a.fig.anim.pos; v.fig.refresh(); }
+    const imp = a.fig.cuadroDe('impacto');
+    // antes del impacto, se acerca lo justo para que el golpe le llegue (el punto del impacto, más lo que le falta avanzar)
+    const o = s.objetivo;
+    if (o && imp >= 0 && now < imp && o.alive) {
+      const p = a.fig.anim.data.eventos?.find((e) => e.tipo === 'impacto')?.punto?.[a.fig.rowIndex] ?? [20, -20];
+      const falta = (d[imp] ?? 0) - (d[now] ?? 0);
+      const quiero = o.x - a.dir * (p[0] + falta + 4);
+      const paso = 260 * dt;
+      a.x = Phaser.Math.Clamp(a.x + Phaser.Math.Clamp(quiero - a.x, -paso, paso), XMIN, XMAX);
+      a.y += Phaser.Math.Clamp(o.y - a.y, -paso * 0.6, paso * 0.6);
+    }
+    // la ciclovía: después del impacto el rival sale volando hacia atrás hasta que cae
+    if (v && imp >= 0 && now >= imp && now < 7) v.x = Phaser.Math.Clamp(v.x + a.dir * 170 * dt, XMIN, XMAX);
+    for (const e of ev) {
+      if (e.tipo === 'suelta' && s.arma) {
+        s.sueltas = (s.sueltas ?? 0) + 1;
+        // la silla y la última chancleta tumban
+        this.lanzarDeTecnica(a, s.arma, e.punto?.[a.fig.rowIndex], s.arma === 'silla_plastica' || s.sueltas >= 3);
+        if (s.sueltas >= 3 || s.arma === 'silla_plastica') this.tecArma?.setVisible(false);
+      }
+      if (e.tipo !== 'impacto') continue;
+      a.hitThisAttack.clear();
+      const punto = e.punto;
+      if (eq === 'maracuchos_del_lago') {
+        // el Furrazo: el retumbo tumba a todos los de cerca
+        efecto(this, 'onda_furro', this.px(a.x, a.y), FLOOR_TOP + a.y, { depth: FLOOR_TOP + a.y + 0.3 });
+        this.sfx('jefe_pisoton', 0.8);
+        this.shake(320, 0.016);
+        for (const o of this.actors) if (o.team !== a.team && o.canBeHit() && Math.abs(o.x - a.x) < 80 && Math.abs(o.y - a.y) < 26) o.takeHit(a, { dmg: 16, kd: true, push: 160, launch: 190 }, o.x >= a.x ? 1 : -1);
+      } else if (eq === 'panas_de_caracas') {
+        // el Batazo de Jonrón: lo manda a volar
+        a.resolveHit(punto, { dmg: 18, kd: true, push: 230, launch: 330 }, 18);
+        this.sfx('critico', 0.7);
+        chip.blip(660, 0.25, 'sq25', 0.2, 1760);
+        this.shake(260, 0.014);
+        void this.banner('¡JONRÓN!', 'fuente_titulo', 2, 700);
+      } else if (eq === 'instituto_nekketsu') {
+        // el Copetazo: el cabezazo
+        a.resolveHit(punto, { dmg: 16, kd: true, push: 210, launch: 160 }, 16);
+        this.shake(200, 0.012);
+      } else if (eq === 'rolos_de_chapinero') {
+        if (v) {
+          const dmg = 18;
+          v.hp = Math.max(1, v.hp - dmg);
+          this.number(v.x, v.y, dmg);
+          this.spark(v.x - a.dir * 4, v.y, 22, true);
+          this.onHit(a, v, dmg, true);
+        } else a.resolveHit(punto, { dmg: 18, kd: true, push: 220, launch: 160 }, 18);
+        this.shake(240, 0.014);
+      }
+    }
+    if (v && ev.some((e) => e.tipo === 'aterriza')) this.dust(v.x, v.y);
+    if (a.fig.anim.done) {
+      this.tecArma?.setVisible(false);
+      // el de la ciclovía queda en el piso, sin el rebote de la calle
+      if (v && v.st === 'frozen') { v.knockdown(a.dir, 20, 0); v.bounces = 1; }
+      done();
     }
   }
 
@@ -867,10 +1004,14 @@ export class Fight extends Phaser.Scene implements World {
 
   private specialTick(a: Actor, dt: number) {
     const s = this.specials.get(a)!;
+    const au = this.auras.get(a);
+    if (au?.active) au.setPosition(Math.round(this.px(a.x, a.y)), FLOOR_TOP + a.y).setDepth(FLOOR_TOP + a.y - 0.5);
     s.t += dt;
     const done = () => { this.specials.delete(a); a.vx = 0; a.vz = 0; a.z = 0; a.setSt('idle', 'idle'); a.invul = 0.4; };
     const hit = (def: AttackDef, radius = 8) => a.resolveHit(a.fig.anim.data.eventos?.find((e) => e.tipo === 'impacto')?.punto, def, radius);
-    if (s.kind === 'tijera' && s.v) {
+    if (s.kind === 'equipo') {
+      this.tecnicaTick(a, s, dt, done);
+    } else if (s.kind === 'tijera' && s.v) {
       const v = s.v;
       const before = a.fig.anim.frame;
       const ev = a.fig.step(dt);

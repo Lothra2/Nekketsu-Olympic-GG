@@ -2,7 +2,7 @@
  "hora": "noche",
  "luces": [
   {
-   "x": 82,
+   "x": 162,
    "y": 46,
    "color": "#ffb43a",
    "radio": 80,
@@ -11,7 +11,7 @@
    "nota": "el bombillo de sodio del poste, que alumbra la cancha"
   },
   {
-   "x": 104,
+   "x": 184,
    "y": 46,
    "color": "#ffb43a",
    "radio": 80,
@@ -20,7 +20,7 @@
    "nota": "el bombillo de sodio del poste, que alumbra la cancha"
   },
   {
-   "x": 322,
+   "x": 402,
    "y": 40,
    "color": "#ffb43a",
    "radio": 80,
@@ -29,7 +29,7 @@
    "nota": "el bombillo de sodio del poste, que alumbra la cancha"
   },
   {
-   "x": 344,
+   "x": 424,
    "y": 40,
    "color": "#ffb43a",
    "radio": 80,
@@ -38,7 +38,7 @@
    "nota": "el bombillo de sodio del poste, que alumbra la cancha"
   },
   {
-   "x": 586,
+   "x": 666,
    "y": 46,
    "color": "#ffb43a",
    "radio": 80,
@@ -47,7 +47,7 @@
    "nota": "el bombillo de sodio del poste, que alumbra la cancha"
   },
   {
-   "x": 608,
+   "x": 688,
    "y": 46,
    "color": "#ffb43a",
    "radio": 80,
@@ -56,13 +56,31 @@
    "nota": "el bombillo de sodio del poste, que alumbra la cancha"
   },
   {
-   "x": 566,
+   "x": 626,
    "y": 92,
    "color": "#e48ad8",
    "radio": 70,
    "parpadeo": 2,
    "encendida": true,
    "nota": "el resplandor del relámpago del Catatumbo en la nube: prende y apaga con su vida"
+  },
+  {
+   "x": 56,
+   "y": 58,
+   "color": "#ffb43a",
+   "radio": 60,
+   "latido": 0.05,
+   "encendida": true,
+   "nota": "el poste de alumbrado de la calle, afuera de la malla"
+  },
+  {
+   "x": 782,
+   "y": 150,
+   "color": "#ffd84a",
+   "radio": 36,
+   "latido": 0.08,
+   "encendida": true,
+   "nota": "el bombillo pelado del kiosco de los patacones"
   }
  ]
 }

@@ -286,6 +286,8 @@ export class Quemado extends EventScene {
     if (j.st === 'atrapa') {
       j.catchT -= dt;
       j.fig.step(dt);
+      // con los brazos adelante esperando el balón: no abraza (el cuadro 2) hasta que le llega
+      if (j.fig.anim.name === 'dodge_catch' && this.bola.dueño !== j && j.fig.anim.pos > 1.9) { j.fig.anim.pos = 1.9; j.fig.refresh(); }
       if (j.catchT <= 0) { j.st = 'libre'; j.catchCool = j.team === 0 ? 0.25 : 0.35; }
       return;
     }
@@ -493,8 +495,8 @@ export class Quemado extends EventScene {
     // la ventana para atrapar: la tuya más ancha en PASEO y NORMAL; la máquina, cortica
     const n = ajustes().nombre;
     j.catchT = j.team === 1 ? 0.28 : n === 'PASEO' ? 0.45 : n === 'NORMAL' ? 0.38 : 0.34;
-    // la atrapada de béisbol del kit (los brazos al balón) o la guardia de la pelea
-    j.fig.set(j.fig.anim.has('catch') ? 'catch' : 'fight_block', true);
+    // la atrapada del quemado (lote B7: agachado, los brazos adelante), la de béisbol o la guardia de la pelea
+    j.fig.set(j.fig.anim.has('dodge_catch') ? 'dodge_catch' : j.fig.anim.has('catch') ? 'catch' : 'fight_block', true);
   }
 
   private moverBola(dt: number) {
@@ -577,6 +579,12 @@ export class Quemado extends EventScene {
       o.empuje = -o.dir * 50;
       this.sound.play('bloqueo', { volume: 0.5 });
       this.letrero(o, '¡ATRAPADO!', 0x8aff8a);
+      // lo abraza contra el pecho desde el atrapa y se endereza; mientras, no se mueve
+      if (o.fig.anim.has('dodge_catch')) {
+        o.fig.contacto('dodge_catch', 'catch');
+        o.st = 'atrapa';
+        o.catchT = Math.max(0.1, (o.fig.anim.data.cuadros - o.fig.anim.pos) / o.fig.anim.data.fps);
+      }
       if (o.team === 0 && this.d.practica) this.atrapadas++;
       if (o.team === 0) chip.blip(1320, 0.08, 'sq25', 0.2, 1760);
     }
@@ -668,7 +676,7 @@ export class Quemado extends EventScene {
       s.setFrame('balon_goma_quieto_0').setOrigin(0.5, 0.5).setPosition(Math.round(this.sx(o.x, o.y) + hx), Math.round(FT + o.y - o.z + hy)).setDepth(FT + o.y + 0.3);
       // recién atrapado, contra el pecho donde lo pone la atrapada del kit
       // y en el tiro del kit, donde lo lleva la mano (detrás de la cabeza en el impulso)
-      const pe = a.name === 'catch' || a.name === 'dodge_throw' ? o.fig.pelota() : null;
+      const pe = a.name === 'catch' || a.name === 'dodge_catch' || a.name === 'dodge_throw' ? o.fig.pelota() : null;
       if (pe) s.setPosition(Math.round(pe.x), Math.round(pe.y)).setDepth(FT + o.y + (pe.detras ? -0.3 : 0.3));
       b.sombra.setVisible(false);
     } else {

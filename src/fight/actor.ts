@@ -925,6 +925,8 @@ export class Item {
   t = 0;
   returned = false;
   hit = new Set<Actor>();
+  /** lanzado por una técnica de equipo (la silla, la última chancleta): pega más y tumba */
+  fuerte = false;
 
   get ft() { return this.w.floorTop ?? FLOOR_TOP; }
 
@@ -975,8 +977,8 @@ export class Item {
           if (v.team === this.thrower.team || this.hit.has(v) || !v.canBeHit()) continue;
           if (Math.abs(v.y - this.y) > 14 || Math.abs(v.x - this.x) > 16 || this.z > 50) continue;
           this.hit.add(v);
-          const dmg = PESO_DMG[this.def.peso];
-          v.takeHit(this.thrower, { dmg, kd: this.def.peso !== 'liviano', push: 120, launch: 140 }, Math.sign(this.vx) || 1);
+          const dmg = PESO_DMG[this.def.peso] + (this.fuerte ? 6 : 0);
+          v.takeHit(this.thrower, { dmg, kd: this.fuerte || this.def.peso !== 'liviano', push: this.fuerte ? 170 : 120, launch: this.fuerte ? 200 : 140 }, Math.sign(this.vx) || 1);
           this.w.spark(v.x, v.y, Math.max(10, this.z), this.def.peso !== 'liviano');
           this.w.hitstop(0.06);
           if (!this.kind.startsWith('chancleta')) { this.vx = -this.vx * 0.3; this.vz = 80; }

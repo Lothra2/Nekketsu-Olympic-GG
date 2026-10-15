@@ -24,7 +24,28 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 | 14 | B6, B7, C3, E6 | Tradicionales, técnicas, secretos y Barrio Nekketsu | E1 | pendiente | |
 | 15 | J | Estudio | Todo | pendiente | |
 
+## Lotes recientes, ya en el juego
+
+| Lote | Qué | Estado | PR |
+|---|---|---|---|
+| G1H1 | Interfaz retro (botones, barras, banners, marcador de TV, diálogo) y audio H1 | en el juego | [pixel_forja#13](https://github.com/Lothra2/pixel_forja/pull/13) |
+| D2 | Vehículos en la vista inclinada (ferry, motos, xích lô, jacintos, fruta) | en el juego | [pixel_forja#20](https://github.com/Lothra2/pixel_forja/pull/20) |
+| H6, H7 | Ambientes de cada mundo y acorde de victoria de cada equipo | en el juego | [#38](https://github.com/Lothra2/pixel_forja/pull/38), [#39](https://github.com/Lothra2/pixel_forja/pull/39) |
+| B4B6, B4B6 bis | vault_fail, bateo, dodge_jump, tejo_throw y el judo completo | en el juego | [#40](https://github.com/Lothra2/pixel_forja/pull/40), [#41](https://github.com/Lothra2/pixel_forja/pull/41) |
+| B7H8 | 13 súper golpes y 3 ambientes | en el juego | [#42](https://github.com/Lothra2/pixel_forja/pull/42) |
+| B7 | Técnicas de equipo, dodge_catch, beach_run, traffic_dodge | en el juego | [#43](https://github.com/Lothra2/pixel_forja/pull/43) |
+| E4 | Las 8 canchas a 800 de ancho | en el juego | [#44](https://github.com/Lothra2/pixel_forja/pull/44) |
+| D3 | Motos y xích lô a escala de atleta | en el juego | [#45](https://github.com/Lothra2/pixel_forja/pull/45) |
+| rayo_cielo | El relámpago vertical | en el juego | [#46](https://github.com/Lothra2/pixel_forja/pull/46) |
+
 ## Lo último del lado del juego
+- **B7, E4, D3 y rayo_cielo en el juego** (pixel_forja `main` en 884c143: #43 a #46). Estaban como PR abiertos; el juego los probó juntos (526 de 526) y los unió en orden.
+  - **E4:** los 8 layouts de las canchas (Margarita, Đà Lạt, Tao Đàn, Maracaibo, Barranquilla, el liceo, la Candelaria y Hội An) a 800 con `margen` 80. `pintarEscenario` corre todo lo pintado el margen y la paralaje va con `scrollX + margen`. La cámara va de -80 a 720, sin el acercamiento de antes, centrada en la cancha de 640 en las pruebas que no siguen la pelota. El Tama-wari resta el margen a sus postes y ahora también monta el arte con la cámara y la paralaje.
+  - **D3:** motos y xích lô a escala 1. El atropello usa la huella (`|dx| < w/2`, `|dy| < d/2 + 4`) y la sombra es del ancho de la huella.
+  - **rayo_cielo:** en la jabalina baja a la punta (la mano cercana 16 px más arriba a 48) en los cuadros 2 y 3 de `javelin_rayo`, carga repitiendo del 3 al 6 y se apaga en el 7 al soltar. En Maracaibo cae al aro o al tablero, con el destello en el cuadro 2 y la x corrida unos pixeles cada vez.
+  - **B7:** la técnica de cada equipo con la barra llena (`tecnica_<equipo>`, como la burla), con el arma en la mano por su dato `arma`, lo que vuela en cada `suelta` (la silla y la última chancleta tumban), el golpe en el `impacto` y la ciclovía con `bike_charged` arrancando junto. El Furrazo, el Batazo de Jonrón y el Copetazo se acercan al rival mientras preparan el golpe. `dodge_catch` en el Quemado (espera con los brazos adelante y abraza en el `atrapa`), `beach_run` en el Vóley con polvo de arena en cada `paso`, y `traffic_dodge` en el Cross cuando una moto pasa rozando.
+  - **Lo que se ve raro en el arte:** nada que bloquee. Ver la entrega del juego al final de esta tanda.
+
 
 - **Los nueve lotes ya están en el juego** (pixel_forja `main` en 8eda3a1: #26 a #34). El juego mismo unió los PR en orden y resolvió los choques (alias junto a los packs en forma de objeto, `frase` junto a `bote` y `atrapa`, las cuentas de PNG). Antes de unir, la suite completa pasó sobre el resultado final: 428 de 428. El submódulo apunta a main y el kit y los escenarios salen de ahí.
   - **Escenarios (E3c, E4a, E5):** 15 con arte, todos con 9 de 9 pruebas. Tama-wari en `hoian` (el poste del arte, la bola en el gancho), el judo en `judo_hanoi`, Đá cầu en `tao_dan`, el tejo en `candelaria` (la caja y el bocín del arte, las mechas y los tejos encima en `PISO + 1`), Vóley en `margarita`, Tenis en `dalat`, Fútbol en `barranquilla` (los arcos del arte en dos piezas, sin los de código) y Básquet en `cancha_maracaibo` (sin el relleno azul y naranja; el tablero y el relámpago siguen siendo del juego). Sin el arte, cada prueba vuelve a su fondo pintado por código.
@@ -32,7 +53,7 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
   - **Burlas (C5):** en la pelea, el Instituto se burla con `burla_instituto_nekketsu` cuando te tumba y la Familia que maneja la máquina con `burla_familia_gg` cuando tumba a uno del Instituto. El globo sale en el evento `frase`, con la frase del equipo.
   - **Perro y gato (C7c):** en la Comuna 13 los tres perros dormidos son `perro_calle_1`: al pisarlo, `wake`, y embiste con `pounce` hacia el que lo pisó; tumba en el `impacto` si alcanza. `gato_1` espera al pie de techos bajos dentro de `muro_min` y `muro_max` y, si alguien se acerca, sube con `jump_wall` y `subida * alto`.
   - **Audio (H2 y H3):** el tema de cada mundo con `bucle()` (Saigón, Comuna 13, Hội An, Bogotá, Margarita, Đà Lạt, Barranquilla, Maracaibo, Caracas en Chapita, Quemado y el 1 contra 1, y el tema del Instituto en el 4 contra 4), y `gallo`, `aleteo`, `mecha_tejo`, `toque_cau`, `caida_tatami`, `pitazo_largo`, `red_voley`, `rebote_balon`, `aro_basket`, `aro_fallo`, `chapa` y `chancleta`. Los sintetizados de antes quedan de respaldo.
-  - **Todavía sin conectar:** los vehículos de D2 y los paneles de interfaz de G1.
+  - **Todavía sin conectar:** los vehículos de D2 y los paneles de interfaz de G1 (ya conectados después: ver la tabla de lotes recientes).
 
 - **H5 ([pixel_forja#37](https://github.com/Lothra2/pixel_forja/pull/37)) en el juego** (main en 5a2e391, suite 458 de 458): `salida_natacion` en el ¡YA! de Natación, `chapuzon` en el `impacto` del `dive`, `brazada` en el evento `brazada` de los nados, solo de la persona (o, si ya llegó, del que va más cerca de la cámara), y `garrocha` en el clavado de Azoteas. Probado: los cuatro suenan.
 

@@ -2,7 +2,7 @@
  "hora": "manana",
  "luces": [
   {
-   "x": 120,
+   "x": 200,
    "y": 220,
    "color": "#f0d066",
    "radio": 80,
@@ -11,7 +11,7 @@
    "nota": "el sol de la mañana que entra entre los pinos y la neblina"
   },
   {
-   "x": 470,
+   "x": 550,
    "y": 230,
    "color": "#f0d066",
    "radio": 70,

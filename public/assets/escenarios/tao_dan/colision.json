@@ -1,6 +1,6 @@
 {
  "id": "tao_dan",
- "largo": 640,
+ "largo": 800,
  "franja": {
   "atras": 290,
   "adelante": 330
@@ -8,7 +8,7 @@
  "piso": [
   {
    "x0": 0,
-   "x1": 640,
+   "x1": 800,
    "tipo": "tierra",
    "nombre": "cancha de tierra apisonada"
   }

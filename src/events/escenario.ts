@@ -36,6 +36,11 @@ export interface EscenarioJson {
   inclinacion?: number;
   /** lo ancho que viene pintado (largo + inclinación por el fondo de la franja) */
   ancho?: number;
+  /**
+   * Las canchas a 800 (lote E4): el arte va de 0 a `largo` y la cancha de `margen` a `largo - margen`. El juego
+   * sigue en su cancha de 640: todo lo pintado se corre `margen` a la izquierda.
+   */
+  margen?: number;
   capas: Record<string, Capa>;
   /** el filo que se desmorona y el vacío de abajo, para cuando el borde avanza (la azotea que se achica) */
   borde?: { filo: { archivo: string; w: number; h: number; cuadros: number; fps: number; ancla: [number, number] }; vacio: { archivo: string; w: number; h: number } };
@@ -116,26 +121,28 @@ export function pintarEscenario(scene: Phaser.Scene, id: string, depthFrente: nu
   const FT = e.franja.atras;
   const C = e.capas;
   const W = scene.scale.width;
+  // lo que va en el mundo se corre el margen: la x 80 del arte cae en la 0 del juego
+  const M = e.margen ?? 0;
   // cielo quieto y ciudad lejana con su paralaje
   // (el cielo cierra el ciclo a lo ancho: se repite para cubrir la pantalla más ancha)
   // (quietos a lo ancho pero siguiendo a la cámara en vertical: en la pelea la cámara sube y baja con la acción)
   scene.add.tileSprite(0, C.cielo.y, MAX_W, scene.textures.get(k(id, 'cielo')).getSourceImage().height, k(id, 'cielo')).setOrigin(0).setScrollFactor(0, 1).setDepth(-40);
   const lejos = scene.add.tileSprite(0, C.lejos.y, MAX_W, scene.textures.get(k(id, 'lejos')).getSourceImage().height, k(id, 'lejos')).setOrigin(0).setScrollFactor(0, 1).setDepth(-35);
   // trozos de 1280: casas, piso y primer plano
-  const trozos = (n: string, depth: number) => C[n]?.archivos?.forEach((_a, i) => scene.add.image(i * (C[n].trozo ?? 1280), C[n].y, k(id, `${n}_${i}`)).setOrigin(0).setDepth(depth));
+  const trozos = (n: string, depth: number) => C[n]?.archivos?.forEach((_a, i) => scene.add.image(i * (C[n].trozo ?? 1280) - M, C[n].y, k(id, `${n}_${i}`)).setOrigin(0).setDepth(depth));
   trozos('cerca', -20);
   trozos('piso', -15);
   trozos('frente', depthFrente);
   // objetos ordenados con los atletas
   const obj = scene.cache.json.get(k(id, 'objetos_json')) as { objetos: Objeto[] };
-  const objetos = obj.objetos.map((o) => ({ o, img: scene.add.image(o.x, o.y, k(id, 'objetos'), cuadro(scene, k(id, 'objetos'), o.id, o.cuadro)).setOrigin(0).setDepth(FT + o.orden) }));
+  const objetos = obj.objetos.map((o) => ({ o, img: scene.add.image(o.x - M, o.y, k(id, 'objetos'), cuadro(scene, k(id, 'objetos'), o.id, o.cuadro)).setOrigin(0).setDepth(FT + o.orden) }));
   // vida: la de la capa lejos va aparte (pegada a la ciudad lejana, con su paralaje)
   const anchoLejos = scene.textures.get(k(id, 'lejos')).getSourceImage().width;
   const profundidad = (p: Pieza) => (p.capa === 'tras_cerca' ? -22 : p.capa === 'objeto' ? FT + (p.orden ?? 0) : -19);
   const vida = e.vida.piezas.filter((p) => p.capa !== 'lejos').map((p) => {
     const frames = p.cuadros.map((c, i) => cuadro(scene, k(id, 'vida'), `${p.id}_${i}`, c));
-    const img = scene.add.image(p.x, p.y, k(id, 'vida'), frames[0]).setOrigin(0).setDepth(profundidad(p));
-    return { p, img, frames, t: Math.random() * 3, vuela: false, x: p.x, y: p.y, espera: 0 };
+    const img = scene.add.image(p.x - M, p.y, k(id, 'vida'), frames[0]).setOrigin(0).setDepth(profundidad(p));
+    return { p, img, frames, t: Math.random() * 3, vuela: false, x: p.x - M, y: p.y, espera: 0 };
   });
   // en la capa lejos: copias cada ancho de lejos.png, las que hagan falta para cubrir la pantalla más ancha
   const copias = Math.ceil(MAX_W / anchoLejos) + 1;
@@ -159,7 +166,7 @@ export function pintarEscenario(scene: Phaser.Scene, id: string, depthFrente: nu
   }
   const luces = ((scene.cache.json.get(k(id, 'luces')) as { luces: Luz[] }).luces ?? []).filter((l) => l.encendida).map((l) => {
     const c = Phaser.Display.Color.HexStringToColor(l.color).color;
-    const g = scene.add.image(l.x, l.y, 'luz_suave').setScale((l.radio * 2) / 128).setTint(c).setAlpha(0.22).setBlendMode(Phaser.BlendModes.ADD).setDepth(l.y < FT ? -18 : FT + (l.y - FT));
+    const g = scene.add.image(l.x - M, l.y, 'luz_suave').setScale((l.radio * 2) / 128).setTint(c).setAlpha(0.22).setBlendMode(Phaser.BlendModes.ADD).setDepth(l.y < FT ? -18 : FT + (l.y - FT));
     return { l, g };
   });
   // partículas: las que piden un efecto del kit lo usan; las demás son puntitos que suben o brillan
@@ -180,13 +187,19 @@ export function pintarEscenario(scene: Phaser.Scene, id: string, depthFrente: nu
     inclinacion: e.inclinacion ?? 0,
     /** lo ancho que viene pintado */
     ancho: e.ancho ?? e.largo,
+    /** lo que mide el arte a lo largo, y cuánto se corrió a la izquierda (las canchas a 800) */
+    largo: e.largo,
+    margen: M,
     /** prende (o apaga) los fuegos artificiales del escenario, si los trae */
     fuegos(on: boolean) { fuegos = on; for (const q of conFx) if (q.p.tipo === 'fuegos') q.t = Math.random() * 0.4; },
     /** los objetos pintados (las antenas), para que la escena los tumbe si hace falta */
     objetos,
     /** las texturas del borde que avanza, si el escenario las trae */
     borde: e.borde && scene.textures.exists(k(id, 'filo')) ? { tex: { filo: k(id, 'filo'), vacio: k(id, 'vacio') }, ...e.borde } : null,
-    /** Paralaje, vida y luces. `cerca(x, y)` dice si hay un atleta a mano (para espantar palomas). */
+    /**
+     * Paralaje, vida y luces. `camX` va en x del arte: la de la cámara más el margen, así lo lejano (Monserrate, la nube
+     * del Catatumbo) cae donde se pintó. `cerca(x, y)` dice si hay un atleta a mano (para espantar palomas).
+     */
     tick(dt: number, camX: number, cerca: (x: number, y: number) => boolean) {
       const lejosX = camX * (C.lejos.paralaje ?? 0.25);
       lejos.tilePositionX = lejosX;
@@ -208,17 +221,17 @@ export function pintarEscenario(scene: Phaser.Scene, id: string, depthFrente: nu
           // las motos del fondo cruzan y vuelven cada tanto
           if (v.espera > 0) { v.espera -= dt; v.img.setVisible(false); continue; }
           v.x += p.velocidad * dt;
-          if (v.x < -60 || v.x > e.largo + 60) { v.x = p.x; v.espera = p.cada ?? 5; }
+          if (v.x < -60 - M || v.x > e.largo - M + 60) { v.x = p.x - M; v.espera = p.cada ?? 5; }
           v.img.setVisible(true).setPosition(Math.round(v.x), p.y).setFrame(v.frames[Math.floor(v.t * p.fps) % v.frames.length]);
           continue;
         }
         if (p.tipo === 'palomas' && v.frames.length >= 4) {
           // paradas picotean; si pasa alguien cerca, salen volando y vuelven al rato
-          if (!v.vuela && cerca(p.x + 17, p.y)) { v.vuela = true; v.t = 0; }
+          if (!v.vuela && cerca(p.x - M + 17, p.y)) { v.vuela = true; v.t = 0; }
           if (v.vuela) {
             v.x += 40 * dt; v.y -= 30 * dt;
             v.img.setPosition(Math.round(v.x), Math.round(v.y)).setFrame(v.frames[2 + (Math.floor(v.t * 8) % 2)]).setAlpha(Math.max(0, 1 - v.t / 2.5));
-            if (v.t > 6) { v.vuela = false; v.x = p.x; v.y = p.y; v.img.setAlpha(1).setPosition(p.x, p.y); }
+            if (v.t > 6) { v.vuela = false; v.x = p.x - M; v.y = p.y; v.img.setAlpha(1).setPosition(p.x - M, p.y); }
           } else v.img.setFrame(v.frames[Math.floor(v.t * p.fps) % 2]);
           continue;
         }
@@ -236,7 +249,7 @@ export function pintarEscenario(scene: Phaser.Scene, id: string, depthFrente: nu
         q.t = q.p.cada;
         if (q.p.x1 < camX - 40 || q.p.x0 > camX + W + 40) continue;
         const x = Phaser.Math.Between(Math.max(q.p.x0, camX - 20), Math.min(q.p.x1, camX + W + 20)), y = Phaser.Math.Between(q.p.y0, q.p.y1);
-        const s = efecto(scene, q.p.fx!, x, y, { depth: y < FT ? -18 : y - 0.5, alpha: 0.85 });
+        const s = efecto(scene, q.p.fx!, x - M, y, { depth: y < FT ? -18 : y - 0.5, alpha: 0.85 });
         if (s && kit().fx?.[q.p.fx!]?.loop) scene.tweens.add({ targets: s, alpha: 0, delay: 1200, duration: 400, onComplete: () => s.destroy() });
       }
       for (const q of parts) {
@@ -244,7 +257,7 @@ export function pintarEscenario(scene: Phaser.Scene, id: string, depthFrente: nu
         if (q.t > 0) continue;
         q.t = q.p.cada;
         if (q.p.x1 < camX - 40 || q.p.x0 > camX + W + 40) continue;
-        q.em.emitParticleAt(Phaser.Math.Between(q.p.x0, q.p.x1), Phaser.Math.Between(q.p.y0, q.p.y1), 1);
+        q.em.emitParticleAt(Phaser.Math.Between(q.p.x0, q.p.x1) - M, Phaser.Math.Between(q.p.y0, q.p.y1), 1);
       }
     },
   };

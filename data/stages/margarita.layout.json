@@ -4,8 +4,9 @@
  "prueba": "voley",
  "vista": "lado",
  "nombre": "PLAYA EL AGUA, MARGARITA",
- "nota": "Vóley Playa de lado en Playa El Agua, isla de Margarita, al mediodía. El piso de Voley.ts está en la fila 310: la franja va de 290 a 330, la fila de atrás es el carril y 14 (fila 304) y la de adelante el y 26 (fila 316). La cancha va de x 34 a 606 entre las filas 298 y 322, y la red en x 320 con 46 de alto: las dos las dibuja el juego. La arena frena al correr.",
- "largo": 640,
+ "nota": "Vóley Playa de lado en Playa El Agua, isla de Margarita, al mediodía. El piso de Voley.ts está en la fila 310: la franja va de 290 a 330, la fila de atrás es el carril y 14 (fila 304) y la de adelante el y 26 (fila 316). Mide 800: la cancha va en los 640 del medio (margen 80) y a cada lado hay 80 de playa. La cancha va de x 114 a 686 entre las filas 298 y 322, y la red en x 400 con 46 de alto: las dos las dibuja el juego. En las coordenadas de 640 de Voley.ts es lo mismo menos 80. La arena frena al correr.",
+ "largo": 800,
+ "margen": 80,
  "franja": {
   "atras": 290,
   "adelante": 330
@@ -23,7 +24,7 @@
  "piso": [
   {
    "x0": 0,
-   "x1": 640,
+   "x1": 800,
    "tipo": "arena",
    "nombre": "la arena de la cancha"
   }
@@ -48,21 +49,21 @@
   {
    "tipo": "objeto",
    "objeto": "red_voley",
-   "x": 320,
+   "x": 400,
    "y": 20,
-   "nota": "la red la dibuja el juego: RED_X 320, RED_H 46"
+   "nota": "la red la dibuja el juego: RED_X 320 de Voley.ts más el margen, RED_H 46"
   }
  ],
  "ranuras_deco": [
   {
    "x0": 0,
-   "x1": 640,
+   "x1": 800,
    "capa": "lejos",
    "tema": "mar_caribe_cerro"
   },
   {
    "x0": 0,
-   "x1": 640,
+   "x1": 800,
    "capa": "cerca",
    "tema": "palmas_toldos_churuata"
   }

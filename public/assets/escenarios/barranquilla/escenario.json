@@ -11,15 +11,17 @@
   "atras": 212,
   "adelante": 316
  },
- "largo": 640,
+ "largo": 800,
  "hora": "mediodia",
  "clima": [
   "despejado",
   "calor"
  ],
  "inclinacion": 0.35,
- "ancho": 676,
- "nota_inclinacion": "vista inclinada: px = x + 0.35 * y (lo del fondo queda a la izquierda). Las capas largas miden 676 px (largo + 0.35 * fondo de la franja). Los objetos ya vienen corridos: corre a los atletas igual.",
+ "ancho": 836,
+ "margen": 80,
+ "nota_margen": "la cancha va de x 80 a 720 (los 640 px del medio) y hay 80 px de escenario a cada lado: centra la cámara en la cancha. Las x del layout ya vienen corridas.",
+ "nota_inclinacion": "vista inclinada: px = x + 0.35 * y (lo del fondo queda a la izquierda). Las capas largas miden 836 px (largo + 0.35 * fondo de la franja). Los objetos ya vienen corridos: corre a los atletas igual.",
  "capas": {
   "cielo": {
    "archivo": "cielo_mediodia.png",
@@ -73,20 +75,20 @@
     "id": "publico_0",
     "tipo": "publico",
     "capa": "cerca",
-    "x": 0,
+    "x": 76,
     "y": 132,
     "fps": 2,
     "cuadros": [
      {
       "x": 0,
       "y": 0,
-      "w": 192,
+      "w": 196,
       "h": 66
      },
      {
-      "x": 193,
+      "x": 197,
       "y": 0,
-      "w": 192,
+      "w": 196,
       "h": 66
      }
     ]
@@ -95,20 +97,20 @@
     "id": "publico_1",
     "tipo": "publico",
     "capa": "cerca",
-    "x": 488,
+    "x": 568,
     "y": 132,
     "fps": 2,
     "cuadros": [
      {
-      "x": 386,
+      "x": 394,
       "y": 0,
-      "w": 188,
+      "w": 192,
       "h": 66
      },
      {
-      "x": 575,
+      "x": 587,
       "y": 0,
-      "w": 188,
+      "w": 192,
       "h": 66
      }
     ]
@@ -122,15 +124,15 @@
     "fps": 2,
     "cuadros": [
      {
-      "x": 764,
+      "x": 780,
       "y": 0,
-      "w": 676,
+      "w": 836,
       "h": 37
      },
      {
       "x": 0,
       "y": 67,
-      "w": 676,
+      "w": 836,
       "h": 37
      }
     ]
@@ -139,18 +141,18 @@
     "id": "guirnaldas_1",
     "tipo": "guirnaldas",
     "capa": "cerca",
-    "x": 140,
+    "x": 220,
     "y": 11,
     "fps": 2,
     "cuadros": [
      {
-      "x": 677,
+      "x": 837,
       "y": 67,
       "w": 424,
       "h": 31
      },
      {
-      "x": 1102,
+      "x": 1262,
       "y": 67,
       "w": 424,
       "h": 31
@@ -168,13 +170,13 @@
      {
       "x": 0,
       "y": 105,
-      "w": 676,
+      "w": 836,
       "h": 27
      },
      {
-      "x": 677,
+      "x": 837,
       "y": 105,
-      "w": 676,
+      "w": 836,
       "h": 27
      }
     ]
@@ -188,15 +190,15 @@
     "fps": 2,
     "cuadros": [
      {
-      "x": 1354,
+      "x": 1674,
       "y": 105,
-      "w": 210,
+      "w": 290,
       "h": 29
      },
      {
-      "x": 1565,
-      "y": 105,
-      "w": 210,
+      "x": 0,
+      "y": 135,
+      "w": 290,
       "h": 29
      }
     ]
@@ -205,87 +207,87 @@
     "id": "guirnaldas_4",
     "tipo": "guirnaldas",
     "capa": "cerca",
-    "x": 474,
+    "x": 554,
     "y": 51,
     "fps": 2,
     "cuadros": [
      {
-      "x": 1776,
-      "y": 105,
-      "w": 202,
+      "x": 291,
+      "y": 135,
+      "w": 282,
       "h": 31
      },
      {
-      "x": 0,
-      "y": 137,
-      "w": 202,
+      "x": 574,
+      "y": 135,
+      "w": 282,
       "h": 31
      }
     ]
    },
    {
-    "id": "comparsa_208",
+    "id": "comparsa_288",
     "tipo": "comparsa",
     "capa": "cerca",
-    "x": 208,
+    "x": 288,
     "y": 162,
     "fps": 4,
     "cuadros": [
      {
-      "x": 203,
-      "y": 137,
+      "x": 857,
+      "y": 135,
       "w": 70,
       "h": 50
      },
      {
-      "x": 274,
-      "y": 137,
+      "x": 928,
+      "y": 135,
       "w": 70,
       "h": 50
      },
      {
-      "x": 345,
-      "y": 137,
+      "x": 999,
+      "y": 135,
       "w": 70,
       "h": 50
      },
      {
-      "x": 416,
-      "y": 137,
+      "x": 1070,
+      "y": 135,
       "w": 70,
       "h": 50
      }
     ]
    },
    {
-    "id": "comparsa_398",
+    "id": "comparsa_478",
     "tipo": "comparsa",
     "capa": "cerca",
-    "x": 398,
+    "x": 478,
     "y": 162,
     "fps": 4,
     "cuadros": [
      {
-      "x": 487,
-      "y": 137,
+      "x": 1141,
+      "y": 135,
       "w": 66,
       "h": 50
      },
      {
-      "x": 554,
-      "y": 137,
+      "x": 1208,
+      "y": 135,
       "w": 66,
       "h": 50
      },
      {
-      "x": 621,
-      "y": 137,
+      "x": 1275,
+      "y": 135,
       "w": 66,
       "h": 50
      },
      {
-      "x": 688,
-      "y": 137,
+      "x": 1342,
+      "y": 135,
       "w": 66,
       "h": 50
      }
@@ -413,8 +415,9 @@
   "pais": "colombia",
   "prueba": "futbol",
   "nombre": "CARNAVAL DE BARRANQUILLA",
-  "nota": "Fútbol Callejero en una calle del Carnaval de Barranquilla, al mediodía. Vista inclinada de 0.35, como la pelea, con la franja de Futbol.ts: FT 212 y 104 de fondo (filas 212 a 316). Las líneas de gol en x 26 y 600, el medio en x 313. Los arcos de piedra van de y 34 a y 70 en cada línea de gol, con 26 de alto: los pinta el arte, en dos objetos cada uno (la columna de atrás con el palo y la de adelante). La Marimonda cruza la calle cada tanto: es un NPC del kit.",
-  "largo": 640,
+  "nota": "Fútbol Callejero en una calle del Carnaval de Barranquilla, al mediodía. Vista inclinada de 0.35, como la pelea, con la franja de Futbol.ts: FT 212 y 104 de fondo (filas 212 a 316). Mide 800: la cancha va en los 640 del medio (margen 80) y a cada lado hay 80 de calle de Carnaval. Las líneas de gol en x 106 y 680, el medio en x 393. En las coordenadas de 640 de Futbol.ts es lo mismo menos 80. Los arcos de piedra van de y 34 a y 70 en cada línea de gol, con 26 de alto: los pinta el arte, en dos objetos cada uno (la columna de atrás con el palo y la de adelante). La Marimonda cruza la calle cada tanto: es un NPC del kit.",
+  "largo": 800,
+  "margen": 80,
   "franja": {
    "atras": 212,
    "adelante": 316
@@ -432,7 +435,7 @@
   "piso": [
    {
     "x0": 0,
-    "x1": 640,
+    "x1": 800,
     "tipo": "cancha",
     "nombre": "la calle de asfalto"
    }
@@ -460,7 +463,7 @@
    {
     "tipo": "objeto",
     "objeto": "arco_piedra",
-    "x": 26,
+    "x": 106,
     "y": 34,
     "parte": "atras",
     "nota": "la columna de atrás del arco de la izquierda, con el palo de arriba"
@@ -468,14 +471,14 @@
    {
     "tipo": "objeto",
     "objeto": "arco_piedra",
-    "x": 26,
+    "x": 106,
     "y": 70,
     "nota": "la columna de adelante del arco de la izquierda"
    },
    {
     "tipo": "objeto",
     "objeto": "arco_piedra",
-    "x": 600,
+    "x": 680,
     "y": 34,
     "parte": "atras",
     "nota": "la columna de atrás del arco de la derecha, con el palo de arriba"
@@ -483,28 +486,28 @@
    {
     "tipo": "objeto",
     "objeto": "arco_piedra",
-    "x": 600,
+    "x": 680,
     "y": 70,
     "nota": "la columna de adelante del arco de la derecha"
    },
    {
     "tipo": "npc",
     "npc": "marimonda",
-    "x0": 16,
-    "x1": 610,
+    "x0": 96,
+    "x1": 690,
     "nota": "la Marimonda cruza la calle de lado a lado cada tanto, en una y al azar entre 20 y 84: caminar y bailar"
    }
   ],
   "ranuras_deco": [
    {
     "x0": 0,
-    "x1": 640,
+    "x1": 800,
     "capa": "lejos",
     "tema": "barranquilla_mediodia"
    },
    {
     "x0": 0,
-    "x1": 640,
+    "x1": 800,
     "capa": "cerca",
     "tema": "casas_palcos_guirnaldas"
    }

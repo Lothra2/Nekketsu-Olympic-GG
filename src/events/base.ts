@@ -115,19 +115,28 @@ export abstract class EventScene extends Phaser.Scene {
   }
 
   /** Prepara capas y cámara. Llamar al inicio de create(). */
+  /** lo que mide el mundo para la cámara: con las canchas a 800 va de -margen a largo - margen */
+  private mundo = { zoom: 1, x0: 0, w: 640, margen: 0 };
+  private llenar: () => void = () => {};
+
   protected setup(zoom: number, worldW: number) {
     this.cameras.main.fadeIn(250);
     this.registry.set('marchaSonando', false);
     this.ui = this.add.layer().setDepth(10000);
     const cam = this.cameras.main;
+    this.mundo = { zoom, x0: 0, w: worldW, margen: 0 };
     cam.setZoom(zoom).setBounds(0, 0, worldW, 360);
     // en los celulares alargados una cancha fija (640 de mundo) no alcanzaba a cubrir lo ancho de la pantalla: la
     // cámara la pegaba a la izquierda y a la derecha se veía el vacío o el arte repetido. Se acerca lo justo para
-    // que la cancha llene la pantalla, centrada (y se ven más grandes los atletas)
+    // que la cancha llene la pantalla. Con el arte de las canchas a 800 (lote E4) ya no hace falta: hay escenario a
+    // los lados y la cámara va centrada en la cancha
     const llenar = () => {
-      const z = Math.max(zoom, this.scale.gameSize.width / worldW);
+      const m = this.mundo;
+      const z = Math.max(m.zoom, this.scale.gameSize.width / m.w);
       if (Math.abs(cam.zoom - z) > 0.001) cam.setZoom(z);
+      if (m.margen) cam.centerOnX(320);
     };
+    this.llenar = llenar;
     llenar();
     this.scale.on(Phaser.Scale.Events.RESIZE, llenar);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.scale.off(Phaser.Scale.Events.RESIZE, llenar));
@@ -190,10 +199,25 @@ export abstract class EventScene extends Phaser.Scene {
       else respaldo();
       return false;
     }
-    const tick = (_t: number, dms: number) => this.arteFondo?.tick(Math.min(0.05, dms / 1000), this.cameras.main.scrollX, () => false);
+    this.montarArte();
+    return true;
+  }
+
+  /**
+   * Monta el arte ya pintado (`arteFondo`): con la cancha a 800 (lote E4) la cámara puede ver el escenario de los
+   * lados, sin acercarse, y la paralaje va con la x del arte. Las pruebas que pintan su arte a mano también lo llaman.
+   */
+  protected montarArte() {
+    if (!this.arteFondo) return;
+    const M = this.arteFondo.margen;
+    if (M > 0) {
+      this.mundo = { ...this.mundo, x0: -M, w: this.arteFondo.largo, margen: M };
+      this.cameras.main.setBounds(-M, 0, this.arteFondo.largo, 360);
+      this.llenar();
+    }
+    const tick = (_t: number, dms: number) => this.arteFondo?.tick(Math.min(0.05, dms / 1000), this.cameras.main.scrollX + M, () => false);
     this.events.on(Phaser.Scenes.Events.UPDATE, tick);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.events.off(Phaser.Scenes.Events.UPDATE, tick));
-    return true;
   }
 
   protected fondo(key: string): Phaser.GameObjects.TileSprite {

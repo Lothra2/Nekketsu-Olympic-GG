@@ -116,6 +116,9 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
   - **Quemado:** el tiro con la rodilla arriba y el balonazo que lo sienta.
   - **Judo:** con la barra llena, la tijera del vovinam, ippon, con el rival cayendo cuadro a cuadro y la palmada del ukemi al caer.
   - **Ambientes nuevos:** el parque Tao Đàn en el Đá cầu, el barrio de Caracas en la Chapita y el dojo de Hà Nội en el judo.
+- **Las técnicas de equipo** de PixelForja (lote B7), con la barra llena en la pelea: el Chancletazo Supremo de la Familia GG (tres chancletas, la última tumba), el Copetazo del Instituto, la Silla Plástica Voladora de Rồng Sài Gòn, la Ciclovía Infernal de los Rolos (con el rival que sale volando), el Batazo de Jonrón de los Panas y el Furrazo de los Maracuchos, que tumba a todos los de cerca. Además, la atrapada del Quemado, el paso pesado en la arena del Vóley y el salto de susto cuando una moto pasa rozando en el Cross.
+- **Las canchas a 800** (lote E4): Margarita, Đà Lạt, Tao Đàn, Maracaibo, Barranquilla, el liceo, la Candelaria y Hội An traen escenario a los lados. En el iPhone se ve el lugar completo, sin acercar la cámara.
+- **Las motos y el xích lô a escala de atleta** (lote D3) y **el relámpago que baja del cielo** (`rayo_cielo`) en la lanza del Catatumbo y sobre el aro de Maracaibo.
 - Los efectos que se repiten (el aura de fuego de los poderes, el confeti, el rayo del Catatumbo) se apagan solos al rato y no se quedan tapando el juego.
 - Los deportes de pelota usan las animaciones de PixelForja sin la pelota pintada: la pelota la mueve el juego y, mientras alguien la tiene, va donde la pone la animación. En la pelea, cada equipo se burla con su gesto y su frase en un globo.
 
@@ -124,7 +127,7 @@ Remake espiritual de los juegos deportivos Nekketsu de NES/Famicom, con escenari
 El juego llena la pantalla en cualquier celular acostado, sin barras negras:
 - Está diseñado en un cuadro de 640 x 360 (16:9). En pantallas más alargadas (19.5:9, 20:9) se estira a los costados hasta 800 de ancho, sin deformar.
 - Lo importante (personajes, textos, menús) queda centrado. Los costados muestran más fondo, y en las carreras y la pelea, más mundo.
-- Las canchas fijas (vóley, tenis, đá cầu, básquet, fútbol, quemado, tejo, tama-wari) miden 640: en las pantallas alargadas la cámara se acerca lo justo para que la cancha llene la pantalla centrada, sin mostrar vacío ni arte repetido a un lado.
+- Las canchas fijas (vóley, tenis, đá cầu, básquet, fútbol, quemado, tejo, tama-wari) juegan en 640, pero su arte mide 800 con 80 de escenario a cada lado (lote E4). En las pantallas alargadas se ve ese escenario, con la cancha centrada y sin acercar la cámara. Sin el arte, la cámara se acerca lo justo para que la cancha llene la pantalla.
 - Los botones táctiles se pegan a los bordes de la pantalla.
 - En tablets, más cuadradas, queda en 16:9 con barras arriba y abajo.
 - Al tocar la primera pantalla en el celular pide pantalla completa y se acuesta solo, si el navegador lo permite.
@@ -181,6 +184,7 @@ node scripts/prueba-celular.mjs http://localhost:5173/ capturas/celular 844 390 
 node scripts/prueba-girar.mjs http://localhost:5173/   # parado pide girar; al girar (y al cambiar de pantalla) todo se acomoda
 node scripts/prueba-palanca.mjs http://localhost:5173/   # la palanca táctil con un dedo de verdad: bajar hasta el borde y volver a subir sin soltar
 node scripts/prueba-aves.mjs http://localhost:4173/ capturas/aves   # las palomas del hẻm despegan y vuelven, el gallo de la Comuna 13 canta y se asusta (hace falta el kit con aves)
+node scripts/prueba-b7e4d3.mjs http://localhost:4173/ capturas/b7e4d3   # B7, E4, D3 y rayo_cielo: las 8 canchas a 640 y 780, la moto, el rayo, la técnica de cada equipo, la atrapada y la arena
 node scripts/prueba-b7h8.mjs http://localhost:4173/ capturas/b7h8   # los súper golpes B7H8: clavada y tablero, plancha, remate colgado, dominio y chilenas, batazo girado, lanza del rayo, balonazo, tijera y ambientes
 node scripts/prueba-g1d2.mjs http://localhost:4173/ capturas/g1d2   # interfaz G1 y vehículos D2: botones, marcador, reloj de TV, letreros con fondo, ferry, motos, xích lô, jacintos y fruta
 node scripts/prueba-gira.mjs http://localhost:4173/ capturas/gira   # la Olimpiada con Tama-wari, Đá cầu, Tejo y Judo: cada una arranca en gira, reparte puntos y vuelve al medallero
