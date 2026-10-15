@@ -73,10 +73,21 @@ await toma('rivales', ['intro_bogota', 'intro_bogota_lluvia', 'rolos_de_chapiner
 await p.waitForTimeout(400);
 await p.screenshot({ path: `${out}/bogota_silueta.png` });
 await p.waitForTimeout(700);
+const rival = () => ev(() => { const s = window.game.scene.getScene('Intro'); const l = s.layer.list; const i = (k) => l.findIndex((o) => o.texture?.key === k); const caras = l.filter((o) => o.texture?.key?.startsWith('retratos:')); return { pres: i('ui_intro_presentacion'), lluvia: i('ui_intro_bogota_lluvia'), caras: caras.map((o) => `${Math.round(o.x)},${Math.round(o.y)}:${o.isTinted ? 'silueta' : 'color'}`), primera: l.indexOf(caras[0]), nombres: l.filter((o) => o.type === 'BitmapText' && o.visible && Math.abs(o.y - 260) < 40).map((o) => `${o.text}@${o.scaleX}:${Math.round(o.width)}`) }; });
+let rv = await rival();
+console.log('  bogotá:', JSON.stringify(rv));
+check(rv.pres >= 0 && rv.pres < rv.primera && rv.lluvia > rv.primera, 'bogotá: la escena, la presentación, los retratos y la lluvia encima');
+check(rv.caras.length === 4 && rv.caras.every((c) => c.endsWith('color')) && rv.caras.every((c) => c.split(',')[1].startsWith('180')), 'bogotá: los 4 revelados en sus huecos de y 132');
+check(rv.nombres.length === 4 && rv.nombres.every((n) => Number(n.split(':')[1]) <= 104), 'bogotá: los nombres caben en su placa de 104', rv.nombres.join(' '));
 await p.screenshot({ path: `${out}/bogota.png` });
 await p.waitForFunction(() => window.tomaFin, null, { timeout: 10000 }).catch(() => {});
 await toma('rivales', ['intro_maracaibo', null, 'maracuchos_del_lago', 'MARACAIBO · LOS MARACUCHOS']);
 await p.waitForTimeout(1100);
+rv = await rival();
+console.log('  maracaibo:', JSON.stringify(rv));
+const hm = await ev(() => window.game.cache.json.get('manifest').ui.interfaz.intro_maracaibo.huecos?.map(([x, y, w, h]) => `${x - 80 + w / 2},${y + h / 2}`));
+check(rv.pres >= 0 && rv.lluvia < 0 && hm && rv.caras.map((c) => c.split(':')[0]).join(' ') === hm.join(' '), 'maracaibo: sus propios huecos, con la presentación y sin lluvia', hm?.join(' '));
+check(rv.nombres.length === 4 && rv.nombres.every((n) => Number(n.split(':')[1]) <= 104), 'maracaibo: los nombres caben (ABUELA NERVA a 1,5)', rv.nombres.join(' '));
 await p.screenshot({ path: `${out}/maracaibo.png` });
 await p.waitForFunction(() => window.tomaFin, null, { timeout: 10000 }).catch(() => {});
 

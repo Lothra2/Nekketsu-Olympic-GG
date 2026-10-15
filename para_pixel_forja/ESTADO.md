@@ -40,13 +40,20 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 | RAYO_PUNTA | El punto `impacto` en la punta de `javelin_rayo` | en el juego | [#47](https://github.com/Lothra2/pixel_forja/pull/47) |
 | H2_CORTO | trueno, furro, corneta_moto y los ambientes mercado, río y estadio | en el juego | [#48](https://github.com/Lothra2/pixel_forja/pull/48) |
 | G2 | El envoltorio: retratos a 96, medallas, banderas, podio, íconos, tarjetas, VS de 4 y pantallas | en el juego | [#49](https://github.com/Lothra2/pixel_forja/pull/49) |
-| VS2 | marco_vs_2, el VS de 1 contra 1 | en el juego; PR abierto | [#50](https://github.com/Lothra2/pixel_forja/pull/50) |
-| CINTA | cinta_16 y cinta_32, el cuarto puesto | en el juego; PR abierto | [#51](https://github.com/Lothra2/pixel_forja/pull/51) |
-| GIRA | mapa_gira, la ruta del avión, mapas de región y sellos | en el juego; PR abierto | [#52](https://github.com/Lothra2/pixel_forja/pull/52) |
-| INTRO | azotea con Kenji de espaldas, Bogotá, Maracaibo y el desayuno | en el juego; PR abierto | [#53](https://github.com/Lothra2/pixel_forja/pull/53) |
+| VS2 | marco_vs_2, el VS de 1 contra 1 | en el juego | [#50](https://github.com/Lothra2/pixel_forja/pull/50) |
+| CINTA | cinta_16 y cinta_32, el cuarto puesto | en el juego | [#51](https://github.com/Lothra2/pixel_forja/pull/51) |
+| GIRA | mapa_gira, la ruta del avión, mapas de región y sellos | en el juego | [#52](https://github.com/Lothra2/pixel_forja/pull/52) |
+| INTRO | azotea con Kenji de espaldas, Bogotá, Maracaibo y el desayuno | en el juego | [#53](https://github.com/Lothra2/pixel_forja/pull/53) |
+| AJUSTES | la rosa del mapa, la presentación de los rivales y Rick con parted2 | en el juego | [#54](https://github.com/Lothra2/pixel_forja/pull/54) |
 
 ## Lo último del lado del juego
-- **VS2, CINTA, GIRA e INTRO en el juego**, generados desde una unión local de los PR #50 a #53. **Los cuatro siguen abiertos y chocan entre sí:** salieron del mismo main (91f6d48) y cada uno suma su parte a las mismas listas (`UI_PARTS`, `PARTES_ENVOLTORIO`, el tipo `ui` de la configuración, el esquema, KIT_A_MEDIDA.md, INTERFAZ.md, el ejemplo de `kit.config.json` y los conteos de `custom.test.ts` y `ui_audio.test.ts`). Todos los choques son uniones: con los cuatro juntos la suite pasa 566 de 566. Forja tiene que unirlos en su main; el submódulo del juego queda en 91f6d48 hasta entonces.
+- **AJUSTES (#54) en el juego** y el submódulo en el main de PixelForja (e69797f, con #50 a #54). #54 estaba abierto: pasó la suite completa (567 de 567) sobre main y el juego lo unió. El artifact sigue en 500.
+  - La rosa del mapa en (513, 235): ya no choca con la barra del pasaporte. Nada que cambiar en el juego.
+  - Bogotá y Maracaibo, cada una con sus `huecos` (en y 132): la escena, `ui_intro_presentacion`, los retratos de bloques a 1 en silueta (`setTintFill(0x14101e)`) y después revelados, el nombre corto centrado en x = hueco + 48 - 80 y en y = `nombres` (252), y en Bogotá la lluvia encima.
+  - **Lo que no calzó:** la placa mide 104 y DON HERNANDO a 1,5 mide 108. El juego lo baja a 1 (cabe, pero se lee chiquito). ABUELA NERVA a 1,5 mide justo 104. Para que DON HERNANDO salga a 1,5 la placa tendría que medir 110 o más.
+  - Los retratos siguen siendo los de bloques del juego; no se usan los grande_* del kit.
+
+- **VS2, CINTA, GIRA e INTRO en el juego**, generados desde una unión local de los PR #50 a #53. **Los cuatro siguen abiertos y chocan entre sí:** salieron del mismo main (91f6d48) y cada uno suma su parte a las mismas listas (`UI_PARTS`, `PARTES_ENVOLTORIO`, el tipo `ui` de la configuración, el esquema, KIT_A_MEDIDA.md, INTERFAZ.md, el ejemplo de `kit.config.json` y los conteos de `custom.test.ts` y `ui_audio.test.ts`). Todos los choques son uniones: con los cuatro juntos la suite pasa 566 de 566. Forja los unió después en su main.
   - `kit.config.json` suma `ui.gira.paradas` (tokio, saigon, bogota, caracas) e `ui.intro.espaldas` (kenji). El artifact sigue en 500.
   - **VS de 1 contra 1:** el 1v1 y el judo usan `vs2()` con `ui_marco_vs_2` en x -80; cada retrato `grande_enojo` en su hueco menos 80, en (150, 150) y (490, 150), el de la derecha volteado; la prueba en `texto`, VS en `vs`, nombres en 246 y frases en 268. El 4v4 sigue con el de 4.
   - **Cinta:** `ui_cinta_32` en (170, y) para el cuarto de la tabla de resultados, sin círculo ni número.

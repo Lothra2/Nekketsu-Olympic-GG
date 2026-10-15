@@ -103106,6 +103106,7 @@
      "x0": 80
     },
     "resaltados": ["japon","vietnam","colombia","venezuela"],
+    "rosa": [513,235,23],
     "nota": "Imagen de 800 x 360; la parte de 640 va de x 80 a 720 y calza con el mapa del juego (longitud este de 90 a 300, latitud de 50 a -25). Para poner un lugar: x = (lon este - 90) * kx + 80, y = (50 - lat) * ky."
    },
    "mapa_gira_ruta": {
@@ -103218,7 +103219,8 @@
     "h": 360,
     "margen": 80,
     "anden": 300,
-    "huecos": [[188,150,96,96],[296,150,96,96],[404,150,96,96],[512,150,96,96]],
+    "huecos": [[188,132,96,96],[296,132,96,96],[404,132,96,96],[512,132,96,96]],
+    "nombres": 252,
     "texto": [180,14,440,34],
     "nota": "Bogotá con lluvia. La lluvia va aparte en intro_bogota_lluvia, encima de todo. `huecos` sirve para presentar a un equipo con sus retratos de 96 (en silueta y después de color)."
    },
@@ -103242,8 +103244,20 @@
     "loop": true,
     "margen": 80,
     "malecon": 292,
+    "huecos": [[188,132,96,96],[296,132,96,96],[404,132,96,96],[512,132,96,96]],
+    "nombres": 252,
     "texto": [180,14,440,34],
     "nota": "Maracaibo con calor, 4 cuadros en bucle: el halo del sol late, los balancines cabecean y el horizonte y la calle reverberan. La gente va parada en el malecón (y `malecon`)."
+   },
+   "intro_presentacion": {
+    "archivo": "ui/intro_presentacion.png",
+    "w": 800,
+    "h": 360,
+    "huecos": [[188,132,96,96],[296,132,96,96],[404,132,96,96],[512,132,96,96]],
+    "marco": 6,
+    "franja": [164,116,472,152],
+    "nombres": 252,
+    "nota": "Va entre intro_bogota o intro_maracaibo y los retratos. Los retratos de 96 en `huecos` (en silueta con setTintFill y después de color), el nombre de cada uno centrado en y `nombres`."
    },
    "intro_desayuno": {
     "archivo": "ui/intro_desayuno.png",

@@ -6,7 +6,7 @@ import { txt, typewrite, wait, panel, flash, speedLines } from '../core/ui';
 import { hayUi, pieza } from '../core/interfaz';
 import { Input } from '../core/input';
 import { efecto } from '../core/fx';
-import { kit } from '../core/kit';
+import { kit, nombreCorto } from '../core/kit';
 import { buildLogo, fireworks } from './logo';
 import { JET, PARADAS } from '../gfx/mapa';
 import { cargarAtletas, packsDe } from '../core/carga';
@@ -1168,21 +1168,32 @@ export class Intro extends Phaser.Scene {
   }
 
   /**
-   * Los rivales en su ciudad (lote INTRO), una toma corta de 1,5 s: el fondo, los cuatro retratos en silueta que
-   * después se revelan, y encima la capa animada (la lluvia de Bogotá). Maracaibo no trae huecos: van en los de Bogotá.
+   * Los rivales en su ciudad (lotes INTRO y AJUSTES), una toma corta de 1,5 s. Capas: la escena, la franja de
+   * presentación con un marco por hueco, los cuatro retratos en los `huecos` de la escena (a 1) en silueta que
+   * después se revelan con su nombre en la placa, y encima la capa animada (la lluvia de Bogotá).
    */
   private async rivales(alive: () => boolean, fondo: string, capa: string | null, equipo: string, titulo: string) {
-    const pb = pieza('intro_bogota') as unknown as { huecos?: [number, number, number, number][] } | undefined;
-    const pf = pieza(fondo) as unknown as { texto?: [number, number, number, number] } | undefined;
-    if (!hayUi(this, fondo) || !pb?.huecos) return;
+    type Escena = { huecos?: [number, number, number, number][]; nombres?: number; texto?: [number, number, number, number] };
+    const pf = pieza(fondo) as unknown as Escena | undefined;
+    const huecos = pf?.huecos ?? (pieza('intro_bogota') as unknown as Escena | undefined)?.huecos;
+    if (!hayUi(this, fondo) || !huecos) return;
     this.clear();
     const bg = this.add2(this.add.sprite(-80, 0, `ui_${fondo}`, 0).setOrigin(0));
     if (this.anims.exists(`ui_${fondo}`)) bg.play(`ui_${fondo}`);
+    if (hayUi(this, 'intro_presentacion')) this.add2(this.add.image(-80, 0, 'ui_intro_presentacion').setOrigin(0));
     const ids = Object.entries(kit().atletas).filter(([, a]) => (a as { equipo?: string }).equipo === equipo).map(([id]) => id).slice(0, 4);
     const caras = ids.map((id, i) => {
-      const [x, y, w, h] = pb.huecos![i];
+      const [x, y, w, h] = huecos[i];
       return this.add2(this.add.image(x - 80 + w / 2, y + h / 2, `retratos:${id}`, 'grande_enojo').setTintFill(0x14101e));
     });
+    // el nombre en su placa (104 de ancho): a 2 caben 8 letras; los más largos, a 1,5
+    const nombres = pf?.nombres !== undefined ? ids.map((id, i) => {
+      const n = nombreCorto(id);
+      const t = txt(this, huecos[i][0] + 48 - 80, pf.nombres!, n, 'fuente_ui', n.length > 8 ? 1.5 : 2).setTint(0xffe080).setVisible(false);
+      // DON HERNANDO a 1,5 mide 108: el que aun así no cabe, a 1
+      if (t.width > 104) t.setScale(1);
+      return this.add2(t);
+    }) : [];
     if (capa && hayUi(this, capa)) {
       const c = this.add2(this.add.sprite(-80, 0, `ui_${capa}`, 0).setOrigin(0));
       if (this.anims.exists(`ui_${capa}`)) c.play(`ui_${capa}`);
@@ -1192,8 +1203,9 @@ export class Intro extends Phaser.Scene {
     chip.blip(220, 0.25, 'saw', 0.12, 110);
     await wait(this, 650);
     if (!alive()) return;
-    // se revelan de golpe
+    // se revelan de golpe, con su nombre
     caras.forEach((c) => c.clearTint());
+    nombres.forEach((n) => n.setVisible(true));
     flash(this, 90);
     chip.boom(0.5);
     await wait(this, 850);
