@@ -188,6 +188,7 @@ node scripts/prueba-palanca.mjs http://localhost:5173/   # la palanca táctil co
 node scripts/prueba-aves.mjs http://localhost:4173/ capturas/aves   # las palomas del hẻm despegan y vuelven, el gallo de la Comuna 13 canta y se asusta (hace falta el kit con aves)
 node scripts/prueba-b7e4d3.mjs http://localhost:4173/ capturas/b7e4d3   # B7, E4, D3 y rayo_cielo: las 8 canchas a 640 y 780, la moto, el rayo, la técnica de cada equipo, la atrapada y la arena
 node scripts/prueba-b7h8.mjs http://localhost:4173/ capturas/b7h8   # los súper golpes B7H8: clavada y tablero, plancha, remate colgado, dominio y chilenas, batazo girado, lanza del rayo, balonazo, tijera y ambientes
+node scripts/prueba-nombres.mjs http://localhost:4173/ capturas/nombres   # los 24 nombres dentro de su sitio: selección, panel de la pelea, técnica a 640 y 780, VS, resultados y medallero
 node scripts/prueba-g2.mjs http://localhost:4173/ capturas/g2   # G2, RAYO_PUNTA y H2_CORTO: tarjetas, ícono del menú, VS de 4, pausa, SE ACABÓ, ¿OTRA PARTIDITA?, medallas, podio con banderas, rayo y trueno
 node scripts/prueba-g1d2.mjs http://localhost:4173/ capturas/g1d2   # interfaz G1 y vehículos D2: botones, marcador, reloj de TV, letreros con fondo, ferry, motos, xích lô, jacintos y fruta
 node scripts/prueba-gira.mjs http://localhost:4173/ capturas/gira   # la Olimpiada con Tama-wari, Đá cầu, Tejo y Judo: cada una arranca en gira, reparte puntos y vuelve al medallero

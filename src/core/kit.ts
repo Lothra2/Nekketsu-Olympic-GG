@@ -106,6 +106,17 @@ export const kit = (): Manifest => {
 };
 export const setKit = (m: Manifest) => { manifest = m; };
 
+/** Los que van con su tratamiento por delante: Señora Carmen, Don Hernando, Abuela Nerva, Chamo Toto, Bà Hoa. */
+const TRATO = ['señora', 'don', 'abuela', 'chamo', 'bà'];
+/**
+ * El nombre corto de un atleta, en mayúsculas: sin el apodo entre comillas ni el apellido (KENJI, RYU), pero con su
+ * tratamiento cuando lo lleva (SEÑORA CARMEN, no SEÑORA).
+ */
+export function nombreCorto(id: string) {
+  const p = (kit().atletas[id]?.nombre ?? id).replace(/".*"/, '').trim().split(/\s+/);
+  return (TRATO.includes(p[0].toLowerCase()) && p[1] ? `${p[0]} ${p[1]}` : p[0]).toUpperCase();
+}
+
 /** Clave de textura de un pack de un atleta. */
 export const texKey = (id: string, pack: string) => `${id}:${pack}`;
 export const frameName = (anim: string, row: Row, i: number) => `${anim}_${row}_${i}`;

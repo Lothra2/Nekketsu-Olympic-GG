@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { MAX_W } from '../core/pantalla';
 import { Input, rotular } from '../core/input';
 import { chip, PELEA } from '../core/music';
-import { kit, bucle } from '../core/kit';
+import { kit, bucle, nombreCorto } from '../core/kit';
 import { txt, flash, pantallaCarga } from '../core/ui';
 import { letreroGrande, MarcadorTV, hayUi } from '../core/interfaz';
 import { Coach, type Paso } from '../core/coach';
@@ -292,7 +292,7 @@ export abstract class EventScene extends Phaser.Scene {
   protected get rivalEntreno() { return ellos()[0] ?? 'kenji'; }
   protected get rivalEntrenoNombre() { return this.nombre(this.rivalEntreno); }
 
-  protected nombre(id: string) { return (kit().atletas[id]?.nombre ?? id).split(' ')[0].toUpperCase(); }
+  protected nombre(id: string) { return nombreCorto(id); }
 
   /**
    * Tabla final. `orden` va del primero al último; `valor` es lo que se muestra (tiempo, distancia).

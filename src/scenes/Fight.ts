@@ -17,7 +17,7 @@ import { nuestros, ellos, lado, equipos, conJugador, victoria } from '../core/eq
 import { cargarAtletas, packsDe } from '../core/carga';
 import { PUNTOS, type Gira } from '../events/base';
 import { Coach, type Paso } from '../core/coach';
-import { kit, bucle } from '../core/kit';
+import { kit, bucle, nombreCorto } from '../core/kit';
 import azotea from '../../data/stages/caracas_azotea.layout.json';
 import { hayArte, pintarEscenario, queueEscenario } from '../events/escenario';
 
@@ -717,7 +717,7 @@ export class Fight extends Phaser.Scene implements World {
   }
 
   /** El nombre corto de un atleta, como en su tarjeta. */
-  private nombreDe(id: string) { return (kit().atletas[id]?.nombre ?? id).split(' ')[0].toUpperCase(); }
+  private nombreDe(id: string) { return nombreCorto(id); }
 
   private banner(s: string, font: 'fuente_titulo' | 'fuente_titulo_plata' | 'fuente_ui', scale: number, hold: number, y = 150) {
     return letreroGrande(this, (o) => this.uiAdd(o), s, font, scale, hold, y);
@@ -890,9 +890,16 @@ export class Fight extends Phaser.Scene implements World {
     const lines = this.uiAdd(speedLines(this, 8602));
     const por = this.uiAdd(this.add.image(320 - side * 400, 150, `retratos:${a.id}`, 'grande_enojo').setDepth(8603));
     this.tweens.add({ targets: por, x: 320 - side * 160, duration: 220, ease: 'Back.out' });
-    const name = this.uiAdd(txt(this, 320 + side * 90, 136, (this.judo && a.tiene('vovinam_scissor') ? '¡TIJERA VOVINAM!' : nombreTecnica(a.id)), 'fuente_titulo', 2).setDepth(8604).setScale(5).setAlpha(0));
-    this.tweens.add({ targets: name, scale: 2, alpha: 1, duration: 200, delay: 150 });
-    const who = this.uiAdd(txt(this, 320 + side * 90, 172, a.nombre, 'fuente_ui', 2).setDepth(8604).setTint(0xffe080));
+    // la técnica y el nombre van entre el retrato y el borde de lo que se ve (640 en la tablet, hasta 800 en el
+    // iPhone): centrados ahí, y a 1 si a 2 no caben
+    const W = Math.min(800, this.scale.gameSize.width), ini = side > 0 ? 320 - side * 160 + 56 : 320 - W / 2 + 8, fin = side > 0 ? 320 + W / 2 - 8 : 320 - side * 160 - 56;
+    const cx = (ini + fin) / 2, ancho = fin - ini;
+    const name = this.uiAdd(txt(this, cx, 136, (this.judo && a.tiene('vovinam_scissor') ? '¡TIJERA VOVINAM!' : nombreTecnica(a.id)), 'fuente_titulo', 1).setDepth(8604).setAlpha(0));
+    const esc = name.width * 2 <= ancho ? 2 : 1;
+    name.setScale(5);
+    this.tweens.add({ targets: name, scale: esc, alpha: 1, duration: 200, delay: 150 });
+    const who = this.uiAdd(txt(this, cx, 172, a.nombre, 'fuente_ui', 1).setDepth(8604).setTint(0xffe080));
+    who.setScale(who.width * 2 <= ancho ? 2 : 1);
     this.cutObjs = [dark, band, lines, por, name, who];
     chip.boom(0.7);
     this.sfx('subir_nivel', 0.5);
@@ -1440,7 +1447,7 @@ export class Fight extends Phaser.Scene implements World {
         list.forEach((a, i) => {
           const x = right ? 640 - 10 - (i % 2) * 150 : 10 + (i % 2) * 150, y = 8 + Math.floor(i / 2) * 18;
           this.hudObjs.push(this.uiAdd(this.add.image(x + (right ? -6 : 6), y + 4, 'cabecitas', a.id).setDepth(8001)));
-          this.hudObjs.push(this.uiAdd(txt(this, right ? x - 16 : x + 16, y, a.nombre.split(' ')[0], 'fuente_ui', 1, right ? 1 : 0).setDepth(8001).setTint(a.human ? 0xffe040 : 0xffffff)));
+          this.hudObjs.push(this.uiAdd(txt(this, right ? x - 16 : x + 16, y, nombreCorto(a.id), 'fuente_ui', 1, right ? 1 : 0).setDepth(8001).setTint(a.human ? 0xffe040 : 0xffffff)));
         });
       }
     });

@@ -8,6 +8,7 @@ import { nuestros, ellos, lado, setPartido, victoria } from '../core/equipos';
 import { cargarAtletas, packsDe } from '../core/carga';
 import { fireworks } from './logo';
 import { hayUi, pieza } from '../core/interfaz';
+import { nombreCorto } from '../core/kit';
 
 /**
  * Entre prueba y prueba de la Olimpiada Express: el marcador por equipos, lo que va de gira y la que viene.
@@ -71,10 +72,10 @@ export class Medallero extends Phaser.Scene {
       txt(this, 112, y + 9, p.lugar, 'fuente_ui', 1, 0).setTint(0x8a8ab0);
       if (hecha) {
         const oro = hecha.podio[0];
-        if (hayUi(this, 'medallas_16')) this.add.image(470, y, 'ui_medallas_16', 0);
-        else this.add.circle(470, y, 8, 0xffd040);
-        this.add.image(496, y, 'cabecitas', oro);
-        txt(this, 512, y, oro.toUpperCase(), 'fuente_ui', 1, 0);
+        if (hayUi(this, 'medallas_16')) this.add.image(430, y, 'ui_medallas_16', 0);
+        else this.add.circle(430, y, 8, 0xffd040);
+        this.add.image(454, y, 'cabecitas', oro);
+        txt(this, 468, y, nombreCorto(oro), 'fuente_ui', 1, 0);
       } else if (viene) {
         this.tweens.add({ targets: n, alpha: 0.3, duration: 400, yoyo: true, repeat: -1 });
         txt(this, 560, y, i === this.lista.length - 1 ? 'X2 PTS' : '', 'fuente_ui', 1, 1).setTint(0xff8040);

@@ -135,8 +135,10 @@ export class Select extends Phaser.Scene {
         c.add(this.add.image(0, 0, `ui_tarjeta_${e.id}`));
         const [tx, ty, tw, th] = tar.texto ?? [42, 6, 104, 20];
         // el nombre se queda entre la bandera y el escudo: si no cabe a 2, va a 1
-        const nom = txt(this, -92 + tx + tw / 2, -52 + ty + th / 2, e.corto, 'fuente_ui', 2).setTint(e.claro);
-        if (nom.width > tw) nom.setScale(1);
+        // el nombre se queda entre la bandera y el escudo: a 2 si cabe, si no lo más grande que quepa en medios
+        // (a 1,5 cada pixel de la letra sigue siendo parejo en pantalla)
+        const nom = txt(this, -92 + tx + tw / 2, -52 + ty + th / 2, e.corto, 'fuente_ui', 1).setTint(e.claro);
+        nom.setScale(Math.max(1, Math.min(2, Math.floor(((tw - 2) / nom.width) * 2) / 2)));
         c.add(nom);
         e.atletas.forEach((a, k) => c.add(this.add.image(-92 + 12 + k * 40, -52 + 36, `retratos:${a}`, 'chico_feliz').setOrigin(0)));
         c.add(g);
@@ -162,9 +164,22 @@ export class Select extends Phaser.Scene {
       const c = this.add.container(x, y);
       const g = this.add.graphics();
       c.add(g);
-      c.add(this.add.image(0, 0, `retratos:${id}`, this.paso === 'jugador' ? 'grande_feliz' : 'grande_enojo'));
+      const cara = this.add.image(0, 0, `retratos:${id}`, this.paso === 'jugador' ? 'grande_feliz' : 'grande_enojo');
+      c.add(cara);
       const a = kit().atletas[id];
-      c.add(txt(this, 0, 62, a.nombre.replace(/".*"/, '').trim(), 'fuente_titulo', 1));
+      // el nombre completo; si no cabe en la tarjeta, en dos renglones partido en el espacio más al medio, y la cara
+      // sube un poco para hacerles sitio
+      const nombre = a.nombre.replace(/".*"/, '').replace(/\s+/g, ' ').trim();
+      const t = txt(this, 0, 62, nombre, 'fuente_titulo', 1);
+      c.add(t);
+      if (t.width > 100 && nombre.includes(' ')) {
+        const esp = [...nombre].map((ch, k) => (ch === ' ' ? k : -1)).filter((k) => k > 0);
+        const k = esp.reduce((m, k) => (Math.abs(k - nombre.length / 2) < Math.abs(m - nombre.length / 2) ? k : m));
+        t.setText(nombre.slice(0, k).toUpperCase()).setY(52);
+        c.add(txt(this, 0, 69, nombre.slice(k + 1), 'fuente_titulo', 1));
+        cara.setY(-6);
+      }
+      for (const o of c.list) if (o instanceof Phaser.GameObjects.BitmapText && o.width > 104) o.setScale(104 / o.width);
       if (a.numero) c.add(txt(this, 40, -40, `#${a.numero}`, 'fuente_ui', 1).setTint(0xf2c230));
       c.setData('g', g).setData('color', color);
       c.setSize(110, 140).setInteractive().on('pointerdown', () => { if (this.sel === i) this.confirm(); else { this.sel = i; this.refresh(); } });
@@ -185,8 +200,8 @@ export class Select extends Phaser.Scene {
         g.fillStyle(0x08081a, 0.88).fillRoundedRect(-92, -52, 184, 104, 6);
         g.lineStyle(on ? 3 : 1, on ? c.getData('color') : 0x4a4a6a).strokeRoundedRect(-92, -52, 184, 104, 6);
       } else {
-        g.fillStyle(0x08081a, 0.85).fillRect(-54, -54, 108, 130);
-        g.lineStyle(on ? 3 : 1, on ? c.getData('color') : 0x4a4a6a).strokeRect(-54, -54, 108, 130);
+        g.fillStyle(0x08081a, 0.85).fillRect(-54, -58, 108, 138);
+        g.lineStyle(on ? 3 : 1, on ? c.getData('color') : 0x4a4a6a).strokeRect(-54, -58, 108, 138);
       }
       c.setScale(on ? 1.06 : 0.94).setAlpha(on ? 1 : 0.7);
     });
