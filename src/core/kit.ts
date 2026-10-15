@@ -232,10 +232,31 @@ export function makeAveAnims(scene: Phaser.Scene) {
   }
 }
 
+/**
+ * Los retratos grandes en pixel, como antes del lote G2 (Rick los prefiere así): cada grande es su chico de 40
+ * recortado a 32 x 32 (desde x 4 e y 1) y agrandado x3 a bloques, que es justo como salían antes (probado: cero
+ * pixeles distintos contra la hoja vieja). Se rehace al cargar, así vale con cualquier kit.
+ */
+function retratosPixel(scene: Phaser.Scene, key: string, r: { chico: number; grande: number; expresiones: string[] }) {
+  const src = scene.textures.get(key).getSourceImage() as HTMLImageElement | HTMLCanvasElement;
+  if (!src || r.chico !== 40 || r.grande !== 96 || src instanceof HTMLCanvasElement) return;
+  const cv = document.createElement('canvas');
+  cv.width = src.width;
+  cv.height = src.height;
+  const ctx = cv.getContext('2d');
+  if (!ctx) return;
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(src, 0, 0, src.width, r.chico, 0, 0, src.width, r.chico);
+  r.expresiones.forEach((_e, i) => ctx.drawImage(src, i * r.chico + 4, 1, 32, 32, i * r.grande, r.chico, r.grande, r.grande));
+  scene.textures.remove(key);
+  scene.textures.addCanvas(key, cv);
+}
+
 /** Recorta los retratos (40 y 96) y las cabecitas en cuadros con nombre. */
 export function cutPortraits(scene: Phaser.Scene) {
   const m = kit();
   for (const [id, a] of Object.entries(m.atletas)) {
+    retratosPixel(scene, `retratos:${id}`, a.retratos);
     const t = scene.textures.get(`retratos:${id}`);
     a.retratos.expresiones.forEach((e, i) => {
       t.add(`chico_${e}`, 0, i * a.retratos.chico, 0, a.retratos.chico, a.retratos.chico);

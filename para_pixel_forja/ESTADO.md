@@ -57,7 +57,7 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
     1. La rosa de los vientos de `mapa_gira` está en (512, 297) del 800 y la barra del pasaporte del juego empieza en y 311: la mitad de abajo de la rosa queda tapada. Subirla a y 270 o menos, o moverla a la esquina de arriba a la derecha.
     2. `intro_maracaibo` no trae `huecos`: el juego usa los de `intro_bogota` (188, 296, 404 y 512, en y 150). Hace falta `huecos` propios, o sprites en `malecon`.
     3. En `intro_bogota` los huecos (y 150 a 246) caen sobre el techo de la buseta (y 236): los retratos, cortados en el pecho, quedan flotando. Igual en Maracaibo sobre la baranda. Un marco o una franja detrás de cada hueco lo resolvería.
-    4. La cara `grande_enojo` se lee como bigote en las mujeres y los niños: Sophie, Yusmary, la abuela Nerva y Kenji salen con una raya oscura bajo la nariz en el VS y en las tomas de los rivales. Es la boca de enojo redibujada a 96.
+  - **Retratos grandes en pixel otra vez:** a Rick no le gustan los redibujados a 96 de G2 y prefiere los de bloques. El juego los rehace al cargar (`retratosPixel` en `src/core/kit.ts`): cada grande es su chico de 40 recortado a 32 x 32 desde (4, 1) y agrandado x3 a bloques, que es exactamente como salían antes (cero pixeles distintos contra la hoja vieja). Vale con cualquier kit. Con eso también se fue la boca de enojo que parecía bigote.
   - Probado con `scripts/prueba-intro2.mjs`.
 
 - **RAYO_PUNTA, H2_CORTO y G2 en el juego** (pixel_forja `main` en 91f6d48: #47 a #49). `equipos.json` lleva `bandera` y `escudo` en los 6 equipos; el kit suma `trueno`, `furro` y `corneta_moto` y los ambientes `mercado`, `rio` y `estadio`. El artifact queda en 500 archivos: los 6 audios son lo único nuevo, todo G2 va en `ui/paquete.wasm`.
