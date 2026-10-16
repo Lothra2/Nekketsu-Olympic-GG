@@ -113,7 +113,8 @@ export class Voley extends EventScene {
       this.pat.push({ c, fig, sombra, x: casa, fila, z: 0, vz: 0, st: 'piso', golpeT: 0, cool: 0, puntos: 0, toques: 0, casa, pensar: Math.random() * 0.2, quiereX: casa, salta: false, plan: { n: -1, tipo: 'bien', reaccion: 0, ruido: 0 } });
     });
     // la pelota del kit (lote SP2), del tamaño de los atletas; si no llegó, la pintada por código
-    const pk = pelotaKit(this, 'balon_voley');
+    // la talla grande del kit: con la de 48 el balón se perdía entre los pies en el celular
+    const pk = pelotaKit(this, 'balon_voley', '64');
     const spr = (pk ? this.add.image(0, 0, 'pelotas', pk) : this.add.image(0, 0, 'balon_voley').setScale(1.3)).setDepth(5000);
     // un rastro suave detrás dla pelota, para seguirlo con la vista
     const rastro = this.add.particles(0, 0, 'px', { lifespan: 260, scale: { start: 0.6, end: 0 }, alpha: { start: 0.5, end: 0 }, tint: 0xffffff, frequency: 30 }).setDepth(4999);

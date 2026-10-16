@@ -121,15 +121,16 @@ export class Tenis extends EventScene {
       this.pat.push({ c, fig, sombra, x: casa, fila, z: 0, vz: 0, st: 'piso', golpeT: 0, cool: 0, puntos: 0, toques: 0, casa, pensar: Math.random() * 0.2, quiereX: casa, salta: false, fallo: false, plan: { n: -1, tipo: 'bien', reaccion: 0, ruido: 0, arma: false } });
     });
     // la pelota del kit (lote SP2), del tamaño de los atletas; si no llegó, la pintada por código
-    const pk = pelotaKit(this, 'pelota_tenis');
-    const spr = (pk ? this.add.image(0, 0, 'pelotas', pk) : this.add.image(0, 0, 'pelota_tenis').setScale(1.2)).setDepth(5000);
+    // la pelota de tenis del kit mide 6 px: al doble (12), redonda y nítida, para seguirla en el celular
+    const pk = pelotaKit(this, 'pelota_tenis', '64');
+    const spr = (pk ? this.add.image(0, 0, 'pelotas', pk).setScale(2) : this.add.image(0, 0, 'pelota_tenis').setScale(2)).setDepth(5000);
     // un rastro suave detrás dla pelota, para seguirlo con la vista
-    const rastro = this.add.particles(0, 0, 'px', { lifespan: 260, scale: { start: 0.6, end: 0 }, alpha: { start: 0.5, end: 0 }, tint: 0xffffff, frequency: 30 }).setDepth(4999);
+    const rastro = this.add.particles(0, 0, 'px', { lifespan: 300, scale: { start: 1.2, end: 0 }, alpha: { start: 0.75, end: 0 }, tint: 0xffffff, frequency: 20 }).setDepth(4999);
     rastro.startFollow(spr);
     // el drive Nekketsu deja fuego detrás
     const fuego = this.add.particles(0, 0, 'px', { lifespan: 320, scale: { start: 1.5, end: 0 }, alpha: { start: 0.9, end: 0 }, tint: [0xffe040, 0xff6020, 0xffffff], frequency: 12, emitting: false }).setDepth(4998);
     fuego.startFollow(spr);
-    const sombra = this.add.ellipse(0, PISO, 8, 3, 0x000000, 0.3).setDepth(PISO - 20);
+    const sombra = this.add.ellipse(0, PISO, 11, 4, 0x000000, 0.4).setDepth(PISO - 20);
     const marca = this.add.ellipse(0, PISO, 22, 7).setStrokeStyle(2, 0xffe040, 0.9).setDepth(PISO - 19).setVisible(false);
     this.bola = { x: 0, z: 0, vx: 0, vz: 0, en: 'mano', dueño: null, ultimo: null, ultimoTiro: null, lado: 0, toques: 0, spr, sombra, marca, red: false, n: 0, botes: 0, rastro, fuego };
     // entrenando, siempre saca Kenji (suave, hacia ti)

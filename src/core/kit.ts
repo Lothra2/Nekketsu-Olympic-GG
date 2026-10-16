@@ -167,8 +167,8 @@ export interface Npc {
 }
 
 /** El cuadro de una pelota suelta del kit (balon_basket, pelota_tenis...) para la celda de 48, o null si no está. */
-export function pelotaKit(scene: Phaser.Scene, id: string): string | null {
-  const f = kit().pelotas?.[id]?.cuadros['48'];
+export function pelotaKit(scene: Phaser.Scene, id: string, talla: '48' | '64' = '48'): string | null {
+  const f = kit().pelotas?.[id]?.cuadros[talla] ?? kit().pelotas?.[id]?.cuadros['48'];
   return f && scene.textures.exists('pelotas') && scene.textures.get('pelotas').has(f) ? f : null;
 }
 

@@ -111,7 +111,8 @@ export class Basket extends EventScene {
     this.cancha();
     this.armarEquipos();
     // la pelota del kit (lote SP2), del tamaño de los atletas; si no llegó, la pintada por código
-    const pk = pelotaKit(this, 'balon_basket');
+    // la talla grande del kit: con la de 48 el balón se perdía entre los pies en el celular
+    const pk = pelotaKit(this, 'balon_basket', '64');
     const spr = (pk ? this.add.image(0, 0, 'pelotas', pk) : this.add.image(0, 0, 'balon_basket').setScale(1.2));
     const sombra = this.add.ellipse(0, 0, 9, 3, 0x000000, 0.3);
     // el fuego del tiro Nekketsu
@@ -772,8 +773,9 @@ export class Basket extends EventScene {
     // el balón va delante del aro mientras baja por la red
     // botándolo parado, el balón va donde lo pone el dribble del kit
     const mano = b.dueño?.fig.anim.name === 'dribble' ? b.dueño.fig.pelota() : null;
+    // el balón por encima de los que están justo delante: en el montón no se perdía de vista (en las manos, con el que lo lleva)
     if (mano) b.spr.setPosition(Math.round(mano.x), Math.round(mano.y)).setDepth(b.dueño!.fig.depth + (mano.detras ? -0.1 : 0.1));
-    else b.spr.setPosition(sx, Math.round(FT + b.y - b.z - 3)).setDepth(FT + b.y + 0.3);
+    else b.spr.setPosition(sx, Math.round(FT + b.y - b.z - 3)).setDepth(FT + b.y + 12);
     b.fuego.emitting = !!b.tiro?.nekketsu;
     b.sombra.setPosition(sx, FT + b.y).setDepth(FT + b.y - 0.6).setScale(Math.max(0.4, 1 - b.z / 100));
     const c = this.ctrl;

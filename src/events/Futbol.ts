@@ -115,7 +115,8 @@ export class Futbol extends EventScene {
     this.cancha();
     this.armarEquipos();
     // la pelota del kit (lote SP2), del tamaño de los atletas; si no llegó, la pintada por código
-    const pk = pelotaKit(this, 'balon_futbol');
+    // la talla grande del kit: con la de 48 el balón se perdía entre los pies en el celular
+    const pk = pelotaKit(this, 'balon_futbol', '64');
     const spr = (pk ? this.add.image(0, 0, 'pelotas', pk) : this.add.image(0, 0, 'balon_futbol').setScale(1.2));
     const sombra = this.add.ellipse(0, 0, 9, 3, 0x000000, 0.3);
     const fuego = this.add.particles(0, 0, 'px', { lifespan: 300, scale: { start: 1.4, end: 0 }, alpha: { start: 0.8, end: 0 }, tint: [0xffe040, 0xff6020, 0xffffff], frequency: 14, emitting: false }).setDepth(4999);
@@ -805,8 +806,9 @@ export class Futbol extends EventScene {
     const sx = Math.round(this.sx(b.x, b.y));
     // en las manos del arquero, donde la pone la animación del kit
     const mano = b.dueño?.arquero ? b.dueño.fig.pelota() : null;
+    // el balón por encima de los que están justo delante: en el montón no se perdía de vista (en las manos, con el que lo lleva)
     if (mano) b.spr.setPosition(Math.round(mano.x), Math.round(mano.y)).setDepth(b.dueño!.fig.depth + (mano.detras ? -0.1 : 0.1));
-    else b.spr.setPosition(sx, Math.round(FT + b.y - b.z - 3)).setDepth(FT + b.y + 0.3).setRotation(b.spr.rotation + (b.dueño ? 0 : b.vx * 0.002));
+    else b.spr.setPosition(sx, Math.round(FT + b.y - b.z - 3)).setDepth(FT + b.y + 12).setRotation(b.spr.rotation + (b.dueño ? 0 : b.vx * 0.002));
     b.sombra.setPosition(sx, FT + b.y).setDepth(FT + b.y - 0.6).setScale(Math.max(0.4, 1 - b.z / 80));
     const m = this.mari;
     this.marimonda.setVisible(m.vx !== 0).setPosition(Math.round(this.sx(m.x, m.y)), FT + m.y).setDepth(FT + m.y).setFlipX(m.vx < 0);
