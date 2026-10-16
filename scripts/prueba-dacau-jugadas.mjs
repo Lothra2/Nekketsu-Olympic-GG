@@ -100,7 +100,8 @@ check(ok3 >= 2, 'tu patada desde la red termina en chilena (de ella o tuya)', `$
 
 // 4. máquina contra máquina: tú también la máquina
 await p.evaluate(() => { const s = window.game.scene.getScene('DaCau'); s.pat[0].c.human = false; s.marcador = [0, 0]; s.alSaque(0); window.__log = []; });
-await p.waitForTimeout(45000);
+// el đá cầu se juega a 5: el marcador vuelve a cero para que el partido no se acabe antes de contar las jugadas
+for (let i = 0; i < 9; i++) { await p.waitForTimeout(5000); await p.evaluate(() => { const s = window.game.scene.getScene('DaCau'); if (Math.max(...s.marcador) >= 3) s.marcador = [0, 0]; }); }
 const l4 = await p.evaluate(() => window.__log.slice());
 const rem = [0, 1].map((t) => l4.filter((x) => x.endsWith(':chilena') && (t === 0 ? !x.startsWith('rival') : x.startsWith('rival'))).length);
 const arm = l4.filter((x) => x.endsWith(':pase')).length;

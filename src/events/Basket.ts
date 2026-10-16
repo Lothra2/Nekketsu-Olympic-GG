@@ -648,7 +648,8 @@ export class Basket extends EventScene {
   /** El tapón: saltando cerca del tirador justo cuando suelta, el tiro se va al piso. */
   private tapon(j: Jug) {
     const b = this.bola, t = b.tiro;
-    if (!t || t.tirador.team === j.team || t.t > 0.3 || Math.hypot(t.tirador.x - j.x, t.tirador.y - j.y) > 26) return;
+    // tu ventana es más ancha (saltas un poquito antes); la de la máquina, justo al soltar
+    if (!t || t.tirador.team === j.team || t.t > (j === this.ctrl ? 0.3 : 0.15) || Math.hypot(t.tirador.x - j.x, t.tirador.y - j.y) > 26) return;
     b.tiro = null;
     b.vx = (j.x - t.tirador.x) * -3; b.vy = (Math.random() - 0.5) * 80; b.vz = 60; b.libre = 0.2;
     this.letrero(j, '¡TAPÓN!', 0x8ae0ff);
