@@ -23,8 +23,13 @@ const G = 230;
 const ZOOM = 1.15;
 /** a cuántos puntos se gana */
 const META = 7;
+/** el armado cae a esta distancia de la red: ahí se salta a rematar */
+const ATAQUE = 40;
+/** la altura de la pelota a la que se le pega el remate (con el salto arriba) */
+const ALTO_REMATE = 82;
 
-type Tiro = 'patada' | 'pase' | 'remate' | 'saque' | 'fuego';
+/** 'pase' es el armado junto a la red para el remate; 'recibo', la pelota alta al compañero para que él arme */
+type Tiro = 'patada' | 'pase' | 'recibo' | 'remate' | 'saque' | 'fuego';
 interface Voleador {
   c: Competidor; fig: Figura; sombra: Phaser.GameObjects.Ellipse;
   x: number; fila: 0 | 1; z: number; vz: number; st: 'piso' | 'aire'; golpeT: number; cool: number;
@@ -193,6 +198,35 @@ export class Voley extends EventScene {
     return c.x + c.vx * T;
   }
 
+  /** En cuánto tiempo la pelota, bajando, pasa por la altura `z` (null si no llega tan alto). */
+  private cuandoA(z: number): number | null {
+    const c = this.bola;
+    if (c.en !== 'aire') return null;
+    const d = c.vz * c.vz + 2 * G * (c.z - z);
+    return d < 0 ? null : (c.vz + Math.sqrt(d)) / G;
+  }
+
+  /** El punto de remate de un lado: junto a la red. */
+  private ataque(team: 0 | 1) { return RED_X + (team === 0 ? -ATAQUE : ATAQUE); }
+
+  /** ¿La pelota en el aire es un armado de su compañero para que `q` remate? */
+  private armadaPara(q: Voleador): boolean {
+    const c = this.bola;
+    return c.en === 'aire' && c.ultimoTiro === 'pase' && !!c.ultimo && c.ultimo !== q && c.ultimo.c.team === q.c.team && c.lado === q.c.team && c.toques <= 2;
+  }
+
+  /** ¿Es para que `q` remate? El armado del compañero, o entrenando solo, el que se levantó él mismo. */
+  private paraRematar(q: Voleador): boolean {
+    const c = this.bola;
+    return this.armadaPara(q) || (!!this.d.practica && c.en === 'aire' && c.ultimoTiro === 'pase' && c.ultimo === q);
+  }
+
+  /** Dónde va a estar la pelota cuando baje a la altura del remate (para saltar ahí). */
+  private puntoRemate(): { x: number; t: number } | null {
+    const t = this.cuandoA(ALTO_REMATE);
+    return t === null ? null : { x: this.bola.x + this.bola.vx * t, t };
+  }
+
   /** El que saca tiene la pelota en la mano. */
   private alSaque(team: 0 | 1) {
     this.saca = team;
@@ -219,7 +253,7 @@ export class Voley extends EventScene {
     if (c.en !== 'aire') return null;
     const paseo = ajustes().nombre === 'PASEO' && p.c.human;
     // la que te armó tu compañero para el remate: más fácil de alcanzar
-    const armada = p.c.human && c.ultimoTiro === 'pase' && c.ultimo !== p && c.ultimo?.c.team === p.c.team;
+    const armada = p.c.human && this.paraRematar(p);
     const dx = Math.abs(c.x - p.x), alto = c.z - p.z;
     if (dx > (paseo || armada ? 36 : 26) || alto < 4 || alto > (p.st === 'aire' ? 84 : paseo ? 78 : 68)) return null;
     return alto;
@@ -299,13 +333,24 @@ export class Voley extends EventScene {
       this.shake(120, 0.006);
       if (p.c.human) this.remates++;
     } else if (quiere === 'pase') {
-      // la levanta alta para el compañero (o para sí mismo, más cerca de la red)
-      tiro = 'pase';
       const comp = this.pat.find((o) => o !== p && o.c.team === team);
-      // a tu compañero, donde está; si la persona es el compañero, la máquina se la arma junto a la red para el remate
-      let tx = comp ? comp.x : Phaser.Math.Clamp(p.x + dir * 40, BORDE[0] + 20, BORDE[1] - 20);
-      if (comp?.c.human) { tx = RED_X - dir * 44; this.letrero(comp, '¡SALTA Y REMATA!', 0xffe040); }
-      this.lanzar(team === 0 ? Phaser.Math.Clamp(tx, BORDE[0] + 10, RED_X - 26) : Phaser.Math.Clamp(tx, RED_X + 26, BORDE[1] - 10), comp?.c.human ? 136 : 128 + Math.random() * 14);
+      const red = (o: Voleador) => Math.abs(o.x - RED_X);
+      if (!comp) {
+        // solo (entrenando): la levanta para sí mismo, un poco más cerca de la red
+        tiro = 'pase';
+        const tx = p.x + dir * 40;
+        this.lanzar(team === 0 ? Phaser.Math.Clamp(tx, BORDE[0] + 10, RED_X - 26) : Phaser.Math.Clamp(tx, RED_X + 26, BORDE[1] - 10), 128);
+      } else if (c.toques <= 2 && (comp.c.human || red(comp) <= red(p) + 30 || !p.c.human)) {
+        // el armado: alta y junto a la red, para que el compañero salte y remate
+        tiro = 'pase';
+        this.lanzar(this.ataque(team), comp.c.human ? 136 : 130);
+        this.letrero(comp, comp.c.human ? '¡SALTA Y REMATA!' : '¡ARRIBA!', 0xffe040);
+      } else {
+        // la persona está más cerca de la red que su compañero: se la pasa alta para que él se la arme de vuelta
+        tiro = 'recibo';
+        const tx = Phaser.Math.Clamp(comp.x, team === 0 ? BORDE[0] + 30 : RED_X + 70, team === 0 ? RED_X - 70 : BORDE[1] - 30);
+        this.lanzar(tx, 118);
+      }
     } else {
       tiro = 'patada';
       const lejos = team === 0 ? [380, 580] : [60, 260];
@@ -410,7 +455,7 @@ export class Voley extends EventScene {
       let mx = 0, salta = false, patada = false, pase = false, corre = false, fuego = false;
       if (jugando && this.pausaT <= 0) {
         if (q.c.human) { mx = p.x; corre = p.run; salta = p.pressed.jump; patada = p.pressed.punch; pase = p.pressed.kick; fuego = p.pressed.special && this.nek[0] >= 100; }
-        else ({ mx, salta, patada, pase, fuego } = this.cpu(q, dt));
+        else ({ mx, salta, patada, pase, fuego, corre } = this.cpu(q, dt));
       }
       // el que saca no camina con la pelota en la mano: la suelta con un golpe
       if (c.en === 'mano' && c.dueño === q) { if ((patada || pase) && q.cool <= 0) this.tocar(q, 'patada'); mx = 0; }
@@ -500,12 +545,14 @@ export class Voley extends EventScene {
   // ------------------------------------------------------------------ la máquina
 
   private cpu(q: Voleador, dt: number) {
-    const r = { mx: 0, salta: false, patada: false, pase: false, fuego: false };
+    const r = { mx: 0, salta: false, patada: false, pase: false, fuego: false, corre: false };
     const c = this.bola, team = q.c.team;
     q.pensar -= dt;
     // los errores: más en los niveles fáciles; y si la persona va perdiendo por mucho, un poco más
     const dif = this.marcador[1] - this.marcador[0];
-    const error = this.d.practica ? 0 : Phaser.Math.Clamp(0.5 - 0.36 * ajustes().cpuAgresion + (team === 1 && dif >= 3 ? 0.12 * ajustes().ayuda : 0), 0.04, 0.6);
+    // tu compañera es confiable en todos los niveles: los errores fáciles son de los rivales
+    const conmigo = this.pat.some((o) => o.c.human && o.c.team === team);
+    const error = this.d.practica ? 0 : conmigo ? 0.05 : Phaser.Math.Clamp(0.5 - 0.36 * ajustes().cpuAgresion + (dif >= 3 ? 0.12 * ajustes().ayuda : 0), 0.04, 0.6);
     if (c.en === 'mano' && c.dueño === q) { if (q.cool <= 0) r.patada = true; return r; }
     // una pelota nueva: decide de una vez si le va a pegar bien, mal o si no llega, y cuánto tarda en reaccionar
     if (c.en === 'aire' && q.plan.n !== c.n) {
@@ -518,17 +565,28 @@ export class Voley extends EventScene {
     q.plan.reaccion = Math.max(0, q.plan.reaccion - dt);
     // a dónde va a caer, y si es de mi lado y me toca a mí (el de adelante cerca de la red, el de atrás al fondo)
     let meta = q.casa;
-    if (c.en === 'aire') {
+    const dir = team === 0 ? 1 : -1;
+    const remata = this.armadaPara(q);
+    if (remata) {
+      // el armado es para mí: corre a donde la pelota baja a la altura del remate y salta justo a tiempo para pegarle
+      // arriba (el salto tarda ~0,35 s en llegar arriba), sea de adelante o de atrás
+      const pr = this.puntoRemate();
+      if (pr) {
+        meta = pr.x - dir * 4;
+        r.corre = Math.abs(meta - q.x) > 24;
+        if (q.st === 'piso' && pr.t < 0.36 && Math.abs(pr.x - q.x) < 22 && q.plan.tipo !== 'falla') r.salta = true;
+      }
+    } else if (c.en === 'aire') {
       const xl = this.caida();
       const mio = team === 0 ? xl < RED_X : xl >= RED_X;
       if (mio) {
         const compas = this.pat.filter((o) => o.c.team === team);
         // va el más cerca de donde cae; pero si la tocó uno de este lado, le toca al otro (nadie la toca dos seguidas)
         const tocoUnCompa = c.ultimo?.c.team === team && c.lado === team && compas.length > 1;
-        const yo = compas.length === 1 || (tocoUnCompa ? c.ultimo !== q : compas.sort((a, b) => Math.abs(a.x - xl) - Math.abs(b.x - xl))[0] === q);
-        if (yo) meta = xl - (team === 0 ? 6 : -6) + q.plan.ruido;
-        // el pase del compañero: el de adelante salta a rematar
-        if (yo && c.ultimoTiro === 'pase' && c.ultimo?.c.team === team && q.fila === 1 && Math.abs(c.x - q.x) < 30 && c.z > 70 && c.z < 100 && c.vz < 0 && q.st === 'piso' && Math.random() < 0.5 + ajustes().cpuAgresion * 0.4) r.salta = true;
+        const yo = compas.length === 1 || (tocoUnCompa ? c.ultimo !== q : [...compas].sort((a, b) => Math.abs(a.x - xl) - Math.abs(b.x - xl))[0] === q);
+        if (yo) { meta = xl - dir * 6 + q.plan.ruido; r.corre = Math.abs(meta - q.x) > 60; }
+        // la recibe el compañero: este sube a la red a esperar el armado (o a armarle); si la acaba de tocar él, cubre atrás
+        else if (c.ultimo !== q) meta = RED_X - dir * (ATAQUE + 16);
       }
     }
     // el remate del otro: el de adelante salta a bloquear (a veces)
@@ -538,7 +596,9 @@ export class Voley extends EventScene {
     r.mx = Math.abs(dx) > 5 ? Math.sign(dx) : 0;
     // pegarle: cuando la tiene a la altura de los brazos (o saltando, arriba)
     const alto = this.alcance(q);
-    if (alto !== null && q.golpeT <= 0 && q.plan.tipo !== 'falla') {
+    // con el armado para rematar no le pega desde el piso: espera el salto (salvo que ya se le caiga)
+    const esperaSalto = remata && q.st === 'piso' && alto !== null && alto > 26;
+    if (alto !== null && q.golpeT <= 0 && q.plan.tipo !== 'falla' && !esperaSalto) {
       const bueno = q.st === 'aire' ? alto < 80 : alto >= 20 && alto <= 56;
       const bajando = c.vz < 0;
       if ((bueno && bajando) || alto < 14) {
@@ -549,9 +609,12 @@ export class Voley extends EventScene {
           const compa = this.pat.find((o) => o !== q && o.c.team === team);
           // los toques que van de este lado (el que viene será el siguiente)
           const van = c.lado === team ? c.toques : 0;
-          // con la persona de compañero, casi siempre se la arma para que remate; entre máquinas, a veces
-          const armar = !!compa && van <= 1 && (compa.c.human ? Math.random() < 0.85 : compa.fila === 1 && q.fila === 0 && Math.random() < 0.4);
-          if (this.nek[team] >= 100 && !this.d.practica && (q.st === 'aire' || van >= 1) && Math.random() < 0.6) r.fuego = true;
+          // la jugada de tres toques: el que recibe se la arma al compañero junto a la red para que remate. Con la
+          // persona de compañero casi siempre (y si ya es el segundo toque, siempre); entre máquinas, más mientras más
+          // difícil el nivel
+          const armar = !!compa && van <= 1 && !remata && Math.random() < (compa.c.human ? (van === 1 ? 1 : 0.9) : 0.3 + 0.5 * ajustes().cpuAgresion);
+          // la barra de tu lado es tuya: tu compañera no gasta el fuego
+          if (this.nek[team] >= 100 && !this.d.practica && !conmigo && (q.st === 'aire' || van >= 1) && Math.random() < 0.6) r.fuego = true;
           else if (armar && q.st === 'piso') r.pase = true; else r.patada = true;
         }
       }
@@ -597,7 +660,11 @@ export class Voley extends EventScene {
     // el círculo: dónde va a caer, cuando viene a tu lado (en Nekketsu no hay ayuda)
     const xl = this.caida();
     const ayuda = ajustes().nombre !== 'NEKKETSU' || !!this.d.practica;
-    c.marca.setVisible(ayuda && c.en === 'aire' && xl < RED_X && xl > BORDE[0] - 10).setPosition(Math.round(xl), PISO);
+    // con el armado para ti, el círculo naranja dice dónde saltar a rematar
+    const me0 = this.pat.find((q) => q.c.human);
+    const pr = me0 && this.paraRematar(me0) ? this.puntoRemate() : null;
+    if (pr) c.marca.setVisible(ayuda).setPosition(Math.round(pr.x), PISO).setStrokeStyle(2, 0xff8020, 1);
+    else c.marca.setVisible(ayuda && c.en === 'aire' && xl < RED_X && xl > BORDE[0] - 10).setPosition(Math.round(xl), PISO).setStrokeStyle(2, 0xffe040, 0.9);
     // la cámara sigue la pelota, sin perder a la persona
     const me = this.pat.find((q) => q.c.human) ?? this.pat[0];
     const cam = this.cameras.main;

@@ -86,14 +86,17 @@ const CONSEJOS = [
  * de cargar (o al crear la escena, si no había nada que bajar).
  */
 export function pantallaCarga(scene: Phaser.Scene, titulo: string) {
-  const fondo = scene.add.rectangle(320, 180, 2000, 2000, 0x0b0b14).setDepth(9990).setScrollFactor(0);
-  const t = txt(scene, 320, 150, titulo, 'fuente_titulo', 2).setDepth(9991).setScrollFactor(0);
-  const consejo = txt(scene, 320, 222, CONSEJOS[Math.floor(Math.random() * CONSEJOS.length)], 'fuente_ui', 1).setDepth(9991).setTint(0x9ac8ff).setScrollFactor(0);
+  // durante la carga la cámara todavía no se centró (eso pasa al crear la escena): en las pantallas anchas el cuadro
+  // de 640 quedaba pegado a la izquierda. Se centra a mano en el ancho de ahora
+  const cx = ancho(scene) / 2, dx = cx - 320;
+  const fondo = scene.add.rectangle(cx, 180, 2000, 2000, 0x0b0b14).setDepth(9990).setScrollFactor(0);
+  const t = txt(scene, cx, 150, titulo, 'fuente_titulo', 2).setDepth(9991).setScrollFactor(0);
+  const consejo = txt(scene, cx, 222, CONSEJOS[Math.floor(Math.random() * CONSEJOS.length)], 'fuente_ui', 1).setDepth(9991).setTint(0x9ac8ff).setScrollFactor(0);
   const bar = scene.add.graphics().setDepth(9991).setScrollFactor(0);
   const pintar = (v: number) => {
     bar.clear();
-    bar.lineStyle(2, 0xf2c230).strokeRect(220, 182, 200, 12);
-    bar.fillStyle(0xf2c230).fillRect(223, 185, 194 * v, 6);
+    bar.lineStyle(2, 0xf2c230).strokeRect(220 + dx, 182, 200, 12);
+    bar.fillStyle(0xf2c230).fillRect(223 + dx, 185, 194 * v, 6);
   };
   pintar(0);
   const alProgreso = (v: number) => pintar(v);

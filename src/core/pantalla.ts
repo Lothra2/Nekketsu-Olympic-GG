@@ -40,9 +40,27 @@ function anchoPara(game: Phaser.Game) {
   return Phaser.Math.Clamp(Math.round((BASE_H * w) / h), BASE_W, MAX_W);
 }
 
+/**
+ * En el iPhone (Safari y la app) la página se medía más alta que lo que se ve, o quedaba corrida hacia abajo después
+ * de girar: el juego se centraba en esa caja y salía una barra negra arriba. El contenedor se pega justo a la parte
+ * visible de la pantalla (visualViewport) y la página vuelve arriba del todo.
+ */
+function pegarAlVisible(game: Phaser.Game) {
+  const el = game.scale.parent as HTMLElement | undefined;
+  const v = window.visualViewport;
+  if (window.scrollX || window.scrollY) window.scrollTo(0, 0);
+  if (!el || !v) return;
+  const px = (n: number) => `${Math.round(n)}px`;
+  el.style.left = px(v.offsetLeft);
+  el.style.top = px(v.offsetTop);
+  el.style.width = px(v.width);
+  el.style.height = px(v.height);
+}
+
 /** Engancha el encuadre a cada escena cuando arranca, y ajusta el ancho del juego cada vez que cambia la pantalla. */
 export function instalarPantalla(game: Phaser.Game) {
   const ajustar = () => {
+    pegarAlVisible(game);
     // primero el tamaño nuevo de la pantalla (si no, Phaser escala con el de antes y quedan bordes)
     game.scale.getParentBounds();
     const W = anchoPara(game);
@@ -69,6 +87,7 @@ export function instalarPantalla(game: Phaser.Game) {
   document.addEventListener('fullscreenchange', luego);
   document.addEventListener('webkitfullscreenchange', luego);
   window.visualViewport?.addEventListener('resize', luego);
+  window.visualViewport?.addEventListener('scroll', luego);
   if (new URLSearchParams(location.search).has('diag')) diagnostico(game);
   game.scale.on(Phaser.Scale.Events.RESIZE, () => { for (const s of game.scene.getScenes(true)) encuadrar(s); });
   // y cuando Phaser mismo nota que cambió la pantalla

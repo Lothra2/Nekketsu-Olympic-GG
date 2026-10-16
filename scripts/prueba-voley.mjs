@@ -80,14 +80,15 @@ while (Date.now() - t2 < 90000) {
     else if (s.aire && dx < 30 && alto < 80 && alto > 4) await toque('j');
     else if (s.quien !== 'yo' && !armada && dx < 22 && alto > 22 && alto < 54 && s.c.vz < 0) await toque('k');
   } else { await tecla('ArrowRight', false); await tecla('ArrowLeft', false); }
-  if (jugadas.join(',').includes('yo-pase,compa-pase,yo-remate')) break;
+  if (/yo-(pase|recibo),compa-pase,yo-remate/.test(jugadas.join(','))) break;
   await p.waitForTimeout(25);
 }
 for (const k of [...abajo]) await tecla(k, false);
 const seq = jugadas.join(',');
 console.log('toques:', seq.slice(-300));
-check(seq.includes('yo-pase,compa-pase'), 'el compañero recibe tu pase y te la arma');
-check(seq.includes('yo-pase,compa-pase,yo-remate'), 'la jugada de 3 toques termina en tu remate');
+// tu pase alto a ella es el 'recibo': ella te la arma junto a la red
+check(/yo-(pase|recibo),compa-pase/.test(seq), 'el compañero recibe tu pase y te la arma');
+check(/yo-(pase|recibo),compa-pase,yo-remate/.test(seq), 'la jugada de 3 toques termina en tu remate');
 await p.screenshot({ path: `${out}/tres_toques.png` });
 
 // el remate de fuego: con la barra llena, especial
