@@ -229,7 +229,7 @@ export class Tenis extends EventScene {
   }
 
   /** Cuánto frena la arcilla al picar: el drive Nekketsu se queda clavado. */
-  private get pique() { return this.bola.ultimoTiro === 'fuego' ? 0.3 : PIQUE; }
+  private get pique() { return this.bola.ultimoTiro === 'fuego' || this.bola.ultimoTiro === 'arma' ? 0.3 : PIQUE; }
 
   /** El que saca tiene la pelota en la mano. */
   private alSaque(team: 0 | 1) {
@@ -317,7 +317,9 @@ export class Tenis extends EventScene {
     const paseo = ajustes().nombre === 'PASEO' && p.c.human;
     const certera = p.c.human || Math.random() < 0.25 + 0.5 * ajustes().cpuAgresion;
     const perfecto = alto >= 12 && alto <= 36 && certera;
-    const malo = forzarMalo || (!paseo && (alto < 4 || alto > 46) && p.st !== 'aire');
+    // tu compañero no la toca mal por llegar justo: sus errores ya los decidió su plan
+    const conmigo = !p.c.human && this.pat.some((o) => o.c.human && o.c.team === team);
+    const malo = forzarMalo || (!paseo && !conmigo && (alto < 4 || alto > 46) && p.st !== 'aire');
     const cercaRed = Math.abs(p.x - RED_X) < 110;
     let tiro: Tiro;
     if (quiere === 'fuego') {
@@ -331,7 +333,8 @@ export class Tenis extends EventScene {
       this.shake(240, 0.012);
       flash(this, 120);
       // los del otro lado casi nunca llegan
-      for (const o of this.pat) if (o.c.team !== team && Math.random() < 0.85) o.plan = { n: c.n, tipo: 'falla', reaccion: 1, ruido: 0, arma: false };
+      // (tu compañero, contra el de los rivales, a veces sí llega: más en los niveles fáciles)
+      for (const o of this.pat) if (o.c.team !== team && Math.random() < (team === 1 ? 0.5 + 0.35 * ajustes().cpuAgresion : 0.85)) o.plan = { n: c.n, tipo: 'falla', reaccion: 1, ruido: 0, arma: false };
     } else if (p.st === 'aire' && cercaRed && quiere === 'patada') {
       // el smash: rápido y para abajo, pica y se va lejos
       tiro = 'remate';
@@ -378,6 +381,8 @@ export class Tenis extends EventScene {
 
   /** Llena la barra de un lado; cuando se llena la tuya, avisa. */
   private carga(team: 0 | 1, n: number) {
+    // la barra de los rivales se llena más lento en los niveles fáciles
+    if (team === 1 && !this.d.practica) n *= Math.max(0.4, ajustes().cpuAgresion);
     const antes = this.nek[team];
     this.nek[team] = Math.min(100, antes + n);
     const me = this.pat.find((q) => q.c.human);
@@ -484,7 +489,8 @@ export class Tenis extends EventScene {
         else if (pase) this.tocar(q, 'pase');
       }
       // moverse, sin pasar la red ni salirse (tras un golpe al aire, también)
-      const vel = (corre ? 150 : 100) * (q.c.human ? 1 : ajustes().cpuVel);
+      // tu compañero corre a tu par en todos los niveles; los rivales, según el nivel
+      const vel = (corre ? 150 : 100) * (q.c.human || this.pat.some((o) => o.c.human && o.c.team === q.c.team) ? 1 : ajustes().cpuVel);
       if (q.golpeT <= 0 || q.st === 'aire' || q.fallo) q.x += mx * vel * dt;
       const lim = q.c.team === 0 ? [BORDE[0] - 14, RED_X - 10] : [RED_X + 12, BORDE[1] + 14];
       q.x = Phaser.Math.Clamp(q.x, lim[0], lim[1]);
@@ -541,17 +547,19 @@ export class Tenis extends EventScene {
     const c = this.bola, team = q.c.team;
     q.pensar -= dt;
     // los errores: más en los niveles fáciles; y si la persona va perdiendo por mucho, un poco más.
-    // tu compañero se equivoca la mitad que los de enfrente
+    // tu compañero es confiable en todos los niveles: los errores fáciles son de los rivales
     const dif = this.marcador[1] - this.marcador[0];
-    const base = Phaser.Math.Clamp(0.5 - 0.36 * ajustes().cpuAgresion + (team === 1 && dif >= 3 ? 0.12 * ajustes().ayuda : 0), 0.04, 0.6);
-    const error = this.d.practica ? 0 : team === 0 ? base * 0.5 : base;
+    const base = Phaser.Math.Clamp(0.5 - 0.36 * ajustes().cpuAgresion + (dif >= 3 ? 0.12 * ajustes().ayuda : 0), 0.04, 0.6);
+    const conmigo = this.pat.some((o) => o.c.human && o.c.team === team);
+    const error = this.d.practica ? 0 : conmigo ? 0.05 : base;
     if (c.en === 'mano' && c.dueño === q) { if (q.cool <= 0) r.patada = true; return r; }
     const compa = this.pat.find((o) => o !== q && o.c.team === team);
     // una pelota nueva: decide de una vez si le va a pegar bien, mal o si no llega, y cuánto tarda en reaccionar
     if (c.en === 'aire' && q.plan.n !== c.n) {
       const dado = Math.random();
-      const torpe = 1 - ajustes().cpuAgresion;
-      q.plan = { n: c.n, tipo: dado < error * 0.45 ? 'falla' : dado < error ? 'mala' : 'bien', reaccion: 0.08 + torpe * 0.3 + Math.random() * 0.12, ruido: (Math.random() - 0.5) * (8 + torpe * 30), arma: Math.random() < 0.35 };
+      const torpe = conmigo ? 0 : 1 - ajustes().cpuAgresion;
+      // se la deja alta junto a la red para tu smash: más seguido en los niveles fáciles
+      q.plan = { n: c.n, tipo: dado < error * 0.45 ? 'falla' : dado < error ? 'mala' : 'bien', reaccion: 0.08 + torpe * 0.3 + Math.random() * 0.12, ruido: (Math.random() - 0.5) * (8 + torpe * 30), arma: Math.random() < 0.5 + 0.3 * (1 - ajustes().cpuAgresion) };
       // entrenando, en el último paso (ganarle un punto), a Kenji se le escapan los tiros buenos
       if (this.d.practica && this.coach?.ultimo && c.ultimo?.c.human && (c.ultimoTiro === 'remate' || Math.random() < 0.5)) q.plan.tipo = 'falla';
     }
@@ -645,7 +653,13 @@ export class Tenis extends EventScene {
     // el círculo: dónde va a caer, cuando viene a tu lado (en Nekketsu no hay ayuda)
     const xl = this.caida();
     const ayuda = ajustes().nombre !== 'NEKKETSU' || !!this.d.practica;
-    c.marca.setVisible(ayuda && c.en === 'aire' && xl < RED_X && xl > BORDE[0] - 10).setPosition(Math.round(xl), PISO);
+    // la que tu compañero te dejó alta junto a la red: el círculo naranja dice dónde saltar al smash (antes del pique)
+    const me0 = this.pat.find((q) => q.c.human);
+    const armada = !!me0 && c.en === 'aire' && c.ultimoTiro === 'arma' && c.ultimo !== me0 && c.ultimo?.c.team === 0 && c.vz * c.vz + 2 * G * (c.z - 60) >= 0;
+    if (armada) {
+      const t = (c.vz + Math.sqrt(c.vz * c.vz + 2 * G * (c.z - 60))) / G;
+      c.marca.setVisible(ayuda).setPosition(Math.round(c.x + c.vx * t), PISO).setStrokeStyle(2, 0xff8020, 1);
+    } else c.marca.setVisible(ayuda && c.en === 'aire' && xl < RED_X && xl > BORDE[0] - 10).setPosition(Math.round(xl), PISO).setStrokeStyle(2, 0xffe040, 0.9);
     // la cámara sigue la pelota, sin perder a la persona
     const me = this.pat.find((q) => q.c.human) ?? this.pat[0];
     const cam = this.cameras.main;

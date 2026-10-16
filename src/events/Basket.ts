@@ -364,6 +364,8 @@ export class Basket extends EventScene {
       if (p.pressed.special && this.nek[0] >= 100 && b.dueño && b.dueño.team !== j.team) this.tacleada(j, b.dueño);
       else if (p.pressed.punch) this.robar(j, p.run);
       if (p.pressed.jump && j.z === 0) { j.vz = 230; this.tapon(j); }
+      // subiendo en el salto también tapa (los niños saltan un poquito antes de que suelte)
+      else if (j.z > 0 && j.vz > 0) this.tapon(j);
     }
     return [p.x * vel, p.y * vel * 0.75];
   }
@@ -372,7 +374,8 @@ export class Basket extends EventScene {
   private maquina(j: Jug, dt: number): [number, number] {
     const b = this.bola;
     j.ia.t -= dt;
-    const ag = this.d.practica ? 0.1 : ajustes().cpuAgresion;
+    // tus compañeros juegan a fondo en todos los niveles: lo fácil es que los rivales aflojen
+    const ag = this.d.practica ? 0.1 : j.team === 0 ? 1 : ajustes().cpuAgresion;
     const vel = 100 * (j.team === 1 ? Math.max(ajustes().cpuVel, 0.82) : 1) * (this.d.practica ? 0.6 : 1);
     const ir = (tx: number, ty: number, v: number): [number, number] => {
       const dx = tx - j.x, dy = ty - j.y, d = Math.hypot(dx, dy);
@@ -389,8 +392,9 @@ export class Basket extends EventScene {
       if (dMarca < 30 && j.ia.t > 0.3 && j.empuja <= 0) j.ia.t = 0.15 + Math.random() * 0.2;
       if (j.ia.t <= 0) {
         j.ia.t = 0.5 + Math.random() * 0.6;
-        if (d < 70 && this.nek[j.team] >= 100) { this.clavar(j, true); return [0, 0]; }
-        if (d >= 70 && d < 200 && this.nek[j.team] >= 100 && Math.random() < 0.5) { this.tiroFuego(j); return [0, 0]; }
+        // la barra de tu equipo es tuya: solo la máquina rival gasta la suya
+        if (j.team === 1 && d < 70 && this.nek[j.team] >= 100) { this.clavar(j, true); return [0, 0]; }
+        if (j.team === 1 && d >= 70 && d < 200 && this.nek[j.team] >= 100 && Math.random() < 0.5) { this.tiroFuego(j); return [0, 0]; }
         if (d < 50 && Math.random() < 0.7) { this.clavar(j, false); return [0, 0]; }
         // tira cerca del aro aunque lo marquen (casi siempre), o de lejos si está solo (a veces);
         // la máquina suelta en lo verde más o menos seguido según el nivel
@@ -407,6 +411,8 @@ export class Basket extends EventScene {
     }
     // entrenando, Kenji no persigue el balón
     if (this.d.practica && j.team === 1) return ir(j.ia.tx, j.ia.ty, 30);
+    // el pase que viene para mí: voy a buscarlo (si no, cae atrás mientras camino a mi sitio)
+    if (!b.dueño && !b.tiro && b.para === j) return ir(b.x, b.y, vel);
     // el balón suelto: va el más cerca de cada equipo
     if (!b.dueño && !b.tiro) {
       const mios = this.js.filter((o) => o.team === j.team && o !== this.ctrl && o.st === 'libre');
@@ -420,7 +426,9 @@ export class Basket extends EventScene {
       if (j.ia.t <= 0) {
         j.ia.t = 1 + Math.random();
         const sitios: [number, number][] = [[ARO.x - 60, 14], [ARO.x - 60, PROF - 14], [ARO.x - 150, PROF / 2 + Phaser.Math.Between(-30, 30)]];
-        [j.ia.tx, j.ia.ty] = sitios[Phaser.Math.Between(0, 2)];
+        // cada uno en su sitio (antes dos podían caer en la misma esquina), y rotan de vez en cuando
+        const yo = this.js.filter((o) => o.team === j.team).indexOf(j);
+        [j.ia.tx, j.ia.ty] = sitios[(yo + Math.floor(this.clock / 4)) % 3];
       }
       return ir(j.ia.tx, j.ia.ty, vel * 0.8);
     }
@@ -428,7 +436,7 @@ export class Basket extends EventScene {
     const rivales = this.js.filter((o) => o.team !== j.team);
     const mi = this.js.filter((o) => o.team === j.team).indexOf(j);
     const hombre = b.dueño && b.dueño.team !== j.team && this.js.filter((o) => o.team === j.team).sort((a, c) => Math.hypot(a.x - b.x, a.y - b.y) - Math.hypot(c.x - b.x, c.y - b.y))[0] === j ? b.dueño : rivales[mi % rivales.length];
-    if (hombre === b.dueño && this.nek[j.team] >= 100 && Math.hypot(hombre.x - j.x, hombre.y - j.y) < 60 && Math.random() < dt * 0.8) this.tacleada(j, hombre);
+    if (j.team === 1 && hombre === b.dueño && this.nek[j.team] >= 100 && Math.hypot(hombre.x - j.x, hombre.y - j.y) < 60 && Math.random() < dt * 0.8) this.tacleada(j, hombre);
     else if (hombre === b.dueño && Math.hypot(hombre.x - j.x, hombre.y - j.y) < 18 && j.empuja <= 0 && Math.random() < dt * (0.6 + 1.2 * ag)) this.empujar(j);
     // el tapón: se intenta una sola vez por tiro
     if (b.tiro && !b.tiro.taponIntentado && b.tiro.tirador === hombre && Math.hypot(hombre.x - j.x, hombre.y - j.y) < 26 && j.z === 0) {
@@ -523,6 +531,7 @@ export class Basket extends EventScene {
     if (!para) return;
     const d = Math.hypot(para.x - b.x, para.y - b.y), t = Math.max(0.25, d / 260);
     b.dueño = null; b.tiro = null; b.ultimo = j; b.para = para;
+    this.paseT = 1.2;
     b.x = j.x; b.y = j.y; b.z = 20;
     b.vx = (para.x - b.x) / t; b.vy = (para.y - b.y) / t; b.vz = (G * t) / 2 - 10;
     b.libre = 0.15;
@@ -639,7 +648,7 @@ export class Basket extends EventScene {
   /** El tapón: saltando cerca del tirador justo cuando suelta, el tiro se va al piso. */
   private tapon(j: Jug) {
     const b = this.bola, t = b.tiro;
-    if (!t || t.tirador.team === j.team || t.t > 0.15 || Math.hypot(t.tirador.x - j.x, t.tirador.y - j.y) > 26) return;
+    if (!t || t.tirador.team === j.team || t.t > 0.3 || Math.hypot(t.tirador.x - j.x, t.tirador.y - j.y) > 26) return;
     b.tiro = null;
     b.vx = (j.x - t.tirador.x) * -3; b.vy = (Math.random() - 0.5) * 80; b.vz = 60; b.libre = 0.2;
     this.letrero(j, '¡TAPÓN!', 0x8ae0ff);
@@ -649,9 +658,13 @@ export class Basket extends EventScene {
     this.cambio(j.team);
   }
 
+  /** cuánto le queda al pase para ser de su receptor; después es un balón suelto para todos */
+  private paseT = 0;
+
   private moverBola(dt: number) {
     const b = this.bola;
     b.libre = Math.max(0, b.libre - dt);
+    if (b.para && (this.paseT -= dt) <= 0) b.para = null;
     if (b.dueño) {
       // botando a la par del que lo lleva
       const o = b.dueño;

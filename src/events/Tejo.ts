@@ -207,7 +207,7 @@ export class Tejo extends EventScene {
     if (!this.tuyo(l)) {
       const team = l.c.team as 0 | 1;
       // si va perdiendo y tiene la barra llena, usa el pulso
-      if (this.nek[team] >= 100 && this.marcador[team] < this.marcador[1 - team]) this.activarPulso(l);
+      if (this.nek[team] >= 100 && ajustes().nombre !== 'PASEO' && this.marcador[team] < this.marcador[1 - team]) this.activarPulso(l);
       const [eBocin, eMecha] = ERROR_CPU[ajustes().nombre] ?? ERROR_CPU.NORMAL;
       const vivas = MECHAS.map((m, i) => (this.mechas[i] ? m : null)).filter(Boolean) as [number, number][];
       const alBocin = Math.random() < 0.5 || !vivas.length;

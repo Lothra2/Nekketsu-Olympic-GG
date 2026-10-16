@@ -322,7 +322,7 @@ export class Voley extends EventScene {
       if (team === 0) void this.banner('¡NEKKETSU!', 'fuente_titulo', 2, 500, 110);
       this.shake(240, 0.012);
       flash(this, 120);
-      for (const o of this.pat) if (o.c.team !== team) o.plan = { n: c.n, tipo: 'falla', reaccion: 1, ruido: 0 };
+      for (const o of this.pat) if (o.c.team !== team && (team === 0 || Math.random() < 0.5 + 0.35 * ajustes().cpuAgresion)) o.plan = { n: c.n, tipo: 'falla', reaccion: 1, ruido: 0 };
     } else if (p.st === 'aire' && cercaRed && quiere === 'patada') {
       // el remate: rápido y para abajo
       tiro = 'remate';
@@ -390,6 +390,8 @@ export class Voley extends EventScene {
 
   /** Llena la barra de un lado; cuando se llena la tuya, avisa. */
   private carga(team: 0 | 1, n: number) {
+    // la barra de los rivales se llena más lento en los niveles fáciles
+    if (team === 1 && !this.d.practica) n *= Math.max(0.4, ajustes().cpuAgresion);
     const antes = this.nek[team];
     this.nek[team] = Math.min(100, antes + n);
     const me = this.pat.find((q) => q.c.human);
@@ -466,7 +468,8 @@ export class Voley extends EventScene {
       }
       // moverse, sin pasar la red ni salirse
       // la arena frena
-      const vel = (corre ? 150 : 100) * (q.c.human ? 1 : ajustes().cpuVel);
+      // tu compañera corre a tu par en todos los niveles; los rivales, según el nivel
+      const vel = (corre ? 150 : 100) * (q.c.human || this.pat.some((o) => o.c.human && o.c.team === q.c.team) ? 1 : ajustes().cpuVel);
       if (q.golpeT <= 0 || q.st === 'aire') q.x += mx * vel * dt;
       const lim = q.c.team === 0 ? [BORDE[0] - 14, RED_X - 10] : [RED_X + 12, BORDE[1] + 14];
       q.x = Phaser.Math.Clamp(q.x, lim[0], lim[1]);
@@ -557,7 +560,7 @@ export class Voley extends EventScene {
     // una pelota nueva: decide de una vez si le va a pegar bien, mal o si no llega, y cuánto tarda en reaccionar
     if (c.en === 'aire' && q.plan.n !== c.n) {
       const dado = Math.random();
-      const torpe = 1 - ajustes().cpuAgresion;
+      const torpe = conmigo ? 0 : 1 - ajustes().cpuAgresion;
       q.plan = { n: c.n, tipo: dado < error * 0.45 ? 'falla' : dado < error ? 'mala' : 'bien', reaccion: 0.08 + torpe * 0.3 + Math.random() * 0.12, ruido: (Math.random() - 0.5) * (8 + torpe * 30) };
       // entrenando, en el último paso (ganarle un punto), a Kenji se le escapan los tiros buenos
       if (this.d.practica && this.coach?.ultimo && c.ultimo?.c.human && (c.ultimoTiro === 'remate' || Math.random() < 0.5)) q.plan.tipo = 'falla';

@@ -448,10 +448,10 @@ export class Fight extends Phaser.Scene implements World {
     this.tweens.add({ targets: t, y: t.y - 16, alpha: 0, duration: 650, onComplete: () => t.destroy() });
   }
   onHit(from: Actor | null, v: Actor, _dmg: number, kd: boolean) {
-    // el seoi nage es ippon; el o-soto-gari, waza-ari; tumbarlo de un golpe, waza-ari
+    // el seoi nage es ippon; el o-soto-gari, waza-ari; tumbarlo de un golpe (o con los rodillazos), waza-ari
     // la tijera del vovinam con la barra llena también es ippon (la palmada suena cuando cae, en su aterriza)
     const tijera = !!from && this.specials.get(from)?.kind === 'tijera';
-    if (this.judo && kd && from && from.team !== v.team && this.phase === 'play') this.puntoJudo(from, (from.st === 'grab' && from.tecnica !== 'osoto') || from.st === 'throw' || tijera, tijera);
+    if (this.judo && kd && from && from.team !== v.team && this.phase === 'play') this.puntoJudo(from, (from.st === 'grab' && from.tecnica === 'seoi') || from.st === 'throw' || tijera, tijera);
     if (from === this.player && this.data0.practica) this.golpes.push(from.fig.anim.name);
     this.sfx(kd ? 'critico' : 'golpe', kd ? 0.55 : 0.45);
     this.sfx(v.team === 0 ? 'jugador_dolor' : 'enemigo_dolor', 0.25);
@@ -515,8 +515,12 @@ export class Fight extends Phaser.Scene implements World {
       this.time.delayedCall(1400, () => { this.cameras.main.zoomTo(this.zoom, 300); this.time.delayedCall(320, () => { this.camLock = false; }); });
     }
   }
+  /** cuándo fue la última técnica de la máquina: entre una y otra pasan unos segundos (cada una congela a todos) */
+  private ultimoEspecial = -1e9;
+
   special(a: Actor) {
     if (a.meter < 100 || this.cut > 0) return;
+    if (!a.human) { if (this.time.now - this.ultimoEspecial < 8000) return; this.ultimoEspecial = this.time.now; }
     a.meter = 0;
     this.fullMeter.delete(a);
     for (const x of this.actors) if (x.st !== 'ko') x.vx = 0;
@@ -549,7 +553,9 @@ export class Fight extends Phaser.Scene implements World {
     const human: Intent = playing ? { x: p.x, y: p.y, run: p.run, punch: p.pressed.punch, kick: p.pressed.kick, jump: p.pressed.jump, special: p.pressed.special, guard: p.held.special && this.player.meter < 100 } : NOTHING;
     for (const a of this.actors) {
       if (this.specials.has(a)) { this.specialTick(a, dt); continue; }
-      const it = a === this.player ? human : playing ? (this.brains.get(a)?.update(dt) ?? NOTHING) : NOTHING;
+      let it = a === this.player ? human : playing ? (this.brains.get(a)?.update(dt) ?? NOTHING) : NOTHING;
+      // la azotea que se derrumba: la máquina se aleja del borde en vez de caerse con el pedazo
+      if (a !== this.player && this.borde < BORDE && a.x > this.borde - 40 && it.x >= 0) it = { ...it, x: -1 };
       a.update(dt, it);
     }
     for (const i of this.items) i.update(dt);
@@ -609,6 +615,15 @@ export class Fight extends Phaser.Scene implements World {
     const ellos = this.actors.filter((a) => a.team === 1 && a.alive);
     if (!ellos.length) this.victory();
     else if (!nos.length || (this.data0.modo === '1v1' && !this.player.alive)) this.defeat();
+    // en el 4 contra 4, si te tumban sigues con un compañero que quede en pie
+    else if (!this.player.alive && nos.length) {
+      const sigue = nos[0];
+      this.brains.delete(sigue);
+      sigue.human = true;
+      this.player.human = false;
+      this.player = sigue;
+      this.letrero(sigue, '¡SIGUES TÚ!', 0xffe040);
+    }
   }
 
   // ------------------------------------------------------------------ inicio y final
@@ -1340,7 +1355,9 @@ export class Fight extends Phaser.Scene implements World {
 
   /** Algo pesado que cae del cielo: primero la sombra que crece y titila, después el golpe. */
   private caePesado() {
-    const objetivo = Math.random() < 0.6 ? this.player : this.actors.filter((a) => a.alive)[Math.floor(Math.random() * this.actors.length)] ?? this.player;
+    // va por ti más seguido mientras más difícil el nivel; si no, por cualquiera que siga en pie
+    const vivos = this.actors.filter((a) => a.alive);
+    const objetivo = Math.random() < 0.6 * Math.max(0.5, ajustes().cpuAgresion) || !vivos.length ? this.player : Phaser.Utils.Array.GetRandom(vivos);
     const x = Phaser.Math.Clamp(objetivo.x + Phaser.Math.Between(-30, 30), XMIN + 30, this.borde - 30);
     const y = Phaser.Math.Clamp(objetivo.y + Phaser.Math.Between(-10, 10), 8, DEPTH - 8);
     // la sombra crece y un aro rojo titila: ahí va a caer

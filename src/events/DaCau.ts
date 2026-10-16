@@ -22,8 +22,13 @@ const G = 240;
 const ZOOM = 1.15;
 /** a cuántos puntos se gana */
 const META = 5;
+/** el armado cae a esta distancia de la red: ahí se salta a la chilena */
+const ATAQUE = 40;
+/** la altura del volante a la que se le pega la chilena (con el salto arriba) */
+const ALTO_CHILENA = 60;
 
-type Tiro = 'patada' | 'pase' | 'chilena' | 'saque';
+/** 'pase' es el armado junto a la red para la chilena; 'recibo', el volante alto al compañero para que él arme */
+type Tiro = 'patada' | 'pase' | 'recibo' | 'chilena' | 'saque';
 interface Pateador {
   c: Competidor; fig: Figura; sombra: Phaser.GameObjects.Ellipse;
   x: number; fila: 0 | 1; z: number; vz: number; st: 'piso' | 'aire'; golpeT: number; cool: number;
@@ -220,10 +225,39 @@ export class DaCau extends EventScene {
     if (c.en !== 'aire') return null;
     const paseo = ajustes().nombre === 'PASEO' && p.c.human;
     // el que te dejó tu compañero junto a la red para la chilena: más fácil de alcanzar
-    const armada = p.c.human && c.ultimoTiro === 'pase' && c.ultimo !== p && c.ultimo?.c.team === p.c.team;
+    const armada = p.c.human && this.paraRematar(p);
     const dx = Math.abs(c.x - p.x), alto = c.z - p.z;
     if (dx > (paseo || armada ? 36 : 26) || alto < -4 || alto > (paseo ? 66 : 60)) return null;
     return alto;
+  }
+
+  /** En cuánto tiempo el volante, bajando, pasa por la altura `z` (null si no llega tan alto). */
+  private cuandoA(z: number): number | null {
+    const c = this.cau;
+    if (c.en !== 'aire') return null;
+    const d = c.vz * c.vz + 2 * G * (c.z - z);
+    return d < 0 ? null : (c.vz + Math.sqrt(d)) / G;
+  }
+
+  /** El punto de chilena de un lado: junto a la red. */
+  private ataque(team: 0 | 1) { return RED_X + (team === 0 ? -ATAQUE : ATAQUE); }
+
+  /** ¿El volante en el aire es un armado de su compañero para que `q` haga la chilena? */
+  private armadaPara(q: Pateador): boolean {
+    const c = this.cau;
+    return c.en === 'aire' && c.ultimoTiro === 'pase' && !!c.ultimo && c.ultimo !== q && c.ultimo.c.team === q.c.team && c.lado === q.c.team && c.toques <= 2;
+  }
+
+  /** ¿Es para que `q` remate? El armado del compañero, o entrenando solo, el que se levantó él mismo. */
+  private paraRematar(q: Pateador): boolean {
+    const c = this.cau;
+    return this.armadaPara(q) || (!!this.d.practica && c.en === 'aire' && c.ultimoTiro === 'pase' && c.ultimo === q);
+  }
+
+  /** Dónde va a estar el volante cuando baje a la altura de la chilena (para saltar ahí). */
+  private puntoRemate(): { x: number; t: number } | null {
+    const t = this.cuandoA(ALTO_CHILENA);
+    return t === null ? null : { x: this.cau.x + this.cau.vx * t, t };
   }
 
   /** Los toques que ya van de este lado (el que viene será el siguiente). */
@@ -282,7 +316,9 @@ export class DaCau extends EventScene {
     // la calidad del toque: lo ideal es a media pierna
     const paseo = ajustes().nombre === 'PASEO' && p.c.human;
     const perfecto = alto >= 10 && alto <= 36;
-    const malo = quiere !== 'fuego' && (forzarMalo || (!paseo && (alto < 2 || alto > 56) && p.st !== 'aire'));
+    // tu compañero no lo toca mal por llegar justo: sus errores ya los decidió su plan
+    const conmigo = !p.c.human && this.pat.some((o) => o.c.human && o.c.team === team);
+    const malo = quiere !== 'fuego' && (forzarMalo || (!paseo && !conmigo && (alto < 2 || alto > 56) && p.st !== 'aire'));
     const cercaRed = Math.abs(p.x - RED_X) < 110;
     let tiro: Tiro;
     if (quiere === 'fuego') {
@@ -297,7 +333,7 @@ export class DaCau extends EventScene {
       if (team === 0) void this.banner('¡NEKKETSU!', 'fuente_titulo', 2, 500, 110);
       this.shake(240, 0.012);
       flash(this, 120);
-      for (const o of this.pat) if (o.c.team !== team) o.plan = { n: c.n, tipo: 'falla', reaccion: 1, ruido: 0, arma: false };
+      for (const o of this.pat) if (o.c.team !== team && (team === 0 || Math.random() < 0.5 + 0.35 * ajustes().cpuAgresion)) o.plan = { n: c.n, tipo: 'falla', reaccion: 1, ruido: 0, arma: false };
       if (p.c.human) this.chilenas++;
     } else if (p.st === 'aire' && cercaRed && quiere === 'patada') {
       // la chilena: rápida y para abajo
@@ -309,13 +345,24 @@ export class DaCau extends EventScene {
       this.shake(120, 0.006);
       if (p.c.human) this.chilenas++;
     } else if (quiere === 'pase') {
-      // la levanta alta a tu compañero, donde está (sin compañero, para ti mismo, más cerca de la red);
-      // si la persona es el compañero, la máquina se lo deja junto a la red para la chilena
-      tiro = 'pase';
       const comp = this.pat.find((o) => o !== p && o.c.team === team);
-      let tx = comp ? comp.x : Phaser.Math.Clamp(p.x + dir * 40, BORDE[0] + 20, BORDE[1] - 20);
-      if (comp?.c.human) { tx = RED_X - dir * 44; this.letrero(comp, '¡SALTA Y CHILENA!', 0xffe040); }
-      this.lanzar(team === 0 ? Phaser.Math.Clamp(tx, BORDE[0] + 10, RED_X - 26) : Phaser.Math.Clamp(tx, RED_X + 26, BORDE[1] - 10), comp?.c.human ? 114 : 104 + Math.random() * 12);
+      const red = (o: Pateador) => Math.abs(o.x - RED_X);
+      if (!comp) {
+        // solo (entrenando): la levanta para sí mismo, un poco más cerca de la red
+        tiro = 'pase';
+        const tx = p.x + dir * 40;
+        this.lanzar(team === 0 ? Phaser.Math.Clamp(tx, BORDE[0] + 10, RED_X - 26) : Phaser.Math.Clamp(tx, RED_X + 26, BORDE[1] - 10), 104);
+      } else if (c.toques <= 2 && (comp.c.human || red(comp) <= red(p) + 30 || !p.c.human)) {
+        // el armado: alto y junto a la red, para que el compañero salte a la chilena
+        tiro = 'pase';
+        this.lanzar(this.ataque(team), comp.c.human ? 114 : 108);
+        this.letrero(comp, comp.c.human ? '¡SALTA Y CHILENA!' : '¡ARRIBA!', 0xffe040);
+      } else {
+        // la persona está más cerca de la red que su compañero: se lo pasa alto para que él se lo arme de vuelta
+        tiro = 'recibo';
+        const tx = Phaser.Math.Clamp(comp.x, team === 0 ? BORDE[0] + 30 : RED_X + 70, team === 0 ? RED_X - 70 : BORDE[1] - 30);
+        this.lanzar(tx, 100);
+      }
     } else {
       tiro = 'patada';
       const lejos = team === 0 ? [380, 580] : [60, 260];
@@ -341,6 +388,8 @@ export class DaCau extends EventScene {
 
   /** Llena la barra de un lado; cuando se llena la tuya, avisa. */
   private carga(team: 0 | 1, n: number) {
+    // la barra de los rivales se llena más lento en los niveles fáciles
+    if (team === 1 && !this.d.practica) n *= Math.max(0.4, ajustes().cpuAgresion);
     const antes = this.nek[team];
     this.nek[team] = Math.min(100, antes + n);
     const me = this.pat.find((q) => q.c.human);
@@ -420,7 +469,7 @@ export class DaCau extends EventScene {
           mx = p.x; corre = p.run; salta = p.pressed.jump; patada = p.pressed.kick; pase = p.pressed.punch;
           // el especial: con la barra llena y el volante cerca; si no, un aviso
           if (p.pressed.special) { if (this.nek[0] >= 100 && this.alcanceFuego(q)) fuego = true; else this.aviso(q); }
-        } else ({ mx, salta, patada, pase, fuego } = this.cpu(q, dt));
+        } else ({ mx, salta, patada, pase, fuego, corre } = this.cpu(q, dt));
       }
       // el que saca no camina con el volante en la mano: lo suelta con patada
       if (c.en === 'mano' && c.dueño === q) { if ((patada || pase) && q.cool <= 0) this.tocar(q, 'patada'); mx = 0; }
@@ -430,7 +479,8 @@ export class DaCau extends EventScene {
         else if (pase) this.tocar(q, 'pase');
       }
       // moverse, sin pasar la red ni salirse (tras un toque al aire, también)
-      const vel = (corre ? 170 : 115) * (q.c.human ? 1 : ajustes().cpuVel);
+      // tu compañero corre a tu par en todos los niveles; los rivales, según el nivel
+      const vel = (corre ? 170 : 115) * (q.c.human || this.pat.some((o) => o.c.human && o.c.team === q.c.team) ? 1 : ajustes().cpuVel);
       if (q.golpeT <= 0 || q.st === 'aire' || q.fallo) q.x += mx * vel * dt;
       const lim = q.c.team === 0 ? [BORDE[0] - 14, RED_X - 10] : [RED_X + 12, BORDE[1] + 14];
       q.x = Phaser.Math.Clamp(q.x, lim[0], lim[1]);
@@ -496,22 +546,25 @@ export class DaCau extends EventScene {
   // ------------------------------------------------------------------ la máquina
 
   private cpu(q: Pateador, dt: number) {
-    const r = { mx: 0, salta: false, patada: false, pase: false, fuego: false };
+    const r = { mx: 0, salta: false, patada: false, pase: false, fuego: false, corre: false };
     const c = this.cau, team = q.c.team;
     q.pensar -= dt;
     // los errores: más en los niveles fáciles; y si la persona va perdiendo por mucho, un poco más.
     // tu compañero se equivoca la mitad que los de enfrente
     const dif = this.marcador[1] - this.marcador[0];
-    const base = Phaser.Math.Clamp(0.5 - 0.36 * ajustes().cpuAgresion + (team === 1 && dif >= 3 ? 0.12 * ajustes().ayuda : 0), 0.04, 0.6);
-    const error = this.d.practica ? 0 : team === 0 ? base * 0.5 : base;
+    const base = Phaser.Math.Clamp(0.5 - 0.36 * ajustes().cpuAgresion + (dif >= 3 ? 0.12 * ajustes().ayuda : 0), 0.04, 0.6);
+    // tu compañero es confiable en todos los niveles: los errores fáciles son de los rivales
+    const conmigo = this.pat.some((o) => o.c.human && o.c.team === team);
+    const error = this.d.practica ? 0 : conmigo ? 0.05 : base;
     if (c.en === 'mano' && c.dueño === q) { if (q.cool <= 0) r.patada = true; return r; }
     const compa = this.pat.find((o) => o !== q && o.c.team === team);
     // un volante nuevo: decide de una vez si le va a pegar bien, mal o si no llega, y cuánto tarda en reaccionar;
     // con la persona de compañero casi siempre se lo arma, entre máquinas a veces (el de atrás al de adelante)
     if (c.en === 'aire' && q.plan.n !== c.n) {
       const dado = Math.random();
-      const torpe = 1 - ajustes().cpuAgresion;
-      const arma = !!compa && (compa.c.human ? Math.random() < 0.85 : compa.fila === 1 && q.fila === 0 && Math.random() < 0.4);
+      const torpe = conmigo ? 0 : 1 - ajustes().cpuAgresion;
+      // la jugada de tres toques: con la persona de compañero casi siempre; entre máquinas, más mientras más difícil
+      const arma = !!compa && Math.random() < (compa.c.human ? 0.9 : 0.15 + 0.5 * ajustes().cpuAgresion);
       q.plan = { n: c.n, tipo: dado < error * 0.45 ? 'falla' : dado < error ? 'mala' : 'bien', reaccion: 0.08 + torpe * 0.3 + Math.random() * 0.12, ruido: (Math.random() - 0.5) * (8 + torpe * 30), arma };
       // entrenando, en el último paso (ganarle un punto), a Kenji se le escapan los tiros buenos
       if (this.d.practica && this.coach?.ultimo && c.ultimo?.c.human && (c.ultimoTiro === 'chilena' || Math.random() < 0.5)) q.plan.tipo = 'falla';
@@ -519,21 +572,32 @@ export class DaCau extends EventScene {
     q.plan.reaccion = Math.max(0, q.plan.reaccion - dt);
     // los toques que van de este lado (el que viene será el siguiente); se lo arma si quedan toques
     const van = this.van(team);
-    const armar = q.plan.arma && van <= 1;
+    const dir = team === 0 ? 1 : -1;
+    const remata = this.armadaPara(q);
+    // si ya es el segundo toque y el compañero es la persona, siempre se lo arma
+    const armar = !remata && !!compa && van <= 1 && (q.plan.arma || (compa.c.human && van === 1));
     // a dónde va a caer, y si es de mi lado y me toca a mí (el de adelante cerca de la red, el de atrás al fondo)
     let meta = q.casa, yo = false;
-    if (c.en === 'aire') {
+    if (remata) {
+      // el armado es para mí: corre a donde el volante baja a la altura de la chilena y salta justo a tiempo
+      yo = true;
+      const pr = this.puntoRemate();
+      if (pr) {
+        meta = pr.x - dir * 4;
+        r.corre = Math.abs(meta - q.x) > 24;
+        if (q.st === 'piso' && pr.t < 0.34 && Math.abs(pr.x - q.x) < 22 && q.plan.tipo !== 'falla') r.salta = true;
+      }
+    } else if (c.en === 'aire') {
       const xl = this.caida();
       const mio = team === 0 ? xl < RED_X : xl >= RED_X;
       if (mio) {
         const compas = this.pat.filter((o) => o.c.team === team);
         // va el más cerca de donde cae; pero si la tocó uno de este lado, le toca al otro (nadie la toca dos seguidas)
         const tocoUnCompa = c.ultimo?.c.team === team && c.lado === team && compas.length > 1;
-        yo = compas.length === 1 || (tocoUnCompa ? c.ultimo !== q : compas.sort((a, b) => Math.abs(a.x - xl) - Math.abs(b.x - xl))[0] === q);
-        if (yo) meta = xl - (team === 0 ? 6 : -6) + q.plan.ruido;
-        // el pase del compañero junto a la red: salta a la chilena (si no se lo va a devolver armado)
-        const conChilena = !(armar && compa?.c.human) && Math.abs(q.x - RED_X) < 110;
-        if (yo && conChilena && c.ultimoTiro === 'pase' && c.ultimo?.c.team === team && c.ultimo !== q && Math.abs(c.x - q.x) < 30 && c.z > 44 && c.z < 70 && c.vz < 0 && q.st === 'piso' && q.plan.tipo !== 'falla' && Math.random() < 0.5 + ajustes().cpuAgresion * 0.4) r.salta = true;
+        yo = compas.length === 1 || (tocoUnCompa ? c.ultimo !== q : [...compas].sort((a, b) => Math.abs(a.x - xl) - Math.abs(b.x - xl))[0] === q);
+        if (yo) { meta = xl - dir * 6 + q.plan.ruido; r.corre = Math.abs(meta - q.x) > 60; }
+        // lo recibe el compañero: este sube a la red a esperar el armado (o a armarle); si lo acaba de tocar él, cubre atrás
+        else if (c.ultimo !== q) meta = RED_X - dir * (ATAQUE + 16);
       }
     }
     if (q.pensar <= 0 && q.plan.reaccion <= 0) { q.pensar = 0.08 + Math.random() * 0.08; q.quiereX = meta + (Math.random() - 0.5) * 6; }
@@ -541,7 +605,9 @@ export class DaCau extends EventScene {
     r.mx = Math.abs(dx) > 5 ? Math.sign(dx) : 0;
     // pegarle, solo si le toca: cuando la tiene a media pierna (o saltando, a los pies)
     const alto = this.alcance(q);
-    if (yo && alto !== null && q.golpeT <= 0 && q.plan.tipo !== 'falla') {
+    // con el armado para la chilena no le pega desde el piso: espera el salto (salvo que ya se le caiga)
+    const esperaSalto = remata && q.st === 'piso' && alto !== null && alto > 12;
+    if (yo && alto !== null && q.golpeT <= 0 && q.plan.tipo !== 'falla' && !esperaSalto) {
       const bueno = q.st === 'aire' ? alto < 44 : alto >= 8 && alto <= 36;
       const bajando = c.vz < 0;
       if ((bueno && bajando) || alto < 6) {
@@ -597,7 +663,11 @@ export class DaCau extends EventScene {
     // el círculo: dónde va a caer, cuando viene a tu lado (en Nekketsu no hay ayuda)
     const xl = this.caida();
     const ayuda = ajustes().nombre !== 'NEKKETSU' || !!this.d.practica;
-    c.marca.setVisible(ayuda && c.en === 'aire' && xl < RED_X && xl > BORDE[0] - 10).setPosition(Math.round(xl), PISO);
+    // con el armado para ti, el círculo naranja dice dónde saltar a la chilena
+    const me0 = this.pat.find((q) => q.c.human);
+    const pr = me0 && this.paraRematar(me0) ? this.puntoRemate() : null;
+    if (pr) c.marca.setVisible(ayuda).setPosition(Math.round(pr.x), PISO).setStrokeStyle(2, 0xff8020, 1);
+    else c.marca.setVisible(ayuda && c.en === 'aire' && xl < RED_X && xl > BORDE[0] - 10).setPosition(Math.round(xl), PISO).setStrokeStyle(2, 0xffe040, 0.9);
     // la cámara sigue el volante, sin perder a la persona
     const me = this.pat.find((q) => q.c.human) ?? this.pat[0];
     const cam = this.cameras.main;

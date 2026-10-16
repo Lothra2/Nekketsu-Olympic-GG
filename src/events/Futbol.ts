@@ -372,7 +372,7 @@ export class Futbol extends EventScene {
     if (b.dueño === j) {
       if (p.pressed.special && this.nek[0] >= 100) this.tirar(j, p.y, true);
       else if (p.pressed.kick) this.tirar(j, p.y, false);
-      else if (p.pressed.punch) this.pasar(j);
+      else if (p.pressed.punch) this.pasar(j, p.x, p.y);
       else if (p.pressed.special) this.pista(j, '¡LLENA LA BARRA!');
     } else {
       if (p.pressed.kick && j.z === 0) this.barrer(j, p.x || j.dir, p.y);
@@ -388,7 +388,8 @@ export class Futbol extends EventScene {
   private maquina(j: Jug, dt: number): [number, number] {
     const b = this.bola;
     j.ia.t -= dt;
-    const ag = this.d.practica ? 0.1 : ajustes().cpuAgresion;
+    // tus compañeros juegan a fondo en todos los niveles: lo fácil es que los rivales aflojen
+    const ag = this.d.practica ? 0.1 : j.team === 0 ? 1 : ajustes().cpuAgresion;
     const ir = (tx: number, ty: number, v: number): [number, number] => {
       const dx = tx - j.x, dy = ty - j.y, d = Math.hypot(dx, dy);
       return d < 4 ? [0, 0] : [(dx / d) * v, (dy / d) * v];
@@ -404,7 +405,8 @@ export class Futbol extends EventScene {
       if (j.ia.t <= 0) {
         j.ia.t = 0.5 + Math.random() * 0.5;
         // el especial, no apenas se llena: cerca del arco y de vez en cuando
-        if (this.nek[j.team] >= 100 && dGol < 210 && Math.random() < 0.35) { this.tirar(j, (Math.random() - 0.5) * 2, true); return [0, 0]; }
+        // la barra de tu equipo es tuya: solo la máquina rival gasta la suya
+        if (j.team === 1 && this.nek[j.team] >= 100 && dGol < 210 && Math.random() < 0.35) { this.tirar(j, (Math.random() - 0.5) * 2, true); return [0, 0]; }
         if (dGol < 200 && Math.random() < 0.55 + 0.3 * ag) { this.tirar(j, (Math.random() - 0.5) * 2, false); return [0, 0]; }
         if (presion && Math.random() < 0.4) { this.pasar(j); return [0, 0]; }
       }
@@ -417,8 +419,10 @@ export class Futbol extends EventScene {
       if (j.z === 0 && b.vz < 0 && b.z > 10 && b.z < 46 && Math.hypot(b.x - j.x, b.y - j.y) < 30) j.vz = 210;
       return ir(b.x, b.y, vel);
     }
+    // el pase de un compañero que va en el aire es nuestro: nadie se lo quita al que lo recibe
+    const nuestro = b.dueño?.team === j.team || (!b.dueño && b.para?.team === j.team);
     // el balón suelto o del otro equipo: va el que esté más cerca de los suyos
-    const libreOrival = !b.dueño || b.dueño.team !== j.team;
+    const libreOrival = !nuestro;
     if (libreOrival) {
       const mios = this.js.filter((o) => o.team === j.team && !o.arquero && o !== this.ctrl && o.st === 'libre');
       const cerca = mios.sort((a, c) => Math.hypot(a.x - b.x, a.y - b.y) - Math.hypot(c.x - b.x, c.y - b.y))[0];
@@ -435,7 +439,7 @@ export class Futbol extends EventScene {
     // los demás: se abren adelante si atacamos, o se ponen entre el balón y su arco si defendemos
     if (j.ia.t <= 0) {
       j.ia.t = 0.8 + Math.random() * 0.8;
-      const atacamos = b.dueño?.team === j.team;
+      const atacamos = nuestro;
       const propio = j.team === 0 ? GOL[0] : GOL[1];
       if (atacamos) { j.ia.tx = Phaser.Math.Clamp(b.x + (j.team === 0 ? 1 : -1) * Phaser.Math.Between(40, 110), GOL[0] + 30, GOL[1] - 30); j.ia.ty = Phaser.Math.Between(10, PROF - 10); }
       else { j.ia.tx = (b.x + propio) / 2 + Phaser.Math.Between(-20, 20); j.ia.ty = Phaser.Math.Clamp(b.y + Phaser.Math.Between(-30, 30), 8, PROF - 8); }
@@ -501,14 +505,21 @@ export class Futbol extends EventScene {
     if (j.team === 0 && this.d.practica) this.tiros++;
   }
 
-  /** El pase al compañero más adelantado: rasante, o alto (de centro) si el compañero está cerca del área rival. */
-  private pasar(j: Jug) {
+  /**
+   * El pase: al compañero más adelantado y más despejado; la persona elige con el stick hacia dónde (si apunta a
+   * alguien). Rasante, o alto (de centro) si el compañero está cerca del área rival. Va un poco adelante del que
+   * recibe y hacia el medio, para que llegue con el arco de frente.
+   */
+  private pasar(j: Jug, sx = 0, sy = 0) {
     const b = this.bola;
     const compas = this.js.filter((o) => o.team === j.team && o !== j && !o.arquero && o.st !== 'caido');
     const adelante = (o: Jug) => (o.x - j.x) * (j.team === 0 ? 1 : -1);
-    const para = compas.sort((a, c) => adelante(c) - adelante(a))[0];
+    const despejado = (o: Jug) => Math.min(80, ...this.js.filter((r) => r.team !== j.team && !r.arquero).map((r) => Math.hypot(r.x - o.x, r.y - o.y)));
+    const hacia = (o: Jug) => { const d = Math.hypot(o.x - j.x, o.y - j.y) || 1, n = Math.hypot(sx, sy); return n ? ((o.x - j.x) * sx + (o.y - j.y) * sy) / (d * n) : 0; };
+    const puntaje = (o: Jug) => hacia(o) * 2 + despejado(o) / 40 + adelante(o) / 100;
+    const para = compas.sort((a, c) => puntaje(c) - puntaje(a))[0];
     if (!para) { this.tirar(j, 0, false); return; }
-    const tx = para.x + (j.team === 0 ? 14 : -14), ty = para.y;
+    const tx = para.x + (j.team === 0 ? 14 : -14), ty = Phaser.Math.Linear(para.y, PROF / 2, 0.3);
     const d = Math.hypot(tx - b.x, ty - b.y);
     const cerca = Math.abs((j.team === 0 ? GOL[1] : GOL[0]) - para.x) < 130;
     const centro = !j.arquero && !this.d.practica && cerca && d > 30 && Math.random() < 0.5;
@@ -618,14 +629,15 @@ export class Futbol extends EventScene {
   }
 
   /**
-   * Lo que ataja un arquero: la misma cuenta para los dos, según el nivel (el nuestro con una ayudita en PASEO).
+   * Lo que ataja un arquero: el rival según el nivel; el nuestro, siempre confiable.
    * El tiro lento de lejos es más fácil; el colocado y el cabezazo de pase, más difíciles. El Nekketsu casi siempre
    * entra (el de la máquina, un poco menos).
    */
   private ataja(j: Jug, tiro: { apunta: number; cabeza: boolean }, v: number): number {
     const a = ajustes();
     if (this.bola.especial) return j.team === 0 ? 0.45 : 0.2;
-    let p = 0.5 + 0.3 * a.cpuAgresion + (j.team === 0 && a.nombre === 'PASEO' ? 0.1 : 0);
+    // nuestro arquero es confiable en todos los niveles (antes atajaba menos justo en el fácil)
+    let p = j.team === 0 ? 0.82 : 0.5 + 0.3 * a.cpuAgresion;
     p += 0.35 * Phaser.Math.Clamp((260 - v) / 200, 0, 1);
     p -= 0.18 * tiro.apunta;
     if (tiro.cabeza) p -= 0.15;
@@ -658,7 +670,11 @@ export class Futbol extends EventScene {
       // el arquero que toca al que se mete con el balón en su área chiquita, se lo quita
       const o = b.dueño;
       const arq = o.arquero || this.quitaT > 0 ? null : this.js.find((k) => k.arquero && k.team !== o.team && k.st !== 'caido' && Math.hypot(k.x - o.x, k.y - o.y) < 16 && this.enArea(o, k.team));
-      if (arq) {
+      // en los niveles fáciles a veces le ganas al arquero rival con un amague
+      if (arq && o.team === 0 && Math.random() < 0.5 * ajustes().ayuda) {
+        this.quitaT = 1;
+        this.letrero(o, '¡LO DRIBLÓ!', 0x8aff8a);
+      } else if (arq) {
         o.st = 'tambalea'; o.t = 0.4; o.fig.set(o.fig.anim.has('stagger') ? 'stagger' : 'fight_hit', true, 1.6);
         if (arq.st === 'vuela') { arq.st = 'libre'; arq.fig.setAngle(0); arq.filaVuelo = undefined; }
         this.tomar(arq);

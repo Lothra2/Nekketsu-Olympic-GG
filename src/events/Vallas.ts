@@ -23,6 +23,8 @@ interface Racer {
   st: 'set' | 'start' | 'run' | 'air' | 'stumble' | 'done'; t: number; time: number; react: number; last: string; cool: number; top: number;
   /** entrenamiento: corre pegado a la persona para que practique el codazo */
   sombra?: boolean;
+  /** la máquina: la valla que ya decidió y si la va a pasar limpia (se decide una vez por valla) */
+  valla?: unknown; limpia?: boolean;
   /** la persona: cuánto lleva la palanca arriba o abajo, la espera entre cambios de carril y el salto guardado */
   palanca?: number; espera?: number; salto?: number;
 }
@@ -173,8 +175,11 @@ export class Vallas extends EventScene {
       const me = this.racers[0];
       target = r.sombra ? me.v + Phaser.Math.Clamp((me.x - 4 - r.x) * 3, -60, 60) : (r.top + Math.sin(r.t * 2 + r.react * 20) * 10) * ajustes().cpuVel * goma(r.x - me.x);
       const next = this.hurdles.find((h) => h.lane === this.carrilVisto(r) && !h.down && h.x > r.x);
-      if (next && r.st !== 'air' && next.x - r.x < 26 + r.v * 0.05 && Math.random() < 0.92) this.jump(r);
-      else if (next && r.st !== 'air' && next.x - r.x < 12) this.jump(r);
+      // una vez por valla decide si salta a tiempo (antes tiraba el dado cada cuadro y nunca tropezaba);
+      // los rivales tropiezan más en los niveles fáciles
+      if (next && next !== r.valla) { r.valla = next; r.limpia = Math.random() < (r.c.team === 0 ? 0.95 : 0.78 + 0.18 * ajustes().cpuAgresion); }
+      if (next && r.st !== 'air' && r.limpia && next.x - r.x < 26 + r.v * 0.05) this.jump(r);
+      else if (next && r.st !== 'air' && next.x - r.x < 12 && (r.limpia || next.x - r.x < 5)) this.jump(r);
       const h = this.racers.find((o) => o !== r && o.c.team !== r.c.team && Math.abs(o.lane - r.lane) === 1 && Math.abs(o.x - r.x) < 22);
       if (h && !r.sombra && r.cool <= 0 && Math.random() < 0.6 * ajustes().cpuAgresion * dt) this.codazo(r);
     }

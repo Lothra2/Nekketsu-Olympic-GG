@@ -458,12 +458,15 @@ export class Chapita extends EventScene {
   private cpuPlan: { t: number; altura: Altura; nek: boolean } | null = null;
 
   private planCpu(): { t: number; altura: Altura; nek: boolean } {
-    const ag = this.d.practica ? 0.1 : ajustes().cpuAgresion;
+    // tu compañero batea a fondo en todos los niveles: lo fácil es que los rivales aflojen
+    const mio = this.bat.c.team === 0;
+    const ag = this.d.practica ? 0.1 : mio ? 1 : ajustes().cpuAgresion;
     // el swing tarda tres cuadros (a 14 fps) en llegar al impacto
     const ideal = 3 / 14;
     // con la barra llena, el batazo Nekketsu sin error (el del kit llega al impacto un cuadro después)
     const f = this.bat.fig, imp = f.anim.has('bat_nekketsu') ? 4 / 14 : ideal;
-    if (!this.d.practica && this.nek[this.bat.c.team] >= 100 && Math.random() < 0.5) return { t: imp, altura: 'alta', nek: true };
+    // la barra de tu equipo es tuya; y en PASEO el rival no saca el batazo (como la recta de fuego)
+    if (!this.d.practica && !mio && ajustes().nombre !== 'PASEO' && this.nek[this.bat.c.team] >= 100 && Math.random() < 0.5) return { t: imp, altura: 'alta', nek: true };
     const error = (Math.random() + Math.random() + Math.random() - 1.5) * (0.22 - 0.1 * ag);
     const acierta = this.chapa.tipo === 'recta' || Math.random() < 0.3 + 0.4 * ag;
     const altura: Altura = this.chapa.tipo === 'recta' ? (Math.random() < 0.35 ? 'alta' : 'media') : acierta ? (this.chapa.tipo === 'sube' ? 'alta' : 'baja') : this.chapa.tipo === 'sube' ? 'baja' : 'alta';
@@ -482,7 +485,7 @@ export class Chapita extends EventScene {
   private contacto() {
     const c = this.chapa, s = this.swing!;
     if (c.st !== 'lanzada') return;
-    const ayuda = this.humanoBatea() ? ajustes().ayuda : 0.6;
+    const ayuda = this.humanoBatea() ? ajustes().ayuda : this.bat.c.team === 0 ? 1 : 0.6;
     // el batazo Nekketsu: el doble de margen y la altura no importa
     const ventana = (20 + 12 * ayuda) * (s.nek ? 2 : 1);
     const dx = c.x - CONTACTO;
@@ -578,7 +581,7 @@ export class Chapita extends EventScene {
     let x = c.x, z = c.z, vx = c.vx, vz = c.vz;
     for (let k = 0; k < 200 && z > 14; k++) { vz -= G * 0.02; x += vx * 0.02; z += vz * 0.02; }
     const meta = Phaser.Math.Clamp(x, PIT_X + 20, CASA_X - 10);
-    const vel = (this.d.practica ? 60 : 95 + 22 * ajustes().cpuAgresion) * (f.c.team === 0 ? 1.05 : 1);
+    const vel = (this.d.practica ? 60 : 95 + 22 * (f.c.team === 0 ? 1 : ajustes().cpuAgresion)) * (f.c.team === 0 ? 1.05 : 1);
     const d = meta - this.fx;
     const mueve = Math.abs(d) > 3;
     if (mueve) this.fx += Math.sign(d) * Math.min(Math.abs(d), vel * dt);

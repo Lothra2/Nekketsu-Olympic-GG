@@ -1,6 +1,9 @@
 import { Actor, Item, NOTHING, type Intent } from './actor';
 import { AGRESION } from './defs';
 
+/** a quién va cada luchador de la máquina (para repartirse en el 4 contra 4) */
+const objetivos = new WeakMap<Actor, Actor>();
+
 /**
  * La máquina: elige un rival, se alinea en profundidad, se acerca y pega con combos.
  * También recoge armas, levanta a los caídos y los lanza contra los demás.
@@ -33,9 +36,10 @@ export class Brain {
     }
     if (me.st === 'dizzy') { out.punch = Math.random() < 0.3; return out; }
     // agarrado: forcejea; agarrando: rodillazos y a veces lo bota
-    if (me.st === 'grabbed') { out.punch = Math.random() < 0.12 * this.level; return out; }
+    // forcejea igual de rápido a cualquier velocidad de pantalla (~7 por segundo a nivel 1)
+    if (me.st === 'grabbed') { out.punch = Math.random() < 7 * this.level * dt; return out; }
     if (me.st === 'grab') {
-      if (this.cool <= 0) { this.cool = 0.38 + Math.random() * 0.2; if (Math.random() < 0.25) out.kick = true; else out.punch = true; }
+      if (this.cool <= 0) { this.cool = (0.38 + Math.random() * 0.2) / Math.max(0.4, this.level); if (Math.random() < 0.25) out.kick = true; else out.punch = true; }
       return out;
     }
     // cubriéndose mientras le tiran golpes
@@ -48,7 +52,16 @@ export class Brain {
     const enemies = me.w.actors.filter((a) => a.team !== me.team && a.alive);
     if (!enemies.length) { this.plan = { ...NOTHING }; return out; }
     const near = (a: { x: number; y: number }) => Math.abs(a.x - me.x) + Math.abs(a.y - me.y) * 2;
-    const target = enemies.filter((e) => e.st !== 'down' && e.st !== 'lifted').sort((a, b) => near(a) - near(b))[0] ?? enemies[0];
+    // a quién ir: el más cerca, pero repartidos. Tus compañeros van primero por los que te están pegando a ti; los
+    // rivales no se amontonan todos sobre ti (en los niveles fáciles, de a uno)
+    const encima = (e: Actor) => me.w.actors.filter((a) => a !== me && a.alive && a.team !== e.team && objetivos.get(a) === e).length;
+    const tope = this.level < 0.5 ? 1 : this.level < 0.75 ? 2 : 4;
+    const actual = objetivos.get(me);
+    const puntaje = (e: Actor) => near(e) + 40 * encima(e) - (e === actual ? 30 : 0)
+      - (me.team === 0 && objetivos.get(e)?.human ? 80 : 0)
+      + (me.team === 1 && e.human && encima(e) >= tope ? 200 : 0);
+    const target = enemies.filter((e) => e.st !== 'down' && e.st !== 'lifted').sort((a, b) => puntaje(a) - puntaje(b))[0] ?? enemies[0];
+    objetivos.set(me, target);
 
     // le van a pegar de frente: a veces se cubre
     if (me.controllable && !me.weapon && target.st === 'attack' && Math.abs(target.x - me.x) < 40 && Math.abs(target.y - me.y) < 10
@@ -62,7 +75,7 @@ export class Brain {
     if (comida && me.hp < me.maxHp * 0.5 && near(comida) < 260 && !me.carrying) return { ...out, ...this.walkTo(comida.x, comida.y, 4, out), punch: false };
 
     // técnica especial con la barra llena
-    if (me.meter >= 100 && Math.abs(target.x - me.x) < 70 && Math.abs(target.y - me.y) < 10 && Math.random() < 0.5) { out.special = true; return out; }
+    if (me.meter >= 100 && Math.abs(target.x - me.x) < 70 && Math.abs(target.y - me.y) < 10 && Math.random() < 0.5 * this.level) { out.special = true; return out; }
 
     // cargando algo: alinear y lanzar
     if (me.st === 'carry') {

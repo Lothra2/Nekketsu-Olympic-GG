@@ -111,7 +111,7 @@ export class Actor {
   /** cuánto dura la burla en curso */
   private burlaT = 0;
 
-  constructor(readonly w: World, readonly id: string, readonly team: 0 | 1, x: number, y: number, readonly human = false) {
+  constructor(readonly w: World, readonly id: string, readonly team: 0 | 1, x: number, y: number, public human = false) {
     this.x = x;
     this.y = y;
     this.nombre = kit().atletas[id]?.nombre ?? id;

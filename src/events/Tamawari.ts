@@ -394,7 +394,7 @@ export class Tamawari extends EventScene implements World {
       // mantener arriba también sube (en Paseo, bastante)
       const lento = arriba || (!j.c.human && it.y < 0) ? (ajustes().nombre === 'PASEO' ? 34 : 20) : 0;
       // la máquina trepa a su ritmo (el de la carrera, según el nivel)
-      sube = j.c.human ? t.boost * 0.75 + lento : j.sparring ? 4 : 34 * ajustes().cpuVel;
+      sube = j.c.human ? t.boost * 0.75 + lento : j.sparring ? 4 : 34 * (j.c.team === 0 ? 1 : ajustes().cpuVel);
     }
     t.boost = Math.max(0, t.boost - 70 * dt);
     if (it.y > 0 && j.c.human) sube = -70;
@@ -418,7 +418,8 @@ export class Tamawari extends EventScene implements World {
     j.pensar -= dt;
     if (j.pensar > 0) return { ...j.quiere, punch: false, kick: false, jump: false };
     j.pensar = 0.12 + Math.random() * 0.1;
-    const a = j.a, ag = ajustes().cpuAgresion;
+    // tus compañeros juegan a fondo en todos los niveles: lo fácil es que los rivales aflojen
+    const a = j.a, ag = j.c.team === 0 ? 1 : ajustes().cpuAgresion;
     const mio = this.postes.find((q) => q.team === j.c.team)!, suyo = this.postes.find((q) => q.team !== j.c.team)!;
     const it: Intent = { ...NOTHING };
     const ir = (x: number, y: number) => {
@@ -439,7 +440,7 @@ export class Tamawari extends EventScene implements World {
     const t = this.trepa.get(a);
     if (t) {
       if (t.h >= this.cima(t.poste) - 0.5) { if (Math.random() < 0.55 * (0.5 + ag / 2)) it.punch = true; }
-      else { it.y = -1; if (Math.random() < 0.5 * ajustes().cpuVel) it[Math.random() < 0.5 ? 'punch' : 'kick'] = true; }
+      else { it.y = -1; if (Math.random() < 0.5 * (j.c.team === 0 ? 1 : ajustes().cpuVel)) it[Math.random() < 0.5 ? 'punch' : 'kick'] = true; }
       j.quiere = it;
       return it;
     }

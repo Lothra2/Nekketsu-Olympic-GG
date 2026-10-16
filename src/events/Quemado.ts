@@ -244,7 +244,11 @@ export class Quemado extends EventScene {
     const mios = this.js.filter((j) => j.team === 0 && j.st !== 'golpe');
     if (b.st === 'suelta') {
       const pueden = mios.filter((j) => this.enZona(j, b.x, 10));
-      if (pueden.length) return pueden.sort((a, c) => Math.hypot(a.x - b.x, a.y - b.y) - Math.hypot(c.x - b.x, c.y - b.y))[0];
+      const dist = (j: Jug) => Math.hypot(j.x - b.x, j.y - b.y);
+      const mejor = pueden.sort((a, c) => dist(a) - dist(c))[0];
+      // el que ya manejas sigue siendo tuyo mientras no quede muy lejos: el stick no salta de un niño a otro
+      if (mejor && prev && prev.team === 0 && pueden.includes(prev) && dist(prev) < dist(mejor) + 20) return prev;
+      if (mejor) return mejor;
     }
     if (prev && prev.team === 0 && prev.dentro && prev.st !== 'golpe') return prev;
     return mios.filter((j) => j.dentro).sort((a, c) => Math.abs(a.x - b.x) - Math.abs(c.x - b.x))[0] ?? null;
@@ -355,7 +359,8 @@ export class Quemado extends EventScene {
       const r = Math.random();
       const amigo = this.fuera(j.team)[0];
       if (j.dentro && amigo && r < 0.22) this.pasar(j);
-      else if (this.nek[j.team] >= 100 && Math.random() < 0.7) this.lanzar(j, 'especial');
+      // el especial del rival: más seguido mientras más difícil el nivel
+      else if (this.nek[j.team] >= 100 && Math.random() < (j.team === 1 ? 0.25 + 0.45 * ajustes().cpuAgresion : 0.7)) this.lanzar(j, 'especial');
       else if (j.dentro && r < 0.55) { j.ia.corre = true; j.ia.t = 0.7; }
       else this.lanzar(j, 'normal');
       return [0, 0];
@@ -483,7 +488,8 @@ export class Quemado extends EventScene {
       const pc = this.d.practica ? 0 : b.especial ? 0.08 : r.team === 1 ? (0.18 + 0.3 * ag) * fuerte : 0.35 * fuerte;
       const pd = this.d.practica ? 0 : r.team === 1 ? 0.2 : 0.3;
       const x = Math.random();
-      r.ia.plan = x < pc ? 'atrapa' : x < pc + pd ? 'salta' : 'golpe';
+      // tus compañeros siempre hacen algo: atrapan o saltan (los que se lo comen son los rivales)
+      r.ia.plan = r.team === 0 && !this.d.practica ? (x < pc ? 'atrapa' : 'salta') : x < pc ? 'atrapa' : x < pc + pd ? 'salta' : 'golpe';
     }
     this.sound.play('esquiva', { volume: b.especial ? 0.6 : 0.35, rate: b.especial ? 0.7 : 1 });
     if (b.especial) this.cameras.main.shake(120, 0.006);
@@ -518,7 +524,8 @@ export class Quemado extends EventScene {
         // sí recibe el que pasó de largo
         if (o.team === L.team) { if (!o.dentro && b.t > 0.2) this.agarra(o); continue; }
         if (!o.dentro) continue;
-        if (o.st === 'atrapa' && (!b.especial || Math.random() < 0.15)) this.agarra(o, true);
+        // el especial casi no se atrapa; el tuyo, más en los niveles fáciles
+        if (o.st === 'atrapa' && (!b.especial || Math.random() < (o.team === 0 ? 0.15 + 0.45 * ajustes().ayuda : 0.15))) this.agarra(o, true);
         else if (bolita || o.z > 12) { this.stats.esquivas[o.team]++; if (o.team === 0 && o === b.objetivo) { this.esquivas++; this.letrero(o, '¡ESQUIVÓ!', 0x8ae0ff); } }
         else this.golpe(o);
       }
@@ -569,7 +576,8 @@ export class Quemado extends EventScene {
     const b = this.bola;
     b.st = 'mano'; b.dueño = o; b.objetivo = null; b.especial = false; b.lanzador = null; b.quieta = 0;
     o.ia.plan = null;
-    o.ia.t = 0.9 + Math.random() * 0.9;
+    // el rival se la piensa más en los niveles fáciles antes de lanzar
+    o.ia.t = (0.9 + Math.random() * 0.9) / (o.team === 1 && !this.d.practica ? Math.max(0.5, ajustes().cpuAgresion) : 1);
     o.ia.corre = false;
     if (o.st === 'atrapa') { o.st = 'libre'; o.catchT = 0; }
     this.sound.play('recoger', { volume: 0.3 });
