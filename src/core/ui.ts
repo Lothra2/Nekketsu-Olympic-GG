@@ -66,6 +66,13 @@ export function speedLines(scene: Phaser.Scene, depth = 8000, color = 0xffffff):
   return g;
 }
 
+/** Las líneas de velocidad un instante (`ms`) y se van solas: el manga del súper tiro. Ponerla en la capa de la interfaz. */
+export function rafaga(scene: Phaser.Scene, ms = 450, depth = 8990): Phaser.GameObjects.Graphics {
+  const g = speedLines(scene, depth);
+  scene.time.delayedCall(ms, () => { if (g.active) scene.tweens.add({ targets: g, alpha: 0, duration: 120, onComplete: () => g.destroy() }); });
+  return g;
+}
+
 /** Los consejos de la pantalla de carga: para que la espera enseñe algo. */
 const CONSEJOS = [
   'CON LA BARRA LLENA, LA ESTRELLA ES TU SÚPER GOLPE',

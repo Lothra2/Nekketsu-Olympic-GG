@@ -1,8 +1,8 @@
 import Phaser from 'phaser';
 import { Figura } from '../core/figura';
 import { ajustes } from '../core/nivel';
-import { efecto } from '../core/fx';
-import { txt, flash } from '../core/ui';
+import { efecto, tiroSuper } from '../core/fx';
+import { txt, flash, rafaga } from '../core/ui';
 import { MarcadorPartido } from '../core/interfaz';
 import { Painter, hex } from '../gfx/paint';
 import { EventScene, prueba, type Competidor } from './base';
@@ -500,6 +500,7 @@ export class Futbol extends EventScene {
       this.nek[j.team] = 0;
       efecto(this, 'aura_nekketsu', this.sx(j.x, j.y), FT + j.y, { depth: FT + j.y - 0.1 });
       if (j.team === 0) void this.banner('¡TIRO NEKKETSU!', 'fuente_titulo', 2, 700);
+      this.uiAdd(rafaga(this));
       this.cameras.main.shake(120, 0.006);
     } else this.carga(j.team, 6);
     this.sound.play('golpe', { volume: 0.4, rate: 0.8 });
@@ -809,6 +810,8 @@ export class Futbol extends EventScene {
     // el balón por encima de los que están justo delante: en el montón no se perdía de vista (en las manos, con el que lo lleva)
     if (mano) b.spr.setPosition(Math.round(mano.x), Math.round(mano.y)).setDepth(b.dueño!.fig.depth + (mano.detras ? -0.1 : 0.1));
     else b.spr.setPosition(sx, Math.round(FT + b.y - b.z - 3)).setDepth(FT + b.y + 12).setRotation(b.spr.rotation + (b.dueño ? 0 : b.vx * 0.002));
+    // el tiro Nekketsu: el balón achatado y en llamas, como el del tigre en Súper Campeones
+    tiroSuper(this, b.spr, b.especial && !b.dueño);
     b.sombra.setPosition(sx, FT + b.y).setDepth(FT + b.y - 0.6).setScale(Math.max(0.4, 1 - b.z / 80));
     const m = this.mari;
     this.marimonda.setVisible(m.vx !== 0).setPosition(Math.round(this.sx(m.x, m.y)), FT + m.y).setDepth(FT + m.y).setFlipX(m.vx < 0);

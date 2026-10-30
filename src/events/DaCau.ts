@@ -1,9 +1,9 @@
 import Phaser from 'phaser';
 import { Figura } from '../core/figura';
 import { ajustes } from '../core/nivel';
-import { efecto, destellar } from '../core/fx';
+import { efecto, destellar, tiroSuper } from '../core/fx';
 import { chip } from '../core/music';
-import { txt, flash } from '../core/ui';
+import { txt, flash, rafaga } from '../core/ui';
 import { rotular } from '../core/input';
 import { Painter, hex } from '../gfx/paint';
 import { lado } from '../core/equipos';
@@ -330,6 +330,7 @@ export class DaCau extends EventScene {
       c.fuego = true;
       this.letrero(p, '¡CHILENA NEKKETSU!', 0xff8020);
       destellar(c.spr, 140, 0xffa040);
+      this.uiAdd(rafaga(this));
       efecto(this, 'aura_nekketsu', p.x, PISO + FILA[p.fila], { depth: PISO + FILA[p.fila] - 0.1 });
       if (team === 0) void this.banner('¡NEKKETSU!', 'fuente_titulo', 2, 500, 110);
       this.shake(240, 0.012);
@@ -660,6 +661,8 @@ export class DaCau extends EventScene {
     c.spr.setPosition(Math.round(c.x), Math.round(PISO + fila - c.z)).setVisible(c.en !== 'piso' || this.pausaT > 0);
     if (c.en === 'aire') c.spr.setRotation(Math.atan2(c.vz * -1, c.vx) + Math.PI / 2 + Math.PI);
     else c.spr.setRotation(0);
+    // la chilena Nekketsu: el volante en llamas, con sus fantasmas detrás
+    tiroSuper(this, c.spr, c.en === 'aire' && c.fuego, false);
     c.rastro.emitting = c.en === 'aire';
     c.llamas.emitting = c.en === 'aire' && c.fuego;
     c.sombra.setPosition(Math.round(c.x), PISO).setScale(Math.max(0.4, 1 - c.z / 140)).setVisible(c.en !== 'piso');

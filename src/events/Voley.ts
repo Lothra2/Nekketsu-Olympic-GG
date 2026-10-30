@@ -2,9 +2,9 @@ import Phaser from 'phaser';
 import { Figura } from '../core/figura';
 import { pelotaKit } from '../core/kit';
 import { ajustes } from '../core/nivel';
-import { efecto, talla, destellar } from '../core/fx';
+import { efecto, talla, destellar, tiroSuper } from '../core/fx';
 import { chip } from '../core/music';
-import { txt, flash } from '../core/ui';
+import { txt, flash, rafaga } from '../core/ui';
 import { rotular } from '../core/input';
 import { Painter, hex } from '../gfx/paint';
 import { lado } from '../core/equipos';
@@ -320,6 +320,7 @@ export class Voley extends EventScene {
       } else this.lanzar(this.hueco(team), 0, 0.42);
       this.letrero(p, '¡REMATE DE FUEGO!', 0xff8020);
       destellar(c.spr, 140, 0xffa040);
+      this.uiAdd(rafaga(this));
       efecto(this, 'aura_nekketsu', p.x, PISO + FILA[p.fila], { depth: PISO + FILA[p.fila] - 0.1 });
       if (team === 0) void this.banner('¡NEKKETSU!', 'fuente_titulo', 2, 500, 110);
       this.shake(240, 0.012);
@@ -661,6 +662,8 @@ export class Voley extends EventScene {
     const fila = c.dueño ? FILA[c.dueño.fila] : 0;
     c.spr.setPosition(Math.round(c.x), Math.round(PISO + fila - c.z)).setVisible(c.en !== 'piso' || this.pausaT > 0);
     if (c.en === 'aire') c.spr.setRotation(c.spr.rotation + (c.vx > 0 ? 0.25 : -0.25));
+    // el remate de fuego: la pelota achatada y en llamas, como en Súper Campeones
+    tiroSuper(this, c.spr, c.en === 'aire' && c.ultimoTiro === 'fuego');
     c.rastro.emitting = c.en === 'aire';
     c.fuego.emitting = c.en === 'aire' && c.ultimoTiro === 'fuego';
     c.sombra.setPosition(Math.round(c.x), PISO).setScale(Math.max(0.4, 1 - c.z / 140)).setVisible(c.en !== 'piso');

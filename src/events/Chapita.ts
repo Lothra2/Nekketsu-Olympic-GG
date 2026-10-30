@@ -1,9 +1,9 @@
 import Phaser from 'phaser';
 import { Figura } from '../core/figura';
 import { ajustes } from '../core/nivel';
-import { efecto } from '../core/fx';
+import { efecto, tiroSuper } from '../core/fx';
 import { chip } from '../core/music';
-import { txt, flash } from '../core/ui';
+import { txt, flash, rafaga } from '../core/ui';
 import { MarcadorPartido } from '../core/interfaz';
 import { Painter, hex } from '../gfx/paint';
 import { lado } from '../core/equipos';
@@ -43,6 +43,8 @@ interface Chapa {
   tipo: Lanz; x0: number; t: number; tt: number; botes: number; jonron: boolean; resuelta: boolean;
   /** se decide al batear: si el del campo la va a soltar (los batazos duros y altos casi siempre) y si ya la soltó */
   escapa: boolean; escapo: boolean;
+  /** va en llamas: la recta de fuego o el batazo Nekketsu */
+  fuego: boolean;
   spr: Phaser.GameObjects.Image; sombra: Phaser.GameObjects.Ellipse;
 }
 
@@ -130,7 +132,7 @@ export class Chapita extends EventScene {
     this.chapaMano = this.add.image(0, 0, 'armas', 'chapa_mano_0').setDepth(PISO + 1).setVisible(false);
     const spr = this.add.image(0, 0, 'armas', 'chapa_girando_0').setScale(1.4).setDepth(PISO + 2);
     const sombra = this.add.ellipse(0, PISO, 6, 2, 0x000000, 0.3).setDepth(PISO - 1);
-    this.chapa = { x: 0, z: 0, vx: 0, vz: 0, st: 'mano', tipo: 'recta', x0: 0, t: 0, tt: 1, botes: 0, jonron: false, resuelta: false, escapa: false, escapo: false, spr, sombra };
+    this.chapa = { x: 0, z: 0, vx: 0, vz: 0, st: 'mano', tipo: 'recta', x0: 0, t: 0, tt: 1, botes: 0, jonron: false, fuego: false, resuelta: false, escapa: false, escapo: false, spr, sombra };
     this.hud = this.uiAdd(this.add.graphics().setDepth(8000));
     // el marcador de TV del kit, con el nombre de cada equipo a su lado
     this.marcadorTxt = new MarcadorPartido(this, (o) => this.uiAdd(o), 320, 16, [lado(0).corto, lado(1).corto]);
@@ -350,6 +352,8 @@ export class Chapita extends EventScene {
     this.cpuPlan = null;
     const nivel = this.humanoLanza() ? 1 : this.d.practica ? 0.62 : ajustes().nombre === 'PASEO' ? 0.7 : ajustes().nombre === 'NORMAL' ? 0.85 : 1;
     const v = (tipo === 'recta' ? 230 : 200) * nivel * (this.rapida ? 1.4 : 1);
+    c.fuego = this.rapida;
+    if (this.rapida) this.uiAdd(rafaga(this, 350));
     this.rapida = false;
     c.st = 'lanzada'; c.tipo = tipo; c.x0 = PIT_X - 10; c.x = c.x0; c.z = 22; c.t = 0;
     c.tt = (c.x0 - CONTACTO) / v;
@@ -503,6 +507,8 @@ export class Chapita extends EventScene {
     const atrapa = Phaser.Math.Clamp(1.25 - fuerza, 0.15, 0.92) * (this.field?.c.team === 1 ? 0.75 + 0.25 * ag : 1);
     c.escapa = Math.random() > atrapa;
     c.st = 'bateada';
+    c.fuego = s.nek;
+    if (s.nek) this.uiAdd(rafaga(this));
     c.vx = Math.cos(ang) * v;
     c.vz = Math.sin(ang) * v;
     c.t = 0;
@@ -678,7 +684,7 @@ export class Chapita extends EventScene {
   /** Después de cada jugada: el mismo bateador sigue, pasa el siguiente o cambia la mitad. */
   private despues() {
     const c = this.chapa;
-    c.st = 'mano';
+    c.st = 'mano'; c.fuego = false;
     const team = this.bat.c.team;
     if (this.d.practica) {
       if (this.strikes >= 3) this.strikes = 0;
@@ -751,6 +757,8 @@ export class Chapita extends EventScene {
     c.sombra.setVisible(vuela);
     if (vuela) {
       c.spr.setFrame(c.st === 'quieta' && c.z === 0 ? 'chapa_quieto_0' : `chapa_girando_${Math.floor(c.t * 20) % 8}`).setPosition(Math.round(c.x), Math.round(PISO - c.z));
+      // la recta de fuego y el batazo Nekketsu: la chapa achatada y en llamas
+      tiroSuper(this, c.spr, c.fuego && (c.st === 'lanzada' || c.st === 'bateada'));
       c.sombra.setPosition(Math.round(c.x), PISO).setScale(Math.max(0.4, 1 - c.z / 120));
     }
   }

@@ -1,9 +1,9 @@
 import Phaser from 'phaser';
 import { Figura } from '../core/figura';
 import { ajustes } from '../core/nivel';
-import { efecto } from '../core/fx';
+import { efecto, tiroSuper } from '../core/fx';
 import { chip } from '../core/music';
-import { txt, flash } from '../core/ui';
+import { txt, flash, rafaga } from '../core/ui';
 import { EventScene, prueba, type Competidor } from './base';
 import { queueEscenario } from './escenario';
 import { nuestros, ellos, lado } from '../core/equipos';
@@ -425,6 +425,7 @@ export class Quemado extends EventScene {
       efecto(this, 'aura_nekketsu', this.sx(j.x, j.y), FT + j.y - j.z, { depth: FT + j.y - 0.1 });
       chip.blip(220, 0.3, 'saw', 0.2, 880);
       if (j.team === 0) void this.banner('¡TIRO NEKKETSU!', 'fuente_titulo', 2, 700);
+      this.uiAdd(rafaga(this));
     }
   }
 
@@ -693,6 +694,8 @@ export class Quemado extends EventScene {
       s.setPosition(Math.round(this.sx(b.x, b.y)), Math.round(FT + b.y - b.z - 4)).setDepth(FT + b.y + 0.3);
       b.sombra.setVisible(true).setPosition(Math.round(this.sx(b.x, b.y)), FT + b.y).setDepth(FT + b.y - 0.6).setScale(Math.max(0.4, 1 - b.z / 80));
     }
+    // el tiro Nekketsu: el balón achatado y en llamas
+    tiroSuper(this, s, b.especial && b.st === 'tiro');
     b.aura.emitting = b.especial && b.st === 'tiro';
     const c = this.ctrl;
     this.flecha.setVisible(!!c && this.fase === 'juego');
