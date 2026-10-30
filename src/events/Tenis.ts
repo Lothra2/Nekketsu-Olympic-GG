@@ -167,32 +167,62 @@ export class Tenis extends EventScene {
     this.textures.addCanvas('pelota_tenis', p.done());
   }
 
-  /** El fondo pintado por código: el cielo de Đà Lạt con sus pinos, las gradas, la arcilla en perspectiva y la red. */
+  /**
+   * El estadio pintado por código, hasta que llegue el de PixelForja (PEDIDO_TENIS_VERTICAL.md): el cielo de Đà Lạt
+   * con la niebla, las montañas, el lago Xuân Hương, los pinos, la grada de dos pisos con público, las vallas de
+   * publicidad, la silla del juez, los bancos, las hortensias y la arcilla en perspectiva con sus marcas de rastrillo.
+   */
   private cancha() {
     const g = this.add.graphics().setDepth(-20);
-    // el cielo y la niebla de la mañana
-    g.fillGradientStyle(0x8fb8d8, 0x8fb8d8, 0xd8e6ec, 0xd8e6ec, 1).fillRect(-80, 0, 800, 104);
-    // los pinos del fondo, en dos filas
-    for (let i = 0; i < 26; i++) {
-      const x = -70 + i * 32 + (i % 2) * 9, h = 34 + ((i * 7) % 13), base = 98;
-      g.fillStyle(i % 2 ? 0x2f5a3a : 0x3a6a44).fillTriangle(x, base - h, x - 11, base, x + 11, base).fillTriangle(x, base - h - 10, x - 7, base - h + 12, x + 7, base - h + 12);
-      g.fillStyle(0x4a3524).fillRect(x - 1, base - 4, 3, 6);
+    const R = (seed: number) => { const x = Math.sin(seed * 12.9898) * 43758.5453; return x - Math.floor(x); };
+    // el cielo, del azul de la mañana a la niebla
+    g.fillGradientStyle(0x6fa6d6, 0x6fa6d6, 0xdfe9ef, 0xdfe9ef, 1).fillRect(-80, 0, 800, 72);
+    // el sol pálido y dos nubes
+    g.fillStyle(0xfff4d0, 0.8).fillCircle(540, 22, 11);
+    for (const [cx, cy, w] of [[120, 28, 70], [430, 16, 50], [690, 30, 60]]) { g.fillStyle(0xffffff, 0.75).fillEllipse(cx, cy, w, 12).fillEllipse(cx - w / 4, cy + 3, w / 2, 10).fillEllipse(cx + w / 4, cy + 4, w / 2, 9); }
+    // las montañas lejanas, dos cordones
+    g.fillStyle(0x8fa9c4, 1);
+    for (let i = -1; i < 9; i++) g.fillTriangle(-80 + i * 100, 72, -80 + i * 100 + 55, 38 + (i % 3) * 6, -80 + i * 100 + 110, 72);
+    g.fillStyle(0x5f7f9a, 1);
+    for (let i = -1; i < 10; i++) g.fillTriangle(-110 + i * 90, 76, -110 + i * 90 + 45, 50 + ((i * 7) % 4) * 4, -110 + i * 90 + 90, 76);
+    // el lago Xuân Hương, con los reflejos de la luz
+    g.fillStyle(0x7fb4cc, 1).fillRect(-80, 70, 800, 16);
+    for (let i = 0; i < 40; i++) g.fillStyle(0xd8f0f8, 0.6).fillRect(-80 + i * 20 + (i % 3) * 5, 73 + (i % 4) * 3, 8 + (i % 3) * 3, 1);
+    // la orilla con los pinos, dos filas: la de atrás más chica y gris, la de adelante verde oscuro
+    g.fillStyle(0x3a5a40, 1).fillRect(-80, 84, 800, 6);
+    for (let i = 0; i < 40; i++) { const x = -78 + i * 21, h = 14 + Math.floor(R(i) * 6); g.fillStyle(0x4a6a52).fillTriangle(x, 86 - h, x - 6, 86, x + 6, 86); }
+    for (let i = 0; i < 28; i++) {
+      const x = -72 + i * 30 + Math.floor(R(i + 50) * 8), h = 26 + Math.floor(R(i + 9) * 12), base = 96;
+      g.fillStyle(i % 2 ? 0x2f5a3a : 0x3a6a44).fillTriangle(x, base - h, x - 10, base, x + 10, base).fillTriangle(x, base - h - 9, x - 7, base - h + 10, x + 7, base - h + 10);
+      g.fillStyle(0x4a3524).fillRect(x - 1, base - 3, 3, 5);
     }
-    // la grada del fondo con el público
-    g.fillStyle(0x3b4a5a).fillRect(-80, 94, 800, 14);
-    for (let i = 0; i < 60; i++) { g.fillStyle([0xe8c070, 0xd05050, 0x5080d0, 0xf0f0f0, 0x60b060][i % 5]).fillRect(-74 + i * 13, 96 + (i % 3) * 3, 5, 6); }
-    g.fillStyle(0x2a3a2a).fillRect(-80, 106, 800, 6);
-    // el césped y la tierra alrededor de la cancha
-    g.fillStyle(0x3f7a3f).fillRect(-80, 108, 800, 252);
-    const [, yFondo] = this.pant(0, LARGO + 60), [, yFrente] = this.pant(0, -60);
+    // la grada del fondo: techo, dos pisos de asientos con la gente, y la baranda
+    g.fillStyle(0x2a3440).fillRect(-80, 92, 800, 4);
+    g.fillStyle(0x3b4a5a).fillRect(-80, 96, 800, 20);
+    const ropa = [0xe8c070, 0xd05050, 0x5080d0, 0xf0f0f0, 0x60b060, 0xf0a040, 0x9060c0];
+    for (let fila = 0; fila < 2; fila++) for (let i = 0; i < 68; i++) {
+      const x = -78 + i * 12 + (fila ? 6 : 0), y = 98 + fila * 9;
+      if (R(i * 3 + fila) < 0.12) continue;
+      g.fillStyle(ropa[(i + fila * 3) % ropa.length]).fillRect(x, y + 3, 5, 5);
+      g.fillStyle(R(i + fila * 7) < 0.5 ? 0x8a5a3a : 0xf0c8a0).fillRect(x + 1, y, 3, 3);
+      // algunos con banderitas
+      if (R(i * 5 + fila) < 0.1) g.fillStyle(R(i) < 0.5 ? 0xda251d : 0xffcd00).fillRect(x + 5, y - 2, 3, 3);
+    }
+    g.fillStyle(0x1e2630).fillRect(-80, 116, 800, 3);
+    // las vallas de publicidad del fondo, bajo la grada
+    const vallas: [number, number, number][] = [[0xe02020, 0xffffff, 0], [0x1040a0, 0xffe040, 1], [0xf2c230, 0x102040, 2], [0x208040, 0xffffff, 3]];
+    for (let i = 0; i < 10; i++) { const [fondo, raya] = vallas[i % 4]; const x = -80 + i * 80; g.fillStyle(fondo).fillRect(x, 119, 78, 9); g.fillStyle(raya, 0.9).fillRect(x + 10, 122, 20 + (i % 3) * 8, 3); }
+    // el césped alrededor (más oscuro lejos) y la tierra de la cancha
+    g.fillGradientStyle(0x3a703a, 0x3a703a, 0x4a8a44, 0x4a8a44, 1).fillRect(-80, 128, 800, 232);
     const poly = (x0: number, d0: number, x1: number, d1: number, color: number, alpha = 1) => {
       const a = this.pant(x0, d1), b = this.pant(x1, d1), c = this.pant(x1, d0), d = this.pant(x0, d0);
       g.fillStyle(color, alpha).fillPoints([{ x: a[0], y: a[1] }, { x: b[0], y: b[1] }, { x: c[0], y: c[1] }, { x: d[0], y: d[1] }], true);
     };
-    // la arcilla roja, con su borde más oscuro afuera de las líneas
-    poly(-ANCHO / 2 - 70, -60, ANCHO / 2 + 70, LARGO + 60, 0x9c4a30);
-    poly(-ANCHO / 2, 0, ANCHO / 2, LARGO, 0xb85a3a);
-    g.fillStyle(0x6a3a28, 0.25).fillRect(-80, yFondo - 2, 800, 2).fillRect(-80, yFrente, 800, 2);
+    // la arcilla, el borde más oscuro afuera de las líneas y las marcas del rastrillo
+    poly(-ANCHO / 2 - 70, -40, ANCHO / 2 + 70, LARGO + 50, 0x9c4a30);
+    poly(-ANCHO / 2 - 4, -4, ANCHO / 2 + 4, LARGO + 4, 0xb85a3a);
+    for (let d = 10; d < LARGO; d += 14) poly(-ANCHO / 2, d, ANCHO / 2, d + 5, 0xc06240, 0.18);
+    for (let i = 0; i < 70; i++) { const x = -ANCHO / 2 + R(i) * ANCHO, d = R(i + 100) * LARGO; const [px, py, ps] = this.pant(x, d); g.fillStyle(0xa04c30, 0.6).fillRect(px, py, 2 * ps, 1); }
     // las líneas: fondo, laterales de dobles y de singles, de saque y la del medio
     const linea = (x0: number, d0: number, x1: number, d1: number, w = 2) => {
       const a = this.pant(x0, d0), b = this.pant(x1, d1);
@@ -202,9 +232,39 @@ export class Tenis extends EventScene {
     for (const x of [-ANCHO / 2, ANCHO / 2, -ANCHO / 2 + 26, ANCHO / 2 - 26]) linea(x, 0, x, LARGO);
     for (const d of [RED_D - SAQUE, RED_D + SAQUE]) linea(-ANCHO / 2 + 26, d, ANCHO / 2 - 26, d);
     linea(0, RED_D - SAQUE, 0, RED_D + SAQUE);
-    // las sillas del juez y los bancos
-    const [jx, jy, js] = this.pant(ANCHO / 2 + 40, RED_D);
-    g.fillStyle(0x4a3524).fillRect(jx - 5 * js, jy - 40 * js, 10 * js, 40 * js).fillStyle(0xf4f4f4).fillRect(jx - 7 * js, jy - 44 * js, 14 * js, 8 * js);
+    // las vallas de publicidad a los costados, en perspectiva, y las hortensias detrás
+    for (const lado of [-1, 1]) {
+      for (let k = 0; k < 6; k++) {
+        const d0 = 20 + k * 60, d1 = d0 + 52, x = lado * (ANCHO / 2 + 78);
+        const [fondo, raya] = vallas[(k + (lado > 0 ? 2 : 0)) % 4];
+        const a = this.pant(x, d0), b = this.pant(x, d1);
+        g.fillStyle(fondo).fillPoints([{ x: a[0], y: a[1] }, { x: b[0], y: b[1] }, { x: b[0], y: b[1] - 11 * b[2] }, { x: a[0], y: a[1] - 11 * a[2] }], true);
+        g.fillStyle(raya, 0.9).fillPoints([{ x: a[0] + (b[0] - a[0]) * 0.25, y: a[1] - 4 * a[2] }, { x: a[0] + (b[0] - a[0]) * 0.75, y: a[1] - 4 * a[2] + (b[1] - a[1]) * 0.5 }, { x: a[0] + (b[0] - a[0]) * 0.75, y: a[1] - 7 * a[2] + (b[1] - a[1]) * 0.5 }, { x: a[0] + (b[0] - a[0]) * 0.25, y: a[1] - 7 * a[2] }], true);
+        // la hortensia detrás de cada valla (las flores de Đà Lạt)
+        const [hx, hy, hs] = this.pant(x + lado * 22, d0 + 26);
+        g.fillStyle(0x3f6f3f).fillCircle(hx, hy - 6 * hs, 10 * hs);
+        g.fillStyle(k % 2 ? 0xe890c0 : 0x90a8f0).fillCircle(hx - 4 * hs, hy - 9 * hs, 4 * hs).fillCircle(hx + 4 * hs, hy - 8 * hs, 4 * hs).fillCircle(hx, hy - 12 * hs, 4 * hs);
+      }
+    }
+    // la silla del juez (derecha de la red) con el juez, y los bancos con toallas y termo a la izquierda
+    const [jx, jy, js] = this.pant(ANCHO / 2 + 46, RED_D);
+    g.fillStyle(0x4a3524).fillRect(jx - 6 * js, jy - 46 * js, 3 * js, 46 * js).fillRect(jx + 3 * js, jy - 46 * js, 3 * js, 46 * js).fillRect(jx - 8 * js, jy - 48 * js, 16 * js, 4 * js);
+    g.fillStyle(0xf4f4f4).fillRect(jx - 9 * js, jy - 54 * js, 18 * js, 7 * js);
+    g.fillStyle(0x203060).fillRect(jx - 4 * js, jy - 62 * js, 8 * js, 9 * js);
+    g.fillStyle(0xf0c8a0).fillRect(jx - 3 * js, jy - 68 * js, 6 * js, 6 * js);
+    g.fillStyle(0xffffff).fillRect(jx - 4 * js, jy - 70 * js, 8 * js, 3 * js);
+    for (const dd of [RED_D - 70, RED_D + 70]) {
+      const [bx, by, bs] = this.pant(-ANCHO / 2 - 48, dd);
+      g.fillStyle(0x6a4a30).fillRect(bx - 14 * bs, by - 8 * bs, 28 * bs, 4 * bs).fillRect(bx - 12 * bs, by - 4 * bs, 3 * bs, 4 * bs).fillRect(bx + 9 * bs, by - 4 * bs, 3 * bs, 4 * bs);
+      g.fillStyle(0xf0f0f0).fillRect(bx - 10 * bs, by - 11 * bs, 8 * bs, 4 * bs);
+      g.fillStyle(0x2050c0).fillRect(bx + 2 * bs, by - 13 * bs, 5 * bs, 6 * bs);
+    }
+    // los recogepelotas, uno en cada esquina del fondo, agachados
+    for (const lado of [-1, 1]) {
+      const [kx, ky, ks] = this.pant(lado * (ANCHO / 2 + 30), LARGO + 20);
+      g.fillStyle(0xe03030).fillRect(kx - 4 * ks, ky - 12 * ks, 8 * ks, 8 * ks);
+      g.fillStyle(0xf0c8a0).fillRect(kx - 3 * ks, ky - 17 * ks, 6 * ks, 5 * ks);
+    }
     // la red: la malla entre dos palos, a la altura de la mitad de la cancha
     this.redG = this.add.graphics();
     const [lx, ly, ls] = this.pant(-ANCHO / 2 - 8, RED_D), [rx] = this.pant(ANCHO / 2 + 8, RED_D);
@@ -215,6 +275,8 @@ export class Tenis extends EventScene {
     for (let y = ly - h; y <= ly; y += 4) this.redG.lineStyle(1, 0x14141c, 0.5).lineBetween(lx, y, rx, y);
     this.redG.lineStyle(2, 0xf4f4f4).lineBetween(lx, ly - h, rx, ly - h);
     this.redG.fillStyle(0x3a3a44).fillRect(lx - 2, ly - h - 4, 4, h + 4).fillRect(rx - 2, ly - h - 4, 4, h + 4);
+    // la sombra de la red sobre la arcilla
+    this.redG.fillStyle(0x000000, 0.12).fillRect(lx, ly, rx - lx, 3);
   }
 
   // ------------------------------------------------------------------ la pelota
@@ -382,7 +444,7 @@ export class Tenis extends EventScene {
       this.uiAdd(rafaga(this));
       const [ex, ey] = this.pant(p.x, p.d);
       efecto(this, 'aura_nekketsu', ex, ey, { depth: ey - 0.1 });
-      if (team === 0) void this.banner('¡NEKKETSU!', 'fuente_titulo', 2, 500, 110);
+      this.corte(p.c.id, '¡DRIVE NEKKETSU!', team);
       this.shake(240, 0.012);
       flash(this, 120);
       for (const o of this.pat) if (o.c.team !== team && Math.random() < (team === 1 ? 0.5 + 0.35 * ajustes().cpuAgresion : 0.85)) o.plan = { n: c.n, tipo: 'falla', reaccion: 1, ruido: 0 };
@@ -393,9 +455,9 @@ export class Tenis extends EventScene {
       this.lanzar(p.c.human ? Phaser.Math.Clamp(p.mira.x * 70 + (Math.random() - 0.5) * 30, -85, 85) : destino.x, d, 0.42, true);
       if (c.vz < 40) c.vz = 40;
       this.letrero(p, '¡SMASH!', 0xffe040);
-      this.shake(120, 0.006);
       destellar(c.spr, 90);
       p.fig.destello(60, 0xffe040);
+      { const [gx, gy] = this.pant(c.x, c.d, c.z); this.golpeFuerte(gx, gy); }
       if (p.c.human) this.remates++;
     } else if (quiere === 'globo') {
       // el globo: alto por encima del de la red y al fondo
@@ -502,7 +564,7 @@ export class Tenis extends EventScene {
   // ------------------------------------------------------------------ cuadro a cuadro
 
   update(_t: number, dms: number) {
-    const dt = Math.min(0.05, dms / 1000);
+    const dt = this.dtJuego(dms);
     const p = this.pad.read();
     if (this.endTick(p)) { this.animar(dt); this.filterUi(); return; }
     const jugando = this.fase === 'juego' && !this.terminado;

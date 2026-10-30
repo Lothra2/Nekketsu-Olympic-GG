@@ -209,7 +209,7 @@ export class Quemado extends EventScene {
   }
 
   update(_t: number, dms: number) {
-    const dt = Math.min(0.05, dms / 1000);
+    const dt = this.dtJuego(dms);
     const p = this.pad.read();
     if (this.endTick(p)) { for (const j of this.js) j.fig.step(dt); this.pintar(); this.filterUi(); return; }
     if (this.fase === 'juego') this.tick(dt, p);
@@ -424,7 +424,7 @@ export class Quemado extends EventScene {
       if (o) { this.letrero(o, '¡CUIDADO!', 0xff6060); chip.blip(880, 0.12, 'sq25', 0.15, 440); }
       efecto(this, 'aura_nekketsu', this.sx(j.x, j.y), FT + j.y - j.z, { depth: FT + j.y - 0.1 });
       chip.blip(220, 0.3, 'saw', 0.2, 880);
-      if (j.team === 0) void this.banner('¡TIRO NEKKETSU!', 'fuente_titulo', 2, 700);
+      this.corte(j.id, '¡TIRO NEKKETSU!', j.team);
       this.uiAdd(rafaga(this));
     }
   }

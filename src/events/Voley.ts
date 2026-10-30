@@ -79,6 +79,8 @@ export class Voley extends EventScene {
   private fuegoPend: { p: Voleador; team: 0 | 1; t: number } | null = null;
   private llego = false;
   private bloqueos = 0;
+  /** el halo oscuro detrás de la pelota: contra la arena clara, la pelota blanca se perdía */
+  private halo!: Phaser.GameObjects.Arc;
 
   constructor() { super('Voley'); }
 
@@ -117,8 +119,10 @@ export class Voley extends EventScene {
     const pk = pelotaKit(this, 'balon_voley', '64');
     const spr = (pk ? this.add.image(0, 0, 'pelotas', pk) : this.add.image(0, 0, 'balon_voley').setScale(1.3)).setDepth(5000);
     // un rastro suave detrás dla pelota, para seguirlo con la vista
-    const rastro = this.add.particles(0, 0, 'px', { lifespan: 260, scale: { start: 0.6, end: 0 }, alpha: { start: 0.5, end: 0 }, tint: 0xffffff, frequency: 30 }).setDepth(4999);
+    // la estela amarilla (la blanca se perdía contra la arena) y un halo oscuro detrás, para ver la pelota en la playa
+    const rastro = this.add.particles(0, 0, 'px', { lifespan: 320, scale: { start: 1.3, end: 0 }, alpha: { start: 0.8, end: 0 }, tint: [0xffe040, 0xffa030], frequency: 18 }).setDepth(4999);
     rastro.startFollow(spr);
+    this.halo = this.add.circle(0, 0, 8, 0x142030, 0.5).setDepth(4998.5);
     const fuego = this.add.particles(0, 0, 'px', { lifespan: 320, scale: { start: 1.5, end: 0 }, alpha: { start: 0.9, end: 0 }, tint: [0xffe040, 0xff6020, 0xffffff], frequency: 12, emitting: false }).setDepth(4998);
     fuego.startFollow(spr);
     const sombra = this.add.ellipse(0, PISO, 8, 3, 0x000000, 0.3).setDepth(PISO - 20);
@@ -322,7 +326,7 @@ export class Voley extends EventScene {
       destellar(c.spr, 140, 0xffa040);
       this.uiAdd(rafaga(this));
       efecto(this, 'aura_nekketsu', p.x, PISO + FILA[p.fila], { depth: PISO + FILA[p.fila] - 0.1 });
-      if (team === 0) void this.banner('¡NEKKETSU!', 'fuente_titulo', 2, 500, 110);
+      this.corte(p.c.id, '¡REMATE DE FUEGO!', team);
       this.shake(240, 0.012);
       flash(this, 120);
       for (const o of this.pat) if (o.c.team !== team && (team === 0 || Math.random() < 0.5 + 0.35 * ajustes().cpuAgresion)) o.plan = { n: c.n, tipo: 'falla', reaccion: 1, ruido: 0 };
@@ -333,9 +337,9 @@ export class Voley extends EventScene {
       this.lanzar(tx, 0, 0.5);
       if (c.z < RED_H + 8) c.vz += 40;
       this.letrero(p, '¡REMATE!', 0xffe040);
-      this.shake(120, 0.006);
       destellar(c.spr, 90);
       p.fig.destello(60, 0xffe040);
+      this.golpeFuerte(c.x, PISO + FILA[p.fila] - c.z);
       if (p.c.human) this.remates++;
     } else if (quiere === 'pase') {
       const comp = this.pat.find((o) => o !== p && o.c.team === team);
@@ -445,7 +449,7 @@ export class Voley extends EventScene {
   // ------------------------------------------------------------------ cuadro a cuadro
 
   update(_t: number, dms: number) {
-    const dt = Math.min(0.05, dms / 1000);
+    const dt = this.dtJuego(dms);
     const p = this.pad.read();
     if (this.endTick(p)) { this.animar(dt); this.filterUi(); return; }
     const jugando = this.fase === 'juego' && !this.terminado;
@@ -666,6 +670,7 @@ export class Voley extends EventScene {
     tiroSuper(this, c.spr, c.en === 'aire' && c.ultimoTiro === 'fuego');
     c.rastro.emitting = c.en === 'aire';
     c.fuego.emitting = c.en === 'aire' && c.ultimoTiro === 'fuego';
+    this.halo.setPosition(c.spr.x, c.spr.y).setVisible(c.spr.visible).setScale(c.spr.scaleX / 1.2);
     c.sombra.setPosition(Math.round(c.x), PISO).setScale(Math.max(0.4, 1 - c.z / 140)).setVisible(c.en !== 'piso');
     // el círculo: dónde va a caer, cuando viene a tu lado (en Nekketsu no hay ayuda)
     const xl = this.caida();

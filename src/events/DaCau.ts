@@ -332,7 +332,7 @@ export class DaCau extends EventScene {
       destellar(c.spr, 140, 0xffa040);
       this.uiAdd(rafaga(this));
       efecto(this, 'aura_nekketsu', p.x, PISO + FILA[p.fila], { depth: PISO + FILA[p.fila] - 0.1 });
-      if (team === 0) void this.banner('¡NEKKETSU!', 'fuente_titulo', 2, 500, 110);
+      this.corte(p.c.id, '¡CHILENA NEKKETSU!', team);
       this.shake(240, 0.012);
       flash(this, 120);
       for (const o of this.pat) if (o.c.team !== team && (team === 0 || Math.random() < 0.5 + 0.35 * ajustes().cpuAgresion)) o.plan = { n: c.n, tipo: 'falla', reaccion: 1, ruido: 0, arma: false };
@@ -344,9 +344,9 @@ export class DaCau extends EventScene {
       this.lanzar(tx, 0, 0.5);
       if (c.z < RED_H + 8) c.vz += 40;
       this.letrero(p, '¡CHILENA!', 0xffe040);
-      this.shake(120, 0.006);
       destellar(c.spr, 90);
       p.fig.destello(60, 0xffe040);
+      this.golpeFuerte(c.x, PISO + FILA[p.fila] - c.z);
       if (p.c.human) this.chilenas++;
     } else if (quiere === 'pase') {
       const comp = this.pat.find((o) => o !== p && o.c.team === team);
@@ -452,7 +452,7 @@ export class DaCau extends EventScene {
   // ------------------------------------------------------------------ cuadro a cuadro
 
   update(_t: number, dms: number) {
-    const dt = Math.min(0.05, dms / 1000);
+    const dt = this.dtJuego(dms);
     const p = this.pad.read();
     if (this.endTick(p)) { this.animar(dt); this.filterUi(); return; }
     const jugando = this.fase === 'juego' && !this.terminado;

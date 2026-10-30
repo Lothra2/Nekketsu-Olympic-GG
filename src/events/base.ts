@@ -3,7 +3,8 @@ import { MAX_W } from '../core/pantalla';
 import { Input, rotular } from '../core/input';
 import { chip, PELEA } from '../core/music';
 import { kit, bucle, nombreCorto } from '../core/kit';
-import { txt, flash, pantallaCarga } from '../core/ui';
+import { txt, flash, pantallaCarga, speedLines } from '../core/ui';
+import { efecto } from '../core/fx';
 import { letreroGrande, MarcadorTV, hayUi } from '../core/interfaz';
 import { Coach, type Paso } from '../core/coach';
 import { nuestros, ellos, conJugador, lado, victoria } from '../core/equipos';
@@ -265,6 +266,63 @@ export abstract class EventScene extends Phaser.Scene {
 
   protected banner(s: string, font: 'fuente_titulo' | 'fuente_titulo_plata' | 'fuente_ui', scale: number, hold: number, y = 150) {
     return letreroGrande(this, (o) => this.uiAdd(o), s, font, scale, hold, y);
+  }
+
+  /** la cámara lenta: cuánto le queda y a qué velocidad va el juego mientras tanto */
+  private lentoT = 0;
+  private lentoK = 1;
+
+  /** El paso de tiempo del juego en este cuadro: el de siempre, o en cámara lenta mientras dura la jugada. */
+  protected dtJuego(dms: number): number {
+    const real = Math.min(0.05, dms / 1000);
+    if (this.lentoT <= 0) return real;
+    this.lentoT -= real;
+    return real * this.lentoK;
+  }
+
+  /** La cámara lenta un ratito. */
+  protected camaraLenta(seg: number, k = 0.25) { this.lentoT = Math.max(this.lentoT, seg); this.lentoK = k; }
+
+  /**
+   * El golpe fuerte de una jugada (el remate, el smash, la clavada, el batazo): un instante en cámara lenta, la
+   * cámara se acerca y vuelve, el destello y el ¡POW! del kit en el punto del golpe (en pixeles de la escena).
+   */
+  protected golpeFuerte(x: number, y: number, fuerte = 1) {
+    this.camaraLenta(0.22 * fuerte, 0.2);
+    const cam = this.cameras.main, z0 = cam.zoom;
+    cam.zoomTo(z0 * (1 + 0.1 * fuerte), 110, 'Quad.easeOut', true, (_c, p) => { if (p >= 1) cam.zoomTo(z0, 240, 'Quad.easeIn', true); });
+    efecto(this, fuerte >= 1.5 ? 'onomatopeya_crack' : 'onomatopeya_pow', x, y - 10, { depth: 7000 });
+    flash(this, 60);
+    cam.shake(120, 0.006 * fuerte);
+  }
+
+  /**
+   * El corte de anime de la técnica especial: el juego en cámara lenta, la franja del equipo con sus líneas de
+   * velocidad, el retrato grande del atleta que entra de un lado, el nombre de la técnica y el suyo. Dura `seg`.
+   */
+  protected corte(id: string, tecnica: string, team: 0 | 1, seg = 0.9) {
+    this.camaraLenta(seg, 0.12);
+    const side = team === 0 ? 1 : -1;
+    const objs: Phaser.GameObjects.GameObject[] = [];
+    const add = <T extends Phaser.GameObjects.GameObject>(o: T): T => { objs.push(o); return this.uiAdd(o); };
+    add(this.add.rectangle(320, 180, 800, 360, 0x000000, 0.55).setDepth(8600));
+    add(this.add.rectangle(320, 150, 800, 110, team === 0 ? 0x1a3a9a : 0x9a1a2a, 0.95).setDepth(8601));
+    add(speedLines(this, 8602));
+    const por = add(this.add.image(320 - side * 400, 150, `retratos:${id}`, 'grande_enojo').setDepth(8603));
+    this.tweens.add({ targets: por, x: 320 - side * 160, duration: 200, ease: 'Back.out' });
+    // la técnica y el nombre van entre el retrato y el borde de lo que se ve (640 en la tablet, hasta 800 en el iPhone)
+    const W = Math.min(800, this.scale.gameSize.width), ini = side > 0 ? 320 - side * 160 + 56 : 320 - W / 2 + 8, fin = side > 0 ? 320 + W / 2 - 8 : 320 - side * 160 - 56;
+    const cx = (ini + fin) / 2, ancho = fin - ini;
+    const name = add(txt(this, cx, 136, tecnica, 'fuente_titulo', 1).setDepth(8604).setAlpha(0));
+    const e = name.width * 2 <= ancho ? 2 : 1;
+    name.setScale(5);
+    this.tweens.add({ targets: name, scale: e, alpha: 1, duration: 200, delay: 120 });
+    const who = add(txt(this, cx, 172, this.nombre(id), 'fuente_ui', 1).setDepth(8604).setTint(0xffe080));
+    who.setScale(who.width * 2 <= ancho ? 2 : 1);
+    chip.boom(0.7);
+    if (this.cache.audio.exists('subir_nivel')) this.sound.play('subir_nivel', { volume: 0.5 });
+    flash(this, 120);
+    this.time.delayedCall(seg * 1000, () => this.tweens.add({ targets: objs, alpha: 0, duration: 120, onComplete: () => objs.forEach((o) => o.destroy()) }));
   }
 
 

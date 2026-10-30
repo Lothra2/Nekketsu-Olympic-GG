@@ -240,7 +240,7 @@ export class Basket extends EventScene {
   }
 
   update(_t: number, dms: number) {
-    const dt = Math.min(0.05, dms / 1000);
+    const dt = this.dtJuego(dms);
     const p = this.pad.read();
     if (this.endTick(p)) { for (const j of this.js) j.fig.step(dt); this.pintar(); this.filterUi(); return; }
     if (this.fase === 'juego') this.tick(dt, p);
@@ -475,7 +475,7 @@ export class Basket extends EventScene {
     if (nekketsu) {
       this.nek[j.team] = 0;
       efecto(this, 'aura_nekketsu', this.sx(j.x, j.y), FT + j.y, { depth: FT + j.y - 0.1 });
-      if (j.team === 0) void this.banner('¡CLAVADA NEKKETSU!', 'fuente_titulo', 2, 700);
+      this.corte(j.id, '¡CLAVADA NEKKETSU!', j.team);
       this.uiAdd(rafaga(this));
     }
     // camina en el aire hasta el aro
@@ -623,7 +623,7 @@ export class Basket extends EventScene {
     j.st = 'tira'; j.vz = 220;
     j.fig.contacto('shoot', 'throw_overhead');
     efecto(this, 'aura_nekketsu', this.sx(j.x, j.y), FT + j.y, { depth: FT + j.y - 0.1 });
-    if (j.team === 0) void this.banner('¡TIRO DE FUEGO!', 'fuente_titulo', 2, 600);
+    this.corte(j.id, '¡TIRO DE FUEGO!', j.team);
     this.uiAdd(rafaga(this));
     this.lanzarTiro(j, true, 2, false, true);
     this.cameras.main.shake(160, 0.006);

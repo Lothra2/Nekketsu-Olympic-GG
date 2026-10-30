@@ -265,7 +265,7 @@ export class Chapita extends EventScene {
   }
 
   update(_t: number, dms: number) {
-    const dt = Math.min(0.05, dms / 1000);
+    const dt = this.dtJuego(dms);
     const p = this.pad.read();
     if (this.endTick(p)) { this.pasoFiguras(dt); this.pintar(); this.filterUi(); return; }
     if (this.fase === 'juego') this.tick(dt, p);
@@ -426,8 +426,7 @@ export class Chapita extends EventScene {
     this.quiereLanz = 'recta';
     efecto(this, 'aura_nekketsu', PIT_X, PISO, { depth: PISO - 0.1 });
     this.cameras.main.shake(120, 0.005);
-    if (this.humanoLanza()) void this.banner('¡RECTA DE FUEGO!', 'fuente_titulo', 2, 600);
-    else this.aviso('¡RECTA DE FUEGO DEL RIVAL!', 0xffa0a0);
+    this.corte(this.pit.c.id, '¡RECTA DE FUEGO!', team);
   }
 
   /** El batazo Nekketsu: swing alto con el doble de margen, sin importar la altura de la chapa. */
@@ -437,8 +436,7 @@ export class Chapita extends EventScene {
     this.batear('alta', true);
     efecto(this, 'aura_nekketsu', BAT_X, PISO, { depth: PISO - 0.1 });
     this.cameras.main.shake(120, 0.005);
-    if (this.humanoBatea()) void this.banner('¡BATAZO NEKKETSU!', 'fuente_titulo', 2, 600);
-    else this.aviso('¡BATAZO NEKKETSU DEL RIVAL!', 0xffa0a0);
+    this.corte(this.bat.c.id, '¡BATAZO NEKKETSU!', team);
   }
 
   /** Un letrero chiquito abajo, que se va solo. */
@@ -509,6 +507,8 @@ export class Chapita extends EventScene {
     c.st = 'bateada';
     c.fuego = s.nek;
     if (s.nek) this.uiAdd(rafaga(this));
+    // el batazo que sale fuerte: el golpe de la película
+    if (q > 0.7 || s.nek) this.golpeFuerte(c.x, PISO - c.z, s.nek ? 1.6 : 1);
     c.vx = Math.cos(ang) * v;
     c.vz = Math.sin(ang) * v;
     c.t = 0;
