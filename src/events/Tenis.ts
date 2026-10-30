@@ -9,65 +9,66 @@ import { rotular } from '../core/input';
 import { Painter, hex } from '../gfx/paint';
 import { lado } from '../core/equipos';
 import { EventScene, prueba, type Competidor } from './base';
-import { queueEscenario } from './escenario';
 import type { Paso } from '../core/coach';
 
-/** el piso de la cancha (vista de lado): los de atrás un poco más arriba que los de adelante */
-const PISO = 310;
-const FILA = [-6, 6];
-const RED_X = 320;
-/** lo alto de la red sobre el piso */
-const RED_H = 20;
-const BORDE = [34, 606];
-const G = 280;
-const ZOOM = 1.15;
+/*
+ * La cancha se mide en unidades propias, vista desde atrás de tu equipo (como el tenis del Switch Sports, en 2D):
+ * x va de lado a lado (0 en el medio), d es la profundidad (0 tu línea de fondo, LARGO la de ellos) y z la altura.
+ * Lo de lejos se ve más chico y más arriba: la proyección está en `pant()`.
+ */
+/** lo ancho de la cancha de dobles y lo largo */
+const ANCHO = 200;
+const LARGO = 400;
+const RED_D = LARGO / 2;
+/** lo alto de la red */
+const RED_H = 24;
+/** las líneas de saque, a cada lado de la red */
+const SAQUE = 95;
+const G = 420;
 /** a cuántos puntos se gana */
 const META = 7;
+/** la perspectiva: cuánto se achica lo que está a `d` de profundidad */
+const D0 = 480;
+const CX = 320;
+/** la cancha va de la fila 322 (tu fondo) a la 114 (el fondo de ellos) */
+const KX = 1.35, KY = 457.6, HOR = -135.6;
+const esc = (d: number) => D0 / (D0 + d);
 
-type Tiro = 'patada' | 'pase' | 'remate' | 'saque' | 'arma' | 'fuego';
-/** las alturas de la raqueta: dónde le pega bien (sobre el piso, y saltando: la altura de la pelota sobre el piso) */
-const ALCANCE = { piso: [2, 50], aire: [10, 90] } as const;
-/** la arcilla frena la pelota al picar */
-const PIQUE = 0.6;
-interface Voleador {
+type Tiro = 'drive' | 'globo' | 'volea' | 'smash' | 'saque' | 'fuego';
+interface Tenista {
   c: Competidor; fig: Figura; sombra: Phaser.GameObjects.Ellipse;
-  x: number; fila: 0 | 1; z: number; vz: number; st: 'piso' | 'aire'; golpeT: number; cool: number;
-  puntos: number; toques: number; casa: number; pensar: number; quiereX: number; salta: boolean;
-  /** le pegó al aire: puede seguir moviéndose mientras recupera */
-  fallo: boolean;
-  /** la máquina decide una vez por pelota que viene: le pega bien, la toca mal o no llega; y tarda un poquito en reaccionar.
-   * `arma`: si le toca, se la deja alta junto a la red a la persona para el smash */
-  plan: { n: number; tipo: 'bien' | 'mala' | 'falla'; reaccion: number; ruido: number; arma: boolean };
+  x: number; d: number; z: number; vz: number; st: 'piso' | 'aire'; golpeT: number; cool: number;
+  puntos: number; pensar: number; quiereX: number; quiereD: number; fallo: boolean;
+  /** hacia dónde apuntaba la palanca al pegar (la persona elige el lado y lo hondo) */
+  mira: { x: number; y: number };
+  /** la máquina decide una vez por pelota: le pega bien, mal o no llega, cuánto tarda en reaccionar y cuánto se desvía */
+  plan: { n: number; tipo: 'bien' | 'mala' | 'falla'; reaccion: number; ruido: number };
 }
 interface Bola {
-  x: number; z: number; vx: number; vz: number;
-  en: 'mano' | 'aire' | 'piso'; dueño: Voleador | null; ultimo: Voleador | null; ultimoTiro: Tiro | null;
-  lado: 0 | 1; toques: number; spr: Phaser.GameObjects.Image; sombra: Phaser.GameObjects.Ellipse; marca: Phaser.GameObjects.Ellipse;
-  red: boolean;
-  /** cuántos tiros van: cada tiro nuevo, la máquina vuelve a decidir */
-  n: number;
-  /** los piques de este lado: el segundo es punto para el que le pegó */
-  botes: number;
-  rastro: Phaser.GameObjects.Particles.ParticleEmitter;
-  fuego: Phaser.GameObjects.Particles.ParticleEmitter;
+  x: number; d: number; z: number; vx: number; vd: number; vz: number;
+  en: 'mano' | 'aire' | 'piso'; dueño: Tenista | null; ultimo: Tenista | null; ultimoTiro: Tiro | null;
+  /** el lado que le pegó por último y cuántas veces (un solo golpe por lado) */
+  lado: 0 | 1; toques: number;
+  /** los piques desde el último golpe */
+  botes: number; red: boolean; n: number;
+  spr: Phaser.GameObjects.Image; sombra: Phaser.GameObjects.Ellipse; marca: Phaser.GameObjects.Ellipse;
+  rastro: Phaser.GameObjects.Particles.ParticleEmitter; fuego: Phaser.GameObjects.Particles.ParticleEmitter;
 }
 
 /**
- * Tenis de dobles en Đà Lạt: la cancha de arcilla roja entre pinos, junto al lago Xuân Hương. 2 contra 2.
- * La pelota puede picar una vez de tu lado (o se la devuelves en el aire); un solo golpe por lado, salvo cuando tu
- * compañero te la deja alta junto a la red: ahí le pegas tú, y saltando es el smash. Puño es el drive, patada el globo
- * (alto y al fondo), y saltando cerca de la red con puño, el smash. Si pica afuera o se queda en la red, punto para el
- * otro. La barra Nekketsu se llena devolviendo y con los puntos que pierdes; llena, especial con la pelota cerca es el
- * DRIVE NEKKETSU, de fuego y al hueco. Gana el primero a 7.
- * La raqueta va dibujada en la mano con los datos de `arma` del swing, hasta que llegue el pack de tenis sin raqueta.
+ * Tenis de dobles en Đà Lạt, visto desde atrás de tu equipo: la cancha de arcilla en profundidad, tú abajo y ellos
+ * arriba, más chicos. Te mueves libre por tu lado con la palanca. Un solo golpe por lado (como en el tenis de verdad):
+ * la pelota puede picar una vez de tu lado o se la devuelves en el aire. Puño es el drive (la palanca apunta a dónde:
+ * a un lado, hondo o corto), patada el globo, pegado a la red el puño es la volea, y la que viene alta cerca de la red
+ * (saltando o no) es el smash. Tu pareja cubre la mitad que tú dejas libre y le pega a las que te quedan lejos. Si
+ * pica afuera o se queda en la red, punto para el otro. La barra Nekketsu se llena devolviendo y con los puntos que
+ * pierdes; llena, especial con la pelota cerca es el DRIVE NEKKETSU, de fuego y al hueco. Gana el primero a 7.
  */
 export class Tenis extends EventScene {
-  private pat: Voleador[] = [];
+  private pat: Tenista[] = [];
   private bola!: Bola;
   private marcador: [number, number] = [0, 0];
-  /** las barras Nekketsu de los dos lados */
   private nek: [number, number] = [0, 0];
-  /** para no repetir los avisos del especial */
   private avisoT = 0;
   private saca: 0 | 1 = 0;
   private pausaT = 0;
@@ -76,66 +77,60 @@ export class Tenis extends EventScene {
   private scoreTxt!: { setText(s: string): unknown };
   private toqueTxt!: Phaser.GameObjects.BitmapText;
   private terminado = false;
+  private redG!: Phaser.GameObjects.Graphics;
   /** entrenamiento */
   private pasadas = 0;
   private remates = 0;
   private llego = false;
   private globos = 0;
   private pasoSmash = false;
-  private raquetas: Phaser.GameObjects.Image[] = [];
+  private avisoDoble = 0;
 
   constructor() { super('Tenis'); }
 
-  preload() { super.preload(); queueEscenario(this, 'dalat'); }
-
   create() {
     this.pat = [];
-    this.raquetas = [];
     this.pasoSmash = false;
     this.marcador = [0, 0];
     this.nek = [0, 0];
     this.avisoT = 0;
+    this.avisoDoble = 0;
     this.saca = 0;
     this.pausaT = 0;
     this.clock = 0;
     this.terminado = false;
     this.pasadas = 0;
     this.remates = 0;
+    this.globos = 0;
     this.llego = false;
-    this.setup(ZOOM, 640);
+    // toda la cancha a la vista, sin cámara que se mueva; en los celulares anchos se ve más borde a los lados
+    this.setup(1, 800);
+    this.cameras.main.setBounds(-80, 0, 800, 360).centerOn(CX, 180);
     this.texturas();
-    this.escenario('dalat', 'bg_dalat');
     this.cancha();
     // entrenando: tú solo de este lado y Kenji del otro, que te la devuelve suave
     const gente: Competidor[] = this.d.practica ? [this.gente[0], { id: this.rivalEntreno, team: 1, human: false }] : this.gente;
     gente.forEach((c) => {
       const nuestro = c.team === 0;
-      const companeros = gente.filter((o) => o.team === c.team);
-      const fila = (companeros.length === 1 ? 1 : companeros.indexOf(c) === 0 ? 1 : 0) as 0 | 1;
-      // el de adelante cerca de la red, el de atrás al fondo
-      const casa = nuestro ? (fila === 1 ? 230 : 110) : fila === 1 ? 410 : 530;
-      const fig = new Figura(this, casa, PISO + FILA[fila], c.id, 'idle');
-      fig.left = !nuestro;
-      const sombra = this.add.ellipse(casa, PISO + FILA[fila], 20, 5, 0x000000, 0.3);
-      this.raquetas.push(this.add.image(0, 0, 'raqueta').setOrigin(0.15, 0.5));
-      this.pat.push({ c, fig, sombra, x: casa, fila, z: 0, vz: 0, st: 'piso', golpeT: 0, cool: 0, puntos: 0, toques: 0, casa, pensar: Math.random() * 0.2, quiereX: casa, salta: false, fallo: false, plan: { n: -1, tipo: 'bien', reaccion: 0, ruido: 0, arma: false } });
+      const compas = gente.filter((o) => o.team === c.team);
+      const k = compas.indexOf(c);
+      // la persona (o el primero) a la derecha y atrás; el compañero a la izquierda y más cerca de la red
+      const casa = this.casa(c.team, k, compas.length);
+      const fig = new Figura(this, 0, 0, c.id, 'idle');
+      fig.row = nuestro ? 'up' : 'down';
+      const sombra = this.add.ellipse(0, 0, 22, 6, 0x000000, 0.3);
+      this.pat.push({ c, fig, sombra, x: casa.x, d: casa.d, z: 0, vz: 0, st: 'piso', golpeT: 0, cool: 0, puntos: 0, pensar: Math.random() * 0.2, quiereX: casa.x, quiereD: casa.d, fallo: false, mira: { x: 0, y: 0 }, plan: { n: -1, tipo: 'bien', reaccion: 0, ruido: 0 } });
     });
-    // la pelota del kit (lote SP2), del tamaño de los atletas; si no llegó, la pintada por código
-    // la pelota de tenis del kit mide 6 px: al doble (12), redonda y nítida, para seguirla en el celular
     const pk = pelotaKit(this, 'pelota_tenis', '64');
-    const spr = (pk ? this.add.image(0, 0, 'pelotas', pk).setScale(2) : this.add.image(0, 0, 'pelota_tenis').setScale(2)).setDepth(5000);
-    // un rastro suave detrás dla pelota, para seguirlo con la vista
+    const spr = (pk ? this.add.image(0, 0, 'pelotas', pk) : this.add.image(0, 0, 'pelota_tenis')).setScale(2).setDepth(5000);
     const rastro = this.add.particles(0, 0, 'px', { lifespan: 300, scale: { start: 1.2, end: 0 }, alpha: { start: 0.75, end: 0 }, tint: 0xffffff, frequency: 20 }).setDepth(4999);
     rastro.startFollow(spr);
-    // el drive Nekketsu deja fuego detrás
     const fuego = this.add.particles(0, 0, 'px', { lifespan: 320, scale: { start: 1.5, end: 0 }, alpha: { start: 0.9, end: 0 }, tint: [0xffe040, 0xff6020, 0xffffff], frequency: 12, emitting: false }).setDepth(4998);
     fuego.startFollow(spr);
-    const sombra = this.add.ellipse(0, PISO, 11, 4, 0x000000, 0.4).setDepth(PISO - 20);
-    const marca = this.add.ellipse(0, PISO, 22, 7).setStrokeStyle(2, 0xffe040, 0.9).setDepth(PISO - 19).setVisible(false);
-    this.bola = { x: 0, z: 0, vx: 0, vz: 0, en: 'mano', dueño: null, ultimo: null, ultimoTiro: null, lado: 0, toques: 0, spr, sombra, marca, red: false, n: 0, botes: 0, rastro, fuego };
-    // entrenando, siempre saca Kenji (suave, hacia ti)
+    const sombra = this.add.ellipse(0, 0, 11, 4, 0x000000, 0.4);
+    const marca = this.add.ellipse(0, 0, 26, 10).setStrokeStyle(2, 0xffe040, 0.9).setVisible(false);
+    this.bola = { x: 0, d: 0, z: 0, vx: 0, vd: 0, vz: 0, en: 'mano', dueño: null, ultimo: null, ultimoTiro: null, lado: 0, toques: 0, botes: 0, red: false, n: 0, spr, sombra, marca, rastro, fuego };
     this.alSaque(this.d.practica ? 1 : 0);
-    this.cameras.main.centerOn(260, this.camY);
     this.hud = this.uiAdd(this.add.graphics().setDepth(8000));
     this.scoreTxt = this.marcadorTV(320, 16, 8001);
     this.uiAdd(txt(this, 250, 16, lado(0).corto, 'fuente_ui', 1, 1).setDepth(8001).setTint(0x9ac8ff));
@@ -144,249 +139,300 @@ export class Tenis extends EventScene {
     this.tema('dalat_niebla');
     this.ambiente('pinos_dalat');
     if (this.d.practica) void this.entrenar('TENIS', this.pasos());
-    else void this.previa('TENIS DE DOBLES', 'ĐÀ LẠT, VIETNAM', '{MOVER} AL CÍRCULO · DEJA QUE PIQUE · {PUÑO} DRIVE · {PATADA} GLOBO · EN LA RED {SALTO} Y {PUÑO}: SMASH · {ESPECIAL}: DRIVE NEKKETSU');
+    else void this.previa('TENIS DE DOBLES', 'ĐÀ LẠT, VIETNAM', '{MOVER} POR LA CANCHA · {PUÑO} DRIVE (APUNTA CON LA PALANCA) · {PATADA} GLOBO · EN LA RED: VOLEA Y SMASH · {ESPECIAL}: DRIVE NEKKETSU');
   }
 
-  private get camY() { return 360 - 180 / this.cameras.main.zoom; }
+  /** Dónde se para cada uno al empezar el punto: el de atrás a la derecha, el de la red a la izquierda (ellos, espejado). */
+  private casa(team: 0 | 1, k: number, n: number) {
+    const atras = n === 1 || k === 0;
+    const d = team === 0 ? (atras ? 18 : RED_D - 60) : atras ? LARGO - 18 : RED_D + 60;
+    const x = (atras ? 42 : -42) * (team === 0 ? 1 : -1);
+    return { x, d };
+  }
+
+  // ------------------------------------------------------------------ la proyección y el dibujo de la cancha
+
+  /** Un punto del mundo (x, d, z) en la pantalla: [x, y, escala]. */
+  private pant(x: number, d: number, z = 0): [number, number, number] {
+    const s = esc(d);
+    return [CX + x * s * KX, HOR + KY * s - z * s, s];
+  }
 
   private texturas() {
     if (this.textures.exists('pelota_tenis')) return;
-    // la pelota amarilla con su costura
     const p = new Painter(6, 6);
     p.circle(2.5, 2.5, 2.8, hex('#5a6a1a'));
     p.circle(2.5, 2.5, 2.2, hex('#d8f040'));
     p.px(1, 2, hex('#f8fff0')); p.px(2, 3, hex('#f8fff0')); p.px(3, 3, hex('#f8fff0'));
     this.textures.addCanvas('pelota_tenis', p.done());
-    // la raqueta: el aro ovalado con su encordado y el mango, apuntando a la derecha
-    const q = new Painter(20, 9);
-    q.rect(0, 3, 8, 3, hex('#2a2a3a'));
-    q.rect(1, 4, 6, 1, hex('#d02a2a'));
-    for (let y = 0; y < 9; y++) for (let x = 8; x < 20; x++) {
-      const dx = (x - 14) / 6, dy = (y - 4) / 4.5, d = dx * dx + dy * dy;
-      if (d <= 1 && d > 0.55) q.px(x, y, hex('#2a5ad0'));
-      else if (d <= 0.55 && (x + y) % 2 === 0) q.px(x, y, hex('#f4f4f4'));
-    }
-    this.textures.addCanvas('raqueta', q.done());
   }
 
-  /** La red con sus palos, las rayas de la cancha y la línea del medio. */
+  /** El fondo pintado por código: el cielo de Đà Lạt con sus pinos, las gradas, la arcilla en perspectiva y la red. */
   private cancha() {
-    const g = this.add.graphics().setDepth(PISO - 30);
-    g.lineStyle(2, 0xf4ecd8, 0.85);
-    g.lineBetween(BORDE[0], PISO - 12, BORDE[1], PISO - 12).lineBetween(BORDE[0] - 6, PISO + 12, BORDE[1] + 6, PISO + 12);
-    g.lineBetween(BORDE[0], PISO - 12, BORDE[0] - 6, PISO + 12).lineBetween(BORDE[1], PISO - 12, BORDE[1] + 6, PISO + 12);
-    const red = this.add.graphics().setDepth(PISO + 1);
-    // los palos
-    red.fillStyle(0x3a3a44).fillRect(RED_X - 2, PISO - 12 - RED_H - 4, 3, RED_H + 4).fillRect(RED_X + 2, PISO + 12 - RED_H - 4, 3, RED_H + 4);
-    // la malla, de un palo al otro (en profundidad)
-    for (let k = 0; k <= 8; k++) {
-      const y0 = PISO - 12 - RED_H + k * 2.6, y1 = PISO + 12 - RED_H + k * 2.6;
-      red.lineStyle(1, 0x2a2a32, 0.55).lineBetween(RED_X, y0, RED_X + 3, y1);
+    const g = this.add.graphics().setDepth(-20);
+    // el cielo y la niebla de la mañana
+    g.fillGradientStyle(0x8fb8d8, 0x8fb8d8, 0xd8e6ec, 0xd8e6ec, 1).fillRect(-80, 0, 800, 104);
+    // los pinos del fondo, en dos filas
+    for (let i = 0; i < 26; i++) {
+      const x = -70 + i * 32 + (i % 2) * 9, h = 34 + ((i * 7) % 13), base = 98;
+      g.fillStyle(i % 2 ? 0x2f5a3a : 0x3a6a44).fillTriangle(x, base - h, x - 11, base, x + 11, base).fillTriangle(x, base - h - 10, x - 7, base - h + 12, x + 7, base - h + 12);
+      g.fillStyle(0x4a3524).fillRect(x - 1, base - 4, 3, 6);
     }
-    for (let k = 0; k <= 6; k++) { const t = k / 6; red.lineStyle(1, 0x2a2a32, 0.4).lineBetween(RED_X + t * 3, PISO - 12 + t * 24 - RED_H, RED_X + t * 3, PISO - 12 + t * 24 - RED_H + 21); }
-    red.lineStyle(2, 0xf4f4f4).lineBetween(RED_X, PISO - 12 - RED_H, RED_X + 3, PISO + 12 - RED_H);
+    // la grada del fondo con el público
+    g.fillStyle(0x3b4a5a).fillRect(-80, 94, 800, 14);
+    for (let i = 0; i < 60; i++) { g.fillStyle([0xe8c070, 0xd05050, 0x5080d0, 0xf0f0f0, 0x60b060][i % 5]).fillRect(-74 + i * 13, 96 + (i % 3) * 3, 5, 6); }
+    g.fillStyle(0x2a3a2a).fillRect(-80, 106, 800, 6);
+    // el césped y la tierra alrededor de la cancha
+    g.fillStyle(0x3f7a3f).fillRect(-80, 108, 800, 252);
+    const [, yFondo] = this.pant(0, LARGO + 60), [, yFrente] = this.pant(0, -60);
+    const poly = (x0: number, d0: number, x1: number, d1: number, color: number, alpha = 1) => {
+      const a = this.pant(x0, d1), b = this.pant(x1, d1), c = this.pant(x1, d0), d = this.pant(x0, d0);
+      g.fillStyle(color, alpha).fillPoints([{ x: a[0], y: a[1] }, { x: b[0], y: b[1] }, { x: c[0], y: c[1] }, { x: d[0], y: d[1] }], true);
+    };
+    // la arcilla roja, con su borde más oscuro afuera de las líneas
+    poly(-ANCHO / 2 - 70, -60, ANCHO / 2 + 70, LARGO + 60, 0x9c4a30);
+    poly(-ANCHO / 2, 0, ANCHO / 2, LARGO, 0xb85a3a);
+    g.fillStyle(0x6a3a28, 0.25).fillRect(-80, yFondo - 2, 800, 2).fillRect(-80, yFrente, 800, 2);
+    // las líneas: fondo, laterales de dobles y de singles, de saque y la del medio
+    const linea = (x0: number, d0: number, x1: number, d1: number, w = 2) => {
+      const a = this.pant(x0, d0), b = this.pant(x1, d1);
+      g.lineStyle(w, 0xf4ecd8, 0.95).lineBetween(a[0], a[1], b[0], b[1]);
+    };
+    for (const d of [0, LARGO]) linea(-ANCHO / 2, d, ANCHO / 2, d, 3);
+    for (const x of [-ANCHO / 2, ANCHO / 2, -ANCHO / 2 + 26, ANCHO / 2 - 26]) linea(x, 0, x, LARGO);
+    for (const d of [RED_D - SAQUE, RED_D + SAQUE]) linea(-ANCHO / 2 + 26, d, ANCHO / 2 - 26, d);
+    linea(0, RED_D - SAQUE, 0, RED_D + SAQUE);
+    // las sillas del juez y los bancos
+    const [jx, jy, js] = this.pant(ANCHO / 2 + 40, RED_D);
+    g.fillStyle(0x4a3524).fillRect(jx - 5 * js, jy - 40 * js, 10 * js, 40 * js).fillStyle(0xf4f4f4).fillRect(jx - 7 * js, jy - 44 * js, 14 * js, 8 * js);
+    // la red: la malla entre dos palos, a la altura de la mitad de la cancha
+    this.redG = this.add.graphics();
+    const [lx, ly, ls] = this.pant(-ANCHO / 2 - 8, RED_D), [rx] = this.pant(ANCHO / 2 + 8, RED_D);
+    const h = RED_H * ls;
+    this.redG.setDepth(ly);
+    this.redG.fillStyle(0x2a2a32, 0.55).fillRect(lx, ly - h, rx - lx, h);
+    for (let x = lx; x <= rx; x += 4) this.redG.lineStyle(1, 0x14141c, 0.5).lineBetween(x, ly - h, x, ly);
+    for (let y = ly - h; y <= ly; y += 4) this.redG.lineStyle(1, 0x14141c, 0.5).lineBetween(lx, y, rx, y);
+    this.redG.lineStyle(2, 0xf4f4f4).lineBetween(lx, ly - h, rx, ly - h);
+    this.redG.fillStyle(0x3a3a44).fillRect(lx - 2, ly - h - 4, 4, h + 4).fillRect(rx - 2, ly - h - 4, 4, h + 4);
   }
 
   // ------------------------------------------------------------------ la pelota
 
-  /** Lanza la pelota para que caiga en `tx` pasando por la altura `alto` (o derecho y rápido si `t` va dado). */
-  private lanzar(tx: number, alto: number, t?: number) {
+  /**
+   * Lanza la pelota para que pique en (tx, td) en `t` segundos. Si no pasaría por encima de la red, la levanta
+   * (más tiempo de vuelo) hasta que pase; el drive Nekketsu la atraviesa igual y la mal pegada se queda como sale.
+   */
+  private lanzar(tx: number, td: number, t: number, libre = false) {
     const c = this.bola;
     c.en = 'aire';
     c.dueño = null;
     c.red = false;
     c.botes = 0;
     c.n++;
-    if (t) {
+    for (let k = 0; k < 6; k++) {
       c.vx = (tx - c.x) / t;
-      c.vz = (G * t * t / 2 - c.z) / t;
-      return;
+      c.vd = (td - c.d) / t;
+      c.vz = (G * t) / 2 - c.z / t;
+      if (libre) return;
+      const tn = (RED_D - c.d) / c.vd;
+      if (!(tn > 0 && tn < t)) return;
+      const zn = c.z + c.vz * tn - (G * tn * tn) / 2;
+      if (zn >= RED_H + 10) return;
+      t += 0.12;
     }
-    const top = Math.max(alto, c.z + 4);
-    const vz = Math.sqrt(2 * G * (top - c.z));
-    const T = vz / G + Math.sqrt((2 * top) / G);
-    c.vz = vz;
-    c.vx = (tx - c.x) / T;
   }
 
   /**
-   * Dónde conviene pegarle: después del primer pique, cuando la pelota vuelve a bajar a la cintura. Si ya picó dos
-   * veces en la cuenta, donde pica la segunda. Es lo que marca el círculo amarillo y a donde va la máquina.
+   * Dónde pica la pelota la próxima vez (y en cuánto tiempo). Con `golpe`, sigue después del primer pique hasta que la
+   * pelota vuelve a bajar a la cintura: ahí conviene pegarle, y ahí va la máquina.
    */
-  private caida(): number {
+  private caida(golpe = false): { x: number; d: number; t: number } {
     const c = this.bola;
-    if (c.en !== 'aire') return c.x;
-    let x = c.x, z = c.z, vx = c.vx, vz = c.vz, botes = c.botes;
+    if (c.en !== 'aire') return { x: c.x, d: c.d, t: 0 };
+    let x = c.x, d = c.d, z = c.z, vx = c.vx, vd = c.vd, vz = c.vz, botes = c.botes;
     const dt = 1 / 60;
-    for (let k = 0; k < 600; k++) {
-      vz -= G * dt; x += vx * dt; z += vz * dt;
+    for (let k = 1; k < 600; k++) {
+      vz -= G * dt; x += vx * dt; d += vd * dt; z += vz * dt;
       if (z <= 0) {
-        if (botes > 0) return x;
-        botes = 1; vz = Math.max(150, Math.abs(vz) * 0.8); vx *= this.pique; z = 0.1;
+        if (!golpe || botes > 0) return { x, d, t: k * dt };
+        botes = 1; vz = Math.abs(vz) * 0.7; vx *= 0.62; vd *= 0.62; z = 0.1;
       }
-      if (botes > 0 && vz < 0 && z <= 24) return x;
+      // ya picó y baja a la cintura: ahí; si antes se va más atrás de la línea de fondo, en la línea (no hay más cancha)
+      if (golpe && botes > 0 && vz < 0 && z <= 30) return { x, d, t: k * dt };
+      if (golpe && botes > 0 && (d < -10 || d > LARGO + 10)) return { x, d: Phaser.Math.Clamp(d, -10, LARGO + 10), t: k * dt };
     }
-    return x;
+    return { x, d, t: 10 };
   }
 
-  /** Cuánto frena la arcilla al picar: el drive Nekketsu se queda clavado. */
-  private get pique() { return this.bola.ultimoTiro === 'fuego' || this.bola.ultimoTiro === 'arma' ? 0.3 : PIQUE; }
+  /** De qué lado está una profundidad. */
+  private ladoDe(d: number): 0 | 1 { return d < RED_D ? 0 : 1; }
 
-  /** El que saca tiene la pelota en la mano. */
+  /** El que saca tiene la pelota en la mano, al fondo; todos vuelven a su casa. */
   private alSaque(team: 0 | 1) {
     this.saca = team;
     const c = this.bola;
     const del = this.pat.filter((p) => p.c.team === team);
-    const quien = del.find((p) => p.c.human) ?? del.find((p) => p.fila === 0) ?? del[0];
-    for (const p of this.pat) { p.x = p.casa; p.z = 0; p.vz = 0; p.st = 'piso'; p.fig.set('idle'); }
-    // el que saca, al fondo de su lado
-    quien.x = team === 0 ? 122 : 518;
+    const quien = del.find((p) => p.c.human) ?? del[0];
+    this.pat.forEach((p) => { const n = this.pat.filter((o) => o.c.team === p.c.team); const h = this.casa(p.c.team, n.indexOf(p), n.length); p.x = h.x; p.d = h.d; p.z = 0; p.vz = 0; p.st = 'piso'; p.quiereX = h.x; p.quiereD = h.d; p.fig.set('idle'); });
+    // el que saca, al fondo, del lado que toca según los puntos jugados
+    const par = (this.marcador[0] + this.marcador[1]) % 2 === 0;
+    quien.x = (par ? 40 : -40) * (team === 0 ? 1 : -1);
+    quien.d = team === 0 ? 4 : LARGO - 4;
     c.en = 'mano';
     c.dueño = quien;
     c.lado = team;
     c.toques = 0;
     c.ultimo = null;
     c.ultimoTiro = null;
-    c.vx = c.vz = 0;
+    c.botes = 0;
+    c.vx = c.vd = c.vz = 0;
     quien.cool = quien.c.human ? 0 : 0.9;
   }
 
-  /**
-   * ¿Alcanza la pelota? Con la raqueta: de la rodilla al hombro; saltando, cuenta lo alto de la pelota sobre el piso
-   * (de la rodilla hasta bien arriba), así el smash sale con las pelotas que pican normal.
-   */
-  private alcance(p: Voleador): number | null {
+  /** ¿Le llega la raqueta? Devuelve lo alto de la pelota sobre sus pies, o null. */
+  private alcance(p: Tenista): number | null {
     const c = this.bola;
     if (c.en !== 'aire') return null;
     const paseo = ajustes().nombre === 'PASEO' && p.c.human;
-    // la que te dejó tu compañero junto a la red: más fácil de alcanzar
-    const armada = p.c.human && c.ultimoTiro === 'arma' && c.ultimo !== p && c.ultimo?.c.team === p.c.team;
-    if (Math.abs(c.x - p.x) > (armada ? 36 : paseo ? 34 : 26)) return null;
-    if (p.st === 'aire') return c.z >= ALCANCE.aire[0] && c.z <= ALCANCE.aire[1] ? c.z : null;
+    const r = paseo ? 34 : 26;
+    if (Math.abs(c.x - p.x) > r || Math.abs(c.d - p.d) > r + 6) return null;
     const alto = c.z - p.z;
-    if (alto < ALCANCE.piso[0] || alto > (paseo ? 62 : ALCANCE.piso[1])) return null;
+    if (p.st === 'aire') return alto >= 0 && alto <= 100 ? alto : null;
+    if (alto < 2 || alto > (paseo ? 90 : 82)) return null;
     return alto;
   }
 
-  /** ¿Puede tirar el drive Nekketsu? La pelota cerca (a cualquier altura), de su lado y sin que su lado ya le haya pegado. */
-  private alcanceFuego(p: Voleador): boolean {
-    const c = this.bola, team = p.c.team;
-    if (c.en !== 'aire' || Math.abs(c.x - p.x) > 50 || c.z > 130) return false;
-    const deMiLado = team === 0 ? c.x < RED_X : c.x >= RED_X;
-    const yaLePegamos = c.ultimo?.c.team === team && !(c.ultimoTiro === 'arma' && c.ultimo !== p);
-    return deMiLado && !yaLePegamos;
+  /** ¿Puede tirar el drive Nekketsu? La pelota cerca, de su lado y sin que su lado ya le haya pegado. */
+  private alcanceFuego(p: Tenista): boolean {
+    const c = this.bola;
+    if (c.en !== 'aire' || Math.abs(c.x - p.x) > 50 || Math.abs(c.d - p.d) > 50 || c.z > 130) return false;
+    return this.ladoDe(c.d) === p.c.team && c.lado !== p.c.team;
   }
 
-  /** Un toque: "patada" la pasa al otro lado (es el puño de la persona), "pase" la levanta, y saltando cerca de la red, el remate. */
-  /** El mejor lugar del otro lado: el más lejos de los que lo cuidan (con un poco de azar entre los mejores). */
-  private hueco(team: 0 | 1): number {
-    const rivales = this.pat.filter((o) => o.c.team !== team).map((o) => o.x);
-    const xs: number[] = [];
-    for (let x = team === 0 ? 372 : 56; x <= (team === 0 ? 584 : 268); x += 16) xs.push(x);
-    const puntaje = xs.map((x) => ({ x, d: Math.min(...rivales.map((r) => Math.abs(r - x))) })).sort((a, b) => b.d - a.d);
-    return puntaje[Math.floor(Math.random() * Math.min(3, puntaje.length))].x;
+  /** El mejor lugar del otro lado para mandarla: el más lejos de los que lo cuidan (con algo de azar entre los mejores). */
+  private hueco(team: 0 | 1): { x: number; d: number } {
+    const rivales = this.pat.filter((o) => o.c.team !== team);
+    const c: { x: number; d: number; v: number }[] = [];
+    for (let x = -80; x <= 80; x += 20) for (const d of team === 0 ? [RED_D + 70, RED_D + 120, LARGO - 40, LARGO - 15] : [RED_D - 70, RED_D - 120, 40, 15]) {
+      const v = Math.min(...rivales.map((r) => Math.abs(r.x - x) + Math.abs(r.d - d) * 0.6));
+      c.push({ x, d, v });
+    }
+    c.sort((a, b) => b.v - a.v);
+    return c[Math.floor(Math.random() * Math.min(3, c.length))];
   }
 
-  private tocar(p: Voleador, quiere: 'patada' | 'pase' | 'arma' | 'fuego', forzarMalo = false) {
+  /** A dónde manda la persona el drive: la palanca elige el lado (izquierda, medio, derecha) y lo hondo (arriba) o corto (abajo). */
+  private puntoPersona(p: Tenista, hondo: number, corto: number): { x: number; d: number } {
+    const s = p.c.team === 0 ? 1 : -1;
+    const x = p.mira.x * 70 + (Math.random() - 0.5) * 20;
+    const d = p.mira.y < -0.3 ? hondo : p.mira.y > 0.3 ? corto : (hondo + corto) / 2;
+    return { x: Phaser.Math.Clamp(x, -85, 85), d: p.c.team === 0 ? d : LARGO - d + 0 * s };
+  }
+
+  private tocar(p: Tenista, quiere: 'drive' | 'globo' | 'fuego', forzarMalo = false) {
     if (p.golpeT > 0) return;
     const c = this.bola;
-    const team = p.c.team, dir = team === 0 ? 1 : -1;
-    // el saque
+    const team = p.c.team;
+    // el saque: cruzado al cuadro de enfrente
     if (c.en === 'mano' && c.dueño === p) {
-      c.x = p.x + dir * 8; c.z = 22;
-      this.lanzar(team === 0 ? Phaser.Math.Between(360, 470) : this.d.practica ? Phaser.Math.Clamp(this.pat[0].x + Phaser.Math.Between(-30, 30), 170, 280) : Phaser.Math.Between(170, 280), 58);
+      c.x = p.x; c.d = p.d; c.z = 46;
+      const tx = -Math.sign(p.x || 1) * (20 + Math.random() * 40);
+      const td = team === 0 ? RED_D + 35 + Math.random() * 45 : RED_D - 35 - Math.random() * 45;
+      const al = this.d.practica && team === 1 ? this.pat[0] : null;
+      this.lanzar(al ? Phaser.Math.Clamp(al.x + (Math.random() - 0.5) * 30, -70, 70) : tx, al ? 70 + Math.random() * 40 : td, 0.95);
       this.golpeAnim(p, 'tennis_serve', 'weapon_swing_heavy');
       c.ultimo = p; c.ultimoTiro = 'saque'; c.lado = team; c.toques = 1;
       this.sfx('esquiva', 0.3);
       return;
     }
-    // el drive Nekketsu sin la pelota cerca no gasta la barra: sale un drive normal
-    if (quiere === 'fuego' && !this.alcanceFuego(p)) quiere = 'patada';
+    if (quiere === 'fuego' && !this.alcanceFuego(p)) quiere = 'drive';
     const alto = quiere === 'fuego' ? c.z : this.alcance(p);
-    // en el aire el smash; pegado a la red, la volea; el globo de revés; y el drive de derecha
-    if (p.st === 'aire') this.golpeAnim(p, 'tn_smash', 'weapon_swing_heavy');
-    else if (quiere !== 'fuego' && Math.abs(p.x - RED_X) < 80) this.golpeAnim(p, 'tn_volley', 'weapon_swing');
-    else this.golpeAnim(p, quiere === 'pase' ? 'backhand' : 'forehand', 'weapon_swing');
-    // le pegó al aire: recupera rápido y se puede seguir moviendo
+    const enRed = Math.abs(p.d - RED_D) < 75;
+    // cerca de la red, la que viene por encima del hombro es el smash (saltando, cualquiera)
+    const altaCerca = alto !== null && alto > 36 && Math.abs(p.d - RED_D) < 95;
+    const smash = alto !== null && (p.st === 'aire' || altaCerca) && quiere === 'drive';
+    if (smash) this.golpeAnim(p, 'tn_smash', 'weapon_swing_heavy');
+    else if (quiere !== 'fuego' && enRed && quiere === 'drive') this.golpeAnim(p, 'tn_volley', 'weapon_swing');
+    else this.golpeAnim(p, quiere === 'globo' || (c.x - p.x) * (team === 0 ? 1 : -1) < 0 ? 'backhand' : 'forehand', 'weapon_swing');
+    // le pegó al aire: recupera rápido y sigue moviéndose
     if (alto === null) { p.golpeT = 0.12; p.fallo = true; return; }
-    // un solo golpe por lado: si tu compañero ya le pegó, punto para el otro; salvo la que te dejó alta junto a la red
-    if (c.lado !== team) { c.lado = team; c.toques = 0; }
-    c.toques++;
-    const armada = c.ultimoTiro === 'arma' && c.ultimo?.c.team === team && c.ultimo !== p && c.toques === 2;
-    if (c.toques > 1 && !armada) { this.letrero(p, '¡DOBLE GOLPE!', 0xff8080); this.punto(team === 0 ? 1 : 0, null); return; }
-    // la calidad del golpe: lo ideal es a la altura de la cintura; la máquina no siempre la pone donde quiere
+    // un solo golpe por lado: si tu lado ya le pegó, la raqueta pasa de largo (no es falta: es que ya iba)
+    if (c.lado === team && c.toques > 0) {
+      p.golpeT = 0.12; p.fallo = true;
+      if (p.c.human && this.avisoDoble <= 0) { this.avisoDoble = 2; this.letrero(p, '¡YA LE PEGÓ TU PAREJA!', 0xffb080); }
+      return;
+    }
+    c.lado = team; c.toques = 1;
     const paseo = ajustes().nombre === 'PASEO' && p.c.human;
     const certera = p.c.human || Math.random() < 0.25 + 0.5 * ajustes().cpuAgresion;
-    const perfecto = alto >= 12 && alto <= 36 && certera;
-    // tu compañero no la toca mal por llegar justo: sus errores ya los decidió su plan
+    const perfecto = alto >= 14 && alto <= 40 && certera && !smash;
     const conmigo = !p.c.human && this.pat.some((o) => o.c.human && o.c.team === team);
-    const malo = forzarMalo || (!paseo && !conmigo && (alto < 4 || alto > 46) && p.st !== 'aire');
-    const cercaRed = Math.abs(p.x - RED_X) < 110;
+    const malo = forzarMalo || (!paseo && !conmigo && !p.c.human && (alto < 5 || alto > 62) && !smash);
+    const lejosD = team === 0 ? LARGO - 30 : 30, cortoD = team === 0 ? RED_D + 55 : RED_D - 55;
     let tiro: Tiro;
+    let destino = p.c.human ? this.puntoPersona(p, LARGO - 30, RED_D + 50) : this.hueco(team);
     if (quiere === 'fuego') {
-      // el drive Nekketsu: de fuego, derecho al hueco, pasa la red y se queda clavado al picar
       tiro = 'fuego';
       this.nek[team] = 0;
-      this.lanzar(this.hueco(team), 0, 0.35);
+      destino = this.hueco(team);
+      this.lanzar(destino.x, destino.d, 0.42, true);
       this.letrero(p, '¡DRIVE NEKKETSU!', 0xff8020);
       destellar(c.spr, 140, 0xffa040);
       this.uiAdd(rafaga(this));
-      efecto(this, 'aura_nekketsu', p.x, PISO + FILA[p.fila], { depth: PISO + FILA[p.fila] - 0.1 });
+      const [ex, ey] = this.pant(p.x, p.d);
+      efecto(this, 'aura_nekketsu', ex, ey, { depth: ey - 0.1 });
       if (team === 0) void this.banner('¡NEKKETSU!', 'fuente_titulo', 2, 500, 110);
       this.shake(240, 0.012);
       flash(this, 120);
-      // los del otro lado casi nunca llegan
-      // (tu compañero, contra el de los rivales, a veces sí llega: más en los niveles fáciles)
-      for (const o of this.pat) if (o.c.team !== team && Math.random() < (team === 1 ? 0.5 + 0.35 * ajustes().cpuAgresion : 0.85)) o.plan = { n: c.n, tipo: 'falla', reaccion: 1, ruido: 0, arma: false };
-    } else if (p.st === 'aire' && cercaRed && quiere === 'patada') {
-      // el smash: rápido y para abajo, pica y se va lejos
-      tiro = 'remate';
-      const tx = team === 0 ? Phaser.Math.Between(380, 500) : Phaser.Math.Between(140, 260);
-      this.lanzar(tx, 0, 0.42);
-      if (c.z < RED_H + 8) c.vz += 40;
+      for (const o of this.pat) if (o.c.team !== team && Math.random() < (team === 1 ? 0.5 + 0.35 * ajustes().cpuAgresion : 0.85)) o.plan = { n: c.n, tipo: 'falla', reaccion: 1, ruido: 0 };
+    } else if (smash) {
+      // el smash: picado y rápido, cerca de la línea de saque de ellos
+      tiro = 'smash';
+      const d = team === 0 ? RED_D + 40 + Math.random() * 90 : RED_D - 40 - Math.random() * 90;
+      this.lanzar(p.c.human ? Phaser.Math.Clamp(p.mira.x * 70 + (Math.random() - 0.5) * 30, -85, 85) : destino.x, d, 0.42, true);
+      if (c.vz < 40) c.vz = 40;
       this.letrero(p, '¡SMASH!', 0xffe040);
       this.shake(120, 0.006);
       destellar(c.spr, 90);
       p.fig.destello(60, 0xffe040);
       if (p.c.human) this.remates++;
-    } else if (quiere === 'arma') {
-      // la máquina se la deja alta junto a la red a la persona, para que salte y remate
-      tiro = 'arma';
-      const comp = this.pat.find((o) => o !== p && o.c.team === team);
-      this.lanzar(RED_X - dir * 44, 128 + Math.random() * 8);
-      if (comp) this.letrero(comp, '¡SALTA Y REMATA!', 0xffe040);
-    } else if (quiere === 'pase') {
-      // el globo: alto por encima de los de la red y al fondo
-      tiro = 'pase';
-      const tx = team === 0 ? Phaser.Math.Between(500, 580) : Phaser.Math.Between(60, 140);
-      this.lanzar(malo ? (team === 0 ? 640 : 0) : tx, 120 + Math.random() * 16);
+    } else if (quiere === 'globo') {
+      // el globo: alto por encima del de la red y al fondo
+      tiro = 'globo';
+      const d = malo ? (team === 0 ? LARGO + 40 : -40) : lejosD + (Math.random() - 0.5) * 20;
+      this.lanzar(malo ? destino.x : Phaser.Math.Clamp(destino.x, -75, 75), d, 1.55);
+      c.vz = Math.max(c.vz, 230);
       if (p.c.human) this.globos++;
+    } else if (enRed) {
+      // la volea: corta y rápida, al hueco del otro lado
+      tiro = 'volea';
+      this.lanzar(destino.x, p.c.human ? destino.d : cortoD + (Math.random() - 0.5) * 50, 0.62);
     } else {
-      tiro = 'patada';
-      const lejos = team === 0 ? [380, 580] : [60, 260];
-      // el toque perfecto va al hueco; el normal, a cualquier lado
-      let tx = perfecto ? this.hueco(team) : Phaser.Math.Between(lejos[0], lejos[1]);
-      let top = perfecto ? 36 + Math.random() * 10 : 46 + Math.random() * 16;
-      // entrenando, Kenji te la devuelve suave cerca de donde estás (y en el paso del smash, alta para rematar)
-      if (this.d.practica && team === 1) { tx = this.pasoSmash ? 240 : Phaser.Math.Clamp(this.pat[0].x + Phaser.Math.Between(-40, 30), 170, 290); top = this.pasoSmash ? 112 : 64; }
+      tiro = 'drive';
+      let t = perfecto ? 0.72 : 0.9;
+      // entrenando, Kenji te la devuelve suave cerca de donde estás (y en el paso del smash, alta y corta para rematar)
+      if (this.d.practica && team === 1) {
+        const me = this.pat[0];
+        destino = this.pasoSmash ? { x: me.x, d: RED_D - 50 } : { x: Phaser.Math.Clamp(me.x + (Math.random() - 0.5) * 60, -70, 70), d: 60 + Math.random() * 60 };
+        t = this.pasoSmash ? 1.5 : 1.15;
+      }
       // mal pegada: a la red o afuera
-      if (malo) { if (Math.random() < 0.6) { tx = RED_X + dir * 20; top = 14 + Math.random() * 6; } else tx = team === 0 ? 650 : -10; }
-      this.lanzar(tx, top);
-      if (perfecto && p.c.human) this.letrero(p, '¡QUÉ DRIVE!', 0x8ae08a);
+      if (malo) { if (Math.random() < 0.5) { destino = { x: c.x, d: RED_D + (team === 0 ? 4 : -4) }; t = 0.5; } else destino = { x: Math.sign(destino.x || 1) * (ANCHO / 2 + 25), d: lejosD }; }
+      this.lanzar(destino.x, destino.d, t, malo);
+      if (this.d.practica && team === 1 && this.pasoSmash) c.vz = Math.max(c.vz, 260);
+      if (perfecto && p.c.human) { this.letrero(p, '¡QUÉ DRIVE!', 0x8ae08a); p.fig.destello(60, 0xffe040); }
       if (p.c.human && !malo) this.pasadas++;
     }
     c.ultimo = p;
     c.ultimoTiro = tiro;
-    p.toques++;
-    // cada devolución buena carga la barra
-    if (tiro !== 'fuego' && tiro !== 'arma' && !malo) this.carga(team, 12);
+    if (tiro !== 'fuego' && !malo) this.carga(team, 12);
     this.sfx('golpe', p.c.human ? 0.35 : 0.2);
-    efecto(this, 'chispa_golpe_liviano', c.x, PISO + FILA[p.fila] - c.z, { depth: 5001 });
+    const [sx, sy] = this.pant(c.x, c.d, c.z);
+    efecto(this, 'chispa_golpe_liviano', sx, sy, { depth: 5001 });
   }
 
-  /** Llena la barra de un lado; cuando se llena la tuya, avisa. */
   private carga(team: 0 | 1, n: number) {
-    // la barra de los rivales se llena más lento en los niveles fáciles
     if (team === 1 && !this.d.practica) n *= Math.max(0.4, ajustes().cpuAgresion);
     const antes = this.nek[team];
     this.nek[team] = Math.min(100, antes + n);
@@ -394,16 +440,14 @@ export class Tenis extends EventScene {
     if (team === 0 && antes < 100 && this.nek[0] >= 100 && me) { this.letrero(me, '¡BARRA LLENA!', 0xffe040); this.sfx('elegir', 0.4); }
   }
 
-  /** El especial apretado sin poder usarlo: un aviso cortito (sin repetirlo a cada rato). */
-  private aviso(p: Voleador) {
+  private aviso(p: Tenista) {
     if (this.avisoT > 0) return;
     this.avisoT = 1;
     this.letrero(p, this.nek[0] >= 100 ? '¡CON LA PELOTA CERCA!' : 'LLENA LA BARRA', 0xffe080);
   }
 
-  /** El golpe con la animación de tenis del kit (con su raqueta, sin la pelota) desde el contacto, o el swing de antes. */
-  private golpeAnim(p: Voleador, anim: string, respaldo: string) {
-    p.golpeT = 0.32;
+  private golpeAnim(p: Tenista, anim: string, respaldo: string) {
+    p.golpeT = 0.3;
     p.fallo = false;
     p.fig.contacto(anim, respaldo, 1.4);
   }
@@ -413,15 +457,13 @@ export class Tenis extends EventScene {
   private punto(team: 0 | 1, motivo: string | null) {
     if (this.pausaT > 0 || this.terminado) return;
     const c = this.bola;
-    const remate = c.ultimoTiro === 'remate' && c.ultimo?.c.team === team;
-    const vale = 1;
-    this.marcador[team] += vale;
-    // el que pierde el punto se enciende
+    const smash = c.ultimoTiro === 'smash' && c.ultimo?.c.team === team;
+    this.marcador[team] += 1;
     this.carga(team === 0 ? 1 : 0, 20);
-    if (c.ultimo && c.ultimo.c.team === team) c.ultimo.puntos += vale;
+    if (c.ultimo && c.ultimo.c.team === team) c.ultimo.puntos += 1;
     c.en = 'piso';
     this.pausaT = 1.6;
-    const s = motivo ?? (c.ultimoTiro === 'fuego' && c.ultimo?.c.team === team ? '¡NEKKETSU!' : remate ? '¡SMASH!' : `¡PUNTO ${lado(team).corto}!`);
+    const s = motivo ?? (c.ultimoTiro === 'fuego' && c.ultimo?.c.team === team ? '¡NEKKETSU!' : smash ? '¡SMASH!' : `¡PUNTO ${lado(team).corto}!`);
     const t = this.uiAdd(txt(this, 320, 90, s, 'fuente_titulo', 1).setDepth(8500).setTint(team === 0 ? 0x9ac8ff : 0xffa0a0));
     this.tweens.add({ targets: t, y: 74, alpha: 0, delay: 900, duration: 500, onComplete: () => t.destroy() });
     chip.blip(team === 0 ? 988 : 330, 0.25, 'sq25', 0.16, team === 0 ? 1318 : 220);
@@ -432,31 +474,29 @@ export class Tenis extends EventScene {
   }
 
   /**
-   * La pelota picó en la arcilla. El primer pique del otro lado vale (rebota y sigue); si pica afuera, en tu propio
-   * lado o se quedó en la red, punto para el otro; el segundo pique es punto contra el lado donde picó. La que te dejó
-   * tu compañero junto a la red puede picar una vez de tu lado.
+   * La pelota picó. El primer pique del otro lado vale (rebota y sigue); afuera, en el propio lado o tras la red es
+   * punto para el otro; el segundo pique es punto para el que pegó.
    */
   private aterriza() {
     const c = this.bola;
-    efecto(this, 'polvo_caer_chico', c.x, PISO);
+    const [sx, sy] = this.pant(c.x, c.d);
+    efecto(this, 'polvo_caer_chico', sx, sy, { scale: esc(c.d) });
     this.sfx('paso_tierra_0', 0.3);
     const quien = c.ultimo?.c.team ?? this.saca;
     const otro: 0 | 1 = quien === 0 ? 1 : 0;
-    const lado: 0 | 1 = c.x < RED_X ? 0 : 1;
-    const afuera = c.x < BORDE[0] - 6 || c.x > BORDE[1] + 6;
+    const afuera = Math.abs(c.x) > ANCHO / 2 + 3 || c.d < -3 || c.d > LARGO + 3;
     if (c.red) { this.punto(otro, '¡A LA RED!'); return; }
     if (c.botes === 0) {
       if (afuera) { this.punto(otro, '¡AFUERA!'); return; }
-      if (lado === quien && c.ultimoTiro !== 'arma') { this.punto(otro, null); return; }
-      // el pique bueno: rebota y sigue (la máquina vuelve a decidir, menos contra el drive Nekketsu)
+      if (this.ladoDe(c.d) === quien) { this.punto(otro, null); return; }
       c.botes = 1;
-      c.vz = Math.max(150, Math.abs(c.vz) * 0.8);
-      c.vx *= this.pique;
+      c.vz = Math.abs(c.vz) * 0.7;
+      c.vx *= 0.62; c.vd *= 0.62;
       c.z = 0.1;
       if (c.ultimoTiro !== 'fuego') c.n++;
       return;
     }
-    this.punto(lado === 0 ? 1 : 0, null);
+    this.punto(quien, null);
   }
 
   // ------------------------------------------------------------------ cuadro a cuadro
@@ -474,69 +514,69 @@ export class Tenis extends EventScene {
     }
     const c = this.bola;
     this.avisoT = Math.max(0, this.avisoT - dt);
+    this.avisoDoble = Math.max(0, this.avisoDoble - dt);
     for (const q of this.pat) {
       q.golpeT = Math.max(0, q.golpeT - dt);
       q.cool = Math.max(0, q.cool - dt);
-      let mx = 0, salta = false, patada = false, pase = false, corre = false, fuego = false, arma = false;
+      let mx = 0, my = 0, salta = false, drive = false, globo = false, corre = false, fuego = false;
       if (jugando && this.pausaT <= 0) {
         if (q.c.human) {
-          mx = p.x; corre = p.run; salta = p.pressed.jump; patada = p.pressed.punch; pase = p.pressed.kick;
-          // el especial: con la barra llena y la pelota cerca; si no, un aviso
+          mx = p.x; my = p.y; corre = p.run; salta = p.pressed.jump; drive = p.pressed.punch; globo = p.pressed.kick;
+          q.mira = { x: p.x, y: p.y };
           if (p.pressed.special) { if (this.nek[0] >= 100 && this.alcanceFuego(q)) fuego = true; else this.aviso(q); }
-        } else ({ mx, salta, patada, pase, fuego, arma } = this.cpu(q, dt));
+        } else ({ mx, my, salta, drive, globo, fuego, corre } = this.cpu(q, dt));
       }
-      // el que saca no camina con la pelota en la mano: la suelta con un golpe
-      if (c.en === 'mano' && c.dueño === q) { if ((patada || pase) && q.cool <= 0) this.tocar(q, 'patada'); mx = 0; }
-      else {
-        if (fuego) this.tocar(q, 'fuego');
-        else if (arma) this.tocar(q, 'arma');
-        else if (patada) this.tocar(q, 'patada');
-        else if (pase) this.tocar(q, 'pase');
+      if (c.en === 'mano' && c.dueño === q) { if ((drive || globo) && q.cool <= 0) this.tocar(q, 'drive'); mx = 0; my = 0; }
+      else if (fuego) this.tocar(q, 'fuego');
+      else if (drive) this.tocar(q, 'drive');
+      else if (globo) this.tocar(q, 'globo');
+      // moverse por su lado de la cancha: la palanca arriba es hacia la red (para ellos, al revés)
+      const vel = (corre ? 150 : 105) * (q.c.human || this.pat.some((o) => o.c.human && o.c.team === q.c.team) ? 1 : ajustes().cpuVel);
+      const haciaRed = q.c.team === 0 ? -my : my;
+      if (q.golpeT <= 0 || q.st === 'aire' || q.fallo) { q.x += mx * vel * dt; q.d += haciaRed * vel * 0.8 * dt; }
+      q.x = Phaser.Math.Clamp(q.x, -ANCHO / 2 - 40, ANCHO / 2 + 40);
+      q.d = q.c.team === 0 ? Phaser.Math.Clamp(q.d, -14, RED_D - 14) : Phaser.Math.Clamp(q.d, RED_D + 14, LARGO + 40);
+      // siempre de cara a la red; de lado cuando corre a un costado
+      if (q.golpeT <= 0) {
+        q.fig.row = mx ? (q.c.team === 0 ? 'up_right' : 'down_right') : q.c.team === 0 ? 'up' : 'down';
+        if (mx) q.fig.left = mx < 0;
       }
-      // moverse, sin pasar la red ni salirse (tras un golpe al aire, también)
-      // tu compañero corre a tu par en todos los niveles; los rivales, según el nivel
-      const vel = (corre ? 150 : 100) * (q.c.human || this.pat.some((o) => o.c.human && o.c.team === q.c.team) ? 1 : ajustes().cpuVel);
-      if (q.golpeT <= 0 || q.st === 'aire' || q.fallo) q.x += mx * vel * dt;
-      const lim = q.c.team === 0 ? [BORDE[0] - 14, RED_X - 10] : [RED_X + 12, BORDE[1] + 14];
-      q.x = Phaser.Math.Clamp(q.x, lim[0], lim[1]);
-      if (mx) q.fig.left = mx < 0;
-      else if (q.golpeT <= 0) q.fig.left = q.c.team === 1;
-      if (salta && q.st === 'piso' && q.golpeT <= 0) { q.st = 'aire'; q.vz = 270; q.fig.set('jump_rise', true).estirar(); }
+      if (salta && q.st === 'piso' && q.golpeT <= 0) { q.st = 'aire'; q.vz = 270; q.fig.set('jump_rise', true); }
       if (q.st === 'aire') {
         q.vz -= 700 * dt;
         q.z += q.vz * dt;
-        if (q.z <= 0) { q.z = 0; q.vz = 0; q.st = 'piso'; q.fig.set('land', true).aplastar(); }
+        if (q.z <= 0) { q.z = 0; q.vz = 0; q.st = 'piso'; q.fig.set('land', true); }
         else if (q.golpeT <= 0 && q.vz < 0 && q.fig.anim.name !== 'jump_fall') q.fig.set('jump_fall');
       }
-      // la animación: caminar, correr o quieto, cuando no está pegando ni celebrando (moverse corta la celebración)
       if (q.st === 'piso' && q.golpeT <= 0) {
-        // quieto, en guardia de tenis si el kit la trae
-        const quiere = mx ? (corre ? 'run' : 'walk') : q.fig.anim.has('tn_ready') ? 'tn_ready' : 'idle';
-        const libre = ['idle', 'tn_ready', 'walk', 'run'].includes(q.fig.anim.name) || q.fig.anim.done || mx !== 0;
+        const mueve = mx || my;
+        const quiere = mueve ? (corre ? 'run' : 'walk') : q.fig.anim.has('tn_ready') ? 'tn_ready' : 'idle';
+        const libre = ['idle', 'tn_ready', 'walk', 'run'].includes(q.fig.anim.name) || q.fig.anim.done || !!mueve;
         if (libre && q.fig.anim.name !== quiere) q.fig.set(quiere);
       }
-      q.fig.step(dt, Math.abs(mx) * vel * dt);
+      q.fig.step(dt, Math.hypot(mx, haciaRed * 0.8) * vel * dt);
     }
     // la pelota
     if (c.en === 'mano' && c.dueño) {
       const d = c.dueño;
-      c.x = d.x + (d.c.team === 0 ? 9 : -9);
-      c.z = 20 + Math.sin(this.time.now / 160) * 2;
+      c.x = d.x + (d.c.team === 0 ? 10 : -10); c.d = d.d;
+      c.z = 22 + Math.sin(this.time.now / 160) * 2;
     } else if (c.en === 'aire') {
-      const x0 = c.x;
+      const d0 = c.d;
       c.vz -= G * dt;
-      c.x += c.vx * dt;
-      c.z += c.vz * dt;
+      c.x += c.vx * dt; c.d += c.vd * dt; c.z += c.vz * dt;
       // la red: si cruza por debajo, rebota y cae de este lado (el drive Nekketsu la atraviesa)
-      const cruza = (x0 < RED_X) !== (c.x < RED_X);
-      if (cruza && c.z < RED_H && c.ultimoTiro !== 'fuego') {
-        c.x = x0;
-        c.vx *= -0.15;
+      const cruza = (d0 < RED_D) !== (c.d < RED_D);
+      if (cruza && c.z < RED_H && c.ultimoTiro !== 'fuego' && Math.abs(c.x) < ANCHO / 2 + 10) {
+        c.d = d0;
+        c.vd *= -0.12; c.vx *= 0.3;
         c.vz = Math.min(c.vz, 0);
         c.red = true;
         this.sfx('esquiva', 0.3);
       }
-      if (c.z <= 0) { c.z = 0; this.aterriza(); }
+      // la que ya picó y se va lejos sin que nadie la toque: segundo pique
+      if (c.botes > 0 && (Math.abs(c.x) > ANCHO / 2 + 80 || c.d < -90 || c.d > LARGO + 90)) { c.z = 0; this.aterriza(); }
+      else if (c.z <= 0) { c.z = 0; this.aterriza(); }
     }
     if (jugando && this.d.practica) this.entrenador();
     this.render();
@@ -547,65 +587,61 @@ export class Tenis extends EventScene {
 
   // ------------------------------------------------------------------ la máquina
 
-  private cpu(q: Voleador, dt: number) {
-    const r = { mx: 0, salta: false, patada: false, pase: false, fuego: false, arma: false };
+  private cpu(q: Tenista, dt: number) {
+    const r = { mx: 0, my: 0, salta: false, drive: false, globo: false, fuego: false, corre: false };
     const c = this.bola, team = q.c.team;
     q.pensar -= dt;
-    // los errores: más en los niveles fáciles; y si la persona va perdiendo por mucho, un poco más.
-    // tu compañero es confiable en todos los niveles: los errores fáciles son de los rivales
     const dif = this.marcador[1] - this.marcador[0];
     const base = Phaser.Math.Clamp(0.5 - 0.36 * ajustes().cpuAgresion + (dif >= 3 ? 0.12 * ajustes().ayuda : 0), 0.04, 0.6);
     const conmigo = this.pat.some((o) => o.c.human && o.c.team === team);
     const error = this.d.practica ? 0 : conmigo ? 0.05 : base;
-    if (c.en === 'mano' && c.dueño === q) { if (q.cool <= 0) r.patada = true; return r; }
+    if (c.en === 'mano' && c.dueño === q) { if (q.cool <= 0) r.drive = true; return r; }
     const compa = this.pat.find((o) => o !== q && o.c.team === team);
-    // una pelota nueva: decide de una vez si le va a pegar bien, mal o si no llega, y cuánto tarda en reaccionar
+    const persona = compa?.c.human ? compa : null;
     if (c.en === 'aire' && q.plan.n !== c.n) {
       const dado = Math.random();
       const torpe = conmigo ? 0 : 1 - ajustes().cpuAgresion;
-      // se la deja alta junto a la red para tu smash: más seguido en los niveles fáciles
-      q.plan = { n: c.n, tipo: dado < error * 0.45 ? 'falla' : dado < error ? 'mala' : 'bien', reaccion: 0.08 + torpe * 0.3 + Math.random() * 0.12, ruido: (Math.random() - 0.5) * (8 + torpe * 30), arma: Math.random() < 0.5 + 0.3 * (1 - ajustes().cpuAgresion) };
-      // entrenando, en el último paso (ganarle un punto), a Kenji se le escapan los tiros buenos
-      if (this.d.practica && this.coach?.ultimo && c.ultimo?.c.human && (c.ultimoTiro === 'remate' || Math.random() < 0.5)) q.plan.tipo = 'falla';
+      q.plan = { n: c.n, tipo: dado < error * 0.45 ? 'falla' : dado < error ? 'mala' : 'bien', reaccion: 0.08 + torpe * 0.3 + Math.random() * 0.12, ruido: (Math.random() - 0.5) * (6 + torpe * 24) };
+      if (this.d.practica && this.coach?.ultimo && c.ultimo?.c.human && (c.ultimoTiro === 'smash' || Math.random() < 0.5)) q.plan.tipo = 'falla';
     }
     q.plan.reaccion = Math.max(0, q.plan.reaccion - dt);
-    // a dónde va a caer, y si es de mi lado y me toca a mí: va el más cerca de donde cae; si mi lado ya le pegó, nadie
-    // (salvo la que el compañero dejó alta junto a la red: esa es del otro)
-    let meta = q.casa, yo = false;
-    if (c.en === 'aire') {
-      const xl = this.caida();
-      const mio = team === 0 ? xl < RED_X : xl >= RED_X;
-      if (mio) {
-        const compas = this.pat.filter((o) => o.c.team === team);
-        const tocoUnCompa = c.ultimo?.c.team === team && c.lado === team;
-        if (tocoUnCompa) yo = c.ultimoTiro === 'arma' && c.ultimo !== q;
-        else yo = compas.length === 1 || compas.sort((a, b) => Math.abs(a.x - xl) - Math.abs(b.x - xl))[0] === q;
-        if (yo) meta = xl - (team === 0 ? 6 : -6) + q.plan.ruido;
-        // la pelota alta cerca de la red: salta al smash (a veces)
-        if (yo && Math.abs(c.x - q.x) < 30 && Math.abs(q.x - RED_X) < 120 && c.z > 50 && c.z < 84 && c.vz < 0 && q.st === 'piso' && q.plan.tipo === 'bien' && Math.random() < 0.08 + ajustes().cpuAgresion * 0.1) r.salta = true;
-      }
+    // a dónde ir: si la pelota viene a mi lado y me toca, a donde conviene pegarle; si no, a cubrir mi mitad
+    let meta = { x: q.quiereX, d: q.quiereD }, yo = false;
+    const viene = c.en === 'aire' && c.lado !== team && this.ladoDe(this.caida().d) === team;
+    if (viene) {
+      const g = this.caida(true);
+      const dist = (o: Tenista) => Math.abs(o.x - g.x) + Math.abs(o.d - g.d) * 0.7;
+      // la toma el más cerca; la persona cuenta como más cerca solo si de verdad está ahí (si no, la pareja va)
+      if (!compa) yo = true;
+      else if (persona) yo = dist(persona) > 48 || dist(q) < dist(persona) - 10;
+      else yo = dist(q) <= dist(compa);
+      if (yo) meta = { x: g.x + q.plan.ruido + (team === 0 ? -8 : 8), d: g.d + (team === 0 ? -16 : 16) };
+      // la alta cerca de la red: salta al smash
+      if (yo && q.st === 'piso' && Math.abs(q.d - RED_D) < 80 && Math.abs(c.x - q.x) < 30 && Math.abs(c.d - q.d) < 30 && c.z > 60 && c.z < 110 && c.vz < 0 && q.plan.tipo === 'bien' && Math.random() < 0.3 + ajustes().cpuAgresion * 0.3) r.salta = true;
     }
-    if (q.pensar <= 0 && q.plan.reaccion <= 0) { q.pensar = 0.08 + Math.random() * 0.08; q.quiereX = meta + (Math.random() - 0.5) * 6; }
-    const dx = q.quiereX - q.x;
+    if (!yo) {
+      // cubrir: la mitad contraria a la del compañero; adelante si el compañero está atrás, y al revés
+      const otroX = compa ? compa.x : 0;
+      const atras = compa ? (team === 0 ? compa.d < RED_D / 2 : compa.d > RED_D + RED_D / 2) : true;
+      const dMio = compa ? (atras ? (team === 0 ? RED_D - 65 : RED_D + 65) : team === 0 ? 24 : LARGO - 24) : team === 0 ? 30 : LARGO - 30;
+      meta = { x: Phaser.Math.Clamp(-Math.sign(otroX || 1) * 45, -80, 80), d: dMio };
+    }
+    if (q.pensar <= 0 && q.plan.reaccion <= 0) { q.pensar = 0.08 + Math.random() * 0.08; q.quiereX = meta.x; q.quiereD = meta.d; }
+    const dx = q.quiereX - q.x, dd = q.quiereD - q.d;
     r.mx = Math.abs(dx) > 5 ? Math.sign(dx) : 0;
-    // pegarle, solo si le toca: cuando la tiene a la altura de la cintura (o saltando, arriba)
+    const haciaRed = Math.abs(dd) > 6 ? Math.sign(dd) : 0;
+    r.my = team === 0 ? -haciaRed : haciaRed;
+    r.corre = Math.abs(dx) + Math.abs(dd) > 60;
+    // pegarle, solo si le toca: a la altura de la cintura bajando (o saltando, arriba)
     const alto = this.alcance(q);
     if (yo && alto !== null && q.golpeT <= 0 && q.plan.tipo !== 'falla') {
-      const bueno = q.st === 'aire' ? alto <= ALCANCE.aire[1] - 4 : alto >= 12 && alto <= 36;
-      const bajando = c.vz < 0;
-      if ((bueno && bajando) || alto < 6) {
-        const van = c.lado === team ? c.toques : 0;
-        // con la persona de compañero cerca de la red, a veces se la deja alta para que salte y remate
-        const armar = !!compa?.c.human && van === 0 && q.st === 'piso' && q.plan.arma && Math.abs(compa.x - RED_X) < 120 && !this.d.practica;
-        // la barra llena: el drive Nekketsu (la barra de tu lado es tuya: tu compañero no la gasta)
-        const conFuego = this.nek[team] >= 100 && !this.d.practica && !compa?.c.human && bueno && this.alcanceFuego(q) && Math.random() < 0.6;
-        if (q.plan.tipo === 'mala') {
-          // se equivoca: la toca mal y se va a la red o afuera
-          this.tocar(q, 'patada', true);
-        } else if (conFuego) r.fuego = true;
-        else if (armar) r.arma = true;
-        // casi siempre drive; a veces, desde el fondo, un globo
-        else if (q.st === 'piso' && q.fila === 0 && Math.random() < 0.15) r.pase = true; else r.patada = true;
+      const bueno = q.st === 'aire' ? alto <= 96 : alto >= 10 && alto <= 48;
+      if ((bueno && (c.vz < 0 || c.botes > 0)) || alto < 6) {
+        const conFuego = this.nek[team] >= 100 && !this.d.practica && !persona && bueno && this.alcanceFuego(q) && Math.random() < 0.6;
+        if (q.plan.tipo === 'mala') this.tocar(q, 'drive', true);
+        else if (conFuego) r.fuego = true;
+        else if (q.st === 'piso' && Math.abs(q.d - RED_D) > 120 && Math.random() < 0.15) r.globo = true;
+        else r.drive = true;
       }
     }
     return r;
@@ -615,83 +651,67 @@ export class Tenis extends EventScene {
 
   private pasos(): Paso[] {
     return [
-      { texto: 'EL CÍRCULO AMARILLO DICE DÓNDE PICA:\nPÁRATE AHÍ CON {MOVER}', botones: ['stick'], listo: () => this.llego },
-      { texto: 'DEJA QUE PIQUE Y, CUANDO BAJE A LA\nCINTURA, {PUÑO} LE PEGA CON LA RAQUETA', botones: ['punch'], listo: () => this.pasadas >= 1 },
-      { texto: '¡ESO! PÁSALA 3 VECES MÁS', botones: ['stick', 'punch'], listo: () => this.pasadas >= 4 },
-      { texto: 'SI VIENE ALTA CERCA DE LA RED,\n{SALTO} Y {PUÑO}: ¡EL SMASH!', botones: ['jump', 'punch'], antes: () => { this.pasoSmash = true; }, listo: () => this.remates >= 1 },
+      { texto: 'EL CÍRCULO AMARILLO DICE DÓNDE PICA:\nMUÉVETE AHÍ CON {MOVER}', botones: ['stick'], listo: () => this.llego },
+      { texto: 'CUANDO LA PELOTA TE LLEGUE A LA CINTURA,\n{PUÑO} LE PEGA EL DRIVE', botones: ['punch'], listo: () => this.pasadas >= 1 },
+      { texto: '¡ESO! LA PALANCA APUNTA A DÓNDE VA.\nPÁSALA 3 VECES MÁS', botones: ['stick', 'punch'], listo: () => this.pasadas >= 4 },
+      { texto: 'ACÉRCATE A LA RED: LA QUE VIENE ALTA,\n{PUÑO} ES EL SMASH', botones: ['stick', 'punch'], antes: () => { this.pasoSmash = true; }, listo: () => this.remates >= 1 },
       { texto: `{PATADA} ES EL GLOBO, ALTO Y AL FONDO.\nGÁNALE UN PUNTO A ${this.rivalEntrenoNombre}`, botones: ['stick', 'punch', 'kick'], antes: () => { this.pasoSmash = false; }, listo: () => this.marcador[0] >= 1 },
     ];
   }
 
-  /** Entrenando: Kenji la devuelve siempre suave hacia donde estás, y en el primer paso la pelota te busca. */
   private entrenador() {
     const me = this.pat[0];
     const c = this.bola;
-    if (c.en === 'aire' && this.caida() < RED_X && Math.abs(me.x - this.caida()) < 14 && c.z > 10) this.llego = true;
+    if (c.en !== 'aire') return;
+    const g = this.caida();
+    if (g.d < RED_D && Math.abs(me.x - g.x) < 22 && Math.abs(me.d - g.d) < 30 && c.z > 10) this.llego = true;
   }
 
   // ------------------------------------------------------------------ dibujo y final
 
   private render() {
     const c = this.bola;
-    this.pat.forEach((q, i) => {
-      const y = PISO + FILA[q.fila];
-      q.fig.setPosition(Math.round(q.x), Math.round(y - q.z)).setDepth(y);
-      // la raqueta: en la mano del swing con su ángulo; si no está pegando, en la mano y apuntando adelante
-      const a = q.fig.anim, arma = a.data.arma?.[q.fig.rowIndex]?.[a.frame];
-      const mano = a.data.manos?.[q.fig.rowIndex]?.[a.frame]?.[0] ?? [6, -20];
-      const [ax, ay, ang] = arma ?? [mano[0], mano[1], 330];
-      const izq = q.fig.left;
-      // las del pack de tenis traen la raqueta dibujada: la de código se esconde
-      this.raquetas[i].setVisible(a.pack !== 'tennis');
-      this.raquetas[i].setPosition(Math.round(q.x + (izq ? -ax : ax)), Math.round(y - q.z + ay)).setDepth(y + 0.5)
-        .setFlipX(izq).setRotation(Phaser.Math.DegToRad(izq ? -ang : ang)).setOrigin(izq ? 0.85 : 0.15, 0.5);
-      q.sombra.setPosition(Math.round(q.x), y).setScale(Math.max(0.5, 1 - q.z / 80)).setDepth(y - 1);
-    });
-    // la pelota, girando
-    const fila = c.dueño ? FILA[c.dueño.fila] : 0;
-    c.spr.setPosition(Math.round(c.x), Math.round(PISO + fila - c.z)).setVisible(c.en !== 'piso' || this.pausaT > 0);
+    for (const q of this.pat) {
+      const [sx, sy, s] = this.pant(q.x, q.d);
+      q.fig.setPosition(Math.round(sx), Math.round(sy - q.z * s)).setScale(s).setDepth(sy);
+      q.sombra.setPosition(Math.round(sx), Math.round(sy)).setScale(s * Math.max(0.5, 1 - q.z / 80), s).setDepth(sy - 1);
+    }
+    const [bx, by, bs] = this.pant(c.x, c.d, c.z);
+    const [, gy] = this.pant(c.x, c.d);
+    c.spr.setPosition(Math.round(bx), Math.round(by)).setVisible(c.en !== 'piso' || this.pausaT > 0).setDepth(gy + 0.5);
     if (c.en === 'aire') c.spr.setRotation(c.spr.rotation + (c.vx > 0 ? 0.25 : -0.25));
-    // el drive Nekketsu: la pelota achatada y en llamas
-    tiroSuper(this, c.spr, c.en === 'aire' && c.ultimoTiro === 'fuego');
+    // el drive Nekketsu: la pelota achatada y en llamas; si no, del tamaño que le toca por la distancia
+    const fuego = c.en === 'aire' && c.ultimoTiro === 'fuego';
+    if (!fuego) c.spr.setScale(2 * Math.max(0.75, bs));
+    tiroSuper(this, c.spr, fuego);
     c.rastro.emitting = c.en === 'aire';
-    c.fuego.emitting = c.en === 'aire' && c.ultimoTiro === 'fuego';
-    c.sombra.setPosition(Math.round(c.x), PISO).setScale(Math.max(0.4, 1 - c.z / 140)).setVisible(c.en !== 'piso');
-    // el círculo: dónde va a caer, cuando viene a tu lado (en Nekketsu no hay ayuda)
-    const xl = this.caida();
+    c.fuego.emitting = fuego;
+    c.sombra.setPosition(Math.round(bx), Math.round(gy)).setScale(bs * Math.max(0.4, 1 - c.z / 140)).setVisible(c.en !== 'piso').setDepth(gy - 0.5);
+    // el círculo: dónde va a picar, cuando viene a tu lado (en Nekketsu no hay ayuda)
+    const g = this.caida();
     const ayuda = ajustes().nombre !== 'NEKKETSU' || !!this.d.practica;
-    // la que tu compañero te dejó alta junto a la red: el círculo naranja dice dónde saltar al smash (antes del pique)
-    const me0 = this.pat.find((q) => q.c.human);
-    const armada = !!me0 && c.en === 'aire' && c.ultimoTiro === 'arma' && c.ultimo !== me0 && c.ultimo?.c.team === 0 && c.vz * c.vz + 2 * G * (c.z - 60) >= 0;
-    if (armada) {
-      const t = (c.vz + Math.sqrt(c.vz * c.vz + 2 * G * (c.z - 60))) / G;
-      c.marca.setVisible(ayuda).setPosition(Math.round(c.x + c.vx * t), PISO).setStrokeStyle(2, 0xff8020, 1);
-    } else c.marca.setVisible(ayuda && c.en === 'aire' && xl < RED_X && xl > BORDE[0] - 10).setPosition(Math.round(xl), PISO).setStrokeStyle(2, 0xffe040, 0.9);
-    // la cámara sigue la pelota, sin perder a la persona
-    const me = this.pat.find((q) => q.c.human) ?? this.pat[0];
-    const cam = this.cameras.main;
-    const cur = cam.midPoint.x || 320;
-    const tx = c.en === 'aire' ? (c.x * 0.6 + me.x * 0.4) : me.x;
-    cam.centerOn(cur + (tx - cur) * 0.07, this.camY);
+    const viene = c.en === 'aire' && c.lado !== 0 && g.d < RED_D && g.d > -20;
+    const [mx, my, ms] = this.pant(g.x, g.d);
+    c.marca.setVisible(ayuda && viene).setPosition(Math.round(mx), Math.round(my)).setScale(ms).setDepth(my - 0.4);
     // marcador
     this.scoreTxt.setText(`${this.marcador[0]} - ${this.marcador[1]}`);
     const llena = this.nek[0] >= 100 ? '{ESPECIAL}: ¡DRIVE NEKKETSU!' : '';
     this.toqueTxt.setY(42).setText(rotular(c.en === 'mano' && c.dueño?.c.human ? '{PUÑO}: SACAR' : llena, this.pad.fuente));
-    const g = this.hud;
-    g.clear();
-    g.fillStyle(0x000000, 0.45).fillRect(170, 6, 300, 20);
-    // las barras Nekketsu, debajo de cada nombre
+    const h = this.hud;
+    h.clear();
+    h.fillStyle(0x000000, 0.45).fillRect(170, 6, 300, 20);
     for (const t of [0, 1] as const) {
       const x = t === 0 ? 176 : 360, lleno = this.nek[t] >= 100;
-      g.fillStyle(0x000000, 0.6).fillRect(x, 28, 104, 6);
-      g.fillStyle(lleno ? (Math.floor(this.time.now / 150) % 2 ? 0xffe040 : 0xff6020) : t === 0 ? 0x5a9af0 : 0xf05a5a).fillRect(x + 2, 29, this.nek[t], 4);
+      h.fillStyle(0x000000, 0.6).fillRect(x, 28, 104, 6);
+      h.fillStyle(lleno ? (Math.floor(this.time.now / 150) % 2 ? 0xffe040 : 0xff6020) : t === 0 ? 0x5a9af0 : 0xf05a5a).fillRect(x + 2, 29, this.nek[t], 4);
     }
   }
 
   private sfx(name: string, vol = 0.5) { if (this.cache.audio.exists(name)) this.sound.play(name, { volume: vol }); }
   private shake(ms: number, k: number) { this.cameras.main.shake(ms, k); }
-  private letrero(p: Voleador, s: string, color: number) {
-    const t = txt(this, p.x, PISO + FILA[p.fila] - p.z - 56, s, 'fuente_ui', 1).setTint(color).setDepth(6000);
+  private letrero(p: Tenista, s: string, color: number) {
+    const [sx, sy, es] = this.pant(p.x, p.d);
+    const t = txt(this, sx, sy - (p.z + 56) * es, s, 'fuente_ui', 1).setTint(color).setDepth(6000);
     this.tweens.add({ targets: t, y: t.y - 12, alpha: 0, delay: 400, duration: 450, onComplete: () => t.destroy() });
   }
 
@@ -702,7 +722,7 @@ export class Tenis extends EventScene {
     this.time.delayedCall(2400, () => {
       for (const q of this.pat) q.fig.set(q.c.team === ganador ? 'victory' : 'sad', true);
       const orden = [...this.pat]
-        .sort((a, b) => Number(b.c.team === ganador) - Number(a.c.team === ganador) || b.toques - a.toques || b.puntos - a.puntos)
+        .sort((a, b) => Number(b.c.team === ganador) - Number(a.c.team === ganador) || b.puntos - a.puntos)
         .map((q) => ({ c: q.c, valor: `${q.puntos} PUNTOS` }));
       this.resultados(prueba('Tenis').nombre, orden);
     });
