@@ -44,6 +44,15 @@ export function efecto(scene: Phaser.Scene, id: string, x: number, y: number, o:
   return s;
 }
 
+/**
+ * Un destello: el sprite se pinta entero de un color (blanco: el golpe que entra; amarillo: el perfecto) y vuelve
+ * solo a sus colores a los `ms`. Lo clásico de los 16 bits, que hace que el golpe se sienta.
+ */
+export function destellar(s: Phaser.GameObjects.Sprite | Phaser.GameObjects.Image, ms = 70, color = 0xffffff) {
+  s.setTintFill(color);
+  s.scene.time.delayedCall(ms, () => { if (s.active) s.clearTint(); });
+}
+
 /** El tamaño de polvo que va con la celda del personaje: chico 32, medio 48, grande 64 (Goro). */
 export const talla = (celda: number) => (celda >= 64 ? 'grande' : celda <= 32 ? 'chico' : 'medio');
 

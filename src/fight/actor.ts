@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { Figura } from '../core/figura';
 import { kit, type Box, type Objeto, type Evento } from '../core/kit';
-import { efecto } from '../core/fx';
+import { efecto, talla } from '../core/fx';
 import { ATTACKS, DEPTH, FLOOR_TOP, GRAVITY, HP, PESO_DMG, SPEED, XMAX, XMIN, type AttackDef } from './defs';
 
 /** Lo que un atleta quiere hacer en este cuadro (de la palanca o de la máquina). */
@@ -108,8 +108,19 @@ export class Actor {
   private bloqueos: number[] = [];
   /** el rival tirado que voy a pisar */
   private pisado: Actor | null = null;
+  /** este golpe ya conectó con alguien */
+  private pego = false;
+  /** a quiénes ya se llevó por delante en esta caída */
+  private arrollados = new Set<Actor>();
   /** cuánto dura la burla en curso */
   private burlaT = 0;
+  /** la frenada al soltar la carrera: cuánto le queda patinando y a qué velocidad */
+  private frenaT = 0;
+  private frenaV = 0;
+  /** cuánto lleva corriendo seguido (la frenada solo después de una carrera de verdad) */
+  private corriendoT = 0;
+  /** las veces que lo volvieron a golpear en el aire en esta caída (los malabares del Kunio, con tope) */
+  private malabares = 0;
 
   constructor(readonly w: World, readonly id: string, readonly team: 0 | 1, x: number, y: number, public human = false) {
     this.x = x;
@@ -218,6 +229,18 @@ export class Actor {
   }
 
   private move(dt: number, it: Intent) {
+    // venía corriendo y soltó (o cambió de lado): patina un pelito con su nube de polvo de frenar
+    const corria = this.st === 'run' && Math.abs(this.vx) > 100 && this.corriendoT > 0.3;
+    if (corria && (!it.run || !it.x || Math.sign(it.x) !== Math.sign(this.vx))) {
+      this.frenaT = 0.14;
+      this.frenaV = this.vx;
+      efecto(this.w.sc, `polvo_frenar_${talla(this.fig.celda)}`, this.sx(this.x, this.y), this.ft + this.y, { flip: this.left });
+    }
+    if (this.frenaT > 0) {
+      this.frenaT -= dt;
+      if (it.x && Math.sign(it.x) === Math.sign(this.frenaV)) this.frenaT = 0;
+      else { this.desplazar(this.frenaV * dt, 0); this.frenaV *= Math.pow(0.03, dt); }
+    }
     if (it.special && this.meter >= 100) { this.w.special(this); return; }
     if (it.jump) { this.jump(it); return; }
     if (it.guard && !this.weapon && !this.carrying) { this.setSt('guard', 'guard'); this.vx = 0; return; }
@@ -245,6 +268,7 @@ export class Actor {
       this.fig.step(dt);
     }
     this.vx = running ? it.x * SPEED.runX * this.vel : 0;
+    this.corriendoT = running ? this.corriendoT + dt : 0;
   }
 
   private footsteps(ev: { tipo: string }[]) {
@@ -261,6 +285,7 @@ export class Actor {
     this.vx = it.x * (it.run ? SPEED.runX : SPEED.walkX * 1.25) * Math.max(1, this.vel);
     this.vy = it.y * SPEED.walkY;
     this.play('jump_rise', true);
+    this.fig.estirar();
     this.w.sfx('esquiva', 0.25);
   }
 
@@ -277,6 +302,7 @@ export class Actor {
     this.z = this.base; this.vz = 0; this.vx = 0; this.vy = 0;
     this.w.dust(this.x, this.y);
     this.setSt('idle', 'land');
+    this.fig.aplastar();
   }
 
   private physics(dt: number) {
@@ -318,6 +344,7 @@ export class Actor {
       this.pisado = tirado;
       this.startAttack('low_kick');
       this.attack = ATTACKS.pisoton;
+      this.fig.anim.speed = ATTACKS.pisoton.speed ?? 1;
       return;
     }
     this.pisado = null;
@@ -341,8 +368,10 @@ export class Actor {
     this.attack = ATTACKS[name] ?? null;
     this.hitThisAttack.clear();
     this.queued = null;
-    this.play(name, true);
-    if (name !== 'run_punch' && name !== 'run_kick' && name !== 'air_kick' && name !== 'flying_kick') this.vx = 0;
+    this.pego = false;
+    this.play(name, true, this.attack?.speed ?? 1);
+    // el pasito hacia adelante con el golpe (`lunge`): el puño llega y se siente; corriendo o en el aire sigue su impulso
+    if (name !== 'run_punch' && name !== 'run_kick' && name !== 'air_kick' && name !== 'flying_kick') this.vx = this.grounded && !this.pisado ? this.dir * (this.attack?.lunge ?? 0) : 0;
     if (name !== 'low_kick') this.pisado = null;
   }
 
@@ -359,12 +388,17 @@ export class Actor {
       if (e.tipo === 'suelta' && this.weapon) this.releaseWeapon();
     }
     if (airborne && this.grounded && this.t > 0.05) { this.land(); return; }
-    if (this.fig.anim.done) {
+    // el golpe siguiente no espera a que termine la recuperación: pasado el impacto, el botón guardado lo encadena
+    // (si conectó, enseguida; si pegó al aire, un cuadro más tarde, para que el abanicazo cueste algo)
+    const an = this.fig.anim;
+    const imp = this.fig.cuadroDe('impacto');
+    const encadenable = !airborne && this.queued && an.name !== 'weapon_throw' && imp >= 0 && an.pos >= imp + (this.pego ? 1 : 2.2);
+    if (an.done || encadenable) {
       if (!this.grounded) { this.st = 'jump'; return; }
       const q = this.queued;
       this.setSt('idle', 'idle');
-      if (q === 'punch' && this.combo > 0) { if (this.weapon) this.swing(); else this.punchOrGrab(); }
-      else if (q === 'kick' && this.combo > 0 && !this.weapon) this.kickAttack();
+      if (q === 'punch') { if (this.weapon) this.swing(); else this.punchOrGrab(); }
+      else if (q === 'kick' && !this.weapon) this.kickAttack();
     }
   }
 
@@ -383,6 +417,7 @@ export class Actor {
       if (hx < hb[0] - radius || hx > hb[1] + radius || hz < hb[2] - radius || hz > hb[3] + radius) continue;
       this.hitThisAttack.add(v);
       any = true;
+      this.pego = true;
       v.takeHit(this, def, this.dir);
       this.w.spark(hx, v.y, hz, !!def.kd);
     }
@@ -391,7 +426,11 @@ export class Actor {
   }
 
   canBeHit() {
-    return this.invul <= 0 && !['down', 'ko', 'lifted', 'thrown', 'getup', 'fall', 'frozen', 'rei'].includes(this.st);
+    if (this.invul > 0) return false;
+    // el rival que va cayendo todavía en el aire se puede volver a golpear (dos veces como mucho): el malabar.
+    // A los de tu equipo nunca los hacen malabares: eso es para castigar al Instituto, no a los niños
+    if (this.st === 'fall') return this.team === 1 && !this.w.esJudo && this.z > 10 && this.bounces === 0 && this.malabares < 2;
+    return !['down', 'ko', 'lifted', 'thrown', 'getup', 'frozen', 'rei'].includes(this.st);
   }
 
   takeHit(from: Actor | null, def: AttackDef, dir: number) {
@@ -406,6 +445,7 @@ export class Actor {
         this.vx = dir * 30;
         this.desplazar(dir * 4, 0);
         this.play('fight_block', true);
+        this.fig.destello(50, 0x9ad8ff);
         this.w.sfx('bloqueo', 0.5);
         this.w.aviso?.(this, '¡BLOQUEO!', 0x9ad8ff);
         from.meter = Math.min(100, from.meter + 2);
@@ -418,19 +458,24 @@ export class Actor {
       this.vx = dir * 40;
       return;
     }
+    // el malabar: lo agarran en el aire mientras cae; pega menos y lo vuelve a subir
+    const malabar = this.st === 'fall';
+    if (malabar) this.malabares++;
     this.hitTimes = this.hitTimes.filter((t) => now - t < 1400);
     this.hitTimes.push(now);
-    const dmg = def.dmg * (this.team === 0 && !this.human ? 0.85 : 1) * (this.w.multDaño?.(from, this) ?? 1);
+    const dmg = def.dmg * (malabar ? 0.7 : 1) * (this.team === 0 && !this.human ? 0.85 : 1) * (this.w.multDaño?.(from, this) ?? 1);
     this.hp = Math.max(0, this.hp - dmg);
     this.meter = Math.min(100, this.meter + 7);
     if (from) from.meter = Math.min(100, from.meter + 6);
-    const kd = !!def.kd || this.hitTimes.length >= 3 || this.hp <= 0;
+    const kd = malabar || !!def.kd || this.hitTimes.length >= 3 || this.hp <= 0;
     this.soltar();
     this.dropAll();
     this.left = dir > 0;
+    this.fig.destello(kd ? 90 : 60);
     this.w.onHit(from, this, dmg, kd);
     this.w.number(this.x, this.y, Math.round(dmg));
-    if (kd) this.knockdown(dir, def.push, def.launch ?? 150);
+    if (malabar) { this.w.aviso?.(this, '¡MALABAR!', 0xffe040); this.knockdown(dir, Math.max(def.push, 90), Math.max(def.launch ?? 0, 190)); }
+    else if (kd) this.knockdown(dir, def.push, def.launch ?? 190);
     else {
       this.setSt('hurt', 'fight_hit');
       this.vx = dir * def.push;
@@ -440,6 +485,7 @@ export class Actor {
 
   knockdown(dir: number, push: number, launch = 150) {
     this.hitTimes = [];
+    this.arrollados.clear();
     this.soltar();
     this.dropAll();
     this.setSt('fall', 'ko_bounce');
@@ -453,8 +499,8 @@ export class Actor {
     this.desplazar(this.vx * dt, 0);
     this.vx *= Math.pow(0.01, dt);
     this.fig.step(dt);
-    // tambaleando (guardia rota) dura más
-    if (this.t > (this.fig.anim.name === 'stagger' ? 0.85 : 0.32)) this.setSt('idle', 'idle');
+    // tambaleando (guardia rota) dura más; del segundo golpe seguido en adelante, un pelito más (que el combo llegue entero)
+    if (this.t > (this.fig.anim.name === 'stagger' ? 0.85 : this.hitTimes.length >= 2 ? 0.44 : 0.36)) this.setSt('idle', 'idle');
   }
 
   /** ¿El kit trae esta animación para este atleta? */
@@ -650,10 +696,35 @@ export class Actor {
 
   private falling(dt: number) {
     this.physics(dt);
-    this.vx *= Math.pow(0.4, dt);
+    // frena poco en el aire: el que cae sale volando lejos
+    this.vx *= Math.pow(0.5, dt);
     this.fig.step(dt * 0.9);
+    // sale disparado contra el borde de la pantalla: rebota de vuelta (lo del Kunio contra la pared)
+    const xmin = this.w.limites?.xmin ?? XMIN, xmax = this.w.limites?.xmax ?? XMAX;
+    if (this.bounces === 0 && Math.abs(this.vx) > 100 && ((this.x <= xmin && this.vx < 0) || (this.x >= xmax && this.vx > 0))) {
+      this.vx = -this.vx * 0.55;
+      this.vz = Math.max(this.vz, 130);
+      this.left = !this.left;
+      this.w.spark(this.x, this.y, Math.max(12, this.z + 20), false);
+      this.w.sfx('golpe', 0.3);
+      this.w.shake(90, 0.004);
+    }
+    // el del Instituto que sale volando se lleva por delante a los suyos que estén en el camino (el boliche del Kunio)
+    if (this.team === 1 && this.bounces === 0 && Math.abs(this.vx) > 120 && this.z < 44) {
+      for (const v of this.w.actors) {
+        if (v === this || v.team !== this.team || this.arrollados.has(v) || !v.canBeHit() || v.st === 'fall') continue;
+        if (Math.abs(v.y - this.y) > 12 || Math.abs(v.x - this.x) > 18) continue;
+        this.arrollados.add(v);
+        const d = Math.sign(this.vx) || 1;
+        v.takeHit(null, { dmg: 6, kd: true, push: 130, launch: 190 }, d);
+        this.w.spark(v.x, v.y, 26, false);
+        this.w.aviso?.(v, '¡ARROLLADO!', 0xffb040);
+        this.vx *= 0.6;
+      }
+    }
     if (this.grounded && this.vz <= 0 && this.t > 0.05) {
       this.w.dust(this.x, this.y);
+      this.fig.aplastar(this.bounces === 0);
       if (this.bounces === 0) {
         this.bounces++;
         this.vz = 70;
@@ -675,6 +746,7 @@ export class Actor {
   private ko() {
     this.st = 'ko';
     this.t = 0;
+    this.malabares = 0;
     this.w.onKO(this);
   }
 
@@ -700,6 +772,7 @@ export class Actor {
     this.fig.step(dt);
     if (this.fig.anim.done) {
       this.invul = 0.7;
+      this.malabares = 0;
       if (this.hp < this.maxHp * 0.3 && Math.random() < 0.45) this.setSt('dizzy', 'dizzy');
       else this.setSt('idle', 'idle');
     }
@@ -816,6 +889,7 @@ export class Actor {
       this.w.number(this.x, this.y, 10);
       this.w.dust(this.x, this.y);
       this.w.shake(200, 0.012);
+      this.fig.aplastar(true);
       this.w.sfx(this.fig.celda > 48 ? 'jefe_pisoton' : 'critico', 0.5);
       this.z = this.base; this.vz = 0; this.vx = 0;
       this.st = 'down';

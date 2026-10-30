@@ -536,7 +536,7 @@ export class Azoteas extends EventScene {
     this.cameras.main.shake(120, 0.005);
     this.sound.play('golpe', { volume: this.cur.c.human ? 0.45 : 0.2, rate: 0.7 });
     if (c.tipo === 'balcon') {
-      fig.set('land', true);
+      fig.set('land', true).aplastar();
       for (let i = 0; i < 6; i++) efecto(this, 'petalo_buganvilla', this.x - 8 + Math.random() * 16, this.y - 10 - Math.random() * 10, { depth: 6000 });
       this.aviso('¡SE QUEDÓ EN EL BALCÓN DE LAS BUGANVILLAS!', 0xf070b0);
     } else if (c.tipo === 'carrito') {

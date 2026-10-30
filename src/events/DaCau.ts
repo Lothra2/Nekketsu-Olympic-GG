@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { Figura } from '../core/figura';
 import { ajustes } from '../core/nivel';
-import { efecto } from '../core/fx';
+import { efecto, destellar } from '../core/fx';
 import { chip } from '../core/music';
 import { txt, flash } from '../core/ui';
 import { rotular } from '../core/input';
@@ -329,6 +329,7 @@ export class DaCau extends EventScene {
       this.lanzar(this.hueco(team), 0, 0.4);
       c.fuego = true;
       this.letrero(p, '¡CHILENA NEKKETSU!', 0xff8020);
+      destellar(c.spr, 140, 0xffa040);
       efecto(this, 'aura_nekketsu', p.x, PISO + FILA[p.fila], { depth: PISO + FILA[p.fila] - 0.1 });
       if (team === 0) void this.banner('¡NEKKETSU!', 'fuente_titulo', 2, 500, 110);
       this.shake(240, 0.012);
@@ -343,6 +344,8 @@ export class DaCau extends EventScene {
       if (c.z < RED_H + 8) c.vz += 40;
       this.letrero(p, '¡CHILENA!', 0xffe040);
       this.shake(120, 0.006);
+      destellar(c.spr, 90);
+      p.fig.destello(60, 0xffe040);
       if (p.c.human) this.chilenas++;
     } else if (quiere === 'pase') {
       const comp = this.pat.find((o) => o !== p && o.c.team === team);
@@ -374,7 +377,7 @@ export class DaCau extends EventScene {
       // mal tocada: corta y baja, a la red o afuera
       if (malo) { if (Math.random() < 0.6) { tx = RED_X + dir * 20; top = 26 + Math.random() * 10; } else tx = team === 0 ? 640 : 0; }
       this.lanzar(tx, top);
-      if (perfecto && p.c.human) this.letrero(p, '¡PERFECTO!', 0x8ae08a);
+      if (perfecto && p.c.human) { this.letrero(p, '¡PERFECTO!', 0x8ae08a); p.fig.destello(60, 0xffe040); }
       if (p.c.human && !malo) this.pasadas++;
     }
     c.ultimo = p;
@@ -486,11 +489,11 @@ export class DaCau extends EventScene {
       q.x = Phaser.Math.Clamp(q.x, lim[0], lim[1]);
       if (mx) q.fig.left = mx < 0;
       else if (q.golpeT <= 0) q.fig.left = q.c.team === 1;
-      if (salta && q.st === 'piso' && q.golpeT <= 0) { q.st = 'aire'; q.vz = 250; q.fig.set('jump_rise', true); }
+      if (salta && q.st === 'piso' && q.golpeT <= 0) { q.st = 'aire'; q.vz = 250; q.fig.set('jump_rise', true).estirar(); }
       if (q.st === 'aire') {
         q.vz -= 700 * dt;
         q.z += q.vz * dt;
-        if (q.z <= 0) { q.z = 0; q.vz = 0; q.st = 'piso'; q.fig.set('land', true); }
+        if (q.z <= 0) { q.z = 0; q.vz = 0; q.st = 'piso'; q.fig.set('land', true).aplastar(); }
         else if (q.golpeT <= 0 && q.vz < 0 && q.fig.anim.name !== 'jump_fall') q.fig.set('jump_fall');
       }
       // la animación: caminar, correr o quieto, cuando no está pegando ni celebrando (moverse corta la celebración)

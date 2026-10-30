@@ -195,7 +195,7 @@ export class Vallas extends EventScene {
     if (r.st === 'air') {
       r.vz -= 900 * dt;
       r.z += r.vz * dt;
-      if (r.z <= 0) { r.z = 0; r.vz = 0; r.st = 'run'; r.fig.set('sprint'); efecto(this, 'polvo_caer_medio', r.x, TOP + r.y); }
+      if (r.z <= 0) { r.z = 0; r.vz = 0; r.st = 'run'; r.fig.set('sprint').aplastar(); efecto(this, 'polvo_caer_medio', r.x, TOP + r.y); }
     } else if (r.st === 'start') {
       r.fig.step(dt);
       if (r.fig.anim.done) { r.st = 'run'; r.fig.set('sprint'); }

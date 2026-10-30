@@ -317,7 +317,7 @@ export class Basket extends EventScene {
     j.t -= dt;
     j.empuja = Math.max(0, j.empuja - dt);
     j.aguanta = Math.max(0, j.aguanta - dt);
-    if (j.z > 0 || j.vz) { j.vz -= 640 * dt; j.z += j.vz * dt; if (j.z <= 0) { j.z = 0; j.vz = 0; if (j.st === 'tira') j.st = 'libre'; } }
+    if (j.z > 0 || j.vz) { j.vz -= 640 * dt; j.z += j.vz * dt; if (j.z <= 0) { j.z = 0; j.vz = 0; if (j.st === 'tira') j.st = 'libre'; j.fig.aplastar(); } }
     if (j.st === 'caido') { j.fig.step(dt); if (j.t <= 0) j.st = 'libre'; return; }
     let vx = 0, vy = 0;
     if (j === this.ctrl) [vx, vy] = this.humano(j, p, dt);

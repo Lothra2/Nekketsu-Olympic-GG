@@ -313,7 +313,7 @@ export class Futbol extends EventScene {
     j.t -= dt;
     j.empuja = Math.max(0, j.empuja - dt);
     j.aguanta = Math.max(0, j.aguanta - dt);
-    if (j.z > 0 || j.vz) { j.vz -= 700 * dt; j.z += j.vz * dt; if (j.z <= 0) { j.z = 0; j.vz = 0; } }
+    if (j.z > 0 || j.vz) { j.vz -= 700 * dt; j.z += j.vz * dt; if (j.z <= 0) { j.z = 0; j.vz = 0; j.fig.aplastar(); } }
     if (j.st === 'caido' || j.st === 'tambalea') { j.fig.step(dt); if (j.t <= 0) { j.st = 'libre'; j.fig.setAngle(0); } return; }
     if (j.st === 'vuela') {
       // la estirada: va derecho a donde va a cruzar el balón, y ahí se queda

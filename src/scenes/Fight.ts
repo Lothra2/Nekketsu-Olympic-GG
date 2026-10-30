@@ -455,7 +455,7 @@ export class Fight extends Phaser.Scene implements World {
     if (from === this.player && this.data0.practica) this.golpes.push(from.fig.anim.name);
     this.sfx(kd ? 'critico' : 'golpe', kd ? 0.55 : 0.45);
     this.sfx(v.team === 0 ? 'jugador_dolor' : 'enemigo_dolor', 0.25);
-    this.hitstop(kd ? 0.09 : 0.05);
+    this.hitstop(kd ? 0.11 : 0.06);
     if (kd) this.shake(110, 0.006);
     if (kd && v.team === 1 && this.thorFan?.visible && Math.random() < 0.5) { this.thorFan.set('bark', true); this.sfx('ladrido', 0.35); }
     // los golpes seguidos de la persona: el contador y, cada tanto, la onomatopeya

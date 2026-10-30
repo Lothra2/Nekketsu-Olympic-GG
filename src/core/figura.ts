@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { AnimPlayer } from './anim';
 import { kit, texKey, frameName, type Row, type Evento } from './kit';
+import { destellar } from './fx';
 
 /**
  * Un atleta (o Thor) en pantalla: sprite con su pivote, su animación del kit y la fila que mira.
@@ -102,6 +103,31 @@ export class Figura extends Phaser.GameObjects.Sprite {
   cuadroDe(tipo: Evento['tipo']): number {
     return this.anim.data?.eventos?.find((e) => e.tipo === tipo)?.cuadro ?? -1;
   }
+
+  /** El destello del golpe: entero de un color un instante (blanco al recibir, amarillo en lo perfecto). */
+  destello(ms = 70, color = 0xffffff): this {
+    destellar(this, ms, color);
+    return this;
+  }
+
+  private estrujon: Phaser.Tweens.Tween | null = null;
+
+  /**
+   * El estrujón de los dibujos animados: aplastado al caer (`k` positivo: más ancho y más bajo) o estirado al saltar
+   * (`k` negativo), y vuelve a su forma en `ms`. El pivote está en los pies, así que el aplastado se ve pegado al piso.
+   */
+  estrujar(k = 0.18, ms = 130): this {
+    this.estrujon?.remove();
+    this.setScale(1 + k, 1 - k);
+    this.estrujon = this.scene.tweens.add({ targets: this, scaleX: 1, scaleY: 1, duration: ms, ease: 'Quad.out', onComplete: () => { this.estrujon = null; } });
+    return this;
+  }
+
+  /** Aplastado contra el piso al aterrizar. */
+  aplastar(fuerte = false): this { return this.estrujar(fuerte ? 0.26 : 0.16, fuerte ? 170 : 120); }
+
+  /** Estirado hacia arriba al despegar. */
+  estirar(): this { return this.estrujar(-0.12, 140); }
 
   /** Un punto de los datos por cuadro, ya espejado si mira a la izquierda. */
   mirror([x, y]: [number, number]): [number, number] {

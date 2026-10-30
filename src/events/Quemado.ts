@@ -257,7 +257,7 @@ export class Quemado extends EventScene {
   private jugador(j: Jug, dt: number, p: Pad) {
     j.catchCool = Math.max(0, j.catchCool - dt);
     // el salto
-    if (j.z > 0 || j.vz) { j.vz -= G * dt; j.z += j.vz * dt; if (j.z <= 0) { j.z = 0; j.vz = 0; } }
+    if (j.z > 0 || j.vz) { j.vz -= G * dt; j.z += j.vz * dt; if (j.z <= 0) { j.z = 0; j.vz = 0; j.fig.aplastar(); } }
     if (j.salto) {
       // el salto de bolita: la altura es la del salto de siempre (generosa para esquivar) y la pose va con el vuelo,
       // del despegue al aterriza de la animación

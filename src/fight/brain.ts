@@ -32,7 +32,8 @@ export class Brain {
     if (this.presses.length && this.pressT <= 0) {
       const b = this.presses.shift()!;
       out[b] = true;
-      this.pressT = 0.17 + Math.random() * 0.08;
+      // en los niveles fáciles los botones del combo van más espaciados: la niña alcanza a cubrirse o a responder
+      this.pressT = (0.17 + Math.random() * 0.08) / Math.max(0.5, this.level);
     }
     if (me.st === 'dizzy') { out.punch = Math.random() < 0.3; return out; }
     // agarrado: forcejea; agarrando: rodillazos y a veces lo bota
@@ -45,6 +46,12 @@ export class Brain {
     // cubriéndose mientras le tiran golpes
     this.guardT -= dt;
     if (this.guardT > 0 && (me.st === 'guard' || me.controllable)) return { ...NOTHING, guard: true };
+    // en el aire, con el rival debajo: la patada
+    if (me.st === 'jump') {
+      const e = me.w.actors.find((a) => a.team !== me.team && a.alive && Math.abs(a.x - me.x) < 46 && Math.abs(a.y - me.y) < 10 && (a.x - me.x) * me.dir > 0);
+      if (e && Math.random() < 0.5) out.kick = true;
+      return out;
+    }
     if (!me.controllable && me.st !== 'carry' && me.st !== 'attack') return out;
     if (this.think > 0) return out;
     this.think = 0.12 + Math.random() * 0.12 / this.level;
@@ -140,6 +147,9 @@ export class Brain {
     } else if (plan.run && aligned && Math.abs(dx) < 70 && Math.random() < 0.5) {
       out.punch = Math.random() < 0.5;
       out.kick = !out.punch;
+    } else if (me.st === 'run' && aligned && Math.abs(dx) > 70 && Math.abs(dx) < 120 && Math.random() < 0.3 * this.level) {
+      // viene corriendo desde lejos: salta a la patada voladora
+      out.jump = true;
     }
     return { ...out, ...this.plan, punch: out.punch, kick: out.kick };
   }
