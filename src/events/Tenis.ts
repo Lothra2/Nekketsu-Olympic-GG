@@ -225,14 +225,31 @@ export class Tenis extends EventScene {
     this.add.image(-330, -34, 'esc_dalat_lejos').setOrigin(0).setDepth(-29);
     // la reja con todo lo suyo, tres veces para cubrir los celulares anchos, al tamaño del fondo de la cancha
     for (const x of [-400, 80, 560]) this.add.image(x, 114, 'esc_dalat_cerca_0').setOrigin(0, 1).setScale(0.6).setDepth(-28);
-    // los recortes del escenario de lado que se usan sueltos por la cancha
-    const t = this.textures.get('esc_dalat_cerca_0');
-    const cortes: Record<string, [number, number, number, number]> = {
-      pino_a: [40, 0, 145, 205], pino_b: [600, 0, 150, 205], pino_gris: [188, 88, 84, 118], pino_gris2: [323, 94, 84, 112],
-      silla_juez: [403, 208, 36, 82], flores_a: [148, 256, 54, 28], flores_b: [222, 256, 42, 28], flores_c: [343, 256, 54, 28],
-      banco: [272, 248, 60, 40], farol: [714, 168, 24, 120], bicis: [742, 244, 56, 46], gente: [16, 248, 34, 40],
+    // los pinos del escenario de lado, sueltos: solo las filas de arriba de la reja (que es transparente alrededor de
+    // las copas) y, donde el grupo toca el borde del dibujo, el canto desvanecido como niebla, sin cortes rectos
+    const src = this.textures.get('esc_dalat_cerca_0').getSourceImage() as HTMLImageElement;
+    const pino = (key: string, x: number, y: number, w: number, h: number, fundir: 'izq' | 'der' | null) => {
+      if (this.textures.exists(key)) return;
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      const ctx = c.getContext('2d')!;
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(src, x, y, w, h, 0, 0, w, h);
+      if (fundir) {
+        const img = ctx.getImageData(0, 0, w, h), d = img.data, F = 18;
+        for (let py = 0; py < h; py++) for (let px = 0; px < w; px++) {
+          const k = fundir === 'izq' ? px / F : (w - 1 - px) / F;
+          if (k < 1) d[(py * w + px) * 4 + 3] = Math.round(d[(py * w + px) * 4 + 3] * Math.max(0, k));
+        }
+        ctx.putImageData(img, 0, 0);
+      }
+      this.textures.addCanvas(key, c);
     };
-    for (const [n, [x, y, w, h]] of Object.entries(cortes)) if (!t.has(n)) t.add(n, 0, x, y, w, h);
+    pino('pino_izq', 0, 0, 182, 204, 'izq');
+    pino('pino_der', 606, 0, 194, 204, 'der');
+    pino('pino_gris', 188, 86, 84, 118, null);
+    pino('pino_gris2', 323, 92, 83, 112, null);
+    pino('pino_par', 442, 94, 157, 110, null);
   }
 
   /** El fondo pintado por código, si el arte de Đà Lạt no llegó: cielo, montañas, lago, pinos y la grada del fondo. */
@@ -268,7 +285,7 @@ export class Tenis extends EventScene {
    * hortensias, la silla del juez, el banco, el farol, las bicis) cada uno a su profundidad.
    */
   private adornos(g: Phaser.GameObjects.Graphics, R: (n: number) => number) {
-    const arte = this.textures.exists('esc_dalat_cerca_0') && this.textures.get('esc_dalat_cerca_0').has('pino_a');
+    const arte = this.textures.exists('pino_izq');
     const vallas: [number, number][] = [[0xe02020, 0xffffff], [0x1040a0, 0xffe040], [0xf2c230, 0x102040], [0x208040, 0xffffff]];
     const ropa = [0xe8c070, 0xd05050, 0x5080d0, 0xf0f0f0, 0x60b060, 0xf0a040, 0x9060c0];
     const P = (x: number, d: number, z = 0) => { const [sx, sy] = this.pant(x, d, z); return { x: sx, y: sy }; };
@@ -302,32 +319,60 @@ export class Tenis extends EventScene {
       g.fillStyle(0x3a4050).fillPoints([P(xg, 18), P(xg + lado * 66, 18), P(xg + lado * 66, 18, 30), P(xg, 18, 8)], true);
       g.fillStyle(0x3a4050).fillPoints([P(xg, 382), P(xg + lado * 66, 382), P(xg + lado * 66, 382, 30), P(xg, 382, 8)], true);
     }
-    if (!arte) {
-      const [jx, jy, js] = this.pant(ANCHO / 2 + 46, RED_D);
-      g.fillStyle(0x4a3524).fillRect(jx - 6 * js, jy - 46 * js, 3 * js, 46 * js).fillRect(jx + 3 * js, jy - 46 * js, 3 * js, 46 * js);
-      g.fillStyle(0xf4f4f4).fillRect(jx - 9 * js, jy - 54 * js, 18 * js, 7 * js);
-      g.fillStyle(0x203060).fillRect(jx - 4 * js, jy - 62 * js, 8 * js, 9 * js);
-      g.fillStyle(0xf0c8a0).fillRect(jx - 3 * js, jy - 68 * js, 6 * js, 6 * js);
-      for (const lado of [-1, 1]) for (let k = 0; k < 5; k++) {
-        const [hx, hy, hs] = this.pant(lado * (ANCHO / 2 + 80), 40 + k * 76);
-        g.fillStyle(0x3f6f3f).fillCircle(hx, hy - 6 * hs, 10 * hs);
-        g.fillStyle(k % 2 ? 0xe890c0 : 0x90a8f0).fillCircle(hx - 4 * hs, hy - 9 * hs, 4 * hs).fillCircle(hx + 4 * hs, hy - 8 * hs, 4 * hs).fillCircle(hx, hy - 12 * hs, 4 * hs);
-      }
-      return;
+    // la silla del juez a la derecha de la red: la escalera de madera, el asiento blanco y el juez con su gorra
+    const [jx, jy, js] = this.pant(ANCHO / 2 + 46, RED_D);
+    g.fillStyle(0x000000, 0.18).fillEllipse(jx, jy, 26 * js, 6 * js);
+    g.fillStyle(0x6a4a30).fillRect(jx - 7 * js, jy - 48 * js, 3 * js, 48 * js).fillRect(jx + 4 * js, jy - 48 * js, 3 * js, 48 * js);
+    for (let k = 1; k < 5; k++) g.fillStyle(0x8a6a48).fillRect(jx - 6 * js, jy - k * 10 * js, 12 * js, 2 * js);
+    g.fillStyle(0xf4f4f4).fillRect(jx - 10 * js, jy - 56 * js, 20 * js, 8 * js).fillRect(jx - 10 * js, jy - 72 * js, 3 * js, 16 * js).fillRect(jx + 7 * js, jy - 72 * js, 3 * js, 16 * js);
+    g.fillStyle(0x203060).fillRect(jx - 4 * js, jy - 64 * js, 8 * js, 9 * js);
+    g.fillStyle(0xf0c8a0).fillRect(jx - 3 * js, jy - 70 * js, 6 * js, 6 * js);
+    g.fillStyle(0xffffff).fillRect(jx - 4 * js, jy - 72 * js, 8 * js, 3 * js);
+    g.fillStyle(0xe8e8f0).fillEllipse(jx, jy - 86 * js, 30 * js, 8 * js);
+    g.fillStyle(0x8a8aa0).fillRect(jx - 1 * js, jy - 86 * js, 2 * js, 14 * js);
+    // los bancos de los equipos a la izquierda de la red, con toalla y termo
+    for (const dd of [RED_D - 62, RED_D + 62]) {
+      const [bx, by, bs] = this.pant(-ANCHO / 2 - 44, dd);
+      g.fillStyle(0x000000, 0.15).fillEllipse(bx, by, 34 * bs, 5 * bs);
+      g.fillStyle(0x6a4a30).fillRect(bx - 15 * bs, by - 9 * bs, 30 * bs, 3 * bs).fillRect(bx - 13 * bs, by - 6 * bs, 3 * bs, 6 * bs).fillRect(bx + 10 * bs, by - 6 * bs, 3 * bs, 6 * bs);
+      g.fillStyle(0x8a6a48).fillRect(bx - 15 * bs, by - 16 * bs, 30 * bs, 2 * bs).fillRect(bx - 14 * bs, by - 14 * bs, 2 * bs, 5 * bs).fillRect(bx + 12 * bs, by - 14 * bs, 2 * bs, 5 * bs);
+      g.fillStyle(dd < RED_D ? 0x5a9af0 : 0xf05a5a).fillRect(bx - 11 * bs, by - 12 * bs, 9 * bs, 4 * bs);
+      g.fillStyle(0xf0f0f0).fillRect(bx + 2 * bs, by - 14 * bs, 5 * bs, 6 * bs);
+      g.fillStyle(0xe03030).fillRect(bx + 2 * bs, by - 14 * bs, 5 * bs, 2 * bs);
     }
-    // los recortes del arte, cada uno parado en su punto de la cancha y ordenado por profundidad
-    const pon = (cuadro: string, x: number, d: number, k = 1, flip = false) => {
+    // las macetas blancas con hortensias (las flores de Đà Lạt) entre las vallas y las gradas
+    for (const lado of [-1, 1]) for (let k = 0; k < 5; k++) {
+      const [hx, hy, hs] = this.pant(lado * (ANCHO / 2 + 80), 46 + k * 76);
+      g.fillStyle(0x000000, 0.15).fillEllipse(hx, hy, 24 * hs, 5 * hs);
+      g.fillStyle(0xe8e4dc).fillRect(hx - 9 * hs, hy - 7 * hs, 18 * hs, 7 * hs);
+      g.fillStyle(0xc8c4bc).fillRect(hx - 9 * hs, hy - 2 * hs, 18 * hs, 2 * hs);
+      const flor = k % 2 ? [0xd870b0, 0xf0a0d0] : [0x7088e0, 0xa0b8f8];
+      g.fillStyle(0x3f7a3f).fillCircle(hx - 5 * hs, hy - 10 * hs, 5 * hs).fillCircle(hx + 5 * hs, hy - 10 * hs, 5 * hs).fillCircle(hx, hy - 13 * hs, 6 * hs);
+      g.fillStyle(flor[0]).fillCircle(hx - 5 * hs, hy - 12 * hs, 3.5 * hs).fillCircle(hx + 5 * hs, hy - 11 * hs, 3.5 * hs).fillCircle(hx, hy - 16 * hs, 4 * hs);
+      g.fillStyle(flor[1]).fillCircle(hx - 6 * hs, hy - 13 * hs, 1.5 * hs).fillCircle(hx + 4 * hs, hy - 12 * hs, 1.5 * hs).fillCircle(hx - 1 * hs, hy - 17 * hs, 1.5 * hs);
+    }
+    // los faroles en las cuatro esquinas
+    for (const [fx, fd] of [[-ANCHO / 2 - 82, 8], [ANCHO / 2 + 82, 8], [-ANCHO / 2 - 82, 392], [ANCHO / 2 + 82, 392]]) {
+      const [px, py, ps] = this.pant(fx, fd);
+      g.fillStyle(0x2a2a34).fillRect(px - 1.5 * ps, py - 64 * ps, 3 * ps, 64 * ps).fillRect(px - 5 * ps, py - 2 * ps, 10 * ps, 2 * ps);
+      g.fillStyle(0x3a3a46).fillRect(px - 6 * ps, py - 72 * ps, 12 * ps, 3 * ps);
+      g.fillStyle(0xfff0b0).fillRect(px - 4 * ps, py - 70 * ps, 8 * ps, 6 * ps);
+    }
+    // los recogepelotas, uno en cada esquina del fondo, agachados
+    for (const lado of [-1, 1]) {
+      const [kx, ky, ks] = this.pant(lado * (ANCHO / 2 + 30), LARGO + 20);
+      g.fillStyle(0xe03030).fillRect(kx - 4 * ks, ky - 12 * ks, 8 * ks, 8 * ks);
+      g.fillStyle(0xf0c8a0).fillRect(kx - 3 * ks, ky - 17 * ks, 6 * ks, 5 * ks);
+      g.fillStyle(0x202020).fillRect(kx - 3 * ks, ky - 18 * ks, 6 * ks, 2 * ks);
+    }
+    if (!arte) return;
+    // los pinos del arte de Đà Lạt a los costados, detrás de las gradas, más grandes cerca y ordenados por profundidad
+    const pon = (key: string, x: number, d: number, k = 1, flip = false) => {
       const [sx, sy, s] = this.pant(x, d);
-      return this.add.image(Math.round(sx), Math.round(sy), 'esc_dalat_cerca_0', cuadro).setOrigin(0.5, 1).setScale(s * k).setFlipX(flip).setDepth(sy);
+      return this.add.image(Math.round(sx), Math.round(sy), key).setOrigin(0.5, 1).setScale(s * k).setFlipX(flip).setDepth(sy);
     };
-    pon('pino_a', -ANCHO / 2 - 215, 70, 0.9); pon('pino_gris', -ANCHO / 2 - 230, 170, 0.9); pon('pino_b', -ANCHO / 2 - 225, 290, 0.9); pon('pino_gris2', -ANCHO / 2 - 210, 395, 0.9);
-    pon('pino_b', ANCHO / 2 + 215, 60, 0.9, true); pon('pino_gris2', ANCHO / 2 + 235, 180, 0.9); pon('pino_a', ANCHO / 2 + 225, 300, 0.9, true); pon('pino_gris', ANCHO / 2 + 210, 400, 0.9);
-    pon('silla_juez', ANCHO / 2 + 44, RED_D, 1.1);
-    pon('banco', -ANCHO / 2 - 46, RED_D - 60, 1.05); pon('gente', -ANCHO / 2 - 44, RED_D + 70, 1.05);
-    pon('bicis', ANCHO / 2 + 70, 2, 1);
-    pon('farol', -ANCHO / 2 - 82, 6, 1.1); pon('farol', ANCHO / 2 + 82, 390, 1.1);
-    const flores = ['flores_a', 'flores_b', 'flores_c'];
-    for (const lado of [-1, 1]) for (let k = 0; k < 5; k++) pon(flores[(k + (lado > 0 ? 1 : 0)) % 3], lado * (ANCHO / 2 + 80), 46 + k * 76, 1.1, lado > 0);
+    pon('pino_izq', -ANCHO / 2 - 235, 80, 0.95); pon('pino_gris', -ANCHO / 2 - 225, 205, 0.95); pon('pino_par', -ANCHO / 2 - 245, 335, 0.95);
+    pon('pino_der', ANCHO / 2 + 235, 70, 0.95); pon('pino_gris2', ANCHO / 2 + 228, 195, 0.95); pon('pino_par', ANCHO / 2 + 245, 330, 0.95, true);
   }
 
   // ------------------------------------------------------------------ la pelota
