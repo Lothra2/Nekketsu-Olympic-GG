@@ -9,6 +9,7 @@ import { rotular } from '../core/input';
 import { Painter, hex } from '../gfx/paint';
 import { lado } from '../core/equipos';
 import { EventScene, prueba, type Competidor } from './base';
+import { queueEscenario } from './escenario';
 import type { Paso } from '../core/coach';
 
 /*
@@ -87,6 +88,8 @@ export class Tenis extends EventScene {
   private avisoDoble = 0;
 
   constructor() { super('Tenis'); }
+
+  preload() { super.preload(); queueEscenario(this, 'dalat'); }
 
   create() {
     this.pat = [];
@@ -175,45 +178,10 @@ export class Tenis extends EventScene {
   private cancha() {
     const g = this.add.graphics().setDepth(-20);
     const R = (seed: number) => { const x = Math.sin(seed * 12.9898) * 43758.5453; return x - Math.floor(x); };
-    // el cielo, del azul de la mañana a la niebla
-    g.fillGradientStyle(0x6fa6d6, 0x6fa6d6, 0xdfe9ef, 0xdfe9ef, 1).fillRect(-80, 0, 800, 72);
-    // el sol pálido y dos nubes
-    g.fillStyle(0xfff4d0, 0.8).fillCircle(540, 22, 11);
-    for (const [cx, cy, w] of [[120, 28, 70], [430, 16, 50], [690, 30, 60]]) { g.fillStyle(0xffffff, 0.75).fillEllipse(cx, cy, w, 12).fillEllipse(cx - w / 4, cy + 3, w / 2, 10).fillEllipse(cx + w / 4, cy + 4, w / 2, 9); }
-    // las montañas lejanas, dos cordones
-    g.fillStyle(0x8fa9c4, 1);
-    for (let i = -1; i < 9; i++) g.fillTriangle(-80 + i * 100, 72, -80 + i * 100 + 55, 38 + (i % 3) * 6, -80 + i * 100 + 110, 72);
-    g.fillStyle(0x5f7f9a, 1);
-    for (let i = -1; i < 10; i++) g.fillTriangle(-110 + i * 90, 76, -110 + i * 90 + 45, 50 + ((i * 7) % 4) * 4, -110 + i * 90 + 90, 76);
-    // el lago Xuân Hương, con los reflejos de la luz
-    g.fillStyle(0x7fb4cc, 1).fillRect(-80, 70, 800, 16);
-    for (let i = 0; i < 40; i++) g.fillStyle(0xd8f0f8, 0.6).fillRect(-80 + i * 20 + (i % 3) * 5, 73 + (i % 4) * 3, 8 + (i % 3) * 3, 1);
-    // la orilla con los pinos, dos filas: la de atrás más chica y gris, la de adelante verde oscuro
-    g.fillStyle(0x3a5a40, 1).fillRect(-80, 84, 800, 6);
-    for (let i = 0; i < 40; i++) { const x = -78 + i * 21, h = 14 + Math.floor(R(i) * 6); g.fillStyle(0x4a6a52).fillTriangle(x, 86 - h, x - 6, 86, x + 6, 86); }
-    for (let i = 0; i < 28; i++) {
-      const x = -72 + i * 30 + Math.floor(R(i + 50) * 8), h = 26 + Math.floor(R(i + 9) * 12), base = 96;
-      g.fillStyle(i % 2 ? 0x2f5a3a : 0x3a6a44).fillTriangle(x, base - h, x - 10, base, x + 10, base).fillTriangle(x, base - h - 9, x - 7, base - h + 10, x + 7, base - h + 10);
-      g.fillStyle(0x4a3524).fillRect(x - 1, base - 3, 3, 5);
-    }
-    // la grada del fondo: techo, dos pisos de asientos con la gente, y la baranda
-    g.fillStyle(0x2a3440).fillRect(-80, 92, 800, 4);
-    g.fillStyle(0x3b4a5a).fillRect(-80, 96, 800, 20);
-    const ropa = [0xe8c070, 0xd05050, 0x5080d0, 0xf0f0f0, 0x60b060, 0xf0a040, 0x9060c0];
-    for (let fila = 0; fila < 2; fila++) for (let i = 0; i < 68; i++) {
-      const x = -78 + i * 12 + (fila ? 6 : 0), y = 98 + fila * 9;
-      if (R(i * 3 + fila) < 0.12) continue;
-      g.fillStyle(ropa[(i + fila * 3) % ropa.length]).fillRect(x, y + 3, 5, 5);
-      g.fillStyle(R(i + fila * 7) < 0.5 ? 0x8a5a3a : 0xf0c8a0).fillRect(x + 1, y, 3, 3);
-      // algunos con banderitas
-      if (R(i * 5 + fila) < 0.1) g.fillStyle(R(i) < 0.5 ? 0xda251d : 0xffcd00).fillRect(x + 5, y - 2, 3, 3);
-    }
-    g.fillStyle(0x1e2630).fillRect(-80, 116, 800, 3);
-    // las vallas de publicidad del fondo, bajo la grada
-    const vallas: [number, number, number][] = [[0xe02020, 0xffffff, 0], [0x1040a0, 0xffe040, 1], [0xf2c230, 0x102040, 2], [0x208040, 0xffffff, 3]];
-    for (let i = 0; i < 10; i++) { const [fondo, raya] = vallas[i % 4]; const x = -80 + i * 80; g.fillStyle(fondo).fillRect(x, 119, 78, 9); g.fillStyle(raya, 0.9).fillRect(x + 10, 122, 20 + (i % 3) * 8, 3); }
+    const arte = ['cielo', 'lejos', 'cerca_0'].every((n) => this.textures.exists(`esc_dalat_${n}`));
+    if (arte) this.fondoArte(); else this.fondoCodigo(g, R);
     // el césped alrededor (más oscuro lejos) y la tierra de la cancha
-    g.fillGradientStyle(0x3a703a, 0x3a703a, 0x4a8a44, 0x4a8a44, 1).fillRect(-80, 128, 800, 232);
+    g.fillGradientStyle(0x3a703a, 0x3a703a, 0x4a8a44, 0x4a8a44, 1).fillRect(-80, 114, 800, 246);
     const poly = (x0: number, d0: number, x1: number, d1: number, color: number, alpha = 1) => {
       const a = this.pant(x0, d1), b = this.pant(x1, d1), c = this.pant(x1, d0), d = this.pant(x0, d0);
       g.fillStyle(color, alpha).fillPoints([{ x: a[0], y: a[1] }, { x: b[0], y: b[1] }, { x: c[0], y: c[1] }, { x: d[0], y: d[1] }], true);
@@ -232,39 +200,6 @@ export class Tenis extends EventScene {
     for (const x of [-ANCHO / 2, ANCHO / 2, -ANCHO / 2 + 26, ANCHO / 2 - 26]) linea(x, 0, x, LARGO);
     for (const d of [RED_D - SAQUE, RED_D + SAQUE]) linea(-ANCHO / 2 + 26, d, ANCHO / 2 - 26, d);
     linea(0, RED_D - SAQUE, 0, RED_D + SAQUE);
-    // las vallas de publicidad a los costados, en perspectiva, y las hortensias detrás
-    for (const lado of [-1, 1]) {
-      for (let k = 0; k < 6; k++) {
-        const d0 = 20 + k * 60, d1 = d0 + 52, x = lado * (ANCHO / 2 + 78);
-        const [fondo, raya] = vallas[(k + (lado > 0 ? 2 : 0)) % 4];
-        const a = this.pant(x, d0), b = this.pant(x, d1);
-        g.fillStyle(fondo).fillPoints([{ x: a[0], y: a[1] }, { x: b[0], y: b[1] }, { x: b[0], y: b[1] - 11 * b[2] }, { x: a[0], y: a[1] - 11 * a[2] }], true);
-        g.fillStyle(raya, 0.9).fillPoints([{ x: a[0] + (b[0] - a[0]) * 0.25, y: a[1] - 4 * a[2] }, { x: a[0] + (b[0] - a[0]) * 0.75, y: a[1] - 4 * a[2] + (b[1] - a[1]) * 0.5 }, { x: a[0] + (b[0] - a[0]) * 0.75, y: a[1] - 7 * a[2] + (b[1] - a[1]) * 0.5 }, { x: a[0] + (b[0] - a[0]) * 0.25, y: a[1] - 7 * a[2] }], true);
-        // la hortensia detrás de cada valla (las flores de Đà Lạt)
-        const [hx, hy, hs] = this.pant(x + lado * 22, d0 + 26);
-        g.fillStyle(0x3f6f3f).fillCircle(hx, hy - 6 * hs, 10 * hs);
-        g.fillStyle(k % 2 ? 0xe890c0 : 0x90a8f0).fillCircle(hx - 4 * hs, hy - 9 * hs, 4 * hs).fillCircle(hx + 4 * hs, hy - 8 * hs, 4 * hs).fillCircle(hx, hy - 12 * hs, 4 * hs);
-      }
-    }
-    // la silla del juez (derecha de la red) con el juez, y los bancos con toallas y termo a la izquierda
-    const [jx, jy, js] = this.pant(ANCHO / 2 + 46, RED_D);
-    g.fillStyle(0x4a3524).fillRect(jx - 6 * js, jy - 46 * js, 3 * js, 46 * js).fillRect(jx + 3 * js, jy - 46 * js, 3 * js, 46 * js).fillRect(jx - 8 * js, jy - 48 * js, 16 * js, 4 * js);
-    g.fillStyle(0xf4f4f4).fillRect(jx - 9 * js, jy - 54 * js, 18 * js, 7 * js);
-    g.fillStyle(0x203060).fillRect(jx - 4 * js, jy - 62 * js, 8 * js, 9 * js);
-    g.fillStyle(0xf0c8a0).fillRect(jx - 3 * js, jy - 68 * js, 6 * js, 6 * js);
-    g.fillStyle(0xffffff).fillRect(jx - 4 * js, jy - 70 * js, 8 * js, 3 * js);
-    for (const dd of [RED_D - 70, RED_D + 70]) {
-      const [bx, by, bs] = this.pant(-ANCHO / 2 - 48, dd);
-      g.fillStyle(0x6a4a30).fillRect(bx - 14 * bs, by - 8 * bs, 28 * bs, 4 * bs).fillRect(bx - 12 * bs, by - 4 * bs, 3 * bs, 4 * bs).fillRect(bx + 9 * bs, by - 4 * bs, 3 * bs, 4 * bs);
-      g.fillStyle(0xf0f0f0).fillRect(bx - 10 * bs, by - 11 * bs, 8 * bs, 4 * bs);
-      g.fillStyle(0x2050c0).fillRect(bx + 2 * bs, by - 13 * bs, 5 * bs, 6 * bs);
-    }
-    // los recogepelotas, uno en cada esquina del fondo, agachados
-    for (const lado of [-1, 1]) {
-      const [kx, ky, ks] = this.pant(lado * (ANCHO / 2 + 30), LARGO + 20);
-      g.fillStyle(0xe03030).fillRect(kx - 4 * ks, ky - 12 * ks, 8 * ks, 8 * ks);
-      g.fillStyle(0xf0c8a0).fillRect(kx - 3 * ks, ky - 17 * ks, 6 * ks, 5 * ks);
-    }
     // la red: la malla entre dos palos, a la altura de la mitad de la cancha
     this.redG = this.add.graphics();
     const [lx, ly, ls] = this.pant(-ANCHO / 2 - 8, RED_D), [rx] = this.pant(ANCHO / 2 + 8, RED_D);
@@ -277,6 +212,122 @@ export class Tenis extends EventScene {
     this.redG.fillStyle(0x3a3a44).fillRect(lx - 2, ly - h - 4, 4, h + 4).fillRect(rx - 2, ly - h - 4, 4, h + 4);
     // la sombra de la red sobre la arcilla
     this.redG.fillStyle(0x000000, 0.12).fillRect(lx, ly, rx - lx, 3);
+    this.adornos(g, R);
+  }
+
+  /**
+   * El fondo con el arte de Đà Lạt de PixelForja (el escenario de lado, visto ahora desde la cancha): el cielo de la
+   * mañana, las montañas con la iglesia y el lago, y detrás de la línea de fondo la reja del club con el letrero,
+   * los pinos de verdad, la silla del juez y las hortensias, achicados por la distancia.
+   */
+  private fondoArte() {
+    this.add.image(-80, 0, 'esc_dalat_cielo').setOrigin(0).setDepth(-30).setCrop(0, 0, 800, 130);
+    this.add.image(-330, -34, 'esc_dalat_lejos').setOrigin(0).setDepth(-29);
+    // la reja con todo lo suyo, tres veces para cubrir los celulares anchos, al tamaño del fondo de la cancha
+    for (const x of [-400, 80, 560]) this.add.image(x, 114, 'esc_dalat_cerca_0').setOrigin(0, 1).setScale(0.6).setDepth(-28);
+    // los recortes del escenario de lado que se usan sueltos por la cancha
+    const t = this.textures.get('esc_dalat_cerca_0');
+    const cortes: Record<string, [number, number, number, number]> = {
+      pino_a: [40, 0, 145, 205], pino_b: [600, 0, 150, 205], pino_gris: [188, 88, 84, 118], pino_gris2: [323, 94, 84, 112],
+      silla_juez: [403, 208, 36, 82], flores_a: [148, 256, 54, 28], flores_b: [222, 256, 42, 28], flores_c: [343, 256, 54, 28],
+      banco: [272, 248, 60, 40], farol: [714, 168, 24, 120], bicis: [742, 244, 56, 46], gente: [16, 248, 34, 40],
+    };
+    for (const [n, [x, y, w, h]] of Object.entries(cortes)) if (!t.has(n)) t.add(n, 0, x, y, w, h);
+  }
+
+  /** El fondo pintado por código, si el arte de Đà Lạt no llegó: cielo, montañas, lago, pinos y la grada del fondo. */
+  private fondoCodigo(g: Phaser.GameObjects.Graphics, R: (n: number) => number) {
+    g.fillGradientStyle(0x6fa6d6, 0x6fa6d6, 0xdfe9ef, 0xdfe9ef, 1).fillRect(-80, 0, 800, 72);
+    g.fillStyle(0xfff4d0, 0.8).fillCircle(540, 22, 11);
+    g.fillStyle(0x8fa9c4, 1);
+    for (let i = -1; i < 9; i++) g.fillTriangle(-80 + i * 100, 72, -80 + i * 100 + 55, 38 + (i % 3) * 6, -80 + i * 100 + 110, 72);
+    g.fillStyle(0x5f7f9a, 1);
+    for (let i = -1; i < 10; i++) g.fillTriangle(-110 + i * 90, 76, -110 + i * 90 + 45, 50 + ((i * 7) % 4) * 4, -110 + i * 90 + 90, 76);
+    g.fillStyle(0x7fb4cc, 1).fillRect(-80, 70, 800, 16);
+    for (let i = 0; i < 40; i++) g.fillStyle(0xd8f0f8, 0.6).fillRect(-80 + i * 20 + (i % 3) * 5, 73 + (i % 4) * 3, 8 + (i % 3) * 3, 1);
+    g.fillStyle(0x3a5a40, 1).fillRect(-80, 84, 800, 6);
+    for (let i = 0; i < 28; i++) {
+      const x = -72 + i * 30 + Math.floor(R(i + 50) * 8), h = 26 + Math.floor(R(i + 9) * 12), base = 96;
+      g.fillStyle(i % 2 ? 0x2f5a3a : 0x3a6a44).fillTriangle(x, base - h, x - 10, base, x + 10, base).fillTriangle(x, base - h - 9, x - 7, base - h + 10, x + 7, base - h + 10);
+      g.fillStyle(0x4a3524).fillRect(x - 1, base - 3, 3, 5);
+    }
+    g.fillStyle(0x3b4a5a).fillRect(-80, 96, 800, 20);
+    const ropa = [0xe8c070, 0xd05050, 0x5080d0, 0xf0f0f0, 0x60b060, 0xf0a040, 0x9060c0];
+    for (let fila = 0; fila < 2; fila++) for (let i = 0; i < 68; i++) {
+      const x = -78 + i * 12 + (fila ? 6 : 0), y = 98 + fila * 9;
+      if (R(i * 3 + fila) < 0.12) continue;
+      g.fillStyle(ropa[(i + fila * 3) % ropa.length]).fillRect(x, y + 3, 5, 5);
+      g.fillStyle(R(i + fila * 7) < 0.5 ? 0x8a5a3a : 0xf0c8a0).fillRect(x + 1, y, 3, 3);
+    }
+    g.fillStyle(0x1e2630).fillRect(-80, 116, 800, 3);
+  }
+
+  /**
+   * Lo que rodea la cancha, en perspectiva: las vallas de publicidad paradas como tableros (con su cara de lado y su
+   * sombra), las gradas de tres escalones con el público a los costados, y los recortes del arte de Đà Lạt (pinos,
+   * hortensias, la silla del juez, el banco, el farol, las bicis) cada uno a su profundidad.
+   */
+  private adornos(g: Phaser.GameObjects.Graphics, R: (n: number) => number) {
+    const arte = this.textures.exists('esc_dalat_cerca_0') && this.textures.get('esc_dalat_cerca_0').has('pino_a');
+    const vallas: [number, number][] = [[0xe02020, 0xffffff], [0x1040a0, 0xffe040], [0xf2c230, 0x102040], [0x208040, 0xffffff]];
+    const ropa = [0xe8c070, 0xd05050, 0x5080d0, 0xf0f0f0, 0x60b060, 0xf0a040, 0x9060c0];
+    const P = (x: number, d: number, z = 0) => { const [sx, sy] = this.pant(x, d, z); return { x: sx, y: sy }; };
+    for (const lado of [-1, 1] as const) {
+      // las vallas, de a tramos, entre la cancha y las gradas
+      const xv = lado * (ANCHO / 2 + 58);
+      for (let k = 0; k < 5; k++) {
+        const d0 = 14 + k * 76, d1 = d0 + 66;
+        const [fondo, raya] = vallas[(k + (lado > 0 ? 2 : 0)) % 4];
+        // la sombra en el césped, hacia la cancha
+        g.fillStyle(0x000000, 0.18).fillPoints([P(xv, d0), P(xv, d1), P(xv - lado * 9, d1), P(xv - lado * 9, d0)], true);
+        // la cara de frente (mira a la cancha) y el canto de arriba
+        g.fillStyle(fondo).fillPoints([P(xv, d0), P(xv, d1), P(xv, d1, 17), P(xv, d0, 17)], true);
+        g.fillStyle(raya, 0.95).fillPoints([P(xv, d0 + 12), P(xv, d1 - 12), P(xv, d1 - 12, 10), P(xv, d0 + 12, 10)], true);
+        g.fillStyle(0xffffff, 0.35).fillPoints([P(xv, d0), P(xv, d1), P(xv, d1, 3), P(xv, d0, 3)], true);
+        g.fillStyle(0x202830).fillPoints([P(xv, d0, 17), P(xv, d1, 17), P(xv + lado * 3, d1, 18), P(xv + lado * 3, d0, 18)], true);
+      }
+      // las gradas: tres escalones que suben alejándose de la cancha, con el público sentado
+      const xg = lado * (ANCHO / 2 + 100);
+      for (let k = 2; k >= 0; k--) {
+        const x0 = xg + lado * k * 22, x1 = x0 + lado * 22, z = 8 + k * 11;
+        g.fillStyle(k % 2 ? 0x8a90a4 : 0x9aa0b4).fillPoints([P(x0, 20, z), P(x1, 20, z), P(x1, 380, z), P(x0, 380, z)], true);
+        g.fillStyle(0x5a6074).fillPoints([P(x0, 20, z), P(x0, 380, z), P(x0, 380, z - 11), P(x0, 20, z - 11)], true);
+        for (let d = 34; d < 372; d += 15) {
+          if (R(d * 3 + k + (lado + 1) * 7) < 0.15) continue;
+          const [px, py, ps] = this.pant(x0 + lado * 11, d, z);
+          g.fillStyle(ropa[(Math.floor(d / 15) + k * 2 + (lado + 1)) % ropa.length]).fillRect(px - 3 * ps, py - 9 * ps, 6 * ps, 7 * ps);
+          g.fillStyle(R(d + k * 5) < 0.5 ? 0x8a5a3a : 0xf0c8a0).fillRect(px - 2 * ps, py - 13 * ps, 4 * ps, 4 * ps);
+        }
+      }
+      g.fillStyle(0x3a4050).fillPoints([P(xg, 18), P(xg + lado * 66, 18), P(xg + lado * 66, 18, 30), P(xg, 18, 8)], true);
+      g.fillStyle(0x3a4050).fillPoints([P(xg, 382), P(xg + lado * 66, 382), P(xg + lado * 66, 382, 30), P(xg, 382, 8)], true);
+    }
+    if (!arte) {
+      const [jx, jy, js] = this.pant(ANCHO / 2 + 46, RED_D);
+      g.fillStyle(0x4a3524).fillRect(jx - 6 * js, jy - 46 * js, 3 * js, 46 * js).fillRect(jx + 3 * js, jy - 46 * js, 3 * js, 46 * js);
+      g.fillStyle(0xf4f4f4).fillRect(jx - 9 * js, jy - 54 * js, 18 * js, 7 * js);
+      g.fillStyle(0x203060).fillRect(jx - 4 * js, jy - 62 * js, 8 * js, 9 * js);
+      g.fillStyle(0xf0c8a0).fillRect(jx - 3 * js, jy - 68 * js, 6 * js, 6 * js);
+      for (const lado of [-1, 1]) for (let k = 0; k < 5; k++) {
+        const [hx, hy, hs] = this.pant(lado * (ANCHO / 2 + 80), 40 + k * 76);
+        g.fillStyle(0x3f6f3f).fillCircle(hx, hy - 6 * hs, 10 * hs);
+        g.fillStyle(k % 2 ? 0xe890c0 : 0x90a8f0).fillCircle(hx - 4 * hs, hy - 9 * hs, 4 * hs).fillCircle(hx + 4 * hs, hy - 8 * hs, 4 * hs).fillCircle(hx, hy - 12 * hs, 4 * hs);
+      }
+      return;
+    }
+    // los recortes del arte, cada uno parado en su punto de la cancha y ordenado por profundidad
+    const pon = (cuadro: string, x: number, d: number, k = 1, flip = false) => {
+      const [sx, sy, s] = this.pant(x, d);
+      return this.add.image(Math.round(sx), Math.round(sy), 'esc_dalat_cerca_0', cuadro).setOrigin(0.5, 1).setScale(s * k).setFlipX(flip).setDepth(sy);
+    };
+    pon('pino_a', -ANCHO / 2 - 215, 70, 0.9); pon('pino_gris', -ANCHO / 2 - 230, 170, 0.9); pon('pino_b', -ANCHO / 2 - 225, 290, 0.9); pon('pino_gris2', -ANCHO / 2 - 210, 395, 0.9);
+    pon('pino_b', ANCHO / 2 + 215, 60, 0.9, true); pon('pino_gris2', ANCHO / 2 + 235, 180, 0.9); pon('pino_a', ANCHO / 2 + 225, 300, 0.9, true); pon('pino_gris', ANCHO / 2 + 210, 400, 0.9);
+    pon('silla_juez', ANCHO / 2 + 44, RED_D, 1.1);
+    pon('banco', -ANCHO / 2 - 46, RED_D - 60, 1.05); pon('gente', -ANCHO / 2 - 44, RED_D + 70, 1.05);
+    pon('bicis', ANCHO / 2 + 70, 2, 1);
+    pon('farol', -ANCHO / 2 - 82, 6, 1.1); pon('farol', ANCHO / 2 + 82, 390, 1.1);
+    const flores = ['flores_a', 'flores_b', 'flores_c'];
+    for (const lado of [-1, 1]) for (let k = 0; k < 5; k++) pon(flores[(k + (lado > 0 ? 1 : 0)) % 3], lado * (ANCHO / 2 + 80), 46 + k * 76, 1.1, lado > 0);
   }
 
   // ------------------------------------------------------------------ la pelota
