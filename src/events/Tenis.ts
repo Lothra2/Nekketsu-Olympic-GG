@@ -497,8 +497,10 @@ export class Tenis extends EventScene {
       c.x = p.x; c.d = p.d; c.z = 46;
       const tx = -Math.sign(p.x || 1) * (20 + Math.random() * 40);
       const td = team === 0 ? RED_D + 35 + Math.random() * 45 : RED_D - 35 - Math.random() * 45;
+      // entrenando, Kenji saca hacia ti; en el paso del smash, alto y corto, para que lo remates
       const al = this.d.practica && team === 1 ? this.pat[0] : null;
-      this.lanzar(al ? Phaser.Math.Clamp(al.x + (Math.random() - 0.5) * 30, -70, 70) : tx, al ? 70 + Math.random() * 40 : td, 0.95);
+      if (al && this.pasoSmash) { this.lanzar(Phaser.Math.Clamp(al.x + (Math.random() - 0.5) * 30, -70, 70), RED_D - 50, 1.5); c.vz = Math.max(c.vz, 260); }
+      else this.lanzar(al ? Phaser.Math.Clamp(al.x + (Math.random() - 0.5) * 30, -70, 70) : tx, al ? 70 + Math.random() * 40 : td, 0.95);
       this.golpeAnim(p, 'tennis_serve', 'weapon_swing_heavy');
       c.ultimo = p; c.ultimoTiro = 'saque'; c.lado = team; c.toques = 1;
       this.sfx('esquiva', 0.3);

@@ -48,7 +48,8 @@ while (Date.now() - t0 < 150000) {
     await tecla('ArrowDown', s.d > meta.d + 5);
     const dx = Math.abs(s.c.x - s.x), dd = Math.abs(s.c.d - s.d), alto = s.c.z - s.z;
     if (smash && dx < 24 && dd < 34 && alto > 38 && alto < 80 && s.c.vz < 0) await toque('j');
-    else if (!smash && dx < 24 && dd < 30 && alto > 10 && alto < 48 && (s.c.vz < 0 || s.c.botes > 0)) await toque('j');
+    // la que no llegó alta se devuelve normal (en el paso del smash también, para que el peloteo siga)
+    else if (dx < 24 && dd < 30 && alto > 10 && alto < 48 && (s.c.vz < 0 || s.c.botes > 0) && (!smash || s.c.botes > 0)) await toque('j');
   } else for (const k of ['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown']) await tecla(k, false);
   await p.waitForTimeout(25);
 }
