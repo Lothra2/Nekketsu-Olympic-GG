@@ -108,6 +108,7 @@ export class Basket extends EventScene {
     this.setup(1, 640);
     this.texturas();
     this.escenario('cancha_maracaibo', 'bg_cancha_maracaibo');
+    this.bordeCancha('cancha_maracaibo');
     this.cancha();
     this.armarEquipos();
     // la pelota del kit (lote SP2), del tamaño de los atletas; si no llegó, la pintada por código

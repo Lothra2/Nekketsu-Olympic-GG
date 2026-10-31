@@ -97,6 +97,7 @@ export class Quemado extends EventScene {
       this.add.bitmapText(595, 113, 'fuente_ui', 'CANTINA').setOrigin(0.5).setDepth(-9).setTint(0xfff4d8);
       this.cancha();
     }
+    this.bordeCancha('liceo_patio');
     this.armarEquipos();
     const spr = this.add.image(0, 0, 'armas', 'balon_goma_quieto_0').setScale(1.3);
     const sombra = this.add.ellipse(0, 0, 10, 3, 0x000000, 0.3);

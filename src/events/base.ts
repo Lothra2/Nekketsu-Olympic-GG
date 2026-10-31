@@ -5,7 +5,7 @@ import { chip, PELEA } from '../core/music';
 import { kit, bucle, nombreCorto } from '../core/kit';
 import { txt, flash, pantallaCarga, speedLines } from '../core/ui';
 import { efecto } from '../core/fx';
-import { letreroGrande, MarcadorTV, hayUi } from '../core/interfaz';
+import { letreroGrande, MarcadorTV, hayUi, pieza } from '../core/interfaz';
 import { Coach, type Paso } from '../core/coach';
 import { nuestros, ellos, conJugador, lado, victoria } from '../core/equipos';
 import { cargarAtletas, packsDe } from '../core/carga';
@@ -221,6 +221,21 @@ export abstract class EventScene extends Phaser.Scene {
     const tick = (_t: number, dms: number) => this.arteFondo?.tick(Math.min(0.05, dms / 1000), this.cameras.main.scrollX + M, () => false);
     this.events.on(Phaser.Scenes.Events.UPDATE, tick);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.events.off(Phaser.Scenes.Events.UPDATE, tick));
+  }
+
+  /**
+   * El borde de la cancha de PixelForja (lote BORDES): lo que rodea la cancha (bancas, mesa de jueces, sombrillas, la
+   * gente del borde) en una imagen transparente de 800 x 360 pegada en (-80, 0). Se parte en la fila `corte` de su
+   * manifiesto: lo de arriba va detrás de los atletas, justo encima del piso del escenario, y lo de abajo delante de
+   * todos (la franja del frente, donde nadie camina). Devuelve si había.
+   */
+  protected bordeCancha(id: string, profundidadFrente = 400): boolean {
+    const key = `borde_${id}`;
+    if (!hayUi(this, key)) return false;
+    const corte = (pieza(key) as unknown as { corte?: number } | undefined)?.corte ?? 318;
+    this.add.image(-80, 0, `ui_${key}`).setOrigin(0).setDepth(-14).setCrop(0, 0, 800, corte);
+    this.add.image(-80, 0, `ui_${key}`).setOrigin(0).setDepth(profundidadFrente).setCrop(0, corte, 800, 360 - corte);
+    return true;
   }
 
   protected fondo(key: string): Phaser.GameObjects.TileSprite {

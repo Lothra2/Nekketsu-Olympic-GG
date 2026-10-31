@@ -103,6 +103,7 @@ export class Voley extends EventScene {
     this.setup(ZOOM, 640);
     this.texturas();
     this.escenario('margarita', 'bg_margarita');
+    this.bordeCancha('margarita');
     this.cancha();
     // entrenando: tú solo de este lado y Kenji del otro, que te la devuelve suave
     const gente: Competidor[] = this.d.practica ? [this.gente[0], { id: this.rivalEntreno, team: 1, human: false }] : this.gente;

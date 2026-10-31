@@ -23,7 +23,7 @@ const ZOOM = 1.5;
 const GRAV = 380;
 const INTENTOS = 2;
 
-interface Lanzador { c: Competidor; fig: Figura; best: number; marcas: number[]; top: number; rayo: number }
+interface Lanzador { c: Competidor; fig: Figura; best: number; marcas: number[]; top: number; rayo: number; banderita?: Phaser.GameObjects.Graphics }
 interface Vuelo { x: number; z: number; vx: number; vz: number; img: Phaser.GameObjects.Image; sombra: Phaser.GameObjects.Ellipse; fuego?: Phaser.GameObjects.Particles.ParticleEmitter }
 
 /**
@@ -81,6 +81,7 @@ export class Jabalina extends EventScene {
     // el arte de PixelForja trae el cielo, lo lejano con su paralaje y la cancha; sin él, el fondo de código
     this.bg = undefined;
     this.escenario('llanos_apure', () => { this.bg = this.fondo('bg_llanos'); this.add.image(0, TOP - 6, 'campo').setOrigin(0, 0).setDepth(-5); });
+    this.sector();
     for (let m = 10; m * PX_M + FOUL < WORLD - 20; m += 10) this.add.bitmapText(FOUL + m * PX_M, TOP + 112, 'fuente_ui', `${m}`).setOrigin(0.5).setDepth(-4).setTint(0xf4f0e8);
     // el orden: primero los de la máquina, de último tú (así sabes la marca a batir)
     const orden = this.d.practica ? [this.gente[0]] : [this.gente[1], this.gente[2], this.gente[3], this.gente[0]];
@@ -110,6 +111,63 @@ export class Jabalina extends EventScene {
       { texto: 'SUELTA {SALTO} PARA LANZAR\nANTES DE LA RAYA BLANCA', botones: ['punch', 'kick', 'jump'], antes: () => { base = validos(); }, listo: () => validos() > base },
       { texto: 'EL TRUCO: MUCHA VELOCIDAD Y\nSOLTAR CERCA DE 45°. ¡PASA LOS 40 M!', botones: ['punch', 'kick', 'jump'], listo: () => this.gente2[0].best > 40 },
     ];
+  }
+
+  /**
+   * El sector de caída pintado sobre el pasto: las dos rayas que se abren desde la raya de nulo, los arcos de cada
+   * 10 m con su marca, los banderines de colores a los 30, 50 y 70 m y la carpa de los jueces con su mesa. Con el arte
+   * de PixelForja el pasto viene liso y sin esto el campo se veía vacío.
+   */
+  private sector() {
+    const g = this.add.graphics().setDepth(-14);
+    const y = TOP + RUN_Y, fin = WORLD - 10;
+    const abre = (x: number) => 14 + ((x - FOUL) / (fin - FOUL)) * 34;
+    // las rayas del sector, con cal, y un borde más oscuro debajo para que se lean en el pasto claro
+    for (const [c, a, dy] of [[0x3a6a2a, 0.35, 1], [0xf4f0e8, 0.95, 0]] as const) {
+      g.lineStyle(2, c, a);
+      g.lineBetween(FOUL, y - 14 + dy, fin, y - abre(fin) + dy).lineBetween(FOUL, y + 14 + dy, fin, y + abre(fin) + dy);
+    }
+    // la raya de nulo, gruesa, y el tablón blanco de la tabla de batida
+    g.fillStyle(0xf4f4f4, 0.95).fillRect(FOUL - 2, y - 15, 4, 30);
+    g.fillStyle(0xe8e0d0, 0.9).fillRect(FOUL - 26, y - 11, 22, 22);
+    g.lineStyle(1, 0x8a7a5a, 0.8).strokeRect(FOUL - 26, y - 11, 22, 22);
+    // los arcos de cada 10 m: una raya corta de cal cruzando el sector (más larga la de cada 20)
+    for (let m = 10; m * PX_M + FOUL < fin; m += 10) {
+      const x = FOUL + m * PX_M, h = abre(x) - 2;
+      g.lineStyle(m % 20 === 0 ? 2 : 1, 0xf4f0e8, m % 20 === 0 ? 0.9 : 0.6).lineBetween(x, y - h, x, y + h);
+    }
+    // los banderines a los 30, 50 y 70 m, clavados arriba del sector
+    const banderin = (x: number, yy: number, color: number) => {
+      const b = this.add.graphics().setDepth(yy);
+      b.fillStyle(0xf4f4f4).fillRect(x, yy - 22, 1, 22);
+      b.fillStyle(color).fillTriangle(x + 1, yy - 22, x + 11, yy - 18, x + 1, yy - 14);
+      b.fillStyle(0x000000, 0.25).fillEllipse(x, yy, 6, 2);
+    };
+    [[30, 0xf2c230], [50, 0xd04030], [70, 0x2a5bd7], [90, 0xf4f4f4]].forEach(([m, c]) => { if (FOUL + m * PX_M < fin) banderin(FOUL + m * PX_M, y - abre(FOUL + m * PX_M) - 6, c); });
+    // la carpa de los jueces, atrás de la tabla de batida: el toldo a rayas, la mesa con el mantel y la libreta
+    const cx = FOUL - 70, cy = y - 40;
+    const t = this.add.graphics().setDepth(cy + 8);
+    t.fillStyle(0x000000, 0.2).fillEllipse(cx + 22, cy + 10, 56, 6);
+    for (const px of [cx, cx + 44]) t.fillStyle(0xd8d0c0).fillRect(px, cy - 22, 2, 32);
+    for (let i = 0; i < 6; i++) t.fillStyle(i % 2 ? 0xf4f4f4 : 0xd04030).fillRect(cx - 4 + i * 9, cy - 28, 9, 7);
+    t.fillStyle(0xb8402a).fillRect(cx - 4, cy - 29, 54, 1);
+    t.fillStyle(0x2a5bd7).fillRect(cx + 6, cy - 2, 32, 10);
+    t.fillStyle(0xf4f4f4).fillRect(cx + 10, cy - 4, 8, 3).fillRect(cx + 26, cy - 5, 6, 4);
+    t.fillStyle(0x3a3a44).fillRect(cx + 8, cy + 8, 2, 6).fillRect(cx + 34, cy + 8, 2, 6);
+  }
+
+  /** La banderita de la mejor marca de cada quien, clavada en el pasto bajo el sector, del color de su equipo. */
+  private marcaBanderita(l: Lanzador, m: number) {
+    const x = FOUL + m * PX_M, y = TOP + RUN_Y + 20 + (this.gente2.indexOf(l) % 2) * 6;
+    l.banderita?.destroy();
+    const b = this.add.graphics().setDepth(y);
+    const color = l.c.team === 0 ? 0x2a5bd7 : 0xd04030;
+    b.fillStyle(0xf4f4f4).fillRect(x, y - 14, 1, 14);
+    b.fillStyle(color).fillTriangle(x + 1, y - 14, x + 8, y - 11, x + 1, y - 8);
+    b.fillStyle(0x000000, 0.25).fillEllipse(x, y, 5, 2);
+    b.setAlpha(0);
+    this.tweens.add({ targets: b, alpha: 1, duration: 300, delay: 600 });
+    l.banderita = b;
   }
 
   private makeTextures() {
@@ -380,6 +438,7 @@ export class Jabalina extends EventScene {
     // entrenando se tira las veces que haga falta: el tablero muestra las dos últimas
     if (this.d.practica && l.marcas.length > INTENTOS) l.marcas.shift();
     const record = m > l.best && m > 0;
+    if (record) this.marcaBanderita(l, m);
     // la mejor de todos hasta ahora (y ya había marcas): ¡RÉCORD! con su cinta dorada
     const deTodos = !this.nulo && m > 0 && l.c.human && this.gente2.some((o) => o.best > 0) && this.gente2.every((o) => m > o.best);
     l.best = Math.max(l.best, m);

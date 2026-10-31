@@ -112,6 +112,7 @@ export class Futbol extends EventScene {
     this.setup(1, 640);
     this.texturas();
     this.escenario('barranquilla', 'bg_barranquilla');
+    this.bordeCancha('barranquilla');
     this.cancha();
     this.armarEquipos();
     // la pelota del kit (lote SP2), del tamaño de los atletas; si no llegó, la pintada por código
