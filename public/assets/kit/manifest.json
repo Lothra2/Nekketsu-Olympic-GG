@@ -4220,7 +4220,8 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 1
+    "escala_grande": 1,
+    "estilo": "puro"
    },
    "cabecita": "ui/cabecitas.png#abuela_nerva"
   },
@@ -8379,7 +8380,8 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 1
+    "escala_grande": 1,
+    "estilo": "puro"
    },
    "cabecita": "ui/cabecitas.png#alana"
   },
@@ -12525,7 +12527,8 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 1
+    "escala_grande": 1,
+    "estilo": "puro"
    },
    "cabecita": "ui/cabecitas.png#andres"
   },
@@ -16672,7 +16675,8 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 1
+    "escala_grande": 1,
+    "estilo": "puro"
    },
    "cabecita": "ui/cabecitas.png#ba_hoa"
   },
@@ -20818,7 +20822,8 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 1
+    "escala_grande": 1,
+    "estilo": "puro"
    },
    "cabecita": "ui/cabecitas.png#camila"
   },
@@ -24964,7 +24969,8 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 1
+    "escala_grande": 1,
+    "estilo": "puro"
    },
    "cabecita": "ui/cabecitas.png#carmen"
   },
@@ -29110,7 +29116,8 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 1
+    "escala_grande": 1,
+    "estilo": "puro"
    },
    "cabecita": "ui/cabecitas.png#don_hernando"
   },
@@ -33257,7 +33264,8 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 1
+    "escala_grande": 1,
+    "estilo": "puro"
    },
    "cabecita": "ui/cabecitas.png#ender"
   },
@@ -37403,7 +37411,8 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 1
+    "escala_grande": 1,
+    "estilo": "puro"
    },
    "cabecita": "ui/cabecitas.png#gabo"
   },
@@ -41550,7 +41559,8 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 1
+    "escala_grande": 1,
+    "estilo": "puro"
    },
    "cabecita": "ui/cabecitas.png#goro"
   },
@@ -45697,7 +45707,8 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 1
+    "escala_grande": 1,
+    "estilo": "puro"
    },
    "cabecita": "ui/cabecitas.png#jhonder"
   },
@@ -49844,7 +49855,8 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 1
+    "escala_grande": 1,
+    "estilo": "puro"
    },
    "cabecita": "ui/cabecitas.png#kenji"
   },
@@ -53991,7 +54003,8 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 1
+    "escala_grande": 1,
+    "estilo": "puro"
    },
    "cabecita": "ui/cabecitas.png#lan"
   },
@@ -58138,7 +58151,8 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 1
+    "escala_grande": 1,
+    "estilo": "puro"
    },
    "cabecita": "ui/cabecitas.png#minh"
   },
@@ -62284,7 +62298,8 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 1
+    "escala_grande": 1,
+    "estilo": "puro"
    },
    "cabecita": "ui/cabecitas.png#pipe"
   },
@@ -66443,7 +66458,8 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 1
+    "escala_grande": 1,
+    "estilo": "puro"
    },
    "cabecita": "ui/cabecitas.png#rick"
   },
@@ -70590,7 +70606,8 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 1
+    "escala_grande": 1,
+    "estilo": "puro"
    },
    "cabecita": "ui/cabecitas.png#ryu"
   },
@@ -74749,7 +74766,8 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 1
+    "escala_grande": 1,
+    "estilo": "puro"
    },
    "cabecita": "ui/cabecitas.png#sophie"
   },
@@ -78908,7 +78926,8 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 1
+    "escala_grande": 1,
+    "estilo": "puro"
    },
    "cabecita": "ui/cabecitas.png#steph"
   },
@@ -83055,7 +83074,8 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 1
+    "escala_grande": 1,
+    "estilo": "puro"
    },
    "cabecita": "ui/cabecitas.png#tetsu"
   },
@@ -87201,7 +87221,8 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 1
+    "escala_grande": 1,
+    "estilo": "puro"
    },
    "cabecita": "ui/cabecitas.png#toto"
   },
@@ -91348,7 +91369,8 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 1
+    "escala_grande": 1,
+    "estilo": "puro"
    },
    "cabecita": "ui/cabecitas.png#tuan"
   },
@@ -95494,7 +95516,8 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 1
+    "escala_grande": 1,
+    "estilo": "puro"
    },
    "cabecita": "ui/cabecitas.png#yuli"
   },
@@ -99642,7 +99665,8 @@
     "chico": 40,
     "grande": 96,
     "expresiones": ["neutral","feliz","enojo","triste","susto","cerrado","dolor","burla"],
-    "escala_grande": 1
+    "escala_grande": 1,
+    "estilo": "puro"
    },
    "cabecita": "ui/cabecitas.png#yusmary"
   }
@@ -100458,7 +100482,7 @@
      "cuadros": 8,
      "fps": 6,
      "loop": true,
-     "cajas": [[[-19,-37,34,38],[-19,-37,34,38],[-19,-37,34,38],[-19,-37,34,38],[-19,-37,34,38],[-19,-37,34,38],[-19,-37,34,38],[-19,-37,34,38]],[[-13,-35,24,36],[-12,-35,23,36],[-12,-35,23,36],[-12,-35,23,36],[-13,-35,24,36],[-13,-35,24,36],[-13,-35,24,36],[-13,-35,24,36]],[[-13,-35,24,36],[-12,-35,23,36],[-12,-35,23,36],[-12,-35,23,36],[-13,-35,24,36],[-13,-35,24,36],[-13,-35,24,36],[-13,-35,24,36]],[[-10,-33,20,34],[-10,-33,20,34],[-10,-33,20,34],[-10,-33,20,34],[-10,-33,20,34],[-10,-33,20,34],[-10,-33,20,34],[-10,-33,20,34]],[[-10,-34,20,35],[-10,-34,20,35],[-10,-34,20,35],[-10,-34,20,35],[-10,-34,20,35],[-10,-34,20,35],[-10,-34,20,35],[-10,-34,20,35]]]
+     "cajas": [[[-17,-31,29,32],[-17,-31,29,32],[-16,-31,28,32],[-17,-31,29,32],[-17,-31,29,32],[-17,-31,29,32],[-17,-31,29,32],[-17,-31,29,32]],[[-11,-33,20,34],[-11,-33,20,34],[-11,-33,20,34],[-11,-33,20,34],[-11,-33,20,34],[-11,-33,20,34],[-11,-33,20,34],[-11,-33,20,34]],[[-11,-34,22,35],[-11,-34,22,35],[-11,-34,22,35],[-11,-34,22,35],[-11,-34,22,35],[-11,-34,22,35],[-11,-34,22,35],[-11,-34,22,35]],[[-10,-30,20,31],[-10,-30,20,31],[-10,-30,20,31],[-10,-30,20,31],[-10,-30,20,31],[-10,-30,20,31],[-10,-30,20,31],[-10,-30,20,31]],[[-10,-33,20,34],[-10,-34,20,35],[-10,-34,20,35],[-10,-34,20,35],[-10,-33,20,34],[-10,-33,20,34],[-10,-33,20,34],[-10,-33,20,34]]]
     },
     "lie": {
      "cuadros": 8,
@@ -100804,7 +100828,7 @@
      "cuadros": 8,
      "fps": 6,
      "loop": true,
-     "cajas": [[[-19,-26,33,27],[-19,-26,33,27],[-19,-26,33,27],[-19,-26,33,27],[-19,-26,33,27],[-20,-26,34,27],[-20,-26,34,27],[-20,-26,34,27]],[[-13,-25,22,26],[-13,-25,22,26],[-13,-25,22,26],[-13,-25,22,26],[-13,-25,22,26],[-13,-25,22,26],[-13,-25,22,26],[-13,-25,22,26]],[[-13,-26,22,27],[-13,-26,22,27],[-13,-27,22,28],[-13,-26,22,27],[-13,-26,22,27],[-13,-25,22,26],[-13,-25,22,26],[-13,-25,22,26]],[[-8,-25,16,26],[-8,-25,16,26],[-8,-25,16,26],[-8,-25,16,26],[-8,-25,16,26],[-8,-25,16,26],[-8,-25,16,26],[-8,-25,16,26]],[[-8,-26,16,27],[-8,-27,16,28],[-8,-27,16,28],[-8,-27,16,28],[-8,-26,16,27],[-8,-25,16,26],[-8,-25,16,26],[-8,-25,16,26]]]
+     "cajas": [[[-17,-25,28,26],[-16,-26,27,27],[-16,-26,27,27],[-16,-26,27,27],[-17,-25,28,26],[-17,-25,28,26],[-17,-25,28,26],[-17,-25,28,26]],[[-11,-22,19,23],[-11,-22,19,23],[-11,-23,19,24],[-11,-22,19,23],[-11,-22,19,23],[-12,-22,20,23],[-12,-22,20,23],[-12,-22,20,23]],[[-11,-28,19,29],[-11,-28,19,29],[-11,-28,19,29],[-11,-28,19,29],[-11,-28,19,29],[-12,-28,20,29],[-12,-28,20,29],[-12,-28,20,29]],[[-8,-22,16,23],[-8,-22,16,23],[-8,-23,16,24],[-8,-22,16,23],[-8,-22,16,23],[-8,-21,16,22],[-8,-21,16,22],[-8,-21,16,22]],[[-8,-29,16,30],[-8,-29,16,30],[-8,-29,16,30],[-8,-29,16,30],[-8,-29,16,30],[-8,-29,16,30],[-8,-29,16,30],[-8,-29,16,30]]]
     },
     "lie": {
      "cuadros": 8,
@@ -101150,7 +101174,7 @@
      "cuadros": 8,
      "fps": 6,
      "loop": true,
-     "cajas": [[[-22,-27,33,28],[-22,-27,33,28],[-22,-27,33,28],[-22,-27,33,28],[-22,-27,33,28],[-23,-27,34,28],[-23,-27,34,28],[-23,-27,34,28]],[[-15,-26,23,27],[-14,-26,22,27],[-14,-26,22,27],[-14,-26,22,27],[-15,-26,23,27],[-15,-26,23,27],[-15,-26,23,27],[-15,-26,23,27]],[[-15,-29,23,30],[-14,-29,22,30],[-14,-29,22,30],[-14,-29,22,30],[-15,-29,23,30],[-15,-28,23,29],[-15,-28,23,29],[-15,-28,23,29]],[[-7,-26,14,27],[-7,-26,14,27],[-7,-26,14,27],[-7,-26,14,27],[-7,-26,14,27],[-7,-26,14,27],[-7,-26,14,27],[-7,-26,14,27]],[[-7,-28,14,29],[-7,-28,14,29],[-7,-28,14,29],[-7,-28,14,29],[-7,-28,14,29],[-7,-28,14,29],[-7,-27,14,28],[-7,-28,14,29]]]
+     "cajas": [[[-19,-28,28,29],[-18,-28,27,29],[-18,-28,28,29],[-18,-28,28,29],[-19,-28,29,29],[-20,-28,29,29],[-20,-28,29,29],[-20,-28,29,29]],[[-13,-26,19,27],[-12,-27,18,28],[-12,-27,18,28],[-12,-27,18,28],[-13,-26,19,27],[-13,-25,19,26],[-13,-25,19,26],[-13,-25,19,26]],[[-11,-28,17,29],[-11,-28,17,29],[-11,-28,17,29],[-11,-28,17,29],[-11,-28,17,29],[-12,-28,18,29],[-12,-28,18,29],[-12,-28,18,29]],[[-7,-25,14,26],[-7,-26,14,27],[-7,-26,14,27],[-7,-26,14,27],[-7,-25,14,26],[-7,-24,14,25],[-7,-24,14,25],[-7,-24,14,25]],[[-7,-27,14,28],[-7,-27,14,28],[-7,-27,14,28],[-7,-27,14,28],[-7,-27,14,28],[-7,-27,14,28],[-7,-27,14,28],[-7,-27,14,28]]]
     },
     "lie": {
      "cuadros": 8,
@@ -103281,6 +103305,36 @@
     "mesa": 266,
     "nota": "Capa de adelante del desayuno, 4 cuadros en bucle (el phin gotea y las arepas echan humito). Va encima de los retratos."
    },
+   "tenis_fondo": {
+    "archivo": "ui/tenis_fondo.png",
+    "w": 800,
+    "h": 360,
+    "cancha": [[265,322],[535,322],[474,114],[326,114]],
+    "red": {
+     "fila": 187,
+     "x0": 297,
+     "x1": 503,
+     "alto": 17
+    },
+    "proyeccion": {
+     "d0": 480,
+     "cx": 400,
+     "kx": 1.35,
+     "ky": 457.6,
+     "hor": -135.6
+    },
+    "nota": "La cancha vista desde atrás de tu equipo, para el Tenis en vertical. Va en (-80, 0) con el cuadro de 640 centrado. `cancha` son las 4 esquinas de la cancha de dobles en la imagen (tu fondo izquierda y derecha, el de ellos derecha e izquierda). La red va aparte en `tenis_red`, en la fila `red.fila`, encima de los de atrás y debajo de los de adelante."
+   },
+   "tenis_red": {
+    "archivo": "ui/tenis_red.png",
+    "w": 800,
+    "h": 360,
+    "fila": 187,
+    "x0": 297,
+    "x1": 503,
+    "alto": 17,
+    "nota": "Encima de los jugadores del fondo y debajo de los de adelante: su profundidad es la fila `fila`."
+   },
    "pantalla_pausa": {
     "archivo": "ui/pantalla_pausa.png",
     "w": 800,
@@ -104475,5 +104529,5 @@
   "notas": "Cada NPC es una tira de cuadros de w x h: el cuadro i va en x = i * w. Cada animación empieza en el cuadro \"desde\" y dura \"cuadros\". El ancla es el pixel de los pies: el juego pone ahí el (x, y) del NPC. Van de frente o en 3/4 hacia la calle (\"vista\"); no se espejan. Los que van de lado (\"lado\", la Marimonda que cruza) miran a la derecha: para ir a la izquierda el juego los espeja. eventos: en qué cuadro de la animación pasa algo (en patear, el impacto es cuando el pie le pega a la pelota: ahí el juego la suelta). Un grupo trae \"grupo\" con los de izquierda a derecha."
  },
  "creditos": "CREDITOS.txt",
- "notas": ["Las aves (tipo \"ave\") van en una tira de cuadros de w x h, de lado mirando a la derecha: para la izquierda se espejan con el ancla. El cuadro i va en x = i * w; cada animación empieza en \"desde\" y dura \"cuadros\". El ancla es el pixel de las patas en el piso. Las animaciones se quedan en su sitio (el juego mueve al ave); \"aire\" dice cuántos pixeles sube el ave sobre el ancla en cada cuadro (el salto del gallo, el vuelo de la paloma). eventos: en qué cuadro pasa algo (el canto del gallo, el aleteo que suena).","Hojas: fila = dirección (orden de `filas`), columna = cuadro. El pivote es el punto de apoyo (pies) y no se mueve.","eventos: en qué cuadro cae cada paso, golpe (impacto), despegue, suelta (pelota, bala, jabalina, hechizo), aterrizaje y brazada (la mano entra al agua).","avance: pixeles que avanza el cuerpo en un ciclo sin patinar. Ritmo = velocidad_del_juego * cuadros / (avance * fps).","elevacion: pixeles que el juego sube el sprite en cada cuadro (saltos que no caben en la celda); la sombra queda en el piso.","agua: fila de la superficie en la celda; el juego puede dibujar su piscina detrás y el nadador ya trae el tinte y las gotas.","desplazamiento: en las acciones que avanzan (salto largo, clavado, remate), pixeles que el juego mueve el sprite hacia donde mira, acumulados desde el primer cuadro.","rumbo: en las pruebas de campo, de frente y de espalda se dibuja la diagonal más cercana; rumbo dice hacia dónde moverlo en cada fila.","cajas, manos, cabeza y pies: [fila][cuadro], en pixeles desde el pivote con y hacia abajo. cajas = [x, y, w, h] de lo opaco (null si el cuadro está vacío); manos y pies = [[x, y] cerca, [x, y] lejos].","sin_props (voley, futbol, keeper, basket, tennis, beisbol): estos packs salen sin las pelotas dibujadas, porque el juego las mueve con su física. El cuerpo es el mismo, pixel a pixel, que en un pack con pelota. Lo que va agarrado (raqueta, bate, garrocha, jabalina) sí sale dibujado. objetos: [fila][cuadro] = lista de { tipo, clase, x, y, r, detras } o null si en ese cuadro no hay pelota. tipo = \"pelota\", clase = futbol, voley, basquet, tenis, beisbol, bala. x, y = centro exacto desde el pivote (puede caer en medio pixel), r = radio sin el contorno, detras = 1 si iba detrás del cuerpo. Al espejar, x pasa a -x. pelotas: cada pelota quitada, dibujada igual, en objetos/pelotas.json (cuadro <id>_<celda>, con su contorno y el pivote en el centro exacto): se pone en (x, y) de objetos.","packs: un atlas por pack (JSON Hash de TexturePacker, para this.load.atlas de Phaser). Cada cuadro se llama <anim>_<fila>_<cuadro>, con la fila por nombre (right, down...) y el cuadro desde 0.","girado: [cuadro] true o false. En los cuadros con true el sprite viene dibujado mirando al otro lado: el juego lo espeja (flipX al revés de como esté) junto con sus datos de ese cuadro (x pasa a -x; en cajas y cuerpo, x pasa a -(x + w)). Si el último cuadro está girado, el personaje termina mirando al otro lado.","retratos.png: arriba los chicos de 40 x 40 (el i en x = i * 40), abajo los grandes de 96 x 96 (el i en x = i * 96, y = 40), en el orden de `expresiones`. El grande es la cabeza y los hombros redibujados a 96, con contorno de un pixel (escala_grande 1: ya no es el sprite x3).","objetos: armas del piso. Cuadros <id>_<anim>_<cuadro>. quieto: la base en el pivote de la celda (como un personaje). girando: centrado. mano (16 cuadros): el agarre en el centro de la celda, el cuadro k girado k * 22.5 grados (0 = como en el piso). Para dibujar el arma en la mano usa el dato `arma` [x, y, angulo, detras] de la animación: elige <id>_mano_<k> con k = round(angulo / 22.5) % 16 y pon el centro de la celda en (x, y) desde el pivote del personaje; si detras = 1, dibújala antes que al personaje.","comida: objetos con peso \"comida\" en su propio atlas (objetos/comida.json, celdas de 16). Cuadros <id>_quieto_0 y <id>_humito_0..3 (en bucle a 6 fps), con la base en el pivote (8, 14) y su sombra ya dibujada. `cura` va de 1 a 3. Se come con la animación eat: el evento impacto marca el mordisco."]
+ "notas": ["Las aves (tipo \"ave\") van en una tira de cuadros de w x h, de lado mirando a la derecha: para la izquierda se espejan con el ancla. El cuadro i va en x = i * w; cada animación empieza en \"desde\" y dura \"cuadros\". El ancla es el pixel de las patas en el piso. Las animaciones se quedan en su sitio (el juego mueve al ave); \"aire\" dice cuántos pixeles sube el ave sobre el ancla en cada cuadro (el salto del gallo, el vuelo de la paloma). eventos: en qué cuadro pasa algo (el canto del gallo, el aleteo que suena).","Hojas: fila = dirección (orden de `filas`), columna = cuadro. El pivote es el punto de apoyo (pies) y no se mueve.","eventos: en qué cuadro cae cada paso, golpe (impacto), despegue, suelta (pelota, bala, jabalina, hechizo), aterrizaje y brazada (la mano entra al agua).","avance: pixeles que avanza el cuerpo en un ciclo sin patinar. Ritmo = velocidad_del_juego * cuadros / (avance * fps).","elevacion: pixeles que el juego sube el sprite en cada cuadro (saltos que no caben en la celda); la sombra queda en el piso.","agua: fila de la superficie en la celda; el juego puede dibujar su piscina detrás y el nadador ya trae el tinte y las gotas.","desplazamiento: en las acciones que avanzan (salto largo, clavado, remate), pixeles que el juego mueve el sprite hacia donde mira, acumulados desde el primer cuadro.","rumbo: en las pruebas de campo, de frente y de espalda se dibuja la diagonal más cercana; rumbo dice hacia dónde moverlo en cada fila.","cajas, manos, cabeza y pies: [fila][cuadro], en pixeles desde el pivote con y hacia abajo. cajas = [x, y, w, h] de lo opaco (null si el cuadro está vacío); manos y pies = [[x, y] cerca, [x, y] lejos].","sin_props (voley, futbol, keeper, basket, tennis, beisbol): estos packs salen sin las pelotas dibujadas, porque el juego las mueve con su física. El cuerpo es el mismo, pixel a pixel, que en un pack con pelota. Lo que va agarrado (raqueta, bate, garrocha, jabalina) sí sale dibujado. objetos: [fila][cuadro] = lista de { tipo, clase, x, y, r, detras } o null si en ese cuadro no hay pelota. tipo = \"pelota\", clase = futbol, voley, basquet, tenis, beisbol, bala. x, y = centro exacto desde el pivote (puede caer en medio pixel), r = radio sin el contorno, detras = 1 si iba detrás del cuerpo. Al espejar, x pasa a -x. pelotas: cada pelota quitada, dibujada igual, en objetos/pelotas.json (cuadro <id>_<celda>, con su contorno y el pivote en el centro exacto): se pone en (x, y) de objetos.","packs: un atlas por pack (JSON Hash de TexturePacker, para this.load.atlas de Phaser). Cada cuadro se llama <anim>_<fila>_<cuadro>, con la fila por nombre (right, down...) y el cuadro desde 0.","girado: [cuadro] true o false. En los cuadros con true el sprite viene dibujado mirando al otro lado: el juego lo espeja (flipX al revés de como esté) junto con sus datos de ese cuadro (x pasa a -x; en cajas y cuerpo, x pasa a -(x + w)). Si el último cuadro está girado, el personaje termina mirando al otro lado.","retratos.png: arriba los chicos de 40 x 40 (el i en x = i * 40), abajo los grandes de 96 x 96 (el i en x = i * 96, y = 40), en el orden de `expresiones`. El grande es la cabeza y los hombros: con estilo \"puro\", el sprite a celda 64 agrandado x3 exacto (cada pixel un bloque de 3 x 3); con estilo \"suave\", redibujado a 96 con contorno de un pixel. escala_grande 1: se dibuja tal cual.","objetos: armas del piso. Cuadros <id>_<anim>_<cuadro>. quieto: la base en el pivote de la celda (como un personaje). girando: centrado. mano (16 cuadros): el agarre en el centro de la celda, el cuadro k girado k * 22.5 grados (0 = como en el piso). Para dibujar el arma en la mano usa el dato `arma` [x, y, angulo, detras] de la animación: elige <id>_mano_<k> con k = round(angulo / 22.5) % 16 y pon el centro de la celda en (x, y) desde el pivote del personaje; si detras = 1, dibújala antes que al personaje.","comida: objetos con peso \"comida\" en su propio atlas (objetos/comida.json, celdas de 16). Cuadros <id>_quieto_0 y <id>_humito_0..3 (en bucle a 6 fps), con la base en el pivote (8, 14) y su sombra ya dibujada. `cura` va de 1 a 3. Se come con la animación eat: el evento impacto marca el mordisco."]
 }

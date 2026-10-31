@@ -46,8 +46,15 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 | INTRO | azotea con Kenji de espaldas, Bogotá, Maracaibo y el desayuno | en el juego | [#53](https://github.com/Lothra2/pixel_forja/pull/53) |
 | AJUSTES | la rosa del mapa, la presentación de los rivales y Rick con parted2 | en el juego | [#54](https://github.com/Lothra2/pixel_forja/pull/54) |
 | PLACAS | las placas de intro_presentacion a 112 y `placa: 112` en el manifiesto | en el juego | [#55](https://github.com/Lothra2/pixel_forja/pull/55) |
+| TENIS_V | la cancha de tenis vista desde atrás: tenis_fondo y tenis_red con la proyección del juego | en el juego | [#59](https://github.com/Lothra2/pixel_forja/pull/59) |
 
 ## Lo último del lado del juego
+- **TENIS_V (#59) en el juego** y el submódulo en el main de PixelForja (d88c41f). El juego lo pidió en `PEDIDO_TENIS_VERTICAL.md` y lo hizo él mismo dentro del motor (`src/engine/ui/tenis.ts`, parte `tenis` de `ui.interfaz`): la suite pasó 600 de 600 sobre la rama y se unió.
+  - `tenis_fondo` (800 x 360) trae la cancha entera con la proyección exacta del Tenis en vertical: Đà Lạt con el lago y los pinos, la malla con la lona, la arcilla con sus rayas, las gradas con público, la pared de vallas, las macetas, los faroles, la silla del juez, las bancas y los recogepelotas. `tenis_red` es la red sola. Todo con los pinceles de la casa, nada pegado.
+  - El juego (`Tenis.ts`, `canchaArte`) pone el fondo en (-80, 0) a profundidad -20 y la red en `fila` (187) como profundidad, igual que la de código. Si no está `ui_tenis_fondo`, sigue el dibujo por código con el escenario `dalat` de lado.
+  - El pedido decía red en la fila 211 (x 174 a 466): era un error de cuenta, a d 200 cae en la 187 (x 217 a 423 en el cuadro de 640). Quedó corregido en el pedido.
+  - El kit se regeneró completo con el main de hoy (1093 archivos): además del tenis cambian las cajas de Thor, el perro y el gato y los retratos traen `estilo: puro`, que ya eran así en Forja y el juego no había vuelto a generar.
+
 - **PLACAS (#55) en el juego** y el submódulo en el main de PixelForja (b0517a4). #55 estaba abierto: pasó tsc y la suite sobre main (el test del kit completo se pasó de tiempo con la máquina cargada y pasó 15 de 15 corrido solo), y el juego lo unió.
   - El juego lee el ancho de `placa` del manifiesto (104 si no viene). Los nombres de más de 8 letras van a 1,5 y el resto a 2. Huecos y `nombres` no cambian.
   - DON HERNANDO a 1,5 mide 108 y ABUELA NERVA 104: los dos caben en 112. El respaldo que baja a 1 solo actúa con la placa vieja.

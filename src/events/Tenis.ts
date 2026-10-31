@@ -10,6 +10,7 @@ import { Painter, hex } from '../gfx/paint';
 import { lado } from '../core/equipos';
 import { EventScene, prueba, type Competidor } from './base';
 import { queueEscenario } from './escenario';
+import { hayUi, pieza } from '../core/interfaz';
 import type { Paso } from '../core/coach';
 
 /*
@@ -176,6 +177,7 @@ export class Tenis extends EventScene {
    * publicidad, la silla del juez, los bancos, las hortensias y la arcilla en perspectiva con sus marcas de rastrillo.
    */
   private cancha() {
+    if (hayUi(this, 'tenis_fondo')) return this.canchaArte();
     const g = this.add.graphics().setDepth(-20);
     const R = (seed: number) => { const x = Math.sin(seed * 12.9898) * 43758.5453; return x - Math.floor(x); };
     const arte = ['cielo', 'lejos', 'cerca_0'].every((n) => this.textures.exists(`esc_dalat_${n}`));
@@ -213,6 +215,18 @@ export class Tenis extends EventScene {
     // la sombra de la red sobre la arcilla
     this.redG.fillStyle(0x000000, 0.12).fillRect(lx, ly, rx - lx, 3);
     this.adornos(g, R);
+  }
+
+  /**
+   * La cancha definitiva de PixelForja (lote TENIS_V): el fondo entero ya viene pintado con la misma proyección del
+   * juego (`tenis_fondo`, 800 x 360 con el cuadro de 640 centrado), y la red aparte (`tenis_red`) con su fila como
+   * profundidad, para que tape a los de atrás y los de adelante la tapen a ella.
+   */
+  private canchaArte() {
+    this.add.image(-80, 0, 'ui_tenis_fondo').setOrigin(0).setDepth(-20);
+    const red = pieza('tenis_red') as unknown as { fila?: number } | undefined;
+    const fila = red?.fila ?? this.pant(0, RED_D)[1];
+    if (hayUi(this, 'tenis_red')) this.add.image(-80, 0, 'ui_tenis_red').setOrigin(0).setDepth(fila);
   }
 
   /**
