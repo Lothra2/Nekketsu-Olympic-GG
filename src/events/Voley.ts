@@ -35,7 +35,7 @@ interface Voleador {
   x: number; fila: 0 | 1; z: number; vz: number; st: 'piso' | 'aire'; golpeT: number; cool: number;
   puntos: number; toques: number; casa: number; pensar: number; quiereX: number; salta: boolean;
   /** la máquina decide una vez por pelota que viene: le pega bien, la toca mal o no llega; y tarda un poquito en reaccionar */
-  plan: { n: number; tipo: 'bien' | 'mala' | 'falla'; reaccion: number; ruido: number };
+  plan: { n: number; tipo: 'bien' | 'mala' | 'falla'; reaccion: number; ruido: number; cubre?: boolean };
 }
 interface Bola {
   x: number; z: number; vx: number; vz: number;
@@ -77,6 +77,9 @@ export class Voley extends EventScene {
    * hasta el impacto de `spike_fuego`, y ahí sale disparada.
    */
   private fuegoPend: { p: Voleador; team: 0 | 1; t: number } | null = null;
+  /** hacia dónde se mueve la persona este cuadro, y hace cuánto fue lo último que hizo (para que su compañera sepa si está jugando) */
+  private mxHumano = 0;
+  private quietaHumano = 0;
   private llego = false;
   private bloqueos = 0;
   /** el halo oscuro detrás de la pelota: contra la arena clara, la pelota blanca se perdía */
@@ -350,9 +353,16 @@ export class Voley extends EventScene {
         const tx = p.x + dir * 40;
         this.lanzar(team === 0 ? Phaser.Math.Clamp(tx, BORDE[0] + 10, RED_X - 26) : Phaser.Math.Clamp(tx, RED_X + 26, BORDE[1] - 10), 128);
       } else if (c.toques <= 2 && (comp.c.human || red(comp) <= red(p) + 30 || !p.c.human)) {
-        // el armado: alta y junto a la red, para que el compañero salte y remate
+        // el armado: alta y junto a la red, para que el compañero salte y remate. A la persona se la arma donde está
+        // (dentro de la zona de remate, y un poco adelante si viene corriendo), para que solo tenga que saltar
         tiro = 'pase';
-        this.lanzar(this.ataque(team), comp.c.human ? 136 : 130);
+        let tx = this.ataque(team);
+        if (comp.c.human) {
+          // se adelanta solo si viene hacia la red
+          const lleva = Math.sign(this.mxHumano) === dir ? 16 : 0;
+          tx = team === 0 ? Phaser.Math.Clamp(comp.x + lleva * dir, RED_X - 100, RED_X - 30) : Phaser.Math.Clamp(comp.x + lleva * dir, RED_X + 30, RED_X + 100);
+        }
+        this.lanzar(tx, comp.c.human ? 136 : 130);
         this.letrero(comp, comp.c.human ? '¡SALTA Y REMATA!' : '¡ARRIBA!', 0xffe040);
       } else {
         // la persona está más cerca de la red que su compañero: se la pasa alta para que él se la arme de vuelta
@@ -454,6 +464,8 @@ export class Voley extends EventScene {
     if (this.endTick(p)) { this.animar(dt); this.filterUi(); return; }
     const jugando = this.fase === 'juego' && !this.terminado;
     if (jugando) this.clock += dt;
+    this.mxHumano = p.x;
+    this.quietaHumano = p.x || p.pressed.jump || p.pressed.punch || p.pressed.kick || p.pressed.special ? 0 : this.quietaHumano + dt;
     this.coach?.tick(dt);
     if (this.pausaT > 0) {
       this.pausaT -= dt;
@@ -564,7 +576,7 @@ export class Voley extends EventScene {
     const dif = this.marcador[1] - this.marcador[0];
     // tu compañera es confiable en todos los niveles: los errores fáciles son de los rivales
     const conmigo = this.pat.some((o) => o.c.human && o.c.team === team);
-    const error = this.d.practica ? 0 : conmigo ? 0.05 : Phaser.Math.Clamp(0.5 - 0.36 * ajustes().cpuAgresion + (dif >= 3 ? 0.12 * ajustes().ayuda : 0), 0.04, 0.6);
+    const error = this.d.practica ? 0 : conmigo ? 0.02 : Phaser.Math.Clamp(0.5 - 0.36 * ajustes().cpuAgresion + (dif >= 3 ? 0.12 * ajustes().ayuda : 0), 0.04, 0.6);
     if (c.en === 'mano' && c.dueño === q) { if (q.cool <= 0) r.patada = true; return r; }
     // una pelota nueva: decide de una vez si le va a pegar bien, mal o si no llega, y cuánto tarda en reaccionar
     if (c.en === 'aire' && q.plan.n !== c.n) {
@@ -591,12 +603,39 @@ export class Voley extends EventScene {
     } else if (c.en === 'aire') {
       const xl = this.caida();
       const mio = team === 0 ? xl < RED_X : xl >= RED_X;
+      if (!mio && conmigo) {
+        // la pelota está del otro lado: la compañera se para a defender la mitad de la cancha que la persona deja sola,
+        // donde suelen caer los remates (no en su casa del fondo)
+        const h = this.pat.find((o) => o.c.human && o.c.team === team)!;
+        const medio = team === 0 ? 176 : 464;
+        meta = team === 0 ? (h.x > medio ? 140 : 208) : h.x < medio ? 500 : 432;
+      }
       if (mio) {
         const compas = this.pat.filter((o) => o.c.team === team);
         // va el más cerca de donde cae; pero si la tocó uno de este lado, le toca al otro (nadie la toca dos seguidas)
         const tocoUnCompa = c.ultimo?.c.team === team && c.lado === team && compas.length > 1;
-        const yo = compas.length === 1 || (tocoUnCompa ? c.ultimo !== q : [...compas].sort((a, b) => Math.abs(a.x - xl) - Math.abs(b.x - xl))[0] === q);
-        if (yo) { meta = xl - dir * 6 + q.plan.ruido; r.corre = Math.abs(meta - q.x) > 60; }
+        let yo = compas.length === 1 || (tocoUnCompa ? c.ultimo !== q : [...compas].sort((a, b) => Math.abs(a.x - xl) - Math.abs(b.x - xl))[0] === q);
+        // cubrir a la persona: si le toca a ella pero no llega (muy lejos para el tiempo que queda, en el aire, o
+        // quieta sin ir a buscarla), va la compañera. Una vez que decide cubrir esa pelota, no se arrepiente
+        const h = compas.find((o) => o.c.human);
+        if (!yo && h && c.ultimo !== q) {
+          if (q.plan.cubre) yo = true;
+          else {
+            const T = this.cuandoA(30) ?? 0, falta = Math.abs(h.x - xl);
+            const llega = falta <= 22 + 150 * Math.max(0, T - 0.15);
+            const vaHaciaElla = this.mxHumano !== 0 && Math.sign(this.mxHumano) === Math.sign(xl - h.x);
+            const pasiva = falta > 30 && !vaHaciaElla && (this.quietaHumano > 0.35 || T < 0.5);
+            if (!llega || (h.st === 'aire' && falta > 30) || pasiva) { yo = true; q.plan.cubre = true; }
+          }
+        }
+        if (yo) {
+          // a dónde ir: a donde cae, salvo que venga rápida y baja (un remate): ahí se para donde la pelota pasa a la
+          // altura de los brazos, que con esa velocidad queda bastante antes de donde cae
+          const tb = Math.abs(c.vx) > 160 ? this.cuandoA(30) : null;
+          const xb = tb !== null && tb > 0 ? c.x + c.vx * tb : xl;
+          meta = xb - dir * 6 + q.plan.ruido;
+          r.corre = q.plan.cubre || Math.abs(c.vx) > 160 || Math.abs(meta - q.x) > 60;
+        }
         // la recibe el compañero: este sube a la red a esperar el armado (o a armarle); si la acaba de tocar él, cubre atrás
         else if (c.ultimo !== q) meta = RED_X - dir * (ATAQUE + 16);
       }
@@ -624,7 +663,9 @@ export class Voley extends EventScene {
           // la jugada de tres toques: el que recibe se la arma al compañero junto a la red para que remate. Con la
           // persona de compañero casi siempre (y si ya es el segundo toque, siempre); entre máquinas, más mientras más
           // difícil el nivel
-          const armar = !!compa && van <= 1 && !remata && Math.random() < (compa.c.human ? (van === 1 ? 1 : 0.9) : 0.3 + 0.5 * ajustes().cpuAgresion);
+          // a la persona solo se le arma si está jugando (no lleva rato sin tocar nada), está en la zona de remate y no se va de la red
+          const humanaLista = !compa?.c.human || (this.quietaHumano < 6 && Math.abs(compa.x - RED_X) <= 112 && compa.st === 'piso' && Math.sign(this.mxHumano) !== -dir);
+          const armar = !!compa && van <= 1 && !remata && humanaLista && Math.random() < (compa.c.human ? (van === 1 ? 1 : 0.9) : 0.3 + 0.5 * ajustes().cpuAgresion);
           // la barra de tu lado es tuya: tu compañera no gasta el fuego
           if (this.nek[team] >= 100 && !this.d.practica && !conmigo && (q.st === 'aire' || van >= 1) && Math.random() < 0.6) r.fuego = true;
           else if (armar && q.st === 'piso') r.pase = true; else r.patada = true;
