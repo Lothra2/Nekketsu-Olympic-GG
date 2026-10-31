@@ -661,12 +661,11 @@ export class Voley extends EventScene {
           const compa = this.pat.find((o) => o !== q && o.c.team === team);
           // los toques que van de este lado (el que viene será el siguiente)
           const van = c.lado === team ? c.toques : 0;
-          // la jugada de tres toques: el que recibe se la arma al compañero junto a la red para que remate. Con la
-          // persona de compañero casi siempre (y si ya es el segundo toque, siempre); entre máquinas, más mientras más
-          // difícil el nivel
-          // a la persona solo se le arma si está jugando (no lleva rato sin tocar nada), está en la zona de remate y no se va de la red
-          const humanaLista = !compa?.c.human || (this.quietaHumano < 6 && Math.abs(compa.x - RED_X) <= 112 && compa.st === 'piso' && Math.sign(this.mxHumano) !== -dir);
-          const armar = !!compa && van <= 1 && !remata && humanaLista && Math.random() < (compa.c.human ? (van === 1 ? 1 : 0.9) : 0.3 + 0.5 * ajustes().cpuAgresion);
+          // la jugada de tres toques: el que recibe se la arma al compañero junto a la red para que remate. A la
+          // persona, siempre que esté lista (ella es la estrella); entre máquinas, más mientras más difícil el nivel
+          // a la persona solo se le arma si está en la zona de remate y no se va de la red (quieta vale: el armado le cae encima y solo tiene que saltar)
+          const humanaLista = !compa?.c.human || (Math.abs(compa.x - RED_X) <= 112 && compa.st === 'piso' && Math.sign(this.mxHumano) !== -dir);
+          const armar = !!compa && van <= 1 && !remata && humanaLista && (compa.c.human || Math.random() < 0.3 + 0.5 * ajustes().cpuAgresion);
           // la barra de tu lado es tuya: tu compañera no gasta el fuego
           if (this.nek[team] >= 100 && !this.d.practica && !conmigo && (q.st === 'aire' || van >= 1) && Math.random() < 0.6) r.fuego = true;
           else if (armar && q.st === 'piso') r.pase = true; else r.patada = true;

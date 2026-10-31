@@ -103335,6 +103335,41 @@
     "alto": 17,
     "nota": "Encima de los jugadores del fondo y debajo de los de adelante: su profundidad es la fila `fila`."
    },
+   "borde_margarita": {
+    "archivo": "ui/borde_margarita.png",
+    "w": 800,
+    "h": 360,
+    "corte": 300,
+    "nota": "La arena alrededor de la cancha de vóley: de la fila 238 a la 296 detrás (sombrillas, toallas, la silla del árbitro, las banderas de las esquinas) y de la 324 a la 360 adelante. Se parte en la fila `corte`: arriba va detrás de los atletas, abajo delante."
+   },
+   "borde_cancha_maracaibo": {
+    "archivo": "ui/borde_cancha_maracaibo.png",
+    "w": 800,
+    "h": 360,
+    "corte": 312,
+    "nota": "La acera de adelante de la cancha de básquet (filas 320 a 360): la banca de cada equipo con sus morrales, la mesa de control con el marcador, el carrito de balones, los conos, el niño con la bandera y el perro. Va delante de los atletas."
+   },
+   "borde_barranquilla": {
+    "archivo": "ui/borde_barranquilla.png",
+    "w": 800,
+    "h": 360,
+    "corte": 312,
+    "nota": "La acera de adelante de la cancha de fútbol (filas 320 a 360): los niños sentados en el borde, las bancas, los tamboreros con la marimonda, el carrito de raspao con su cola y el confeti. Va delante de los atletas."
+   },
+   "borde_tao_dan": {
+    "archivo": "ui/borde_tao_dan.png",
+    "w": 800,
+    "h": 360,
+    "corte": 316,
+    "nota": "El parque alrededor de la cancha de đá cầu: detrás (filas 236 a 262) la banca, la bicicleta y la vendedora; adelante (326 a 360) los bolsos, el abuelo del tai chi, las palomas y los niños sentados. Se parte en `corte`."
+   },
+   "borde_liceo_patio": {
+    "archivo": "ui/borde_liceo_patio.png",
+    "w": 800,
+    "h": 360,
+    "corte": 312,
+    "nota": "El concreto de adelante de la cancha de quemado (filas 320 a 360): la banca con los morrales, la profe con el pito y el botellón, los que esperan sentados en el borde, los conos y la rayuela. Va delante de los atletas."
+   },
    "pantalla_pausa": {
     "archivo": "ui/pantalla_pausa.png",
     "w": 800,
