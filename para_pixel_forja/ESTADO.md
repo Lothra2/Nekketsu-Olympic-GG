@@ -50,6 +50,8 @@ Estados: `pendiente`, `en curso`, `entregado`, `aprobado`.
 | BORDES | lo que rodea las canchas: borde_margarita, borde_cancha_maracaibo, borde_barranquilla, borde_tao_dan, borde_liceo_patio | en el juego | [#60](https://github.com/Lothra2/pixel_forja/pull/60) |
 
 ## Lo último del lado del juego
+- **Liceo (#61) en el juego.** Rick vio la cancha de quemado torcida respecto al piso: las juntas del concreto se pintaban en diagonal (x + y) y en la vista inclinada caían a la izquierda mientras la cancha va a la derecha. Ahora van derechas en el mundo (piso, pasillo del fondo y orilla) y el rayado de los cementerios sigue la misma diagonal. Revisadas las demás canchas: sin patrones en diagonal. `npm run escenarios -- liceo_patio` regenerado.
+
 - **BORDES (#60) en el juego.** Rick pidió pulir el resto de los escenarios después del tenis. Lo flojo no eran los fondos sino las superficies lisas y la falta de vida al borde de la cancha: el juego lo hizo él mismo en Forja (`src/engine/ui/bordes.ts`, parte `bordes` de `ui.interfaz`): cinco piezas transparentes de 800 x 360 con bancas, mesa de jueces, sombrillas, el carrito de raspao, la vendedora, la profe con el pito, etc., en la paleta de cada lugar.
   - El juego (`bordeCancha` en `base.ts`) pega cada una en (-80, 0) partida por `extra.corte`: arriba detrás de los atletas (profundidad -14, sobre el piso del escenario) y abajo delante de todos (400). Vóley, básquet, fútbol, đá cầu y quemado.
   - La jabalina no lleva borde (el mundo corre 1560 de ancho): el juego pinta el sector de caída, los arcos de 10 m, los banderines, la tabla de batida y la carpa de los jueces por código, y una banderita en la mejor marca de cada quien.
